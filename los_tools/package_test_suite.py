@@ -9,7 +9,10 @@ def test_package():
     suite = unittest.TestSuite()
 
     suite.addTests(loader.discover("test"))
-    # suite.addTests(loader.loadTestsFromTestCase(LimitAnglesAlgorithmTest))
+
+    print('########')
+    print("%s tests has been found." % (suite.countTestCases()))
+    print('########')
 
     runner = unittest.TextTestRunner(verbosity=3)
     runner.run(suite)
