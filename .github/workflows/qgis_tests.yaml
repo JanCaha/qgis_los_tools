@@ -7,16 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     container: 
       image: qgis/qgis:latest
-      options: -e DISPLAY=:99
+      volumes:
+      - $GITHUB_WORKSPACE:/tests_directory
+      options: -e DISPLAY=:99 --workdir /tests_directory
       
     steps:
-      #- uses: actions/checkout@v1
-      #  with:
-      #    path: "tests_directory"
-      
-      - name: Checkout to directory
-        run: git clone https://$REPO_ACCESS_TOKEN:x-oauth-basic@github.com/JanCaha/qgis_los_tools.git tests_directory
-      
+      - uses: actions/checkout@v1
+            
       - name: Dir
         run: |
           dir
