@@ -31,6 +31,10 @@ jobs:
           dir
           cd test
           dir
+          
+      - name: run nosetests
+        run: |
+          nosetests -w /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools/test verbosity=3
         
       - name: Run tests using test suite
         run: qgis_testrunner.sh los_tools.package_test_suite.test_package
