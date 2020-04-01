@@ -7,12 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     container: 
       image: qgis/qgis:latest
-      volumes:
-      - $GITHUB_WORKSPACE:/tests_directory
-      options: -e DISPLAY=:99 --workdir /tests_directory
+      options: -e DISPLAY=:99
       
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout to directory
+        run: git clone https://$REPO_ACCESS_TOKEN:x-oauth-basic@github.com/JanCaha/qgis_los_tools.git /tests_directory
                             
       - name: Setup plugin
         run: qgis_setup.sh los_tools  
