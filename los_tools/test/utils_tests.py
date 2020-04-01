@@ -21,7 +21,7 @@ PARENT = None
 IFACE = None
 
 
-def get_qgis_app(cleanup=True):
+def get_qgis_app(cleanup=True, debug=False):
     """ Start one QGIS application to test against.
 
     :returns: Handle to QGIS app, canvas, iface and parent. If there are any
@@ -72,8 +72,9 @@ def get_qgis_app(cleanup=True):
             """
             print('{}({}): {}'.format(tag, level, message))
 
-        QgsApplication.instance().messageLog().messageReceived.connect(
-            debug_log_message)
+        if debug:
+            QgsApplication.instance().messageLog().messageReceived.connect(
+                debug_log_message)
 
         if cleanup:
             @atexit.register
