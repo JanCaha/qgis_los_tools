@@ -10,9 +10,12 @@ jobs:
       options: -e DISPLAY=:99
       
     steps:
-      - uses: actions/checkout@v1
-        with:
-          path: "tests_directory"
+      #- uses: actions/checkout@v1
+      #  with:
+      #    path: "tests_directory"
+      
+      - name: Checkout to directory
+        run: git clone https://$REPO_ACCESS_TOKEN:x-oauth-basic@github.com/JanCaha/qgis_los_tools.git tests_directory
       
       - name: Dir
         run: |
