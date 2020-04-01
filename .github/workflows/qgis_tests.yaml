@@ -1,0 +1,31 @@
+name: Test Docker
+
+on: push
+
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+    container: 
+      image: qgis/qgis:latest
+      options: -e DISPLAY=:99
+      
+    steps:
+      - uses: actions/checkout@v1
+      
+      - name: Dir
+        run: dir
+                
+      - name: Setup plugin
+        run: qgis_setup.sh los_tools  
+      
+      - name: Remove files from plugin folder
+        run: rm -f  /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
+        
+      - name: Copy everything to plugin folder
+        run: ln -s /los_tools /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
+      
+      - name: Install python requirements
+        run: pip3 install -r REQUIREMENTS_TESTING.txt
+        
+      - name: Run tests using test suite
+        run: qgis_testrunner.sh los_tools.package_test_suite.test_package
