@@ -25,5 +25,12 @@ jobs:
       - name: Install python requirements
         run: pip3 install -r /tests_directory/REQUIREMENTS_TESTING.txt
         
+      - name: explore directory
+        run: |
+          cd /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
+          dir
+          cd test
+          dir
+        
       - name: Run tests using test suite
         run: qgis_testrunner.sh los_tools.package_test_suite.test_package
