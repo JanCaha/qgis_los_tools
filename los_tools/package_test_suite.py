@@ -9,10 +9,10 @@ def test_package():
     suite = unittest.TestSuite()
 
     # suite.addTests(loader.discover("test"))
-    suite.addTests(loader.loadTestsFromTestCase(LimitAnglesAlgorithmTest))
+    # suite.addTests(loader.loadTestsFromTestCase(LimitAnglesAlgorithmTest))
 
     runner = unittest.TextTestRunner(verbosity=3)
-    result = runner.run(suite)
+    runner.run(suite)
 
 
 if __name__ == '__main__':
