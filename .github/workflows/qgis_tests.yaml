@@ -11,9 +11,14 @@ jobs:
       
     steps:
       - uses: actions/checkout@v1
+        with:
+          path: "tests_directory"
       
       - name: Dir
-        run: dir
+        run: |
+          dir
+          cd tests_directory
+          dir
                 
       - name: Setup plugin
         run: qgis_setup.sh los_tools  
@@ -22,10 +27,10 @@ jobs:
         run: rm -f  /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
         
       - name: Copy everything to plugin folder
-        run: ln -s /los_tools /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
+        run: ln -s /tests_directory/los_tools /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
       
       - name: Install python requirements
-        run: pip3 install -r REQUIREMENTS_TESTING.txt
+        run: pip3 install -r /tests_directory/REQUIREMENTS_TESTING.txt
         
       - name: Run tests using test suite
         run: qgis_testrunner.sh los_tools.package_test_suite.test_package
