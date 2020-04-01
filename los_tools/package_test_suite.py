@@ -1,17 +1,16 @@
 import unittest
 import os
 
-# import your test modules
 
-# initialize the test suite
-loader = unittest.TestLoader()
-suite = unittest.TestSuite()
+def test_package():
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
 
-suite.addTests(loader.discover("test"))
+    suite.addTests(loader.discover("test"))
 
-# add tests to the test suite
-# suite.addTests(loader.loadTestsFromModule())
+    runner = unittest.TextTestRunner(verbosity=3)
+    result = runner.run(suite)
 
-# initialize a runner, pass it your suite and run it
-runner = unittest.TextTestRunner(verbosity=3)
-result = runner.run(suite)
+
+if __name__ == '__main__':
+    test_package()
