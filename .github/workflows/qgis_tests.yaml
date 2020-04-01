@@ -13,13 +13,7 @@ jobs:
       
     steps:
       - uses: actions/checkout@v1
-            
-      - name: Dir
-        run: |
-          dir
-          cd tests_directory
-          dir
-                
+                            
       - name: Setup plugin
         run: qgis_setup.sh los_tools  
       
