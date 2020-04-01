@@ -8,7 +8,7 @@ def test_package():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    # suite.addTests(loader.discover("test"))
+    suite.addTests(loader.discover("test"))
     # suite.addTests(loader.loadTestsFromTestCase(LimitAnglesAlgorithmTest))
 
     runner = unittest.TextTestRunner(verbosity=3)
