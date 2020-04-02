@@ -1,7 +1,4 @@
 import unittest
-import os
-
-from los_tools.test.test_tool_limit_angles_vector import LimitAnglesAlgorithmTest
 
 
 def test_package():
@@ -10,9 +7,10 @@ def test_package():
 
     suite.addTests(loader.discover("test"))
 
-    print('########')
+    print("################################")
+    print("Tests for LOS TOOLS Plugin runned from the Test Suite.")
     print("%s tests has been found." % (suite.countTestCases()))
-    print('########')
+    print("################################")
 
     runner = unittest.TextTestRunner(verbosity=3)
     runner.run(suite)
