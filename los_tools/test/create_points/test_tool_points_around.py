@@ -7,16 +7,16 @@ from qgis.core import (QgsVectorLayer,
 
 from los_tools.create_points.tool_points_around import CreatePointsAroundAlgorithm
 
-from los_tools.test.utils_tests import print_alg_params, print_alg_outputs
-
-data_path = os.path.join(os.path.dirname(__file__), "test_data")
-data_path_results = os.path.join(data_path, "results")
+from los_tools.test.utils_tests import (print_alg_params,
+                                        print_alg_outputs,
+                                        get_data_path,
+                                        get_data_path_results)
 
 
 class CreatePointsAroundAlgorithmTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.points = QgsVectorLayer(os.path.join(data_path, "points.gpkg"))
+        self.points = QgsVectorLayer(get_data_path(file="points.gpkg"))
         self.alg = CreatePointsAroundAlgorithm()
         self.alg.initAlgorithm()
 
@@ -59,7 +59,7 @@ class CreatePointsAroundAlgorithmTest(unittest.TestCase):
         feedback = QgsProcessingFeedback()
         context = QgsProcessingContext()
 
-        output_path = os.path.join(data_path_results, "points_around.gpkg")
+        output_path = get_data_path_results(file="points_around.gpkg")
 
         params = {
             "InputLayer": self.points,
