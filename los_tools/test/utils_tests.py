@@ -124,3 +124,23 @@ def print_alg_outputs(alg: QgsProcessingAlgorithm) -> None:
         print("{} - {} \n\t {}".format(o.name(),
                                        o.type(),
                                        o.description()))
+
+
+def get_data_path(file: str = None) -> str:
+    path = ""
+    if file is None:
+        path = os.path.join(os.path.dirname(__file__), "test_data")
+    else:
+        path = os.path.join(os.path.dirname(__file__), "test_data", file)
+
+    return path
+
+
+def get_data_path_results(file: str = None) -> str:
+    path = ""
+    if file is None:
+        path = os.path.join(get_data_path(), "results")
+    else:
+        path = os.path.join(get_data_path(), "results", file)
+
+    return path
