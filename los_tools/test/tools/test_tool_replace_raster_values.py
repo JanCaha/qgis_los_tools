@@ -16,10 +16,11 @@ from los_tools.constants.field_names import FieldNames
 from processing.core.Processing import Processing
 import processing
 
-from los_tools.test.utils_tests import print_alg_params, print_alg_outputs, get_qgis_app
-
-data_path = os.path.join(os.path.dirname(__file__), "test_data")
-data_path_results = os.path.join(data_path, "results")
+from los_tools.test.utils_tests import (print_alg_params,
+                                        print_alg_outputs,
+                                        get_qgis_app,
+                                        get_data_path,
+                                        get_data_path_results)
 
 QGIS = get_qgis_app()
 
@@ -27,8 +28,8 @@ QGIS = get_qgis_app()
 class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.raster = QgsRasterLayer(os.path.join(data_path, "dsm_reprojected.tif"))
-        self.polygons = QgsVectorLayer(os.path.join(data_path, "polys.gpkg"))
+        self.raster = QgsRasterLayer(get_data_path(file="dsm_reprojected.tif"))
+        self.polygons = QgsVectorLayer(get_data_path(file="polys.gpkg"))
         self.alg = ReplaceRasterValuesAlgorithm()
         self.alg.initAlgorithm()
 
@@ -57,12 +58,6 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
         self.assertEqual("VectorLayer", param_value_field.parentLayerParameterName())
         self.assertEqual(QgsProcessingParameterField.Numeric, param_value_field.dataType())
 
-        # print(param_raster_layer.checkValueIsAcceptable(self.raster))
-        # print(param_vector_layer.checkValueIsAcceptable(self.polygons))
-        # print(param_raster_value.checkValueIsAcceptable(-100))
-        # print(param_value_field.checkValueIsAcceptable("height"))
-        # print(param_output_raster.checkValueIsAcceptable(os.path.join(data_path_results, "raster_edited.tif")))
-
     def test_check_wrong_params(self) -> None:
         # does not apply, there are no checks for parameters
         pass
@@ -73,7 +68,7 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
         feedback = QgsProcessingFeedback()
         context = QgsProcessingContext()
 
-        output_path = os.path.join(data_path_results, "raster_new_values.tif")
+        output_path = get_data_path_results(file="raster_new_values.tif")
 
         params = {
             "RasterLayer": self.raster,

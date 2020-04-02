@@ -8,19 +8,19 @@ from qgis.core import (QgsVectorLayer,
 from los_tools.tools.tool_limit_angles_vector import LimitAnglesAlgorithm
 from los_tools.constants.field_names import FieldNames
 
-from los_tools.test.utils_tests import print_alg_params, print_alg_outputs
-
-data_path = os.path.join(os.path.dirname(__file__), "test_data")
-data_path_results = os.path.join(data_path, "results")
+from los_tools.test.utils_tests import (print_alg_params,
+                                        print_alg_outputs,
+                                        get_data_path,
+                                        get_data_path_results)
 
 
 class LimitAnglesAlgorithmTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.los_no_target = QgsVectorLayer(os.path.join(data_path, "no_target_los.gpkg"))
-        self.los_no_target_wrong = QgsVectorLayer(os.path.join(data_path, "no_target_los_wrong.gpkg"))
-        self.polygon = QgsVectorLayer(os.path.join(data_path, "poly.gpkg"))
-        self.polygons = QgsVectorLayer(os.path.join(data_path, "polys.gpkg"))
+        self.los_no_target = QgsVectorLayer(get_data_path(file="no_target_los.gpkg"))
+        self.los_no_target_wrong = QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))
+        self.polygon = QgsVectorLayer(get_data_path(file="poly.gpkg"))
+        self.polygons = QgsVectorLayer(get_data_path(file="polys.gpkg"))
         self.alg = LimitAnglesAlgorithm()
         self.alg.initAlgorithm()
 
@@ -44,7 +44,7 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
     def test_check_wrong_params(self) -> None:
         context = QgsProcessingContext()
 
-        output_path = os.path.join(data_path_results, "table.csv")
+        output_path = get_data_path_results(file="table.csv")
 
         params = {
             "LoSLayer": self.los_no_target_wrong,
@@ -74,7 +74,7 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
         feedback = QgsProcessingFeedback()
         context = QgsProcessingContext()
 
-        output_path = os.path.join(data_path_results, "table.csv")
+        output_path = get_data_path_results(file="table.csv")
 
         params = {
             "LoSLayer": self.los_no_target,
