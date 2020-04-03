@@ -12,9 +12,8 @@ from qgis.core import (
     QgsFeature,
     QgsWkbTypes,
     QgsGeometry,
-    QgsFields,
-    QgsMessageLog,
-    Qgis)
+    QgsFields)
+
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
 
@@ -101,9 +100,6 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
             msg = "`Main direction point layer` should only containt one feature. " \
                   "Currently is has `{}` features.".format(main_direction_layer.featureCount())
 
-            QgsMessageLog.logMessage(msg,
-                                     "los_tools",
-                                     Qgis.MessageLevel.Critical)
             return False, msg
 
         return True, "OK"
