@@ -7,6 +7,7 @@ import os
 import atexit
 
 from qgis.core import QgsApplication, QgsProcessingAlgorithm
+from qgis.analysis import QgsNativeAlgorithms
 from qgis.utils import iface
 from qgis.gui import QgsMapCanvas
 from qgis.PyQt.QtCore import QSize
@@ -61,6 +62,8 @@ def get_qgis_app(cleanup=True, debug=False):
         QGISAPP.initQgis()
         s = QGISAPP.showSettings()
         LOGGER.debug(s)
+
+        QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
 
         def debug_log_message(message, tag, level):
             """
