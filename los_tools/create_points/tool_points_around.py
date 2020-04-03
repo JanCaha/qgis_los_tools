@@ -7,6 +7,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterDistance,
     QgsField,
     QgsFeature,
     QgsWkbTypes,
@@ -82,10 +83,10 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterNumber(
+            QgsProcessingParameterDistance(
                 self.DISTANCE,
                 "Distance",
-                QgsProcessingParameterNumber.Double,
+                parentParameterName=self.INPUT_LAYER,
                 defaultValue=10.0,
                 minValue=0.001,
                 optional=False)
@@ -104,7 +105,11 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
         angle_min = self.parameterAsDouble(parameters, self.ANGLE_START, context)
         angle_max = self.parameterAsDouble(parameters, self.ANGLE_END, context)
         angle_step = self.parameterAsDouble(parameters, self.ANGLE_STEP, context)
-        angles = np.arange(angle_min, np.nextafter(angle_max, np.Inf), step=angle_step).tolist()
+
+        angles = np.arange(angle_min,
+                           angle_max + 0.1*angle_step,
+                           step=angle_step).tolist()
+
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 
         fields = QgsFields()

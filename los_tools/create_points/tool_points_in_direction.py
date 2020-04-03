@@ -7,6 +7,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterDistance,
     QgsField,
     QgsFeature,
     QgsWkbTypes,
@@ -77,10 +78,10 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterNumber(
+            QgsProcessingParameterDistance(
                 self.DISTANCE,
                 "Distance",
-                QgsProcessingParameterNumber.Double,
+                parentParameterName=self.INPUT_LAYER,
                 defaultValue=10.0,
                 minValue=0.001,
                 optional=False)
@@ -141,7 +142,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                     .azimuth(feature_direction.geometry().asPoint())
 
                 angles = np.arange(main_angle - angle_offset,
-                                   np.nextafter(main_angle + angle_offset, np.Inf),
+                                   main_angle + angle_offset + 0.1*angle_step,
                                    step=angle_step).tolist()
 
                 i = 0
