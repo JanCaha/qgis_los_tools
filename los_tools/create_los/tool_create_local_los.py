@@ -11,9 +11,7 @@ from qgis.core import (
     QgsWkbTypes,
     QgsPoint,
     QgsFields,
-    QgsLineString,
-    QgsMessageLog,
-    Qgis)
+    QgsLineString)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.tools.util_functions import segmentize_line, bilinear_interpolated_value
@@ -123,10 +121,6 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         if dem_band_count != 1:
             msg = "`Raster Layer DEM` can only have one band. Currently there are `{0}` bands.".format(dem_band_count)
 
-            QgsMessageLog.logMessage(msg,
-                                     "los_tools",
-                                     Qgis.MessageLevel.Critical)
-
             return False, msg
 
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
@@ -136,29 +130,17 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
             msg = "`Observers point layer` crs must be projected. " \
                   "Right now it is `geographic`."
 
-            QgsMessageLog.logMessage(msg,
-                                     "los_tools",
-                                     Qgis.MessageLevel.Critical)
-
             return False, msg
 
         if not raster_crs == observers_layer.sourceCrs():
             msg = "`Observers point layer` and `Raster Layer DEM` crs must be equal. " \
                   "Right now they are not."
 
-            QgsMessageLog.logMessage(msg,
-                                     "los_tools",
-                                     Qgis.MessageLevel.Critical)
-
             return False, msg
 
         if not observers_layer.sourceCrs() == targets_layer.sourceCrs():
             msg = "`Observers point layer` and `Targets point layer` crs must be equal. " \
                   "Right now they are not."
-
-            QgsMessageLog.logMessage(msg,
-                                     "los_tools",
-                                     Qgis.MessageLevel.Critical)
 
             return False, msg
 
