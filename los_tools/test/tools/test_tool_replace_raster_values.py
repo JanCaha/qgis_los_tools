@@ -28,10 +28,17 @@ QGIS = get_qgis_app()
 class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.raster = QgsRasterLayer(get_data_path(file="dsm_reprojected.tif"))
+        self.raster = QgsRasterLayer(get_data_path(file="dsm.tif"))
         self.polygons = QgsVectorLayer(get_data_path(file="polys.gpkg"))
+
+        self.output_path = get_data_path_results(file="raster_new_values.tif")
+
         self.alg = ReplaceRasterValuesAlgorithm()
         self.alg.initAlgorithm()
+
+        self.feedback = QgsProcessingFeedback()
+        self.context = QgsProcessingContext()
+
 
     @unittest.skip("printing not necessary `test_show_params()`")
     def test_show_params(self) -> None:
@@ -63,24 +70,20 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
         pass
 
     def test_run_alg(self):
+
         Processing.initialize()
-
-        feedback = QgsProcessingFeedback()
-        context = QgsProcessingContext()
-
-        output_path = get_data_path_results(file="raster_new_values.tif")
 
         params = {
             "RasterLayer": self.raster,
             "VectorLayer": self.polygons,
             "RasterValue": -100,
             "ValueField": "",
-            "OutputRaster": output_path,
+            "OutputRaster": self.output_path,
         }
 
-        self.alg.run(params, context, feedback)
+        self.alg.run(params, context=self.context, feedback=self.feedback)
 
-        ds = gdal.OpenEx(output_path)
+        ds = gdal.Open(self.output_path)
         raster_array = ds.GetRasterBand(1).ReadAsArray()
 
         self.assertIn(-100, np.unique(raster_array))
@@ -90,12 +93,12 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
             "VectorLayer": self.polygons,
             "RasterValue": -1,
             "ValueField": "height",
-            "OutputRaster": output_path,
+            "OutputRaster": self.output_path,
         }
 
-        self.alg.run(parameters=params, context=context, feedback=feedback)
+        self.alg.run(parameters=params, context=self.context, feedback=self.feedback)
 
-        ds = gdal.Open(output_path)
+        ds = gdal.Open(self.output_path)
         raster_array = ds.GetRasterBand(1).ReadAsArray()
         unique_values = np.unique(raster_array)
 

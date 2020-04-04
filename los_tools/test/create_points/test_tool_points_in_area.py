@@ -8,10 +8,8 @@ from qgis._core import QgsWkbTypes
 
 from processing.core.Processing import Processing
 import processing
-from qgis.analysis import QgsNativeAlgorithms
 
 from los_tools.create_points.tool_points_in_area import CreatePointsInAreaAlgorithm
-from los_tools.constants.field_names import FieldNames
 
 from los_tools.test.utils_tests import (print_alg_params,
                                         print_alg_outputs,
@@ -25,7 +23,7 @@ QGIS = get_qgis_app()
 class CreatePointsInAreaAlgorithmTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.raster = QgsRasterLayer(get_data_path(file="dsm_reprojected.tif"))
+        self.raster = QgsRasterLayer(get_data_path(file="dsm.tif"))
         self.polygons = QgsVectorLayer(get_data_path(file="polys.gpkg"))
         self.polygons_id_field = "id_poly"
 

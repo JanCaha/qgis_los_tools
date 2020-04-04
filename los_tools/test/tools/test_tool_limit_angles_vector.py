@@ -21,8 +21,14 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
         self.los_no_target_wrong = QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))
         self.polygon = QgsVectorLayer(get_data_path(file="poly.gpkg"))
         self.polygons = QgsVectorLayer(get_data_path(file="polys.gpkg"))
+
+        self.output_path = get_data_path_results(file="table.csv")
+
         self.alg = LimitAnglesAlgorithm()
         self.alg.initAlgorithm()
+
+        self.feedback = QgsProcessingFeedback()
+        self.context = QgsProcessingContext()
 
     @unittest.skip("printing not necessary `test_show_params()`")
     def test_show_params(self) -> None:
@@ -42,17 +48,14 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
         self.assertEqual("sink", param_output_table.type())
 
     def test_check_wrong_params(self) -> None:
-        context = QgsProcessingContext()
-
-        output_path = get_data_path_results(file="table.csv")
 
         params = {
             "LoSLayer": self.los_no_target_wrong,
             "ObjectLayer": self.polygon,
-            "OutputTable": output_path,
+            "OutputTable": self.output_path,
         }
 
-        can_run, msg = self.alg.checkParameterValues(params, context=context)
+        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertFalse(can_run)
         self.assertIn("Fields specific for LoS without target not found in current layer (los_type).",
@@ -61,35 +64,31 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
         params = {
             "LoSLayer": self.los_no_target,
             "ObjectLayer": self.polygons,
-            "OutputTable": output_path,
+            "OutputTable": self.output_path,
         }
 
-        can_run, msg = self.alg.checkParameterValues(params, context=context)
+        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertFalse(can_run)
         self.assertIn("Object layer must have only one feature.",
                       msg)
 
     def test_run_alg(self) -> None:
-        feedback = QgsProcessingFeedback()
-        context = QgsProcessingContext()
-
-        output_path = get_data_path_results(file="table.csv")
 
         params = {
             "LoSLayer": self.los_no_target,
             "ObjectLayer": self.polygon,
-            "OutputTable": output_path,
+            "OutputTable": self.output_path,
         }
 
-        can_run, msg = self.alg.checkParameterValues(params, context=context)
+        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertTrue(can_run)
         self.assertIn("OK", msg)
 
-        self.alg.run(parameters=params, context=context, feedback=feedback)
+        self.alg.run(parameters=params, context=self.context, feedback=self.feedback)
 
-        table = QgsVectorLayer(output_path)
+        table = QgsVectorLayer(self.output_path)
 
         self.assertIn(FieldNames.AZIMUTH_MIN, table.fields().names())
         self.assertIn(FieldNames.AZIMUTH_MAX, table.fields().names())

@@ -16,7 +16,11 @@ from los_tools.test.utils_tests import (print_alg_params,
 class CreatePointsAroundAlgorithmTest(unittest.TestCase):
 
     def setUp(self) -> None:
+        self.feedback = QgsProcessingFeedback()
+        self.context = QgsProcessingContext()
+
         self.points = QgsVectorLayer(get_data_path(file="points.gpkg"))
+
         self.alg = CreatePointsAroundAlgorithm()
         self.alg.initAlgorithm()
 
@@ -58,8 +62,6 @@ class CreatePointsAroundAlgorithmTest(unittest.TestCase):
         pass
 
     def test_run_alg(self):
-        feedback = QgsProcessingFeedback()
-        context = QgsProcessingContext()
 
         output_path = get_data_path_results(file="points_around.gpkg")
 
@@ -73,7 +75,7 @@ class CreatePointsAroundAlgorithmTest(unittest.TestCase):
             "OutputLayer": output_path,
         }
 
-        self.alg.run(parameters=params, context=context, feedback=feedback)
+        self.alg.run(parameters=params, context=self.context, feedback=self.feedback)
 
         output_layer = QgsVectorLayer(output_path)
 

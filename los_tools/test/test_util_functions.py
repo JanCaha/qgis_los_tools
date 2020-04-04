@@ -17,7 +17,7 @@ data_path_results = os.path.join(data_path, "results")
 class UtilsTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.raster = QgsRasterLayer(os.path.join(data_path, "dsm_reprojected.tif"))
+        self.raster = QgsRasterLayer(os.path.join(data_path, "dsm.tif"))
         self.raster_dp = self.raster.dataProvider()
         self.points = QgsVectorLayer(os.path.join(data_path, "points.gpkg"))
 
