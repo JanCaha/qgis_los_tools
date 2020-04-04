@@ -126,15 +126,17 @@ class CreatePointsInDirectionAlgorithmTest(unittest.TestCase):
 
         self.assertEqual(number_of_elements, output_layer.featureCount())
 
-        request = QgsFeatureRequest()
-        request.setFilterExpression("{} = '{}'".format(FieldNames.ID_ORIGINAL_POINT, unique_ids_orig[0]))
-        order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
-        request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
-        request.setLimit(11)
+        for id_orig in unique_ids_orig:
 
-        features = list(output_layer.getFeatures(request))
+            request = QgsFeatureRequest()
+            request.setFilterExpression("{} = '{}'".format(FieldNames.ID_ORIGINAL_POINT, id_orig))
+            order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
+            request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
 
-        for i in range(0, 10):
-            self.assertAlmostEqual(features[i].geometry().distance(features[i+1].geometry()),
-                                   math.radians(angle_step)*distance,
-                                   places=5)
+            features = list(output_layer.getFeatures(request))
+
+            for i in range(0, len(features)-1):
+                with self.subTest(id_original_point=id_orig, point_range=i):
+                    self.assertAlmostEqual(features[i].geometry().distance(features[i+1].geometry()),
+                                           math.radians(angle_step)*distance,
+                                           places=5)
