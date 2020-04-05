@@ -11,9 +11,7 @@ from qgis.core import (
     QgsWkbTypes,
     QgsPoint,
     QgsFields,
-    QgsLineString,
-    QgsMessageLog,
-    Qgis)
+    QgsLineString)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.tools.util_functions import segmentize_line, bilinear_interpolated_value, get_diagonal_size
