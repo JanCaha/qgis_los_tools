@@ -144,7 +144,7 @@ class CreateGlobalLosAlgorithm(QgsProcessingAlgorithm):
 
             return False, msg
 
-        return True, "OK"
+        return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
 
@@ -154,9 +154,11 @@ class CreateGlobalLosAlgorithm(QgsProcessingAlgorithm):
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
         observers_id = self.parameterAsString(parameters, self.OBSERVER_ID_FIELD, context)
         observers_offset = self.parameterAsString(parameters, self.OBSERVER_OFFSET_FIELD, context)
+
         targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
         targets_offset = self.parameterAsString(parameters, self.TARGET_OFFSET_FIELD, context)
+
         sampling_distance = self.parameterAsDouble(parameters, self.LINE_DENSITY, context)
 
         fields = QgsFields()

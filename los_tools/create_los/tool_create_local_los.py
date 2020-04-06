@@ -144,7 +144,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
             return False, msg
 
-        return True, "OK"
+        return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
 
@@ -154,9 +154,11 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
         observers_id = self.parameterAsString(parameters, self.OBSERVER_ID_FIELD, context)
         observers_offset = self.parameterAsString(parameters, self.OBSERVER_OFFSET_FIELD, context)
+
         targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
         targets_offset = self.parameterAsString(parameters, self.TARGET_OFFSET_FIELD, context)
+
         sampling_distance = self.parameterAsDouble(parameters, self.LINE_DENSITY, context)
 
         fields = QgsFields()
@@ -166,8 +168,12 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.OBSERVER_OFFSET, QVariant.Double))
         fields.append(QgsField(FieldNames.TARGET_OFFSET, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
-                                             QgsWkbTypes.LineString25D, observers_layer.sourceCrs())
+        sink, dest_id = self.parameterAsSink(parameters,
+                                             self.OUTPUT_LAYER,
+                                             context,
+                                             fields,
+                                             QgsWkbTypes.LineString25D,
+                                             observers_layer.sourceCrs())
 
         feature_count = observers_layer.featureCount() * targets_layer.featureCount()
         total = 100.0 / feature_count if feature_count else 0
