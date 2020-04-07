@@ -86,9 +86,10 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterDistance(
                 self.DISTANCE,
                 "Distance",
-                defaultValue=10,
-                minValue=0.000001,
-                parentParameterName=self.INPUT_LAYER)
+                parentParameterName=self.INPUT_LAYER,
+                defaultValue=10.0,
+                minValue=0.001,
+                optional=False)
         )
 
         self.addParameter(

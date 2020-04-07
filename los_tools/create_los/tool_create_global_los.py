@@ -14,13 +14,137 @@ from qgis.core import (
     QgsLineString)
 
 from qgis.PyQt.QtCore import QVariant
-from los_tools.create_los.tool_create_local_los import CreateLocalLosAlgorithm
 from los_tools.tools.util_functions import segmentize_line, bilinear_interpolated_value, get_diagonal_size
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 
 
-class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
+class CreateGlobalLosAlgorithm(QgsProcessingAlgorithm):
+
+    OBSERVER_POINTS_LAYER = "ObserverPoints"
+    OBSERVER_ID_FIELD = "ObserverIdField"
+    OBSERVER_OFFSET_FIELD = "ObserverOffset"
+    TARGET_POINTS_LAYER = "TargetPoints"
+    TARGET_ID_FIELD = "TargetIdField"
+    TARGET_OFFSET_FIELD = "TargetOffset"
+    OUTPUT_LAYER = "OutputLayer"
+    LINE_DENSITY = "LineDensity"
+    DEM = "DemRaster"
+
+    def initAlgorithm(self, config=None):
+
+        self.addParameter(
+            QgsProcessingParameterRasterLayer(
+                self.DEM,
+                "Raster Layer DEM",
+                [QgsProcessing.TypeRaster]
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.OBSERVER_POINTS_LAYER,
+                "Observers point layer",
+                [QgsProcessing.TypeVectorPoint])
+        )
+
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.OBSERVER_ID_FIELD,
+                "Observer ID field",
+                parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
+                type=QgsProcessingParameterField.Numeric,
+                optional=False
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.OBSERVER_OFFSET_FIELD,
+                "Observer offset field",
+                parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
+                type=QgsProcessingParameterField.Numeric,
+                optional=False
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.TARGET_POINTS_LAYER,
+                "Targets point layer",
+                [QgsProcessing.TypeVectorPoint])
+        )
+
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.TARGET_ID_FIELD,
+                "Target ID field",
+                parentLayerParameterName=self.TARGET_POINTS_LAYER,
+                type=QgsProcessingParameterField.Numeric,
+                optional=False
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.TARGET_OFFSET_FIELD,
+                "Target offset field",
+                parentLayerParameterName=self.TARGET_POINTS_LAYER,
+                type=QgsProcessingParameterField.Numeric,
+                optional=False
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.LINE_DENSITY,
+                "LoS sampling distance",
+                QgsProcessingParameterNumber.Double,
+                defaultValue=1,
+                minValue=0.01,
+                maxValue=1000.0,
+                optional=False)
+        )
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT_LAYER,
+                "Output layer")
+        )
+
+    def checkParameterValues(self, parameters, context):
+
+        dem = self.parameterAsRasterLayer(parameters, self.DEM, context)
+        raster_crs = dem.crs()
+        dem_band_count = dem.bandCount()
+
+        if dem_band_count != 1:
+            msg = "`Raster Layer DEM` can only have one band. Currently there are `{0}` bands.".format(dem_band_count)
+
+            return False, msg
+
+        observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
+        targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
+
+        if observers_layer.sourceCrs().isGeographic():
+            msg = "`Observers point layer` crs must be projected. " \
+                  "Right now it is `geographic`."
+
+            return False, msg
+
+        if not raster_crs == observers_layer.sourceCrs():
+            msg = "`Observers point layer` and `Raster Layer DEM` crs must be equal. " \
+                  "Right now they are not."
+
+            return False, msg
+
+        if not observers_layer.sourceCrs() == targets_layer.sourceCrs():
+            msg = "`Observers point layer` and `Targets point layer` crs must be equal. " \
+                  "Right now they are not."
+
+            return False, msg
+
+        return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
 
@@ -119,6 +243,12 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
 
     def displayName(self):
         return "Create global LoS"
+
+    def group(self):
+        return "LoS Creation"
+
+    def groupId(self):
+        return "loscreate"
 
     def createInstance(self):
         return CreateGlobalLosAlgorithm()
