@@ -5,8 +5,6 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterBoolean,
     QgsField,
-    QgsMessageLog,
-    Qgis,
     edit)
 
 from qgis.PyQt.QtCore import QVariant
@@ -61,9 +59,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
                   "Cannot analyse the layer as LoS.".format(FieldNames.LOS_TYPE,
                                                             FieldNames.ID_OBSERVER,
                                                             FieldNames.ID_TARGET)
-            QgsMessageLog.logMessage(msg,
-                                     "los_tools",
-                                     Qgis.MessageLevel.Critical)
+
             return False, msg
 
         return True, "OK"
