@@ -10,9 +10,7 @@ from qgis.core import (
     QgsFeature,
     QgsWkbTypes,
     QgsFields,
-    QgsError,
-    QgsMessageLog,
-    Qgis)
+    QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -74,6 +72,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
     def checkParameterValues(self, parameters, context):
 
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
+        horizon_type = self.horizons_types[self.parameterAsEnum(parameters, self.HORIZON_TYPE, context)]
 
         field_names = los_layer.fields().names()
 
@@ -81,12 +80,18 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
             msg = "Fields specific for LoS not found in current layer ({0}). " \
                   "Cannot extract horizons from this layer.".format(FieldNames.LOS_TYPE)
-            QgsMessageLog.logMessage(msg,
-                                     "los_tools",
-                                     Qgis.MessageLevel.Critical)
+
             return False, msg
 
-        return True, "OK"
+        los_type = get_los_type(los_layer, field_names)
+
+        if horizon_type == NamesConstants.HORIZON_GLOBAL and los_type == NamesConstants.LOS_LOCAL:
+
+            msg = "Cannot extract global horizon from local LoS."
+
+            return False, msg
+
+        return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
 
@@ -159,15 +164,6 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
                         sink.addFeature(f)
 
             elif horizon_type == NamesConstants.HORIZON_GLOBAL:
-
-                if los_type == NamesConstants.LOS_LOCAL:
-
-                    msg = "Cannot extract global horizon from local LoS."
-
-                    QgsMessageLog.logMessage(msg,
-                                             "los_tools",
-                                             Qgis.MessageLevel.Critical)
-                    raise QgsError(msg)
 
                 f = QgsFeature(fields)
                 f.setGeometry(los.get_global_horizon())
