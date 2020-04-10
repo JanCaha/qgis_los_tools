@@ -39,7 +39,6 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
         self.feedback = QgsProcessingFeedback()
         self.context = QgsProcessingContext()
 
-
     @unittest.skip("printing not necessary `test_show_params()`")
     def test_show_params(self) -> None:
         print("{}".format(self.alg.name()))

@@ -68,7 +68,7 @@ class ExportLoSCSVAlgorithm(QgsProcessingAlgorithm):
 
         field_names = input_los_layer.fields().names()
 
-        if not FieldNames.LOS_TYPE in field_names:
+        if FieldNames.LOS_TYPE not in field_names:
             msg = "Fields specific for LoS not found in current layer ({0}). " \
                   "Cannot export the layer as horizon lines.".format(FieldNames.LOS_TYPE)
 

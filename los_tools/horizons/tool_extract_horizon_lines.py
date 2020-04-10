@@ -79,7 +79,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
         field_names = los_layer.fields().names()
 
-        if not FieldNames.LOS_TYPE in field_names:
+        if FieldNames.LOS_TYPE not in field_names:
             msg = "Fields specific for LoS not found in current layer ({0}). " \
                   "Cannot extract horizon lines from this layer.".format(FieldNames.LOS_TYPE)
 

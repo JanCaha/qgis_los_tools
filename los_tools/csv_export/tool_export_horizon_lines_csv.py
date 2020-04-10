@@ -49,7 +49,7 @@ class ExportHorizonLinesCSVAlgorithm(QgsProcessingAlgorithm):
 
         field_names = input_horizon_lines_layer.fields().names()
 
-        if not FieldNames.HORIZON_TYPE in field_names:
+        if FieldNames.HORIZON_TYPE not in field_names:
             msg = "Fields specific for horizon lines not found in current layer ({0}). " \
                   "Cannot export the layer as horizon lines.".format(FieldNames.HORIZON_TYPE)
 

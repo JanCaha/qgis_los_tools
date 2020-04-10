@@ -29,6 +29,7 @@ __copyright__ = '(C) 2020 by Jan Caha'
 
 from los_tools.los_tools_plugin import los_toolsPlugin
 
+
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
     """Load los_tools class from file los_tools.

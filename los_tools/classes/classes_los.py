@@ -297,9 +297,10 @@ class LoSGlobal(LoS):
 
     def get_elevation_difference_global_horizon(self) -> float:
 
-        elev_difference_horizon = self.points[self.target_index][3] - (
-                self.points[0][3] + math.tan(math.radians(self.points[self._get_global_horizon_index()][4])) *
-                self.points[self.target_index][2])
+        elev_difference_horizon = self.points[self.target_index][3] - \
+                                  (self.points[0][3] +
+                                   math.tan(math.radians(self.points[self._get_global_horizon_index()][4])) *
+                                   self.points[self.target_index][2])
         return elev_difference_horizon
 
     def get_horizon_distance(self) -> float:
