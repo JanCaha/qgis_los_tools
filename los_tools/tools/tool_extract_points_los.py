@@ -64,7 +64,8 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.ONLY_VISIBLE,
-                "Export only visible points"
+                "Export only visible points",
+                defaultValue=False
             )
         )
 
@@ -78,12 +79,10 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
 
             msg = "Fields specific for LoS not found in current layer ({0}). " \
                   "Cannot extract horizons from this layer.".format(FieldNames.LOS_TYPE)
-            QgsMessageLog.logMessage(msg,
-                                     "los_tools",
-                                     Qgis.MessageLevel.Critical)
+
             return False, msg
 
-        return True, "OK"
+        return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
 
