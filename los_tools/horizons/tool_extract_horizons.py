@@ -9,8 +9,7 @@ from qgis.core import (
     QgsField,
     QgsFeature,
     QgsWkbTypes,
-    QgsFields,
-    QgsProcessingException)
+    QgsFields)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -112,8 +111,12 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
         if los_type == NamesConstants.LOS_NO_TARGET:
             fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
-                                             QgsWkbTypes.Point25D, los_layer.sourceCrs())
+        sink, dest_id = self.parameterAsSink(parameters,
+                                             self.OUTPUT_LAYER,
+                                             context,
+                                             fields,
+                                             QgsWkbTypes.Point25D,
+                                             los_layer.sourceCrs())
 
         feature_count = los_layer.featureCount()
         total = 100.0 / feature_count if feature_count else 0
