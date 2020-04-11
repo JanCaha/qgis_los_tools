@@ -7,19 +7,17 @@ from qgis.core import (QgsRasterLayer, QgsPointXY, QgsVectorLayer)
 from los_tools.tools.util_functions import bilinear_interpolated_value, get_diagonal_size, calculate_distance
 
 from los_tools.test.utils_tests import get_qgis_app
+from los_tools.test.utils_tests import (get_data_path,
+                                        get_data_path_results)
 
 QGIS_APP = get_qgis_app()
-
-data_path = os.path.join(os.path.dirname(__file__), "test_data")
-data_path_results = os.path.join(data_path, "results")
-
 
 class UtilsTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.raster = QgsRasterLayer(os.path.join(data_path, "dsm.tif"))
+        self.raster = QgsRasterLayer(get_data_path(file="dsm.tif"))
         self.raster_dp = self.raster.dataProvider()
-        self.points = QgsVectorLayer(os.path.join(data_path, "points.gpkg"))
+        self.points = QgsVectorLayer(get_data_path(file="points.gpkg"))
 
     def test_bilinear_interpolated_value(self):
 
