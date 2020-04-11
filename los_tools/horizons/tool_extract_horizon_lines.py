@@ -111,8 +111,12 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
             fields.append(QgsField(FieldNames.POINTS_ELEVATION_DIFF_GH_LH, QVariant.String))
             fields.append(QgsField(FieldNames.POINTS_DISTANCE_GH, QVariant.String))
 
-        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
-                                             QgsWkbTypes.LineStringZM, los_layer.sourceCrs())
+        sink, dest_id = self.parameterAsSink(parameters,
+                                             self.OUTPUT_LAYER,
+                                             context,
+                                             fields,
+                                             QgsWkbTypes.LineStringZM,
+                                             los_layer.sourceCrs())
 
         id_values = list(los_layer.uniqueValues(los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)))
 
