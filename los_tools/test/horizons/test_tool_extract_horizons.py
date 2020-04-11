@@ -1,6 +1,4 @@
-from qgis.core import (QgsVectorLayer,
-                       QgsRasterLayer,
-                       QgsFeatureRequest)
+from qgis.core import (QgsVectorLayer)
 from qgis._core import QgsWkbTypes
 
 from los_tools.horizons.tool_extract_horizons import ExtractHorizonsAlgorithm
