@@ -10,6 +10,7 @@ from los_tools.test.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from los_tools.test.utils_tests import (get_data_path,
                                         get_data_path_results)
 
+
 class AnalyseLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def setUp(self) -> None:
