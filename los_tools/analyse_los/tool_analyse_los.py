@@ -62,7 +62,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
             return False, msg
 
-        return True, "OK"
+        return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
 
