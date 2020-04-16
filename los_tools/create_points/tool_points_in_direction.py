@@ -15,6 +15,7 @@ from qgis.core import (
     QgsFields)
 
 from qgis.PyQt.QtCore import QVariant
+
 from los_tools.constants.field_names import FieldNames
 
 
