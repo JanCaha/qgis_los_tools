@@ -1,21 +1,12 @@
-import numpy as np
-
 from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingParameterRasterLayer,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterField,
-    QgsField,
-    QgsWkbTypes,
-    QgsFields,
-    QgsMessageLog,
-    Qgis)
+    QgsProcessingParameterField)
 
-from qgis.PyQt.QtCore import QVariant
 import processing
-from los_tools.constants.field_names import FieldNames
 
 
 class CreatePointsInAreaAlgorithm(QgsProcessingAlgorithm):
