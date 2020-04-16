@@ -16,6 +16,8 @@ from qgis.core import (
 
 from qgis.PyQt.QtCore import QVariant
 
+from los_tools.constants.field_names import FieldNames
+
 
 class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
 
@@ -26,9 +28,6 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
     ANGLE_STEP = "AngleStep"
     ID_FIELD = "IdField"
     DISTANCE = "Distance"
-
-    ID_FIELD_NAME = "id_original_point"
-    ANGLE_FIELD_NAME = "azimuth"
 
     def initAlgorithm(self, config=None):
 
@@ -113,8 +112,8 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 
         fields = QgsFields()
-        fields.append(QgsField(self.ID_FIELD_NAME, QVariant.Int))
-        fields.append(QgsField(self.ANGLE_FIELD_NAME, QVariant.Double))
+        fields.append(QgsField(FieldNames.ID_ORIGINAL_POINT, QVariant.Int))
+        fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
                                              QgsWkbTypes.Point, input_layer.sourceCrs())
@@ -134,8 +133,8 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
 
                 f = QgsFeature(fields)
                 f.setGeometry(QgsGeometry.fromPointXY(new_point))
-                f.setAttribute(f.fieldNameIndex(self.ID_FIELD_NAME), int(feature.attribute(id_field)))
-                f.setAttribute(f.fieldNameIndex(self.ANGLE_FIELD_NAME), float(angle))
+                f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT), int(feature.attribute(id_field)))
+                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
 
                 sink.addFeature(f)
 
