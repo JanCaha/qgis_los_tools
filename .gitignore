@@ -1,3 +1,4 @@
 /.idea
 /los_tools/zip_build
+/los_tools/test/test_data/results
 __pycache__
