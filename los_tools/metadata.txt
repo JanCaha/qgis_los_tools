@@ -5,15 +5,15 @@
 [general]
 name=LoS Tools
 qgisMinimumVersion=3.10
-description=This plugin creates and analyzes lines of sight and also provides supporting tools.
+description=This plugin creates and analyzes lines-of-sight (LoS) and also provides supporting tools.
 version=0.1
-author=Jan Caha
+author =Jan Caha
 email=jan.caha@outlook.com
 
 about=This plugin creates and analyzes lines of sight and also provides supporting tools.
 
-tracker=http://bugs
-repository=http://repo
+tracker=https://github.com/JanCaha/qgis_los_tools/issues
+repository=https://github.com/JanCaha/qgis_los_tools
 # End of mandatory metadata
 
 # Recommended items:
@@ -25,7 +25,7 @@ hasProcessingProvider=yes
 # Tags are comma separated with spaces allowed
 tags=analysis, dem, landscape, visibility
 
-homepage=http://homepage
+homepage=https://jancaha.github.io/qgis_los_tools/
 category=Analysis
 #icon=icon.png
 
@@ -41,7 +41,7 @@ deprecated=False
 # plugin_dependencies=
 
 Category of the plugin: Raster, Vector, Database or Web
-# category=
+category=Vector
 
 # If the plugin can run on QGIS Server.
 server=False
