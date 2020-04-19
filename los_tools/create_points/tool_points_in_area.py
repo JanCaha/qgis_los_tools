@@ -21,7 +21,7 @@ class CreatePointsInAreaAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
-                "Input point layer",
+                "Input polygon layer",
                 [QgsProcessing.TypeVectorPolygon])
         )
 
@@ -48,9 +48,6 @@ class CreatePointsInAreaAlgorithm(QgsProcessingAlgorithm):
                 self.OUTPUT_LAYER,
                 "Output layer")
         )
-
-    def checkParameterValues(self, parameters, context):
-        return True, "OK"
 
     def processAlgorithm(self, parameters, context, feedback):
 
