@@ -8,9 +8,7 @@ from qgis.core import (
     QgsField,
     QgsFeature,
     QgsWkbTypes,
-    QgsFields,
-    QgsMessageLog,
-    Qgis)
+    QgsFields)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
