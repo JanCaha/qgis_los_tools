@@ -8,11 +8,12 @@ from qgis.core import (
     edit)
 
 from qgis.PyQt.QtCore import QVariant
+
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
 from los_tools.tools.util_functions import wkt_to_array_points, get_los_type
-
+from los_tools.tools.util_functions import get_doc_file
 
 class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
@@ -176,3 +177,10 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return AnalyseLosAlgorithm()
+
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Analysis/tool_analyse_los/"
+
+    def shortHelpString(self):
+
+        return get_doc_file(__file__, self)
