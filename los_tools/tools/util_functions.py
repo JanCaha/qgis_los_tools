@@ -1,5 +1,7 @@
 import numpy as np
 import math
+import os
+import json
 from typing import List
 import re
 
@@ -11,9 +13,10 @@ from qgis.core import (QgsGeometry,
                        QgsRectangle,
                        QgsVectorLayer,
                        QgsMessageLog,
-                       QgsError,
+                       QgsProcessingUtils,
                        QgsProcessingException,
-                       Qgis)
+                       Qgis,
+                       QgsProcessingAlgorithm)
 
 from los_tools.constants.field_names import FieldNames
 
@@ -142,3 +145,19 @@ def bilinear_interpolated_value(raster: QgsRasterDataProvider, point: (QgsPoint,
 
 def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
     return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
+
+
+def get_doc_file(file_path: str, algorithm: QgsProcessingAlgorithm) -> str:
+
+    file = os.path.splitext(os.path.basename(file_path))[0] + ".help"
+
+    help_file = os.path.join(os.path.dirname(os.path.dirname(file_path)),
+                             "doc", file)
+
+    if os.path.exists(help_file):
+        with open(help_file) as f:
+            descriptions = json.load(f)
+
+        return QgsProcessingUtils.formatHelpMapAsHtml(descriptions, algorithm)
+
+    return ""
