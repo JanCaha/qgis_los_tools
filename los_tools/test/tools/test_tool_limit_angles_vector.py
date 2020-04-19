@@ -84,7 +84,7 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertTrue(can_run)
-        self.assertIn("OK", msg)
+        self.assertIn("", msg)
 
         self.alg.run(parameters=params, context=self.context, feedback=self.feedback)
 
