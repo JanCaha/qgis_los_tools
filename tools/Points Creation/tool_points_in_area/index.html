@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="Jan Caha">
-        <link rel="canonical" href="https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_in_direction/">
+        <link rel="canonical" href="https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_in_area/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
-        <title>Create points in direction - LoS Tools</title>
+        <title>Create points in polygon - LoS Tools</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../../css/base.css" rel="stylesheet">
@@ -115,11 +115,11 @@
 </li>
             
 <li>
-    <a href="../tool_points_in_area/" class="dropdown-item">Create points in polygon</a>
+    <a href="./" class="dropdown-item active">Create points in polygon</a>
 </li>
             
 <li>
-    <a href="./" class="dropdown-item active">Create points in direction</a>
+    <a href="../tool_points_in_direction/" class="dropdown-item">Create points in direction</a>
 </li>
     </ul>
   </li>
@@ -165,7 +165,7 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#create-points-in-direction" class="nav-link">Create points in direction</a>
+            <li class="nav-item" data-level="1"><a href="#create-points-in-polygon" class="nav-link">Create points in polygon</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#parameters" class="nav-link">Parameters</a>
               <ul class="nav flex-column">
@@ -186,9 +186,8 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="create-points-in-direction">Create points in direction</h1>
-<p>Create points set of points at given distance from points from input layer that span given angle offset from main direction layer.</p>
-<p>The default value produces range of values [-20;20] by one angle from azimuth of point in main direction layer.</p>
+<h1 id="create-points-in-polygon">Create points in polygon</h1>
+<p>Creates points in provided polygon layer that are aligned with centers of cells of provided raster layer. </p>
 <h2 id="parameters">Parameters</h2>
 <table>
 <thead>
@@ -201,40 +200,22 @@
 </thead>
 <tbody>
 <tr>
-<td>Input point layer</td>
+<td>Input polygon layer</td>
 <td><code>InputLayer</code></td>
-<td>[vector: point]</td>
-<td>Point layer around which the new points will be created.</td>
-</tr>
-<tr>
-<td>Main direction point layer</td>
-<td><code>DirectionLayer</code></td>
-<td>[vector: point]</td>
-<td>Point layer (containing only one point) that specifies main direction.</td>
+<td>[vector: polygon]</td>
+<td>Polygon layer in which the new points will be created.</td>
 </tr>
 <tr>
 <td>ID field to assign to output</td>
 <td><code>IdField</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field value to assing to <code>id_original_point</code> for new layer.</td>
+<td>Field value to assing to new layer.</td>
 </tr>
 <tr>
-<td>Angle offset from the main direction</td>
-<td><code>AngleOffset</code></td>
-<td>[number] <br/><br/> Default: <br/> <code>20</code></td>
-<td>Offset from main direction, the whole range is [main azimuth + angleOffset;main azimuth + angleOffset].</td>
-</tr>
-<tr>
-<td>Angle step</td>
-<td><code>AngleStep</code></td>
-<td>[number] <br/><br/> Default: <br/> <code>1</code></td>
-<td>Step size taken in range defined by angle offset.</td>
-</tr>
-<tr>
-<td>Distance</td>
-<td><code>Distance</code></td>
-<td>[number] <br/><br/> Default: <br/> <code>10</code></td>
-<td>How far from the original point the new points should be created.</td>
+<td>Raster Layer to align the points to</td>
+<td><code>InputRaster</code></td>
+<td>[raster]</td>
+<td>Centers of cells from this layer are used as possible places for placing points, if they are inside the polygons.</td>
 </tr>
 <tr>
 <td>Output layer</td>
@@ -265,12 +246,10 @@
 </table>
 <h3 id="fields-in-the-output-layer">Fields in the output layer</h3>
 <ul>
-<li><strong>id_original_point</strong> - integer - value from field specified in <code>ID field to assign to output</code></li>
-<li><strong>azimuth</strong> - double - azimuth from point in Input point layer to point in Main direction point layer</li>
-<li><strong>id_point</strong> - integer - unique id value for the point</li>
+<li><code>IdField</code> - numeric - value selected fom the <code>InputLayer</code></li>
 </ul>
 <h2 id="tool-screenshot">Tool screenshot</h2>
-<p><img alt="Create points in direction" src="../../../images/tool_points_in_direction.png" /></p></div>
+<p><img alt="Create points in polygon" src="../../../images/tool_points_in_area.png" /></p></div>
             </div>
         </div>
 
