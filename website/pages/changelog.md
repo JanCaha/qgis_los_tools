@@ -4,7 +4,7 @@
 
 - update website
 
-- all tools have links (hepl) to website description
+- all tools have links (help) to website description
 
 ## version 0.1
 
