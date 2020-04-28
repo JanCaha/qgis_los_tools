@@ -2,7 +2,7 @@
 
 Create line-of-sight between each point from observers layer and targets layer, where `Observer ID field` value from observer is equal to `Target and Observer agreement ID field` of target. This ensures that each point from targets layer is linked to one point from observers layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.
 
-The target points can be and usually should be created by tools [Create points around](../Points Creation/tool_points_around.md) __`TODO FILL`__! 
+The target points can be and usually should be created by tools [Create points around](../Points Creation/tool_points_around.md) and [Create points in direction](../Points Creation/tool_points_in_direction.md).
 
 ## Parameters
 
