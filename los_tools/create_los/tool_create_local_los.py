@@ -237,3 +237,6 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return CreateLocalLosAlgorithm()
+
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_local_los/"

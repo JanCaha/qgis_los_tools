@@ -178,3 +178,6 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return ExtractPointsLoSAlgorithm()
+
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Points/tool_extract_points_los/"

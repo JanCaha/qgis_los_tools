@@ -151,3 +151,6 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return LimitAnglesAlgorithm()
+
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/Angles/tool_limit_angles_vector/"

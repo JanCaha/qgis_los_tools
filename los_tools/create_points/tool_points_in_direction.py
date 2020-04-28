@@ -178,3 +178,6 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return CreatePointsInDirectionAlgorithm()
+
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_in_direction/"

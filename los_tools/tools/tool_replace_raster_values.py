@@ -173,3 +173,6 @@ class ReplaceRasterValuesAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return ReplaceRasterValuesAlgorithm()
+
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/Raster%20Editing/tool_replace_raster_values/"

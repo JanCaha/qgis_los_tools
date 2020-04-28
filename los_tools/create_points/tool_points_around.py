@@ -157,16 +157,5 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return CreatePointsAroundAlgorithm()
 
-    # def shortHelpString(self):
-    #     file = os.path.dirname(__file__) + "/doc/tool_points_around.txt"
-    #     QgsMessageLog.logMessage(file,
-    #                              "los_tools",
-    #                              Qgis.MessageLevel.Critical)
-    #     if not os.path.exists(file):
-    #         return ""
-    #     with open(file) as help_file:
-    #         help = help_file.read()
-    #         QgsMessageLog.logMessage(help,
-    #                                  "los_tools",
-    #                                  Qgis.MessageLevel.Critical)
-    #     return help
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_around/"

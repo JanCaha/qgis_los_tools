@@ -123,3 +123,6 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
 
     def createInstance(self):
         return CreateGlobalLosAlgorithm()
+
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_global_los/"

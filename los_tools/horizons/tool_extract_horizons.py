@@ -201,3 +201,6 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return ExtractHorizonsAlgorithm()
+
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/Horizons/tool_extract_horizons/"
