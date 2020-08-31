@@ -27,6 +27,7 @@ The default value produces range of values [-20;20] by one angle from azimuth of
 * __id_original_point__ - integer - value from field specified in `ID field to assign to output`
 * __azimuth__ - double - azimuth from point in Input point layer to point in Main direction point layer
 * __id_point__ - integer - unique id value for the point
+* __difference_to_main_azimuth__ - double - difference of main point azimuth to this point's azimuth
 
 ## Tool screenshot
 
