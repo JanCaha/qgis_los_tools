@@ -5,7 +5,11 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterBoolean,
     QgsField,
-    edit)
+    QgsProcessingParameterFeatureSink,
+    QgsFields,
+    QgsFeature,
+Qgis,
+QgsMessageLog)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -20,6 +24,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
     LOS_LAYER = "LoSLayer"
     CURVATURE_CORRECTIONS = "CurvatureCorrections"
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
+    OUTPUT_LAYER = "OutputLayer"
 
     def initAlgorithm(self, config=None):
 
@@ -44,6 +49,12 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
                 type=QgsProcessingParameterNumber.Double,
                 defaultValue=0.13
             )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT_LAYER,
+                "Output layer")
         )
 
     def checkParameterValues(self, parameters, context):
@@ -75,93 +86,125 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
         los_type = get_los_type(los_layer, field_names)
 
-        los_layer_dataprovider = los_layer.dataProvider()
+        fields = QgsFields()
+
+        los_layer_attributes = los_layer.dataProvider().fields().toList()
+
+        for attribute in los_layer_attributes:
+            fields.append(QgsField(attribute.name(), attribute.type()))
 
         if los_type == NamesConstants.LOS_LOCAL:
-            los_layer_dataprovider.addAttributes([
-                QgsField(FieldNames.VISIBLE, QVariant.Bool),
-                QgsField(FieldNames.VIEWING_ANGLE, QVariant.Double),
-                QgsField(FieldNames.ELEVATION_DIFF, QVariant.Double),
-                QgsField(FieldNames.ANGLE_DIFF_LH, QVariant.Double),
-                QgsField(FieldNames.ELEVATION_DIFF_LH, QVariant.Double),
-                QgsField(FieldNames.SLOPE_DIFFERENCE_LH, QVariant.Double),
-                QgsField(FieldNames.HORIZON_COUNT, QVariant.Int),
-                QgsField(FieldNames.DISTANCE_LH, QVariant.Double)
-            ])
+            fields.append(QgsField(FieldNames.VISIBLE, QVariant.Bool))
+            fields.append(QgsField(FieldNames.VIEWING_ANGLE, QVariant.Double))
+            fields.append(QgsField(FieldNames.ELEVATION_DIFF, QVariant.Double))
+            fields.append(QgsField(FieldNames.ANGLE_DIFF_LH, QVariant.Double))
+            fields.append(QgsField(FieldNames.ELEVATION_DIFF_LH, QVariant.Double))
+            fields.append(QgsField(FieldNames.SLOPE_DIFFERENCE_LH, QVariant.Double))
+            fields.append(QgsField(FieldNames.HORIZON_COUNT, QVariant.Int))
+            fields.append(QgsField(FieldNames.DISTANCE_LH, QVariant.Double))
             # los_layer.addAttribute(QgsField(FieldNames.FUZZY_VISIBILITY, QVariant.Double))
         elif los_type == NamesConstants.LOS_GLOBAL:
-            los_layer_dataprovider.addAttributes([
-                QgsField(FieldNames.VISIBLE, QVariant.Bool),
-                QgsField(FieldNames.ANGLE_DIFF_GH, QVariant.Double),
-                QgsField(FieldNames.ELEVATION_DIFF_GH, QVariant.Double),
-                QgsField(FieldNames.HORIZON_COUNT_BEHIND, QVariant.Int),
-                QgsField(FieldNames.DISTANCE_GH, QVariant.Double)
-            ])
+            fields.append(QgsField(FieldNames.VISIBLE, QVariant.Bool))
+            fields.append(QgsField(FieldNames.ANGLE_DIFF_GH, QVariant.Double))
+            fields.append(QgsField(FieldNames.ELEVATION_DIFF_GH, QVariant.Double))
+            fields.append(QgsField(FieldNames.HORIZON_COUNT_BEHIND, QVariant.Int))
+            fields.append(QgsField(FieldNames.DISTANCE_GH, QVariant.Double))
         elif los_type == NamesConstants.LOS_NO_TARGET:
-            los_layer_dataprovider.addAttributes([
-                QgsField(FieldNames.MAXIMAL_VERTICAL_ANGLE, QVariant.Double),
-                QgsField(FieldNames.DISTANCE_GH, QVariant.Double),
-                QgsField(FieldNames.DISTANCE_LH, QVariant.Double),
-                QgsField(FieldNames.VERTICAL_ANGLE_LH, QVariant.Double)
-            ])
+            fields.append(QgsField(FieldNames.MAXIMAL_VERTICAL_ANGLE, QVariant.Double))
+            fields.append(QgsField(FieldNames.DISTANCE_GH, QVariant.Double))
+            fields.append(QgsField(FieldNames.DISTANCE_LH, QVariant.Double))
+            fields.append(QgsField(FieldNames.VERTICAL_ANGLE_LH, QVariant.Double))
 
-        los_layer.updateFields()
+        sink, dest_id = self.parameterAsSink(parameters,
+                                             self.OUTPUT_LAYER,
+                                             context,
+                                             fields,
+                                             los_layer.wkbType(),
+                                             los_layer.sourceCrs())
 
         feature_count = los_layer.featureCount()
-        i = 0
 
-        with edit(los_layer):
-            for los_feature in los_layer.getFeatures():
-                if feedback.isCanceled():
-                    break
+        los_layer_iterator = los_layer.getFeatures()
 
-                if los_type == NamesConstants.LOS_LOCAL:
-                    los = LoSLocal(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                   observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
-                                   target_offset=los_feature.attribute(FieldNames.TARGET_OFFSET),
-                                   use_curvature_corrections=curvature_corrections,
-                                   refraction_coefficient=ref_coeff)
+        for los_layer_count, los_feature in enumerate(los_layer_iterator):
 
-                    los_feature[FieldNames.VISIBLE] = los.is_target_visible()
-                    los_feature[FieldNames.VIEWING_ANGLE] = los.get_view_angle()
-                    los_feature[FieldNames.ELEVATION_DIFF] = los.get_elevation_difference()
-                    los_feature[FieldNames.ANGLE_DIFF_LH] = los.get_angle_difference_local_horizon()
-                    los_feature[FieldNames.ELEVATION_DIFF_LH] = los.get_elevation_difference_local_horizon()
-                    los_feature[FieldNames.SLOPE_DIFFERENCE_LH] = los.get_los_slope_difference()
-                    los_feature[FieldNames.HORIZON_COUNT] = los.get_local_horizon_count()
-                    los_feature[FieldNames.DISTANCE_LH] = los.get_local_horizon_distance()
+            if feedback.isCanceled():
+                break
 
-                elif los_type == NamesConstants.LOS_GLOBAL:
-                    los = LoSGlobal(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                    observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
-                                    target_offset=los_feature.attribute(FieldNames.TARGET_OFFSET),
-                                    target_x=los_feature.attribute(FieldNames.TARGET_X),
-                                    target_y=los_feature.attribute(FieldNames.TARGET_Y),
-                                    use_curvature_corrections=curvature_corrections,
-                                    refraction_coefficient=ref_coeff)
+            f = QgsFeature(fields)
+            f.setGeometry(los_feature.geometry())
 
-                    los_feature[FieldNames.VISIBLE] = los.is_target_visible()
-                    los_feature[FieldNames.ANGLE_DIFF_GH] = los.get_angle_difference_global_horizon()
-                    los_feature[FieldNames.ELEVATION_DIFF_GH] = los.get_elevation_difference_global_horizon()
-                    los_feature[FieldNames.HORIZON_COUNT_BEHIND] = los.get_horizon_count()
-                    los_feature[FieldNames.DISTANCE_GH] = los.get_horizon_distance()
-
-                elif los_type == NamesConstants.LOS_NO_TARGET:
-                    los = LoSWithoutTarget(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                           observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
-                                           use_curvature_corrections=curvature_corrections,
-                                           refraction_coefficient=ref_coeff)
-
-                    los_feature[FieldNames.MAXIMAL_VERTICAL_ANGLE] = los.get_maximal_vertical_angle()
-                    los_feature[FieldNames.DISTANCE_LH] = los.get_max_local_horizon_distance()
-                    los_feature[FieldNames.DISTANCE_GH] = los.get_global_horizon_distance()
-                    los_feature[FieldNames.VERTICAL_ANGLE_LH] = los.get_max_local_horizon_angle()
-
-                los_layer.updateFeature(los_feature)
+            # copy attributes
+            attributes = los_feature.attributes()
+            i = 0
+            for att in attributes:
+                f.setAttribute(i, att)
                 i += 1
-                feedback.setProgress(int((i/feature_count)*100))
 
-        return {}
+            if los_type == NamesConstants.LOS_LOCAL:
+                los = LoSLocal(wkt_to_array_points(los_feature.geometry().asWkt()),
+                               observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
+                               target_offset=los_feature.attribute(FieldNames.TARGET_OFFSET),
+                               use_curvature_corrections=curvature_corrections,
+                               refraction_coefficient=ref_coeff)
+
+                f.setAttribute(f.fieldNameIndex(FieldNames.VISIBLE),
+                               los.is_target_visible())
+                f.setAttribute(f.fieldNameIndex(FieldNames.VIEWING_ANGLE),
+                               los.get_view_angle())
+                f.setAttribute(f.fieldNameIndex(FieldNames.ELEVATION_DIFF),
+                               los.get_elevation_difference())
+                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_DIFF_LH),
+                               los.get_angle_difference_local_horizon())
+                f.setAttribute(f.fieldNameIndex(FieldNames.ELEVATION_DIFF_LH),
+                               los.get_elevation_difference_local_horizon())
+                f.setAttribute(f.fieldNameIndex(FieldNames.SLOPE_DIFFERENCE_LH),
+                               los.get_los_slope_difference())
+                f.setAttribute(f.fieldNameIndex(FieldNames.HORIZON_COUNT),
+                               los.get_local_horizon_count())
+                f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE_LH),
+                               los.get_local_horizon_distance())
+
+            elif los_type == NamesConstants.LOS_GLOBAL:
+                los = LoSGlobal(wkt_to_array_points(los_feature.geometry().asWkt()),
+                                observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
+                                target_offset=los_feature.attribute(FieldNames.TARGET_OFFSET),
+                                target_x=los_feature.attribute(FieldNames.TARGET_X),
+                                target_y=los_feature.attribute(FieldNames.TARGET_Y),
+                                use_curvature_corrections=curvature_corrections,
+                                refraction_coefficient=ref_coeff)
+
+                f.setAttribute(f.fieldNameIndex(FieldNames.VISIBLE),
+                               los.is_target_visible())
+                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_DIFF_GH),
+                               los.get_angle_difference_global_horizon())
+                f.setAttribute(f.fieldNameIndex(FieldNames.ELEVATION_DIFF_GH),
+                               los.get_elevation_difference_global_horizon())
+                f.setAttribute(f.fieldNameIndex(FieldNames.HORIZON_COUNT_BEHIND),
+                               los.get_horizon_count())
+                f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE_GH),
+                               los.get_horizon_distance())
+
+            elif los_type == NamesConstants.LOS_NO_TARGET:
+                los = LoSWithoutTarget(wkt_to_array_points(los_feature.geometry().asWkt()),
+                                       observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
+                                       use_curvature_corrections=curvature_corrections,
+                                       refraction_coefficient=ref_coeff)
+
+                f.setAttribute(f.fieldNameIndex(FieldNames.MAXIMAL_VERTICAL_ANGLE),
+                               los.get_maximal_vertical_angle())
+                f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE_LH),
+                               los.get_max_local_horizon_distance())
+                f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE_GH),
+                               los.get_global_horizon_distance())
+                f.setAttribute(f.fieldNameIndex(FieldNames.VERTICAL_ANGLE_LH),
+                               los.get_max_local_horizon_angle())
+
+            sink.addFeature(f)
+
+            feedback.setProgress(int((los_layer_count/feature_count)*100))
+
+        return {self.OUTPUT_LAYER: dest_id}
 
     def name(self):
         return "analyselos"

@@ -50,8 +50,11 @@ class AnalyseLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def test_run_alg(self) -> None:
 
+        output_path = get_data_path_results(file="los_local_analysed.gpkg")
+
         params = {
-            "LoSLayer": self.los_local
+            "LoSLayer": self.los_local,
+            "OutputLayer": output_path
         }
 
         self.assertRunAlgorithm(parameters=params)
@@ -66,8 +69,11 @@ class AnalyseLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                                FieldNames.DISTANCE_LH],
                                               self.los_local)
 
+        output_path = get_data_path_results(file="los_global_analysed.gpkg")
+
         params = {
-            "LoSLayer": self.los_global
+            "LoSLayer": self.los_global,
+            "OutputLayer": output_path
         }
 
         self.assertRunAlgorithm(parameters=params)
@@ -79,8 +85,11 @@ class AnalyseLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                                FieldNames.DISTANCE_GH],
                                               self.los_global)
 
+        output_path = get_data_path_results(file="los_notarget_analysed.gpkg")
+
         params = {
-            "LoSLayer": self.los_no_target
+            "LoSLayer": self.los_no_target,
+            "OutputLayer": output_path
         }
 
         self.assertRunAlgorithm(parameters=params)
