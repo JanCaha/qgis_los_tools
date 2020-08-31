@@ -219,7 +219,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
                 sink.addFeature(f)
 
-            feedback.setProgress(int((observer_count * target_count + target_count)*total))
+                feedback.setProgress(int((observer_count * target_count + target_count)*total))
 
         return {self.OUTPUT_LAYER: dest_id}
 
