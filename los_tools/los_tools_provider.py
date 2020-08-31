@@ -44,7 +44,6 @@ from los_tools.csv_export.tool_export_los_csv import ExportLoSCSVAlgorithm
 from los_tools.csv_export.tool_export_horizon_lines_csv import ExportHorizonLinesCSVAlgorithm
 from los_tools.tools.tool_extract_points_los import ExtractPointsLoSAlgorithm
 from los_tools.tools.tool_limit_angles_vector import LimitAnglesAlgorithm
-from los_tools.create_points.tool_points_in_area import CreatePointsInAreaAlgorithm
 
 
 class los_toolsProvider(QgsProcessingProvider):
@@ -79,7 +78,6 @@ class los_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ExportHorizonLinesCSVAlgorithm())
         self.addAlgorithm(ExtractPointsLoSAlgorithm())
         self.addAlgorithm(LimitAnglesAlgorithm())
-        self.addAlgorithm(CreatePointsInAreaAlgorithm())
 
     def id(self):
         """
