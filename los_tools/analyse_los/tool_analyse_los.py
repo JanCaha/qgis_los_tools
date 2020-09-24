@@ -4,12 +4,12 @@ from qgis.core import (
     QgsProcessingParameterNumber,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterBoolean,
+    QgsVectorLayer,
     QgsField,
     QgsProcessingParameterFeatureSink,
     QgsFields,
     QgsFeature,
-Qgis,
-QgsMessageLog)
+    QgsFeatureIterator)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -18,6 +18,7 @@ from los_tools.constants.names_constants import NamesConstants
 from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
 from los_tools.tools.util_functions import wkt_to_array_points, get_los_type
 from los_tools.tools.util_functions import get_doc_file
+
 
 class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
@@ -78,7 +79,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
+        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
         curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
         ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
@@ -122,9 +123,14 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
                                              los_layer.wkbType(),
                                              los_layer.sourceCrs())
 
-        feature_count = los_layer.featureCount()
+        feature_count = 0
 
-        los_layer_iterator = los_layer.getFeatures()
+        los_layer_iterator: QgsFeatureIterator = los_layer.getFeatures()
+
+        for los_feature in enumerate(los_layer_iterator):
+            feature_count += 1
+
+        los_layer_iterator: QgsFeatureIterator = los_layer.getFeatures()
 
         for los_layer_count, los_feature in enumerate(los_layer_iterator):
 
@@ -202,7 +208,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
             sink.addFeature(f)
 
-            feedback.setProgress(int((los_layer_count/feature_count)*100))
+            feedback.setProgress((los_layer_count/feature_count)*100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
