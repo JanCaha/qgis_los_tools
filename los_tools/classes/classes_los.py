@@ -89,13 +89,18 @@ class LoS:
                 target_offset = self._curvature_corrections(self.target_offset,
                                                             distance,
                                                             self.refraction_coefficient)
+
             if i == 0:
                 self.points.append([point_x, point_y, 0, first_point_z, -90])
             elif self.is_global and math.fabs(target_distance - distance) < sampling_distance / 2:
                 self.points.append(
-                    [point_x, point_y, distance, point_z + self.target_offset,
-                     self._angle_vertical(distance, point_z + self.target_offset - first_point_z)])
+                    [point_x, point_y, distance, point_z + target_offset,
+                     self._angle_vertical(distance, point_z + target_offset - first_point_z)])
                 self.target_index = i
+            elif not self.is_global and not self.is_without_target and i == len(points)-1:
+                self.points.append(
+                    [point_x, point_y, distance, point_z + target_offset,
+                     self._angle_vertical(distance, point_z + target_offset - first_point_z)])
             else:
                 self.points.append([point_x, point_y, distance, point_z,
                                     self._angle_vertical(distance, point_z - first_point_z)])
