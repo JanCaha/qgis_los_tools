@@ -156,9 +156,12 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         if mask_raster is not None:
             mask_no_data_value = mask_raster.sourceNoDataValue(1)
 
+        input_layer.countSymbolFeatures()
+        feature_count = input_layer.featureCount()
+
         input_layer_iterator = input_layer.getFeatures()
 
-        for input_layer_count, input_layer_feature in enumerate(input_layer_iterator):
+        for input_feature_count, input_layer_feature in enumerate(input_layer_iterator):
 
             if feedback.isCanceled():
                 break
@@ -179,10 +182,6 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
             if mask_raster is not None:
                 mask_block_values: QgsRasterBlock = mask_raster.block(1, pixel_extent, distance_cells*2, distance_cells*2)
-
-            # QgsMessageLog.logMessage("{} - {}".format(block_values.width(), block_values.height()),
-            #                          "los tools",
-            #                          Qgis.Warning)
 
             max_value_x = -math.inf
             max_value_y = -math.inf
@@ -222,6 +221,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
             f.setGeometry(QgsPoint(max_value_x, max_value_y))
             f.setAttributes(input_layer_feature.attributes())
             sink.addFeature(f)
+
+            feedback.setProgress((input_feature_count / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
