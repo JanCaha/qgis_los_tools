@@ -188,7 +188,6 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                                              observers_layer.sourceCrs())
 
         feature_count = targets_layer.featureCount()
-        total = 100.0 / feature_count if feature_count else 0
 
         observers_iterator = observers_layer.getFeatures()
 
@@ -253,7 +252,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
                     sink.addFeature(f)
                     i += 1
-                    feedback.setProgress(int(i * total))
+                    feedback.setProgress((i/feature_count)*100)
 
         return {self.OUTPUT_LAYER: dest_id}
 

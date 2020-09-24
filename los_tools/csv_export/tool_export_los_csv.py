@@ -4,9 +4,7 @@ from qgis.core import (
     QgsProcessingParameterNumber,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFileDestination,
-    QgsMessageLog,
-    Qgis)
+    QgsProcessingParameterFileDestination)
 
 from los_tools.tools.util_functions import wkt_to_array_points, get_los_type
 from los_tools.constants.field_names import FieldNames
@@ -88,8 +86,6 @@ class ExportLoSCSVAlgorithm(QgsProcessingAlgorithm):
         alternative_csv = self.parameterAsBool(parameters, self.ALTERNATIVE_CSV, context)
 
         feature_count = input_los_layer.featureCount()
-        total = 100.0 / feature_count if feature_count else 0
-
         iterator = input_los_layer.getFeatures()
 
         txt_file = open(output_file, "w")
@@ -211,7 +207,7 @@ class ExportLoSCSVAlgorithm(QgsProcessingAlgorithm):
                                 int(los.visible[i]),
                                 int(los.horizon[i]))
 
-            feedback.setProgress(int(cnt * total))
+            feedback.setProgress((cnt/feature_count)*100)
 
         if alternative_csv:
             csv_string = csv_string.replace(",", ";").replace(".", ",")

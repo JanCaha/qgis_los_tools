@@ -176,11 +176,11 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
                                              observers_layer.sourceCrs())
 
         feature_count = observers_layer.featureCount() * targets_layer.featureCount()
-        total = 100.0 / feature_count if feature_count else 0
 
         observers_iterator = observers_layer.getFeatures()
 
         for observer_count, observer_feature in enumerate(observers_iterator):
+
             if feedback.isCanceled():
                 break
 
@@ -219,7 +219,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
                 sink.addFeature(f)
 
-                feedback.setProgress(int((observer_count * target_count + target_count)*total))
+                feedback.setProgress(((observer_count + 1 * target_count + 1 + target_count)/feature_count)*100)
 
         return {self.OUTPUT_LAYER: dest_id}
 

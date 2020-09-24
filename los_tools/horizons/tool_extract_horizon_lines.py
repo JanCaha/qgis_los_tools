@@ -121,6 +121,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         id_values = list(los_layer.uniqueValues(los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)))
 
         total = 100.0 / len(id_values) if len(id_values) > 0 else 0
+
         i = 0
 
         for id_value in id_values:
@@ -189,7 +190,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
                 sink.addFeature(f)
                 i += 1
 
-                feedback.setProgress(int(i*total))
+                feedback.setProgress((i/total)*100)
 
         return {self.OUTPUT_LAYER: dest_id}
 

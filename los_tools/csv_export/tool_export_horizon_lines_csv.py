@@ -69,7 +69,6 @@ class ExportHorizonLinesCSVAlgorithm(QgsProcessingAlgorithm):
         horizon_lines_type = get_horizon_lines_type(input_horizon_lines_layer)
 
         feature_count = input_horizon_lines_layer.featureCount()
-        total = 100.0 / feature_count if feature_count else 0
 
         iterator = input_horizon_lines_layer.getFeatures()
 
@@ -125,7 +124,7 @@ class ExportHorizonLinesCSVAlgorithm(QgsProcessingAlgorithm):
                                                             elevs_diff[i])
                 i += 1
 
-            feedback.setProgress(int(cnt * total))
+            feedback.setProgress((cnt/feature_count)*100)
 
         if alternative_csv:
             csv_string = csv_string.replace(",", ";").replace(".", ",")

@@ -124,7 +124,6 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                                              QgsWkbTypes.Point, input_layer.sourceCrs())
 
         feature_count = input_layer.featureCount()
-        total = 100.0 / feature_count if feature_count else 0
 
         iterator = input_layer.getFeatures()
 
@@ -163,7 +162,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                     sink.addFeature(f)
                     i += 1
 
-            feedback.setProgress(int(cnt * total))
+            feedback.setProgress((cnt/feature_count)*100)
 
         return {self.OUTPUT_LAYER: dest_id}
 

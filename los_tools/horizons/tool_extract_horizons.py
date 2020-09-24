@@ -119,7 +119,6 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
                                              los_layer.sourceCrs())
 
         feature_count = los_layer.featureCount()
-        total = 100.0 / feature_count if feature_count else 0
 
         los_iterator = los_layer.getFeatures()
 
@@ -183,7 +182,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
                 sink.addFeature(f)
 
-            feedback.setProgress(int(feature_number * total))
+            feedback.setProgress((feature_number/feature_count)*100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
