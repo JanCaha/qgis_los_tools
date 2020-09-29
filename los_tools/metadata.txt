@@ -6,7 +6,7 @@
 name=LoS Tools
 qgisMinimumVersion=3.10
 description=This plugin creates and analyzes lines-of-sight (LoS) and also provides supporting tools.
-version=0.2
+version=0.3
 author=Jan Caha
 email=jan.caha@outlook.com
 
