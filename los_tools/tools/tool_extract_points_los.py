@@ -8,7 +8,9 @@ from qgis.core import (
     QgsField,
     QgsFeature,
     QgsWkbTypes,
-    QgsFields)
+    QgsFields,
+    QgsVectorLayer,
+    QgsFeatureIterator)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -84,10 +86,10 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
-        curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
-        ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
-        only_visible = self.parameterAsBool(parameters, self.ONLY_VISIBLE, context)
+        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
+        curvature_corrections: bool = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
+        ref_coeff: float = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
+        only_visible: bool = self.parameterAsBool(parameters, self.ONLY_VISIBLE, context)
 
         field_names = los_layer.fields().names()
 
@@ -107,7 +109,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
 
         feature_count = los_layer.featureCount()
 
-        los_iterator = los_layer.getFeatures()
+        los_iterator: QgsFeatureIterator = los_layer.getFeatures()
 
         for feature_number, los_feature in enumerate(los_iterator):
 
