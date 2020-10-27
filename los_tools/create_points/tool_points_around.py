@@ -64,7 +64,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
                 self.ANGLE_END,
                 "Maximal angle",
                 QgsProcessingParameterNumber.Double,
-                defaultValue=359.0,
+                defaultValue=359.999,
                 minValue=0.0,
                 maxValue=360.0,
                 optional=False)
@@ -106,7 +106,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
         angle_step = self.parameterAsDouble(parameters, self.ANGLE_STEP, context)
 
         angles = np.arange(angle_min,
-                           angle_max + 0.1*angle_step,
+                           angle_max + 0.000000001*angle_step,
                            step=angle_step).tolist()
 
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
