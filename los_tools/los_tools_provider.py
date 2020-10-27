@@ -45,6 +45,7 @@ from los_tools.csv_export.tool_export_horizon_lines_csv import ExportHorizonLine
 from los_tools.tools.tool_extract_points_los import ExtractPointsLoSAlgorithm
 from los_tools.tools.tool_limit_angles_vector import LimitAnglesAlgorithm
 from los_tools.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
+from los_tools.tools.tool_azimuth import AzimuthPointPolygonAlgorithm
 
 
 class los_toolsProvider(QgsProcessingProvider):
@@ -80,6 +81,7 @@ class los_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ExtractPointsLoSAlgorithm())
         self.addAlgorithm(LimitAnglesAlgorithm())
         self.addAlgorithm(OptimizePointLocationAlgorithm())
+        self.addAlgorithm(AzimuthPointPolygonAlgorithm())
 
     def id(self):
         """

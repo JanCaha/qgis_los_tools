@@ -56,3 +56,5 @@ class FieldNames:
     POINTS_ANGLE_DIFF_GH_LH = "angle_difference_global_to_local_horizon"
     POINTS_ELEVATION_DIFF_GH_LH = "elevation_difference_global_to_local_horizon"
     POINTS_DISTANCE_GH = "distance_global_horizon"
+
+    ID_OBJECT = "id_object"
