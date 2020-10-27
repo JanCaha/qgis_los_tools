@@ -12,7 +12,8 @@ from qgis.core import (QgsProcessing,
                        QgsVectorLayer,
                        QgsWkbTypes,
                        QgsPoint,
-                       QgsFeature)
+                       QgsFeature,
+                       QgsProcessingFeatureSource)
 
 
 class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
@@ -129,7 +130,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        input_layer: QgsVectorLayer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
+        input_layer: QgsProcessingFeatureSource = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 
         raster = self.parameterAsRasterLayer(parameters, self.INPUT_RASTER, context)
@@ -156,7 +157,6 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         if mask_raster is not None:
             mask_no_data_value = mask_raster.sourceNoDataValue(1)
 
-        input_layer.countSymbolFeatures()
         feature_count = input_layer.featureCount()
 
         input_layer_iterator = input_layer.getFeatures()
