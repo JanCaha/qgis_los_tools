@@ -4,6 +4,7 @@ from qgis.core import (
     QgsFeatureRequest,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterField,
     QgsField,
     QgsFeature,
     QgsWkbTypes,
@@ -19,6 +20,7 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
     LOS_LAYER = "LoSLayer"
     OBJECT_LAYER = "ObjectLayer"
+    OBJECT_LAYER_FIELD_ID = "ObjectLayerID"
     OUTPUT_TABLE = "OutputTable"
 
     def initAlgorithm(self, config=None):
@@ -38,6 +40,16 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
+            QgsProcessingParameterField(
+                self.OBJECT_LAYER_FIELD_ID,
+                "Objects layer ID field",
+                parentLayerParameterName=self.OBJECT_LAYER,
+                type=QgsProcessingParameterField.Numeric,
+                optional=False
+            )
+        )
+
+        self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_TABLE,
                 "Output table")
@@ -46,7 +58,6 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
     def checkParameterValues(self, parameters, context):
 
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
-        object_layer = self.parameterAsVectorLayer(parameters, self.OBJECT_LAYER, context)
 
         field_names = los_layer.fields().names()
 
@@ -66,22 +77,17 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
             return False, msg
 
-        if object_layer.featureCount() != 1:
-
-            msg = "Object layer must have only one feature. Currently it has `{0}` features." \
-                .format(object_layer.featureCount())
-
-            return False, msg
-
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
 
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
         object_layer = self.parameterAsVectorLayer(parameters, self.OBJECT_LAYER, context)
+        field_id = self.parameterAsString(parameters, self.OBJECT_LAYER_FIELD_ID, context)
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.ID_OBSERVER, QVariant.Int))
+        fields.append(QgsField(FieldNames.ID_OBJECT, QVariant.Int))
         fields.append(QgsField(FieldNames.AZIMUTH_MIN, QVariant.Double))
         fields.append(QgsField(FieldNames.AZIMUTH_MAX, QVariant.Double))
 
@@ -94,46 +100,51 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
         id_values = list(los_layer.uniqueValues(los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)))
 
-        total = 100.0 / len(id_values) if len(id_values) > 0 else 0
+        total = los_layer.dataProvider().featureCount() * object_layer.dataProvider().featureCount()
         i = 0
 
         object_layer_features = object_layer.getFeatures()
 
-        for object_layer_feature in object_layer_features:
+        for object_layer_feature_count, object_layer_feature in enumerate(object_layer_features):
+
             object_layer_feature_geom = object_layer_feature.geometry()
+            object_id = object_layer_feature.attribute(field_id)
 
-        for id_value in id_values:
+            for id_value in id_values:
 
-            if feedback.isCanceled():
-                break
+                if feedback.isCanceled():
+                    break
 
-            request = QgsFeatureRequest()
-            request.setFilterExpression("{} = '{}'".format(FieldNames.ID_OBSERVER, id_value))
-            order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
-            request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
+                request = QgsFeatureRequest()
+                request.setFilterRect(object_layer_feature.geometry().boundingBox())
+                request.setFilterExpression("{} = '{}'".format(FieldNames.ID_OBSERVER, id_value))
+                order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
+                request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
 
-            features = los_layer.getFeatures(request)
+                features = los_layer.getFeatures(request)
 
-            azimuths = []
+                azimuths = []
 
-            for feature in features:
+                for feature in features:
 
-                if feature.geometry().intersects(object_layer_feature_geom):
-                    azimuths.append(feature.attribute(FieldNames.AZIMUTH))
+                    if feature.geometry().intersects(object_layer_feature_geom):
+                        azimuths.append(feature.attribute(FieldNames.AZIMUTH))
 
-            if 1 < len(azimuths):
-                f = QgsFeature(fields)
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
-                               int(id_value))
-                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MIN),
-                               min(azimuths))
-                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MAX),
-                               max(azimuths))
+                if 1 < len(azimuths):
+                    f = QgsFeature(fields)
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
+                                   int(id_value))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MIN),
+                                   min(azimuths))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MAX),
+                                   max(azimuths))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBJECT),
+                                   int(object_id))
 
-                sink.addFeature(f)
+                    sink.addFeature(f)
 
-            i += 1
-            feedback.setProgress(int(i * total))
+                i += 1
+                feedback.setProgress((i/total)*100)
 
         return {self.OUTPUT_TABLE: dest_id}
 
