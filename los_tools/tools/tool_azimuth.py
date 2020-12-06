@@ -50,7 +50,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.OBJECT_LAYER_FIELD_ID,
-                "Objects layer ID field",
+                "Object layer ID field",
                 parentLayerParameterName=self.OBJECT_LAYER,
                 type=QgsProcessingParameterField.Numeric,
                 optional=False
