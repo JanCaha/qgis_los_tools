@@ -12,6 +12,8 @@ class FieldNames:
     ID_OBSERVER = "id_observer"
     ID_TARGET = "id_target"
 
+    ID_LOS = "id_los"
+
     OBSERVER_OFFSET = "observer_offset"
     TARGET_OFFSET = "target_offset"
 
