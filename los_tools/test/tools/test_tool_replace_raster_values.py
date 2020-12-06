@@ -87,6 +87,8 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
 
         self.assertIn(-100, np.unique(raster_array))
 
+        ds = None
+
         params = {
             "RasterLayer": self.raster,
             "VectorLayer": self.polygons,
@@ -104,3 +106,5 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
         self.assertIn(1200, unique_values)
         self.assertIn(1100, unique_values)
         self.assertIn(1050, unique_values)
+
+        ds = None

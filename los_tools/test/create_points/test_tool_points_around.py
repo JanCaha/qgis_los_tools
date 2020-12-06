@@ -53,7 +53,7 @@ class CreatePointsAroundAlgorithmTest(unittest.TestCase):
         self.assertIn("InputLayer", param_distance.dependsOnOtherParameters())
 
         self.assertEqual(0, param_angle_start.defaultValue())
-        self.assertEqual(359, param_angle_end.defaultValue())
+        self.assertEqual(359.999, param_angle_end.defaultValue())
         self.assertEqual(1, param_angle_step.defaultValue())
         self.assertEqual(10, param_distance.defaultValue())
 

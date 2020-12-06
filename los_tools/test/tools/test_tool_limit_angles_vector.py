@@ -61,28 +61,16 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
         self.assertIn("Fields specific for LoS without target not found in current layer (los_type).",
                       msg)
 
-        params = {
-            "LoSLayer": self.los_no_target,
-            "ObjectLayer": self.polygons,
-            "OutputTable": self.output_path,
-        }
-
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
-
-        self.assertFalse(can_run)
-        self.assertIn("Object layer must have only one feature.",
-                      msg)
-
     def test_run_alg(self) -> None:
 
         params = {
             "LoSLayer": self.los_no_target,
+            "ObjectLayerID": "fid",
             "ObjectLayer": self.polygon,
             "OutputTable": self.output_path,
         }
 
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
-
         self.assertTrue(can_run)
         self.assertIn("", msg)
 
@@ -92,6 +80,8 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
 
         self.assertIn(FieldNames.AZIMUTH_MIN, table.fields().names())
         self.assertIn(FieldNames.AZIMUTH_MAX, table.fields().names())
+        self.assertIn(FieldNames.ID_OBSERVER, table.fields().names())
+        self.assertIn(FieldNames.ID_OBJECT, table.fields().names())
 
         unique_ids = self.los_no_target.uniqueValues(self.los_no_target.fields().lookupField(FieldNames.ID_OBSERVER))
 

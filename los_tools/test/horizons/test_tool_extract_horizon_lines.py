@@ -1,6 +1,12 @@
 from qgis.core import (QgsVectorLayer,
                        QgsRasterLayer,
-                       QgsFeatureRequest)
+                       QgsFeatureRequest,
+                       QgsProcessingParameterFeatureSource,
+                       QgsProcessingParameterEnum,
+                       QgsProcessingParameterFeatureSink,
+                       QgsProcessingParameterBoolean,
+                       QgsProcessingParameterNumber)
+
 from qgis._core import QgsWkbTypes
 
 from los_tools.horizons.tool_extract_horizon_lines import ExtractHorizonLinesAlgorithm
@@ -25,18 +31,15 @@ class ExtractHorizonLinesAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.alg.initAlgorithm()
 
     def test_parameters(self) -> None:
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("LoSLayer"),
-                                          parameter_type="source")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("HorizonType"),
-                                          parameter_type="enum")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputLayer"),
-                                          parameter_type="sink")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("CurvatureCorrections"),
-                                          parameter_type="boolean",
-                                          default_value=True)
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("RefractionCoefficient"),
-                                          parameter_type="number",
-                                          default_value=0.13)
+
+        self.assertIsInstance(self.alg.parameterDefinition("LoSLayer"), QgsProcessingParameterFeatureSource)
+        self.assertIsInstance(self.alg.parameterDefinition("HorizonType"), QgsProcessingParameterEnum)
+        self.assertIsInstance(self.alg.parameterDefinition("OutputLayer"), QgsProcessingParameterFeatureSink)
+        self.assertIsInstance(self.alg.parameterDefinition("CurvatureCorrections"), QgsProcessingParameterBoolean)
+        self.assertIsInstance(self.alg.parameterDefinition("RefractionCoefficient"), QgsProcessingParameterNumber)
+
+        self.assertTrue(self.alg.parameterDefinition("CurvatureCorrections").defaultValue())
+        self.assertEqual(self.alg.parameterDefinition("RefractionCoefficient").defaultValue(), 0.13)
 
     def test_check_wrong_params(self) -> None:
 
