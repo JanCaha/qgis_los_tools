@@ -35,7 +35,8 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
                 "Input point layer",
-                [QgsProcessing.TypeVectorPoint])
+                [QgsProcessing.TypeVectorPoint]
+            )
         )
 
         self.addParameter(
@@ -52,7 +53,8 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.DIRECTION_LAYER,
                 "Main direction point layer",
-                [QgsProcessing.TypeVectorPoint])
+                [QgsProcessing.TypeVectorPoint]
+            )
         )
 
         self.addParameter(
@@ -63,7 +65,8 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                 defaultValue=20.0,
                 minValue=0.0,
                 maxValue=180.0,
-                optional=False)
+                optional=False
+            )
         )
 
         self.addParameter(
@@ -74,7 +77,8 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                 defaultValue=1.0,
                 minValue=0.001,
                 maxValue=180.0,
-                optional=False)
+                optional=False
+            )
         )
 
         self.addParameter(
@@ -84,13 +88,15 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                 parentParameterName=self.INPUT_LAYER,
                 defaultValue=10.0,
                 minValue=0.001,
-                optional=False)
+                optional=False
+            )
         )
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LAYER,
-                "Output layer")
+                "Output layer"
+            )
         )
 
     def checkParameterValues(self, parameters, context):
@@ -120,14 +126,19 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
         fields.append(QgsField(FieldNames.DIFF_TO_MAIN_AZIMUTH, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
-                                             QgsWkbTypes.Point, input_layer.sourceCrs())
+        sink, dest_id = self.parameterAsSink(parameters,
+                                             self.OUTPUT_LAYER,
+                                             context,
+                                             fields,
+                                             QgsWkbTypes.Point,
+                                             input_layer.sourceCrs())
 
         feature_count = input_layer.featureCount()
 
         iterator = input_layer.getFeatures()
 
         for cnt, feature in enumerate(iterator):
+
             if feedback.isCanceled():
                 break
 
