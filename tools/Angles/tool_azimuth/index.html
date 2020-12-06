@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="Jan Caha">
-        <link rel="canonical" href="https://jancaha.github.io/qgis_los_tools/tools/Raster%20Editing/tool_replace_raster_values/">
+        <link rel="canonical" href="https://jancaha.github.io/qgis_los_tools/tools/Angles/tool_azimuth/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
-        <title>Replace Raster Values - LoS Tools</title>
+        <title>Extract Azimuth between Points and centroids of Polygons/Lines - LoS Tools</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../../css/base.css" rel="stylesheet">
@@ -49,11 +49,11 @@
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../Angles/tool_azimuth/" class="dropdown-item">Extract Azimuth between Points and centroids of Polygons/Lines</a>
+    <a href="./" class="dropdown-item active">Extract Azimuth between Points and centroids of Polygons/Lines</a>
 </li>
             
 <li>
-    <a href="../../Angles/tool_limit_angles_vector/" class="dropdown-item">Extract Limit Angles</a>
+    <a href="../tool_limit_angles_vector/" class="dropdown-item">Extract Limit Angles</a>
 </li>
     </ul>
   </li>
@@ -143,7 +143,7 @@
     <ul class="dropdown-menu">
             
 <li>
-    <a href="./" class="dropdown-item active">Replace Raster Values</a>
+    <a href="../../Raster%20Editing/tool_replace_raster_values/" class="dropdown-item">Replace Raster Values</a>
 </li>
     </ul>
   </li>
@@ -179,7 +179,7 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#replace-raster-values" class="nav-link">Replace Raster Values</a>
+            <li class="nav-item" data-level="1"><a href="#extract-azimuth-between-points-and-centroids-of-polygonslines" class="nav-link">Extract Azimuth between Points and centroids of Polygons/Lines</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#parameters" class="nav-link">Parameters</a>
               <ul class="nav flex-column">
@@ -200,8 +200,8 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="replace-raster-values">Replace Raster Values</h1>
-<p>Tool to replace raster values in polygons with either constant value (specified by <code>RasterValue</code>) or by field value (definied by <code>ValueField</code>). </p>
+<h1 id="extract-azimuth-between-points-and-centroids-of-polygonslines">Extract Azimuth between Points and centroids of Polygons/Lines</h1>
+<p>Calculates azimuth between points in one layer and centroids of polygons or lines in second layer.</p>
 <h2 id="parameters">Parameters</h2>
 <table>
 <thead>
@@ -214,34 +214,34 @@
 </thead>
 <tbody>
 <tr>
-<td>Raster Layer</td>
-<td><code>RasterLayer</code></td>
-<td>[vector: line]</td>
-<td>Raster layer to use as base.</td>
+<td>Point layer</td>
+<td><code>PointLayer</code></td>
+<td>[vector: point]</td>
+<td>Layer of points to calculate the azimuth from.</td>
 </tr>
 <tr>
-<td>Vector Layer</td>
-<td><code>VectorLayer</code></td>
-<td>[vector: polygon]</td>
-<td>Vector layer that specifies areas of raster to replace the values.</td>
-</tr>
-<tr>
-<td>Raster value for polygon</td>
-<td><code>RasterValue</code></td>
-<td>[number]</td>
-<td>Value to use as replacement.</td>
-</tr>
-<tr>
-<td>Field specifying the addition</td>
-<td><code>ValueField</code></td>
+<td>Point layer ID field</td>
+<td><code>PointLayerID</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field from vector layer that defines values that should be used in output raster.</td>
+<td>Field containing ID for points.</td>
 </tr>
 <tr>
-<td>Output Raster</td>
-<td><code>OutputRaster</code></td>
-<td>[raster]</td>
-<td>Output raster with new values.</td>
+<td>Object layer</td>
+<td><code>ObjectLayer</code></td>
+<td>[vector: line, polygon]</td>
+<td>Layer of lines/polygons to calculate the azimuth to.</td>
+</tr>
+<tr>
+<td>Object layer ID field</td>
+<td><code>ObjectLayerID</code></td>
+<td>[table]</td>
+<td>Field containing ID for object layer.</td>
+</tr>
+<tr>
+<td>Output table</td>
+<td><code>OutputTable</code></td>
+<td>[table]</td>
+<td>Table containing the result (without geometry).</td>
 </tr>
 </tbody>
 </table>
@@ -257,15 +257,22 @@
 </thead>
 <tbody>
 <tr>
-<td>Output Raster</td>
-<td><code>OutputRaster</code></td>
-<td>[raster]</td>
-<td>Output raster with new values.</td>
+<td>Output table</td>
+<td><code>OutputTable</code></td>
+<td>[table]</td>
+<td>Table containing the result (without geometry).</td>
 </tr>
 </tbody>
 </table>
+<p>For $n$ points and $m$ lines/polygons the output layer will have $n \times m$ rows.</p>
+<h3 id="fields-in-the-output-layer">Fields in the output layer</h3>
+<ul>
+<li><strong>id_point</strong> - integer - value from expected field (<code>PointLayerID</code>) in <code>PointLayer</code></li>
+<li><strong>id_object</strong> - integer - value from expected field (<code>ObjectLayerID</code>) in <code>ObjectLayerID</code></li>
+<li><strong>azimuth</strong> - double - azimuth from given point to the centroid of given line/polygon</li>
+</ul>
 <h2 id="tool-screenshot">Tool screenshot</h2>
-<p><img alt="Replace Raster Values" src="../../../images/tool_replace_raster_values.png" /></p></div>
+<p><img alt="Extract Limit Angles" src="../../../images/tool_azimuth.png" /></p></div>
             </div>
         </div>
 
