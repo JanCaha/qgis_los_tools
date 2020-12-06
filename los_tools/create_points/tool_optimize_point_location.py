@@ -38,7 +38,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
                 "Input point layer (points to optimize)",
-                [QgsProcessing.TypeVectorPoint])
+                [QgsProcessing.TypeVectorPoint]
+            )
         )
 
         self.addParameter(
@@ -47,7 +48,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
                 "Search radius",
                 defaultValue=30.0,
                 minValue=0.001,
-                optional=False)
+                optional=False
+            )
         )
 
         self.addParameter(
@@ -62,7 +64,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LAYER,
-                "Output layer (optimized points)")
+                "Output layer (optimized points)"
+            )
         )
 
     def checkParameterValues(self, parameters, context):
@@ -198,7 +201,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
                         if mask_raster is not None:
                             mask_value = mask_block_values.value(i, j)
-                            if 0 < mask_value and mask_value != mask_no_data_value:
+                            if 0 < mask_value != mask_no_data_value:
                                 max_value = value
                                 max_value_x = j
                                 max_value_y = i
