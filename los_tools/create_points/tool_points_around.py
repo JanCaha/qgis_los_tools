@@ -115,14 +115,19 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.ID_ORIGINAL_POINT, QVariant.Int))
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
-                                             QgsWkbTypes.Point, input_layer.sourceCrs())
+        sink, dest_id = self.parameterAsSink(parameters,
+                                             self.OUTPUT_LAYER,
+                                             context,
+                                             fields,
+                                             QgsWkbTypes.Point,
+                                             input_layer.sourceCrs())
 
         feature_count = input_layer.featureCount()
 
         iterator = input_layer.getFeatures()
 
         for cnt, feature in enumerate(iterator):
+
             if feedback.isCanceled():
                 break
 
