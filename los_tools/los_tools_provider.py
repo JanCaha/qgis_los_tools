@@ -40,8 +40,8 @@ from los_tools.analyse_los.tool_analyse_los import AnalyseLosAlgorithm
 from los_tools.horizons.tool_extract_horizons import ExtractHorizonsAlgorithm
 from los_tools.horizons.tool_extract_horizon_lines import ExtractHorizonLinesAlgorithm
 from los_tools.tools.tool_replace_raster_values import ReplaceRasterValuesAlgorithm
-from los_tools.csv_export.tool_export_los_csv import ExportLoSCSVAlgorithm
-from los_tools.csv_export.tool_export_horizon_lines_csv import ExportHorizonLinesCSVAlgorithm
+from los_tools.to_table.tool_export_los import ExportLoSAlgorithm
+from los_tools.to_table.tool_export_horizon_lines import ExportHorizonLinesAlgorithm
 from los_tools.tools.tool_extract_points_los import ExtractPointsLoSAlgorithm
 from los_tools.tools.tool_limit_angles_vector import LimitAnglesAlgorithm
 from los_tools.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
@@ -76,8 +76,8 @@ class los_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ExtractHorizonsAlgorithm())
         self.addAlgorithm(ExtractHorizonLinesAlgorithm())
         self.addAlgorithm(ReplaceRasterValuesAlgorithm())
-        self.addAlgorithm(ExportLoSCSVAlgorithm())
-        self.addAlgorithm(ExportHorizonLinesCSVAlgorithm())
+        self.addAlgorithm(ExportLoSAlgorithm())
+        self.addAlgorithm(ExportHorizonLinesAlgorithm())
         self.addAlgorithm(ExtractPointsLoSAlgorithm())
         self.addAlgorithm(LimitAnglesAlgorithm())
         self.addAlgorithm(OptimizePointLocationAlgorithm())
