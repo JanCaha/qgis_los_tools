@@ -174,13 +174,13 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
 
                     feature.setAttributes([los_id,
                                            observer_id,
-                                           target_id,
                                            observer_offset,
-                                           target_offset,
-                                           los.points[i][2],
-                                           los.points[i][3],
+                                           los.points[i][LoSLocal.DISTANCE],
+                                           los.points[i][LoSLocal.Z],
                                            los.visible[i],
-                                           los.horizon[i]])
+                                           los.horizon[i],
+                                           target_id,
+                                           target_offset])
 
                 elif los_type == NamesConstants.LOS_GLOBAL:
 
@@ -188,16 +188,16 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
 
                     feature.setAttributes([los_id,
                                            observer_id,
-                                           target_id,
                                            observer_offset,
+                                           los.points[i][LoSGlobal.DISTANCE],
+                                           los.points[i][LoSGlobal.Z],
+                                           los.visible[i],
+                                           los.horizon[i],
+                                           target_id,
                                            target_offset,
                                            target_x,
                                            target_y,
-                                           los.points[i][2],
-                                           los.points[i][3],
-                                           is_target,
-                                           los.visible[i],
-                                           los.horizon[i]])
+                                           is_target])
 
                 # elif los_type == NamesConstants.LOS_NO_TARGET:
                 else:
