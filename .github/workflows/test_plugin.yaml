@@ -29,7 +29,7 @@ jobs:
           dir
 
       - run: |
-          qgis_setup.sh /tests_directory/los_tools
+          qgis_setup.sh los_tools
           rm -f /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
           ln -s /tests_directory/los_tools /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
           pip3 install -r /tests_directory/REQUIREMENTS_TESTING.txt
