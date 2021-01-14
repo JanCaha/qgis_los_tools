@@ -12,10 +12,17 @@ jobs:
 
     container:
       image: qgis/qgis
-      
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          path: '/tests_directory/'
+
+      - name: print dir
+        run: |
+          cd /tests_directory/
+          dir
 
       - run: |
           qgis_setup.sh los_tools
