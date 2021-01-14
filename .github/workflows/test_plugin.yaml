@@ -15,5 +15,5 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v2
 
-        run: |
-          qgis_setup.sh los_tools
+        - run: |
+            qgis_setup.sh los_tools
