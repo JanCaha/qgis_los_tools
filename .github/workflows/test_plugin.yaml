@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          path: '/tests_directory/'
+          path: '/__w/qgis_los_tools/qgis_los_tools/'
 
       - name: print dir
         run: |
@@ -25,4 +25,8 @@ jobs:
           dir
 
       - run: |
-          qgis_setup.sh los_tools
+          qgis_setup.sh /__w/qgis_los_tools/qgis_los_tools/los_tools
+          rm -f /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
+          ln -s /__w/qgis_los_tools/qgis_los_tools/los_tools /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
+          pip3 install -r /tests_directory/REQUIREMENTS_TESTING.txt
+          qgis_testrunner.sh los_tools.package_test_suite.test_package
