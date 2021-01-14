@@ -3,4 +3,3 @@ deepdiff
 mock
 flake8
 pep257
-nose
