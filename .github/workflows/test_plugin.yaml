@@ -35,6 +35,9 @@ jobs:
         run: |
           cd /tests_directory
           dir
+          
+      - name: print env
+        run: printenv
 
       - run: |
           qgis_setup.sh los_tools
