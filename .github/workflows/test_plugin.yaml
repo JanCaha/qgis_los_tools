@@ -12,8 +12,7 @@ jobs:
 
     container:
       image: qgis/qgis
-      env:
-        DISPLAY: 99
+      options: -e DISPLAY=:99
       volumes:
         - /__w/qgis_los_tools/qgis_los_tools/:/tests_directory
 
