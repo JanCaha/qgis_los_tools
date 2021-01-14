@@ -1,0 +1,19 @@
+name: Test plugin
+
+on:
+  push:
+    paths:
+    - "los_tools/**"
+    - ".github/workflows/test_plugin.yaml"
+
+jobs:
+  my_job:
+    container:
+      runs-on: ubuntu-latest
+      image: qgis/qgis
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v2
+
+        run: |
+          qgis_setup.sh los_tools
