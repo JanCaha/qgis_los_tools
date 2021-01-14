@@ -41,4 +41,4 @@ jobs:
           rm -f /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
           ln -s /tests_directory/los_tools /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools
           pip3 install -r /tests_directory/REQUIREMENTS_TESTING.txt
-          qgis_testrunner.sh los_tools.test.run_all
+          python3 /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools/package_test_suite.py
