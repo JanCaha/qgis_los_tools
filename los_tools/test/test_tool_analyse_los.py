@@ -10,7 +10,7 @@ from los_tools.test.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from los_tools.test.utils_tests import (get_data_path,
                                         get_data_path_results)
 
-from ..utils_tests import get_qgis_app
+from los_tools.test.utils_tests import get_qgis_app
 
 QGIS_APP = get_qgis_app()
 
