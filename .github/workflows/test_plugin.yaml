@@ -14,11 +14,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          path: '/__w/qgis_los_tools/qgis_los_tools/'
+          path: '/home/runner/work/qgis_los_tools/qgis_los_tools'
 
       - name: print dir
         run: |
-          cd /__w/qgis_los_tools/qgis_los_tools/
+          cd /home/runner/work/qgis_los_tools/qgis_los_tools/
           dir
 
       - name: Install QGIS
@@ -31,8 +31,8 @@ jobs:
 
       - name: print env
         run: |
-          export PYTHONPATH=/__w/qgis_los_tools/qgis_los_tools:$PYTHONPATH
+          export PYTHONPATH=/home/runner/work/qgis_los_tools/qgis_los_tools:$PYTHONPATH
           printenv
 
       - run: |
-          python3 /__w/qgis_los_tools/qgis_los_tools/los_tools/package_test_suite.py
+          python3 /home/runner/work/qgis_los_tools/qgis_los_tools/los_tools/package_test_suite.py
