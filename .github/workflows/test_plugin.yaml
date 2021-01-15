@@ -31,4 +31,4 @@ jobs:
       - name: Docker run plugin tests
         run: |
           docker exec qgis-testing-environment sh -c "export PYTHONPATH=$PYTHONPATH:/tests_directory/los_tools/test"
-          docker exec qgis-testing-environment sh -c "qgis_testrunner.sh los_tools.package_test_suite.test_package"
+          docker exec qgis-testing-environment sh -c "python3 /tests_directory/los_tools/package_test_suite.py"
