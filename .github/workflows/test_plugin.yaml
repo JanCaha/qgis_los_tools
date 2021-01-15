@@ -16,29 +16,8 @@ jobs:
         with:
           path: '/home/runner/work/qgis_los_tools/qgis_los_tools'
 
-      - name: print dir
+      - name: Docker
         run: |
-          cd /home/runner/work/qgis_los_tools/qgis_los_tools/
-          dir
-
-      - name: Install QGIS
-        run: |
-          wget -qO - https://qgis.org/downloads/qgis-2020.gpg.key | sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/qgis-archive.gpg --import || true
-          sudo chmod a+r /etc/apt/trusted.gpg.d/qgis-archive.gpg
-          sudo add-apt-repository "deb https://qgis.org/ubuntu-nightly `lsb_release -c -s` main"
-          sudo apt-get update
-          sudo apt-get install -y qgis qgis-plugin-grass saga
-
-      - name: Set Display
-        run: |
-          export DISPLAY=:99
-
-      - name: print env
-        run: |
-          export PYTHONPATH=/home/runner/work/qgis_los_tools/qgis_los_tools:/usr/share/qgis/python/:/usr/share/qgis/python/plugins:/usr/lib/python3/dist-packages/qgis:/usr/share/qgis/python/qgis
-          printenv
-
-      - run: |
-          pip3 install setuptools
-          pip3 install -r /home/runner/work/qgis_los_tools/qgis_los_tools/REQUIREMENTS_TESTING.txt
-          python3 /home/runner/work/qgis_los_tools/qgis_los_tools/los_tools/package_test_suite.py
+          docker pull qgis/qgis:latest
+          docker run -d --name qgis-testing-environment -v /home/runner/work/qgis_los_tools/qgis_los_tools:/tests_directory -e DISPLAY=:99 qgis/qgis:latest
+          docker exec -it qgis-testing-environment sh -c "qgis_setup.sh los_tools"
