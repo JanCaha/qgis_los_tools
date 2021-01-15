@@ -24,7 +24,7 @@ jobs:
       - name: Docker set up QGIS
         run: |
           docker exec qgis-testing-environment sh -c "qgis_setup.sh los_tools"
-          docker exec qgis-testing-environment sh -c "rm -f  /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools"
+          docker exec qgis-testing-environment sh -c "rm -f /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools"
           docker exec qgis-testing-environment sh -c "ln -s /tests_directory/los_tools /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools"
           docker exec qgis-testing-environment sh -c "pip3 install -r /tests_directory/REQUIREMENTS_TESTING.txt"
 
@@ -32,5 +32,7 @@ jobs:
         run: |
           docker exec qgis-testing-environment sh -c "export PYTHONPATH=$PYTHONPATH:/tests_directory/"
           docker exec qgis-testing-environment sh -c "printenv"
+          docker exec qgis-testing-environment sh -c "cd /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins && dir"
+          docker exec qgis-testing-environment sh -c "cd /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools && dir"
           docker exec qgis-testing-environment sh -c "python3 -m los_tools"
           docker exec qgis-testing-environment sh -c "python3 /tests_directory/los_tools/package_test_suite.py"
