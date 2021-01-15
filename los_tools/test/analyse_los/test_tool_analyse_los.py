@@ -71,7 +71,7 @@ class AnalyseLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                                FieldNames.SLOPE_DIFFERENCE_LH,
                                                FieldNames.HORIZON_COUNT,
                                                FieldNames.DISTANCE_LH],
-                                              self.los_local)
+                                              QgsVectorLayer(output_path))
 
         output_path = get_data_path_results(file="los_global_analysed.gpkg")
 
@@ -87,7 +87,7 @@ class AnalyseLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                                FieldNames.ELEVATION_DIFF_GH,
                                                FieldNames.HORIZON_COUNT_BEHIND,
                                                FieldNames.DISTANCE_GH],
-                                              self.los_global)
+                                              QgsVectorLayer(output_path))
 
         output_path = get_data_path_results(file="los_notarget_analysed.gpkg")
 
@@ -102,4 +102,4 @@ class AnalyseLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                                FieldNames.DISTANCE_GH,
                                                FieldNames.DISTANCE_LH,
                                                FieldNames.VERTICAL_ANGLE_LH],
-                                              self.los_no_target)
+                                              QgsVectorLayer(output_path))
