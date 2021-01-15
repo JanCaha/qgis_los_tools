@@ -32,5 +32,5 @@ jobs:
         run: |
           docker exec qgis-testing-environment sh -c "export PYTHONPATH=$PYTHONPATH:/tests_directory/"
           docker exec qgis-testing-environment sh -c "PYTHONPATH=$PYTHONPATH:/tests_directory/:/usr/share/qgis/python/plugins/processing python3 -c 'import sys;print(sys.path)'"
-          docker exec qgis-testing-environment sh -c "PYTHONPATH=$PYTHONPATH:/tests_directory//usr/share/qgis/python/plugins/processing python3 -m los_tools"
+          docker exec qgis-testing-environment sh -c "PYTHONPATH=$PYTHONPATH:/tests_directory/:/usr/share/qgis/python/plugins/processing python3 -m los_tools"
           docker exec qgis-testing-environment sh -c "python3 /tests_directory/los_tools/package_test_suite.py"
