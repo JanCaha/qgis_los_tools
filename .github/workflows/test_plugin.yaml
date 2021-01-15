@@ -34,6 +34,6 @@ jobs:
           docker exec qgis-testing-environment sh -c "printenv"
           docker exec qgis-testing-environment sh -c "cd /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins && dir"
           docker exec qgis-testing-environment sh -c "cd /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools && dir"
-          docker exec qgis-testing-environment sh -c "python -c 'import sys;print(sys.path)'"
+          docker exec qgis-testing-environment sh -c "python3 -c 'import sys;print(sys.path)'"
           docker exec qgis-testing-environment sh -c "python3 -m los_tools"
           docker exec qgis-testing-environment sh -c "python3 /tests_directory/los_tools/package_test_suite.py"
