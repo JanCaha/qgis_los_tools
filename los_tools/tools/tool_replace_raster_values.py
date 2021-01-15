@@ -149,8 +149,8 @@ class ReplaceRasterValuesAlgorithm(QgsProcessingAlgorithm):
             "GTiff",
             raster_extent,
             raster_crs,
-            raster_extent.width(),
-            raster_extent.height(),
+            int(raster_extent.width()),
+            int(raster_extent.height()),
             raster_entries,
             context.transformContext()
         )
