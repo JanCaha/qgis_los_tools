@@ -48,7 +48,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
                 "Search radius",
                 defaultValue=30.0,
                 minValue=0.001,
-                optional=False
+                optional=False,
+                parentParameterName=self.INPUT_RASTER
             )
         )
 
