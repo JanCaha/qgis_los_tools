@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DOCKER_IMAGE: qgis/qgis:latest
+      DOCKER_IMAGE: qgis/qgis
 
     steps:
       - name: Checkout
