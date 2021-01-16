@@ -7,6 +7,8 @@ on:
     - ".github/workflows/test_plugin.yaml"
 
 env:
+  PLUGIN_NAME: los_tools
+  PATH_TO_TEST_RUNNER: los_tools/package_test_suite.py
   DOCKER_IMAGE: qgis/qgis
   DOCKER_IMAGE_TAG: latest
 
@@ -29,16 +31,16 @@ jobs:
 
       - name: Docker pull and create qgis-testing-environment
         run: |
-          docker pull qgis/qgis:latest
-          docker run -d --name qgis-testing-environment -v /home/runner/work/qgis_los_tools/qgis_los_tools:/tests_directory -e DISPLAY=:99 qgis/qgis:latest
+          docker pull "$DOCKER_IMAGE":"$DOCKER_IMAGE_TAG"
+          docker run -d --name qgis-testing-environment -v "$GITHUB_WORKSPACE":/tests_directory -e DISPLAY=:99 "$DOCKER_IMAGE":"$DOCKER_IMAGE_TAG"
 
       - name: Docker set up QGIS
         run: |
-          docker exec qgis-testing-environment sh -c "qgis_setup.sh los_tools"
-          docker exec qgis-testing-environment sh -c "rm -f /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools"
-          docker exec qgis-testing-environment sh -c "ln -s /tests_directory/los_tools /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/los_tools"
+          docker exec qgis-testing-environment sh -c "qgis_setup.sh $PLUGIN_NAME"
+          docker exec qgis-testing-environment sh -c "rm -f /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME"
+          docker exec qgis-testing-environment sh -c "ln -s /tests_directory/$PLUGIN_NAME /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME"
           docker exec qgis-testing-environment sh -c "pip3 install -r /tests_directory/REQUIREMENTS_TESTING.txt"
 
       - name: Docker run plugin tests
         run: |
-          docker exec qgis-testing-environment sh -c "PYTHONPATH=/tests_directory:/usr/share/qgis/python/:/usr/share/qgis/python/plugins:/usr/lib/python3/dist-packages/qgis:/usr/share/qgis/python/qgis python3 /tests_directory/los_tools/package_test_suite.py"
+          docker exec qgis-testing-environment sh -c "PYTHONPATH=/tests_directory:/usr/share/qgis/python/:/usr/share/qgis/python/plugins:/usr/lib/python3/dist-packages/qgis:/usr/share/qgis/python/qgis python3 /tests_directory/$PATH_TO_TEST_RUNNER"
