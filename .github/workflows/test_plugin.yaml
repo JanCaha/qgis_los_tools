@@ -21,9 +21,9 @@ jobs:
         with:
           path: '/home/runner/work/qgis_los_tools/qgis_los_tools'
 
-      -name: Print env
+      - name: Print env
         run: echo "${{ DOCKER_IMAGE }}"
-        
+
       - name: Docker pull and create qgis-testing-environment
         run: |
           docker pull "${{ DOCKER_IMAGE }}":"${{ DOCKER_IMAGE_TAG }}"
