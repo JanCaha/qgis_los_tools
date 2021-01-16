@@ -24,12 +24,11 @@ jobs:
       - name: Print env
         run: |
           echo "$GITHUB_WORKSPACE"
-          echo "$DOCKER_IMAGE"
 
       - name: Docker pull and create qgis-testing-environment
         run: |
-          docker pull "${{ DOCKER_IMAGE }}":"${{ DOCKER_IMAGE_TAG }}"
-          docker run -d --name qgis-testing-environment -v /home/runner/work/qgis_los_tools/qgis_los_tools:/tests_directory -e DISPLAY=:99 "${{ DOCKER_IMAGE }}":"${{ DOCKER_IMAGE_TAG }}"
+          docker pull qgis/qgis:latest
+          docker run -d --name qgis-testing-environment -v /home/runner/work/qgis_los_tools/qgis_los_tools:/tests_directory -e DISPLAY=:99 qgis/qgis:latest
 
       - name: Docker set up QGIS
         run: |
