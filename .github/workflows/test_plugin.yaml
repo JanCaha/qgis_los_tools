@@ -7,16 +7,13 @@ on:
     - ".github/workflows/test_plugin.yaml"
 
 env:
-  DOCKER_IMAGE: "qgis/qgis"
-  DOCKER_IMAGE_TAG: "latest"
+  DOCKER_IMAGE: qgis/qgis
+  DOCKER_IMAGE_TAG: latest
 
 
 jobs:
   my_job:
     runs-on: ubuntu-latest
-
-    env:
-      DOCKER_IMAGE: qgis/qgis
 
     steps:
       - name: Checkout
@@ -27,7 +24,8 @@ jobs:
       - name: Print env
         run: |
           echo "$GITHUB_WORKSPACE"
-          echo "$DOCKER_IMAGE"
+          echo "$DOCKER_IMAGE":"$DOCKER_IMAGE_TAG"
+          echo $DOCKER_IMAGE
 
       - name: Docker pull and create qgis-testing-environment
         run: |
