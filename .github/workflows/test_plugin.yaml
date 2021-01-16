@@ -15,6 +15,9 @@ jobs:
   my_job:
     runs-on: ubuntu-latest
 
+    env:
+      DOCKER_IMAGE: qgis/qgis:latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -24,6 +27,7 @@ jobs:
       - name: Print env
         run: |
           echo "$GITHUB_WORKSPACE"
+          echo "${{DOCKER_IMAGE}}"
 
       - name: Docker pull and create qgis-testing-environment
         run: |
