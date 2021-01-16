@@ -27,7 +27,7 @@ jobs:
       - name: Print env
         run: |
           echo "$GITHUB_WORKSPACE"
-          echo "${{DOCKER_IMAGE}}"
+          echo "$DOCKER_IMAGE"
 
       - name: Docker pull and create qgis-testing-environment
         run: |
