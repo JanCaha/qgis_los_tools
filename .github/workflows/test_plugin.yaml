@@ -6,6 +6,11 @@ on:
     - "los_tools/**"
     - ".github/workflows/test_plugin.yaml"
 
+env:
+  DOCKER_IMAGE: qgis/qgis
+  DOCKER_IMAGE_TAG: latest
+
+
 jobs:
   my_job:
     runs-on: ubuntu-latest
@@ -18,8 +23,8 @@ jobs:
 
       - name: Docker pull and create qgis-testing-environment
         run: |
-          docker pull qgis/qgis:latest
-          docker run -d --name qgis-testing-environment -v /home/runner/work/qgis_los_tools/qgis_los_tools:/tests_directory -e DISPLAY=:99 qgis/qgis:latest
+          docker pull "${{ DOCKER_IMAGE }}":"${{ DOCKER_IMAGE_TAG }}"
+          docker run -d --name qgis-testing-environment -v /home/runner/work/qgis_los_tools/qgis_los_tools:/tests_directory -e DISPLAY=:99 "${{ DOCKER_IMAGE }}":"${{ DOCKER_IMAGE_TAG }}"
 
       - name: Docker set up QGIS
         run: |
