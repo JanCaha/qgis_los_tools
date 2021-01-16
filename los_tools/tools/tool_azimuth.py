@@ -135,5 +135,4 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
         return AzimuthPointPolygonAlgorithm()
 
     def helpUrl(self):
-        return ""
-        #FIXME lin to web "https://jancaha.github.io/qgis_los_tools/tools/Angles/tool_limit_angles_vector/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/Angles/tool_azimuth/"

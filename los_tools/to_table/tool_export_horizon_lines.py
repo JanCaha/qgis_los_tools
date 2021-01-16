@@ -8,6 +8,7 @@ from qgis.core import (
     QgsFeatureSink,
     QgsProcessingAlgorithm,
     QgsProcessingParameterFeatureSource,
+    QgsProcessingFeatureSource,
     QgsProcessingParameterFeatureSink,
     QgsWkbTypes,
     QgsMessageLog,
@@ -44,7 +45,9 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
     def checkParameterValues(self, parameters, context):
 
-        input_horizon_lines_layer = self.parameterAsSource(parameters, self.INPUT_HORIZON_LINES_LAYER, context)
+        input_horizon_lines_layer: QgsProcessingFeatureSource = self.parameterAsSource(parameters,
+                                                                                       self.INPUT_HORIZON_LINES_LAYER,
+                                                                                       context)
 
         field_names = input_horizon_lines_layer.fields().names()
 
@@ -143,3 +146,6 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return ExportHorizonLinesAlgorithm()
+
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/Export%20to%20table/tool_export_horizon_lines/"

@@ -230,3 +230,6 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return ExportLoSAlgorithm()
+
+    def helpUrl(self):
+        return "https://jancaha.github.io/qgis_los_tools/tools/Export%20to%20table/tool_export_los/"
