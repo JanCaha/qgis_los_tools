@@ -1,13 +1,14 @@
-name: Build GitHub Pages
+name: Build Documentation and Deploy to GitHub Pages
 
 on:
   push:
-    paths: website/**
+    paths:
+    - "website/**"
 
 jobs:
+
   build-deploy:
-    # if: contains(toJson(github.event.commits), 'update') == true
-    
+
     runs-on: ubuntu-latest
     
     steps:
@@ -27,7 +28,6 @@ jobs:
         python3 -m pip install MarkdownHighlight
         python3 -m pip install https://codeload.github.com/mkdocs/mkdocs-bootstrap/zip/master
         python3 -m pip install git+https://github.com/mkdocs/mkdocs-bootswatch
-        
 
     - name: Build
       run: |
