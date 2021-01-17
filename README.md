@@ -1,5 +1,8 @@
 # LoS Tools
 
+![Tests for Plugin](https://github.com/JanCaha/qgis_los_tools/workflows/Tests%20for%20Plugin/badge.svg)
+![Build Documentation and Deploy to GitHub Pages](https://github.com/JanCaha/qgis_los_tools/workflows/Build%20Documentation%20and%20Deploy%20to%20GitHub%20Pages/badge.svg)
+
 **LoS Tools** is a [QGIS](https://qgis.org/en/site/) plugin for analysing visibility. The plugin focuses on point to point visibility, creation of lines-of-sight (LoS), extraction of horizon points, creation of horizon lines and a set of supporting functions. The plugin basically provides tools availabe in Processing Toolbox.
 
 The plugin can be installed directly from **QGIS** Plugins menu.
