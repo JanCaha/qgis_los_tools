@@ -119,7 +119,7 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
                                                   self.OUTPUT_LAYER,
                                                   context,
                                                   fields,
-                                                  QgsWkbTypes.LineString25D,
+                                                  QgsWkbTypes.MultiLineString25D,
                                                   los_layer.sourceCrs())
 
         feature_count = los_layer.featureCount()
