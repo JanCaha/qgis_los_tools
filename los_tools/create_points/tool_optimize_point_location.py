@@ -7,6 +7,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterDistance,
                        QgsProcessingParameterFeatureSink,
                        QgsRasterDataProvider,
+                       QgsRasterLayer,
                        QgsRectangle,
                        QgsRasterBlock,
                        QgsVectorLayer,
@@ -137,7 +138,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         input_layer: QgsProcessingFeatureSource = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 
-        raster = self.parameterAsRasterLayer(parameters, self.INPUT_RASTER, context)
+        raster: QgsRasterLayer = self.parameterAsRasterLayer(parameters, self.INPUT_RASTER, context)
         raster: QgsRasterDataProvider = raster.dataProvider()
 
         mask_raster = self.parameterAsRasterLayer(parameters, self.MASK_RASTER, context)
@@ -152,6 +153,11 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
                                              crs=input_layer.sourceCrs())
 
         raster_extent: QgsRectangle = raster.extent()
+
+        max_size = math.sqrt(math.pow(raster_extent.width(), 2) + math.pow(raster_extent.height(), 2))
+
+        if max_size < distance:
+            distance = max_size
 
         cell_size = raster_extent.width() / raster.xSize()
         distance_cells = int(distance / cell_size)
