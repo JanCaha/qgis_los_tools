@@ -10,10 +10,16 @@ from qgis.core import (
     QgsWkbTypes,
     QgsFields,
     QgsVectorLayer,
-    QgsFeatureIterator)
+    QgsFeatureIterator,
+    QgsProcessingUtils,
+    QgsMapLayer,
+    QgsSymbol,
+    QgsRendererCategory,
+    QgsCategorizedSymbolRenderer)
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant, Qt
 from los_tools.constants.field_names import FieldNames
+from los_tools.constants.textlabels import TextLabels
 from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
 from los_tools.tools.util_functions import wkt_to_array_points, get_los_type
 from los_tools.constants.names_constants import NamesConstants
@@ -26,9 +32,6 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
     CURVATURE_CORRECTIONS = "CurvatureCorrections"
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
     ONLY_VISIBLE = "OnlyVisiblePoints"
-
-    horizons_types = [NamesConstants.HORIZON_LOCAL,
-                      NamesConstants.HORIZON_GLOBAL]
 
     def initAlgorithm(self, config=None):
 
@@ -84,6 +87,26 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
 
         return super().checkParameterValues(parameters, context)
 
+    def postProcessAlgorithm(self, context, feedback):
+
+        output_layer: QgsMapLayer = QgsProcessingUtils.mapLayerFromString(self.dest_id, context)
+
+        symbols = []
+
+        symbol_invisible = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
+        symbol_invisible.setColor(Qt.red)
+        symbols.append(QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE))
+
+        symbol_visible = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
+        symbol_visible.setColor(Qt.green)
+        symbols.append(QgsRendererCategory(True, symbol_visible, TextLabels.VISIBLE))
+
+        renderer = QgsCategorizedSymbolRenderer(FieldNames.VISIBLE, symbols)
+
+        output_layer.setRenderer(renderer)
+
+        return {self.OUTPUT_LAYER: self.dest_id}
+
     def processAlgorithm(self, parameters, context, feedback):
 
         los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
@@ -100,7 +123,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.ID_TARGET, QVariant.Int))
         fields.append(QgsField(FieldNames.VISIBLE, QVariant.Bool))
 
-        sink, dest_id = self.parameterAsSink(parameters,
+        sink, self.dest_id = self.parameterAsSink(parameters,
                                              self.OUTPUT_LAYER,
                                              context,
                                              fields,
@@ -163,7 +186,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
 
             feedback.setProgress((feature_number/feature_count)*100)
 
-        return {self.OUTPUT_LAYER: dest_id}
+        return {self.OUTPUT_LAYER: self.dest_id}
 
     def name(self):
         return "extractpointslos"
