@@ -46,6 +46,7 @@ from los_tools.tools.tool_extract_points_los import ExtractPointsLoSAlgorithm
 from los_tools.tools.tool_limit_angles_vector import LimitAnglesAlgorithm
 from los_tools.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
 from los_tools.tools.tool_azimuth import AzimuthPointPolygonAlgorithm
+from los_tools.tools.tool_extract_los_visibility_parts import ExtractLoSVisibilityPartsAlgorithm
 
 
 class los_toolsProvider(QgsProcessingProvider):
@@ -82,6 +83,7 @@ class los_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(LimitAnglesAlgorithm())
         self.addAlgorithm(OptimizePointLocationAlgorithm())
         self.addAlgorithm(AzimuthPointPolygonAlgorithm())
+        self.addAlgorithm(ExtractLoSVisibilityPartsAlgorithm())
 
     def id(self):
         """
