@@ -1,4 +1,4 @@
-name: Tests for Plugin
+name: Tests for Plugin LoS Tools
 
 on:
   push:
@@ -10,16 +10,19 @@ env:
   # plugin name/directory where the code for the plugin is stored
   PLUGIN_NAME: los_tools
   # the path to file that handles test running inside the github repository
-  PATH_TO_TEST_RUNNER: los_tools/package_test_suite.py
+  PATH_TO_TEST_RUNNER: los_tools.package_test_suite.test_package
   # Docker settings
   DOCKER_IMAGE: qgis/qgis
-  DOCKER_IMAGE_TAG: latest
 
 jobs:
 
-  tests:
+  Tests-plugin-LoS-Tools:
 
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        docker_tags: [ release-3_10, release-3_14, release-3_16, latest ]
 
     steps:
 
@@ -28,8 +31,8 @@ jobs:
 
       - name: Docker pull and create qgis-testing-environment
         run: |
-          docker pull "$DOCKER_IMAGE":"$DOCKER_IMAGE_TAG"
-          docker run -d --name qgis-testing-environment -v "$GITHUB_WORKSPACE":/tests_directory -e DISPLAY=:99 "$DOCKER_IMAGE":"$DOCKER_IMAGE_TAG"
+          docker pull "$DOCKER_IMAGE":${{ matrix.docker_tags }}"
+          docker run -d --name qgis-testing-environment -v "$GITHUB_WORKSPACE":/tests_directory -e DISPLAY=:99 "$DOCKER_IMAGE":${{ matrix.docker_tags }}
 
       - name: Docker set up QGIS
         run: |
@@ -38,11 +41,6 @@ jobs:
           docker exec qgis-testing-environment sh -c "ln -s /tests_directory/$PLUGIN_NAME /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME"
           docker exec qgis-testing-environment sh -c "pip3 install -r /tests_directory/REQUIREMENTS_TESTING.txt"
 
-      # tests dont run unless the tests_directory is in path
-      # PYTHONPATH in docker cannot be edit so we have to construct it completely and run the tests with it
-      # PYTHONPATH is from https://github.com/qgis/QGIS/blob/master/.docker/qgis.dockerfile
       - name: Docker run plugin tests
-        env:
-          PYTHON_PATH: PYTHONPATH=/tests_directory:/usr/share/qgis/python/:/usr/share/qgis/python/plugins:/usr/lib/python3/dist-packages/qgis:/usr/share/qgis/python/qgis
         run: |
-          docker exec qgis-testing-environment sh -c "$PYTHON_PATH python3 /tests_directory/$PATH_TO_TEST_RUNNER"
+          docker exec qgis-testing-environment sh -c "qgis_testrunner.sh $PATH_TO_TEST_RUNNER"
