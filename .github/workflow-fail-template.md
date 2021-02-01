@@ -7,4 +7,4 @@ Workflow {{ env.WORKFLOW }} failed for qgis/qgis:{{ env.DOCKER_TAG }} at: {{ dat
 
 [Link for the action result.]({{ env.URL_ACTION }})
 
-{{ $GITHUB_REPOSITORY }}
+{{ GITHUB_REPOSITORY }}
