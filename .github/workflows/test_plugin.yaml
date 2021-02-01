@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       matrix:
-        docker_tags: [ release-3_10, release-3_14, release-3_16, latest ]
+        docker_tags: [ release-3_16, latest ]
 
     steps:
 
@@ -44,3 +44,28 @@ jobs:
       - name: Docker run plugin tests
         run: |
           docker exec qgis-testing-environment sh -c "qgis_testrunner.sh $PATH_TO_TEST_RUNNER"
+
+  Check-code-quality:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install packages
+        run: |
+          pip install -r REQUIREMENTS_TESTING.txt
+
+      - name: Pylint
+        run: make pylint
+
+      - name: Pycodestyle
+        run: make pycodestyle
