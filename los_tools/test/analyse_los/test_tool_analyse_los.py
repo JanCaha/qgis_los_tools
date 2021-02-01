@@ -39,7 +39,8 @@ class AnalyseLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("RefractionCoefficient"),
                                           parameter_type="number",
                                           default_value=0.13)
-
+        self.assertFalse(True)
+        
     def test_check_wrong_params(self) -> None:
 
         # use layer that is not correctly constructed LoS layer
