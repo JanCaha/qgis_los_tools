@@ -43,29 +43,46 @@ jobs:
 
       - name: Docker run plugin tests
         run: |
+          docker exec qgis-testing-environment sh -c "qgis_testrunner.sh $PATH_TO_TEST_RUNNER" > test_result.txt
           docker exec qgis-testing-environment sh -c "qgis_testrunner.sh $PATH_TO_TEST_RUNNER"
 
-  Check-code-quality:
+      - name: Test print
+        env:
+          VAR: $(cat test_result.txt)
+        run: cat {{ env.VAR }}
 
-    runs-on: ubuntu-latest
-
-    steps:
-
-      - name: Install Python
-        uses: actions/setup-python@v1
+      - uses: JasonEtco/create-an-issue@v2
+        if: ${{ failure() }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW: build-package
+          DOCKER_TAG: ${{ matrix.docker_tags }}
+          URL_ACTION: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          RESULT: $(cat test_result.txt)
         with:
-          python-version: '3.8'
-          architecture: 'x64'
+          filename: .github/workflow-fail-template.md
 
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install packages
-        run: |
-          pip install -r REQUIREMENTS_TESTING.txt
-
-      - name: Pylint
-        run: pylint --reports=n --rcfile=pylintrc "$PLUGIN_NAME"
-
-      - name: Pycodestyle
-        run: pycodestyle --repeat --ignore=E203,E121,E122,E123,E124,E125,E126,E127,E128,E402,E501,W504 --exclude "test" "$PLUGIN_NAME"
+#  Check-code-quality:
+#
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#
+#      - name: Install Python
+#        uses: actions/setup-python@v1
+#        with:
+#          python-version: '3.8'
+#          architecture: 'x64'
+#
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#
+#      - name: Install packages
+#        run: |
+#          pip install -r REQUIREMENTS_TESTING.txt
+#
+#      - name: Pylint
+#        run: pylint --reports=n --rcfile=pylintrc "$PLUGIN_NAME"
+#
+#      - name: Pycodestyle
+#        run: pycodestyle --repeat --ignore=E203,E121,E122,E123,E124,E125,E126,E127,E128,E402,E501,W504 --exclude "test" "$PLUGIN_NAME"
