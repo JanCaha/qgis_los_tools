@@ -43,8 +43,7 @@ jobs:
 
       - name: Docker run plugin tests
         run: |
-          docker exec qgis-testing-environment sh -c "qgis_testrunner.sh $PATH_TO_TEST_RUNNER" > test_result.txt
-          docker exec qgis-testing-environment sh -c "qgis_testrunner.sh $PATH_TO_TEST_RUNNER"
+          docker exec qgis-testing-environment sh -c "qgis_testrunner.sh $PATH_TO_TEST_RUNNER" 2>&1 | tee test_result.txt
 
       - name: Test print
         env:
