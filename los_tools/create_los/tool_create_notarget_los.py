@@ -6,17 +6,20 @@ from qgis.core import (
     QgsProcessingParameterField,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterRasterLayer,
+    QgsProcessingParameterDistance,
     QgsField,
     QgsFeature,
     QgsWkbTypes,
     QgsPoint,
     QgsFields,
-    QgsLineString)
+    QgsLineString,
+    QgsProcessingUtils)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.tools.util_functions import segmentize_line, bilinear_interpolated_value, get_diagonal_size
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
+from los_tools.tools.util_functions import get_doc_file
 
 
 class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
@@ -97,10 +100,10 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterNumber(
+            QgsProcessingParameterDistance(
                 self.LINE_DENSITY,
                 "LoS sampling distance",
-                QgsProcessingParameterNumber.Double,
+                parentParameterName=self.OBSERVER_POINTS_LAYER,
                 defaultValue=1,
                 minValue=0.01,
                 maxValue=1000.0,
@@ -108,13 +111,14 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterNumber(
+            QgsProcessingParameterDistance(
                 self.MAX_LOS_LENGTH,
                 "Maximal length of LoS (0 means unlimited)",
-                QgsProcessingParameterNumber.Double,
+                parentParameterName=self.OBSERVER_POINTS_LAYER,
                 defaultValue=0,
-                minValue=0.0,
-                optional=False)
+                minValue=0,
+                optional=False
+            )
         )
 
         self.addParameter(
@@ -273,3 +277,6 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
