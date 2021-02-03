@@ -64,7 +64,7 @@ class CreateLocalLosAlgorithmTest(unittest.TestCase):
         self.assertEqual("source", param_targets.type())
         self.assertEqual("field", param_targets_id_field.type())
         self.assertEqual("field", param_targets_offset_field.type())
-        self.assertEqual("number", param_line_density.type())
+        self.assertEqual("distance", param_line_density.type())
         self.assertEqual("sink", param_output_layer.type())
 
         self.assertEqual("ObserverPoints", param_observers_id_field.parentLayerParameterName())

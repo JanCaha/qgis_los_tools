@@ -57,7 +57,7 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                           parameter_type="field",
                                           parent_parameter="TargetPoints")
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("LineDensity"),
-                                          parameter_type="number",
+                                          parameter_type="distance",
                                           default_value=1)
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputLayer"),
                                           parameter_type="sink")
