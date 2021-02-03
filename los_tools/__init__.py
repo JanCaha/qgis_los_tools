@@ -31,7 +31,7 @@ from los_tools.los_tools_plugin import los_toolsPlugin
 
 
 # noinspection PyPep8Naming
-def classFactory(iface):  # pylint: disable=invalid-name
+def classFactory(iface):
     """Load los_tools class from file los_tools.
 
     :param iface: A QGIS interface instance.
