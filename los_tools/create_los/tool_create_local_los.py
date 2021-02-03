@@ -11,12 +11,14 @@ from qgis.core import (
     QgsWkbTypes,
     QgsPoint,
     QgsFields,
-    QgsLineString)
+    QgsLineString,
+    QgsProcessingUtils)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.tools.util_functions import segmentize_line, bilinear_interpolated_value
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
+from los_tools.tools.util_functions import get_doc_file
 
 
 class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
@@ -240,3 +242,6 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_local_los/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)

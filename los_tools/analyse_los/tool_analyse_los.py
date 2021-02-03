@@ -9,7 +9,8 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsFields,
     QgsFeature,
-    QgsFeatureIterator)
+    QgsFeatureIterator,
+    QgsProcessingUtils)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -231,5 +232,4 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
         return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Analysis/tool_analyse_los/"
 
     def shortHelpString(self):
-
-        return get_doc_file(__file__, self)
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
