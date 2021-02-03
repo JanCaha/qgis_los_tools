@@ -43,13 +43,12 @@ if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
 
 
-class los_toolsPlugin(object):
+class los_toolsPlugin():
 
     def __init__(self):
         self.provider = None
 
     def initProcessing(self):
-        """Init Processing provider for QGIS >= 3.8."""
         self.provider = los_toolsProvider()
         QgsApplication.processingRegistry().addProvider(self.provider)
 
