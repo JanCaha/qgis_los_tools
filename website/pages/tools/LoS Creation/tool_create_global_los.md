@@ -13,7 +13,7 @@ Create line-of-sight from each point from observers layer through each point in 
 | Targets point layer | `TargetPoints` | [vector: point] | Point layer representing the targets. |
 | Target ID field | `TargetIdField` | [tablefield: numeric] | Field containing ID for target points. |
 | Target offset field | `TargetOffset` | [tablefield: numeric] | Field containing offset above DEM for target points. |
-| LoS sampling distance | `LineDensity` | [number] <br/><br/> Default: <br/> `1` | The distance by which the LoS is segmentized. |
+| LoS sampling distance | `LineDensity` | [distance] <br/><br/> Default: <br/> `1` | The distance by which the LoS is segmentized. |
 | Output layer | `OutputLayer` | [vector: line] | Output layer containing LoS. |
 
 ## Outputs
