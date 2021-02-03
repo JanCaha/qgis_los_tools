@@ -1,0 +1,14 @@
+{
+	"ALG_DESC": "Create line-of-sight between each point from observers layer and targets layer, where `Observer ID field` value from observer is equal to `Target and Observer agreement ID field` of target. This ensures that each point from targets layer is linked to one point from observers layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.",
+	"ALG_CREATOR": "Jan Caha",
+	"DemRaster": "Raster DEM on which the LoS is calculated.",
+	"ObserverPoints": "Point layer representing the observers.",
+	"ObserverIdField": "Field containing ID for observer points.",
+	"ObserverOffset": "Field containing offset above DEM for observer points.",
+	"TargetPoints": "Point layer representing the targets.",
+	"TargetIdField": "Field containing ID for target points.",
+	"TargetDefinitionIdField": "Field that specifies which target point is linked to which observer point. Values in this field are compared to `ObserverIdField`.",
+	"LineDensity": "The distance by which the LoS is segmentized.",
+	"MaxLoSLength": "Maximal length of LoS generated.",
+	"OutputLayer": "Output layer containing LoS."
+}
