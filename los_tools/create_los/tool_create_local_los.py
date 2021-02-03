@@ -6,6 +6,7 @@ from qgis.core import (
     QgsProcessingParameterField,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterRasterLayer,
+    QgsProcessingParameterDistance,
     QgsField,
     QgsFeature,
     QgsWkbTypes,
@@ -98,10 +99,10 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterNumber(
+            QgsProcessingParameterDistance(
                 self.LINE_DENSITY,
                 "LoS sampling distance",
-                QgsProcessingParameterNumber.Double,
+                parentParameterName=self.OBSERVER_POINTS_LAYER,
                 defaultValue=1,
                 minValue=0.01,
                 maxValue=1000.0,
