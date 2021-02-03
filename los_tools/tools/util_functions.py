@@ -4,6 +4,7 @@ import os
 import json
 from typing import List
 import re
+from pathlib import Path
 
 from qgis.core import (QgsGeometry,
                        QgsLineString,
@@ -147,17 +148,18 @@ def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
     return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
 
 
-def get_doc_file(file_path: str, algorithm: QgsProcessingAlgorithm) -> str:
+def get_doc_file(file_path: str):
 
-    file = os.path.splitext(os.path.basename(file_path))[0] + ".help"
+    path = Path(file_path)
 
-    help_file = os.path.join(os.path.dirname(os.path.dirname(file_path)),
-                             "doc", file)
+    file = "{}.help".format(path.stem)
 
-    if os.path.exists(help_file):
+    help_file = path.parent.parent / "doc" / file
+
+    if help_file.exists():
         with open(help_file) as f:
             descriptions = json.load(f)
 
-        return QgsProcessingUtils.formatHelpMapAsHtml(descriptions, algorithm)
+        return descriptions
 
     return ""
