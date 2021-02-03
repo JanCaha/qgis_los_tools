@@ -30,6 +30,10 @@ __copyright__ = '(C) 2020 by Jan Caha'
 
 __revision__ = '$Format:%H$'
 
+from pathlib import Path
+
+from PyQt5.QtGui import QIcon
+
 from qgis.core import QgsProcessingProvider
 from los_tools.create_points.tool_points_around import CreatePointsAroundAlgorithm
 from los_tools.create_points.tool_points_in_direction import CreatePointsInDirectionAlgorithm
@@ -107,7 +111,8 @@ class los_toolsProvider(QgsProcessingProvider):
         Should return a QIcon which is used for your provider inside
         the Processing toolbox.
         """
-        return QgsProcessingProvider.icon(self)
+        path = Path(__file__).parent / "icons" / "los_tools_icon.svg"
+        return QIcon(str(path))
 
     def longName(self):
         """
