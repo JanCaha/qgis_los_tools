@@ -14,9 +14,9 @@ The target points can be and usually should be created by tools [Create points a
 | Observer offset field | `ObserverOffset` | [tablefield: numeric] | Field containing offset above DEM for observer points. |
 | Targets point layer | `TargetPoints` | [vector: point] | Point layer representing the targets. |
 | Target ID field | `TargetIdField` | [tablefield: numeric] | Field containing ID for target points. |
-| Target and Observer agreement ID field | `TargetDefinitionIdField` | [tablefield: numeric] | Field containing offset above DEM for target points. |
+| Target and Observer agreement ID field | `TargetDefinitionIdField` | [tablefield: numeric] | Field that specifies which target point is linked to which observer point. Values in this field are compared to `ObserverIdField`. |
 | LoS sampling distance | `LineDensity` | [number]  <br/><br/> Default: <br/> `1` | The distance by which the LoS is segmentized. |
-| Maximal length of LoS (0 means unlimited) | `MaxLoSLength` | [number]  <br/><br/> Default: <br/> `0` | The distance by which the LoS is segmentized. |
+| Maximal length of LoS (0 means unlimited) | `MaxLoSLength` | [number]  <br/><br/> Default: <br/> `0` | Maximal length of LoS generated. |
 | Output layer | `OutputLayer` | [vector: line] | Output layer containing LoS. |
 
 ## Outputs
