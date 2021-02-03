@@ -1,71 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
      <loc>https://jancaha.github.io/qgis_los_tools/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/changelog/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/Angles/tool_azimuth/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/Angles/tool_limit_angles_vector/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/Export%20to%20table/tool_export_horizon_lines/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/Export%20to%20table/tool_export_los/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/Horizons/tool_extract_horizon_lines/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/Horizons/tool_extract_horizons/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/LoS%20Analysis/tool_analyse_los/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_global_los/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_local_los/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/LoS%20Points/tool_extract_points_los/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_optimize_point_location/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_around/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_in_direction/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://jancaha.github.io/qgis_los_tools/tools/Raster%20Editing/tool_replace_raster_values/</loc>
-     <lastmod>2021-01-16</lastmod>
+     <lastmod>2021-02-03</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>
