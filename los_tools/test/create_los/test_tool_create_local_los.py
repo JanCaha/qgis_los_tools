@@ -4,8 +4,8 @@ from qgis.core import (QgsVectorLayer,
                        QgsRasterLayer,
                        QgsFeatureRequest,
                        QgsProcessingFeedback,
-                       QgsProcessingContext)
-from qgis._core import QgsWkbTypes
+                       QgsProcessingContext,
+                       QgsWkbTypes)
 
 from los_tools.create_los.tool_create_local_los import CreateLocalLosAlgorithm
 from los_tools.constants.field_names import FieldNames
