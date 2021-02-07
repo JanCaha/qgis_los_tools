@@ -119,6 +119,7 @@ class LoS:
             if i == 0:
                 self.visible.append(True)
             else:
+                # [i] and [-1] actually points to the same point, no idea why I wrote this way
                 self.visible.append(self.previous_max_angle[i] < self.points[-1][self.VERTICAL_ANGLE])
 
     def __str__(self):
@@ -397,9 +398,11 @@ class LoSWithoutTarget(LoS):
 
     def get_horizontal_angle(self) -> float:
 
-        return QgsPoint(self.points[0][self.X],
-                        self.points[0][self.Y]).azimuth(QgsPoint(self.points[-1][self.X],
-                                                                 self.points[-1][self.Y]))
+        azimuth = QgsPoint(self.points[0][self.X],
+                           self.points[0][self.Y]).azimuth(QgsPoint(self.points[-1][self.X],
+                                                                    self.points[-1][self.Y]))
+
+        return azimuth
 
     def get_maximal_vertical_angle(self) -> float:
         angles = [row[self.VERTICAL_ANGLE] for row in self.points]
