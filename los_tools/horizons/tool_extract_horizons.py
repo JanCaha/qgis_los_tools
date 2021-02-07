@@ -1,3 +1,5 @@
+from typing import Union
+
 from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
@@ -6,13 +8,21 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterBoolean,
+    QgsFeatureSink,
     QgsField,
     QgsFeature,
     QgsWkbTypes,
-    QgsFields)
+    QgsFields,
+    QgsMapLayer,
+    QgsProcessingUtils,
+    QgsSymbol,
+    QgsRendererCategory,
+    QgsCategorizedSymbolRenderer)
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant, Qt
 from los_tools.constants.field_names import FieldNames
+from los_tools.constants.names_constants import NamesConstants
+from los_tools.constants.textlabels import TextLabels
 from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
 from los_tools.tools.util_functions import wkt_to_array_points, get_los_type
 from los_tools.constants.names_constants import NamesConstants
@@ -29,7 +39,8 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
 
     horizons_types = [NamesConstants.HORIZON_LOCAL,
-                      NamesConstants.HORIZON_GLOBAL]
+                      NamesConstants.HORIZON_GLOBAL,
+                      "all"]
 
     def initAlgorithm(self, config=None):
 
@@ -94,6 +105,29 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
         return super().checkParameterValues(parameters, context)
 
+    def postProcessAlgorithm(self, context, feedback):
+
+        if self.horizon_type == self.horizons_types[2]:
+            output_layer: QgsMapLayer = QgsProcessingUtils.mapLayerFromString(self.dest_id, context)
+
+            symbols = []
+
+            symbol_horizon_global = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
+            symbol_horizon_global.setColor(Qt.red)
+
+            symbols.append(QgsRendererCategory(NamesConstants.HORIZON_GLOBAL, symbol_horizon_global, TextLabels.GLOBAL))
+
+            symbol_horizon_local = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
+            symbol_horizon_local.setColor(Qt.gray)
+
+            symbols.append(QgsRendererCategory(NamesConstants.HORIZON_LOCAL, symbol_horizon_local, TextLabels.LOCAL))
+
+            renderer = QgsCategorizedSymbolRenderer(FieldNames.HORIZON_TYPE, symbols)
+
+            output_layer.setRenderer(renderer)
+
+        return {self.OUTPUT_LAYER: self.dest_id}
+
     def processAlgorithm(self, parameters, context, feedback):
 
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
@@ -101,6 +135,8 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
         curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
         ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
+        self.horizon_type = horizon_type
+        
         field_names = los_layer.fields().names()
 
         los_type = get_los_type(los_layer, field_names)
@@ -113,12 +149,12 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
         if los_type == NamesConstants.LOS_NO_TARGET:
             fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters,
-                                             self.OUTPUT_LAYER,
-                                             context,
-                                             fields,
-                                             QgsWkbTypes.Point25D,
-                                             los_layer.sourceCrs())
+        sink, self.dest_id = self.parameterAsSink(parameters,
+                                                  self.OUTPUT_LAYER,
+                                                  context,
+                                                  fields,
+                                                  QgsWkbTypes.Point25D,
+                                                  los_layer.sourceCrs())
 
         feature_count = los_layer.featureCount()
 
@@ -152,41 +188,38 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
                                        refraction_coefficient=ref_coeff)
 
             if horizon_type == NamesConstants.HORIZON_LOCAL:
-                horizons = los.get_horizons()
 
-                if 0 < len(horizons):
-                    for horizon in horizons:
-                        f = QgsFeature(fields)
-                        f.setGeometry(horizon)
-                        f.setAttribute(f.fieldNameIndex(FieldNames.HORIZON_TYPE),
-                                       str(NamesConstants.HORIZON_LOCAL))
-                        f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
-                                       int(los_feature.attribute(FieldNames.ID_OBSERVER)))
-                        f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
-                                       int(los_feature.attribute(FieldNames.ID_TARGET)))
-
-                        sink.addFeature(f)
+                self.save_local_horizons(sink,
+                                         fields,
+                                         los_feature,
+                                         los,
+                                         los_type)
 
             elif horizon_type == NamesConstants.HORIZON_GLOBAL:
 
-                f = QgsFeature(fields)
-                f.setGeometry(los.get_global_horizon())
-                f.setAttribute(f.fieldNameIndex(FieldNames.HORIZON_TYPE),
-                               NamesConstants.HORIZON_GLOBAL)
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
-                               int(los_feature.attribute(FieldNames.ID_OBSERVER)))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
-                               int(los_feature.attribute(FieldNames.ID_TARGET)))
+                self.save_global_horizon(sink,
+                                         fields,
+                                         los_feature,
+                                         los,
+                                         los_type)
 
-                if los_type == NamesConstants.LOS_NO_TARGET:
-                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
-                                   los_feature.attribute(FieldNames.AZIMUTH))
+            else:
 
-                sink.addFeature(f)
+                self.save_local_horizons(sink,
+                                         fields,
+                                         los_feature,
+                                         los,
+                                         los_type)
+
+                self.save_global_horizon(sink,
+                                         fields,
+                                         los_feature,
+                                         los,
+                                         los_type)
 
             feedback.setProgress((feature_number/feature_count)*100)
 
-        return {self.OUTPUT_LAYER: dest_id}
+        return {self.OUTPUT_LAYER: self.dest_id}
 
     def name(self):
         return "extracthorizons"
@@ -205,3 +238,51 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/Horizons/tool_extract_horizons/"
+
+    def save_local_horizons(self,
+                            sink: QgsFeatureSink,
+                            fields: QgsFields,
+                            los_feature: QgsFeature,
+                            los: Union[LoSLocal, LoSGlobal, LoSWithoutTarget],
+                            los_type: str):
+
+        horizons = los.get_horizons()
+
+        if 0 < len(horizons):
+            for horizon in horizons:
+                f = QgsFeature(fields)
+                f.setGeometry(horizon)
+                f.setAttribute(f.fieldNameIndex(FieldNames.HORIZON_TYPE),
+                               str(NamesConstants.HORIZON_LOCAL))
+                f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
+                               int(los_feature.attribute(FieldNames.ID_OBSERVER)))
+                f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
+                               int(los_feature.attribute(FieldNames.ID_TARGET)))
+
+                if los_type == NamesConstants.LOS_NO_TARGET:
+                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
+                                   los_feature.attribute(FieldNames.AZIMUTH))
+
+                sink.addFeature(f)
+
+    def save_global_horizon(self,
+                            sink: QgsFeatureSink,
+                            fields: QgsFields,
+                            los_feature: QgsFeature,
+                            los: Union[LoSLocal, LoSGlobal, LoSWithoutTarget],
+                            los_type: str):
+
+        f = QgsFeature(fields)
+        f.setGeometry(los.get_global_horizon())
+        f.setAttribute(f.fieldNameIndex(FieldNames.HORIZON_TYPE),
+                       NamesConstants.HORIZON_GLOBAL)
+        f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
+                       int(los_feature.attribute(FieldNames.ID_OBSERVER)))
+        f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
+                       int(los_feature.attribute(FieldNames.ID_TARGET)))
+
+        if los_type == NamesConstants.LOS_NO_TARGET:
+            f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
+                           los_feature.attribute(FieldNames.AZIMUTH))
+
+        sink.addFeature(f)
