@@ -28,7 +28,8 @@ class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("LoSLayer"),
                                           parameter_type="source")
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("HorizonType"),
-                                          parameter_type="enum")
+                                          parameter_type="enum",
+                                          default_value=2)
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputLayer"),
                                           parameter_type="sink")
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("CurvatureCorrections"),

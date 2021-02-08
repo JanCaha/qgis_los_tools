@@ -56,7 +56,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
                 self.HORIZON_TYPE,
                 "Horizon type",
                 options=self.horizons_types,
-                defaultValue=1)
+                defaultValue=2)
         )
 
         self.addParameter(
@@ -136,7 +136,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
         ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
         self.horizon_type = horizon_type
-        
+
         field_names = los_layer.fields().names()
 
         los_type = get_los_type(los_layer, field_names)
