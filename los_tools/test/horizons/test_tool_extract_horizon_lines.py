@@ -97,10 +97,7 @@ class ExtractHorizonLinesAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.assertFieldNamesInQgsVectorLayer([FieldNames.HORIZON_TYPE,
                                                FieldNames.ID_OBSERVER,
                                                FieldNames.OBSERVER_X,
-                                               FieldNames.OBSERVER_Y,
-                                               FieldNames.POINTS_ANGLE_DIFF_GH_LH,
-                                               FieldNames.POINTS_ELEVATION_DIFF_GH_LH,
-                                               FieldNames.POINTS_DISTANCE_GH],
+                                               FieldNames.OBSERVER_Y],
                                               horizon_lines_layer)
 
         self.assertEqual(NamesConstants.HORIZON_GLOBAL,
