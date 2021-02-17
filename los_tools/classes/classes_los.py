@@ -35,6 +35,7 @@ class LoS:
         self.target_x: float = target_x
         self.target_y: float = target_y
         self.target_index: int = None
+        self.global_horizon_index = None
 
         if sampling_distance is None:
             sampling_distance = calculate_distance(points[0][0], points[0][1], points[1][0], points[1][1])
@@ -171,6 +172,106 @@ class LoS:
                 points.append(self.get_geom_at_index(i))
 
         return points
+
+    def __get_global_horizon_index(self) -> int:
+
+        if self.global_horizon_index is None:
+            for i in range(len(self.points) - 1, -1, -1):
+                if self.horizon[i]:
+                    self.global_horizon_index = i
+                    break
+
+        return self.global_horizon_index
+
+    def get_global_horizon(self) -> QgsPoint:
+
+        index = self.__get_global_horizon_index()
+
+        if index is None:
+            index = -1
+
+        return self.get_geom_at_index(index)
+
+    def get_global_horizon_distance(self) -> float:
+
+        index = self.__get_global_horizon_index()
+
+        if index is not None:
+            return self.points[index][2]
+        else:
+            return 0
+
+    def get_global_horizon_angle(self) -> float:
+
+        index = self.__get_global_horizon_index()
+
+        if index is not None:
+            return self.points[index][self.VERTICAL_ANGLE]
+        else:
+            return 90
+
+    def get_angle_difference_global_horizon_at_point(self, index_point: int) -> float:
+
+        horizon_angle = -90
+        if self.__get_global_horizon_index() != 0:
+            horizon_angle = self.points[self.__get_global_horizon_index()][self.VERTICAL_ANGLE]
+        return self.points[index_point][self.VERTICAL_ANGLE] - horizon_angle
+
+    def get_elevation_difference_global_horizon_at_point(self, index_point: int) -> float:
+
+        elev_difference_horizon = self.points[index_point][self.Z] - \
+                                  (self.points[0][self.Z] +
+                                   math.tan(math.radians(self.points[self.__get_global_horizon_index()]
+                                                         [self.VERTICAL_ANGLE])) *
+                                   self.points[index_point][self.DISTANCE])
+        return elev_difference_horizon
+
+    def __get_previous_horizon_index(self, index_point: int) -> int:
+
+        index = None
+
+        for i in range(index_point - 1, -1, -1):
+            if self.horizon[i]:
+                index = i
+                break
+
+        return index
+
+    def get_angle_difference_horizon_at_point(self, index_point: int) -> float:
+
+        if 1 < index_point:
+
+            horizon_index = self.__get_previous_horizon_index(index_point)
+
+            if horizon_index is not None:
+                horizon_angle = self.points[index_point][self.VERTICAL_ANGLE] - \
+                                self.points[horizon_index][self.VERTICAL_ANGLE]
+            else:
+                horizon_angle = None
+        else:
+            horizon_angle = None
+
+        return horizon_angle
+
+    def get_elevation_difference_horizon_at_point(self, index_point: int) -> float:
+
+        if 1 < index_point:
+
+            horizon_index = self.__get_previous_horizon_index(index_point)
+
+            if horizon_index is not None:
+
+                elev_difference_horizon = self.points[index_point][self.Z] - \
+                                          (self.points[0][self.Z] +
+                                           math.tan(math.radians(self.points[horizon_index]
+                                                                 [self.VERTICAL_ANGLE])) *
+                                           self.points[index_point][self.DISTANCE])
+            else:
+                elev_difference_horizon = None
+        else:
+            elev_difference_horizon = None
+
+        return elev_difference_horizon
 
 
 class LoSLocal(LoS):
@@ -328,7 +429,7 @@ class LoSGlobal(LoS):
                                   (self.points[0][self.Z] +
                                    math.tan(math.radians(self.points[self._get_global_horizon_index()]
                                                          [self.VERTICAL_ANGLE])) *
-                                   self.points[self.target_index][self.Z])
+                                   self.points[self.target_index][self.DISTANCE])
         return elev_difference_horizon
 
     def get_horizon_distance(self) -> float:
@@ -338,26 +439,6 @@ class LoSGlobal(LoS):
     def get_horizon_count(self) -> int:
 
         return int(math.fsum(self.horizon[self.target_index+1:]))
-
-    def __get_global_horizon_index(self) -> int:
-
-        index = None
-
-        for i in range(len(self.points) - 1, -1, -1):
-            if self.horizon[i]:
-                index = i
-                break
-
-        return index
-
-    def get_global_horizon(self) -> QgsPoint:
-
-        index = self.__get_global_horizon_index()
-
-        if index is None:
-            index = -1
-
-        return self.get_geom_at_index(index)
 
     def _get_max_local_horizon_index(self) -> int:
 
@@ -454,43 +535,5 @@ class LoSWithoutTarget(LoS):
                 index = 1
             else:
                 index = 0
-
-        return self.get_geom_at_index(index)
-
-    def __get_global_horizon_index(self) -> int:
-
-        index = None
-
-        for i in range(len(self.points)-1, -1, -1):
-            if self.horizon[i]:
-                index = i
-                break
-
-        return index
-
-    def get_global_horizon_distance(self) -> float:
-
-        index = self.__get_global_horizon_index()
-
-        if index is not None:
-            return self.points[index][2]
-        else:
-            return 0
-
-    def get_global_horizon_angle(self) -> float:
-
-        index = self.__get_global_horizon_index()
-
-        if index is not None:
-            return self.points[index][self.VERTICAL_ANGLE]
-        else:
-            return 90
-
-    def get_global_horizon(self) -> QgsPoint:
-
-        index = self.__get_global_horizon_index()
-
-        if index is None:
-            index = -1
 
         return self.get_geom_at_index(index)
