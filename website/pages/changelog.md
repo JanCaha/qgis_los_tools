@@ -2,7 +2,9 @@
 
 ## version 0.5
 
-- added plugin icon
+- add plugin icon
+
+- add ExtractAsM parameter to Extract Horizon Lines
 
 - changes to underlying LoS classes and minor bug fixes
 
