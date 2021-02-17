@@ -2,6 +2,8 @@
 
 Tool that extracts horizon lines from LoS without target (created using tool [Create no target LoS](../LoS Creation/tool_create_notarget_los.md). For other types of LoS this operation does not make sense.
 
+For global horizon line it is possible to select value that should be used as M dimension for points creating the line.
+
 ## Parameters
 
 | Label | Name | Type | Description |
@@ -11,6 +13,7 @@ Tool that extracts horizon lines from LoS without target (created using tool [Cr
 | Output layer | `OutputLayer` | [vector: line] | Output layer horizon lines. |
 | Use curvature corrections? | `CurvatureCorrections` | [boolean]<br/><br/>Default: `True` | Should the curvarture and refraction corrections be used? |
 | Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of refraction coefficient. |
+| Extract value as M dimension <br/>(for global horizon) | `ExtractAsM` | [enumeration] <br/><br/> Default: <br/> `0` | Type of values to extract as M dimension. <br/><br/> **Values**: <br/> **0** - view angles <br/> **1** - angle difference global to local horizon <br/> **2** - elevation difference global to local horizon <br/> **3** - horizon distance |
 
 
 ## Outputs

@@ -28,9 +28,13 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
     OUTPUT_LAYER = "OutputLayer"
     CURVATURE_CORRECTIONS = "CurvatureCorrections"
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
+    EXTRACT_AS_M = "ExtractAsM"
 
     horizons_types = [NamesConstants.HORIZON_MAX_LOCAL,
                       NamesConstants.HORIZON_GLOBAL]
+
+    values_to_extract = ["view angles", "angle difference global to local horizon",
+                         "elevation difference global to local horizon", "horizon distance"]
 
     def initAlgorithm(self, config=None):
 
@@ -71,6 +75,14 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.EXTRACT_AS_M,
+                "Extract value as M dimension (for global horizon)",
+                options=self.values_to_extract,
+                defaultValue=0)
+        )
+
     def checkParameterValues(self, parameters, context):
 
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
@@ -100,16 +112,13 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
         ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
+        m_values = self.values_to_extract[self.parameterAsEnum(parameters, self.EXTRACT_AS_M, context)]
+
         fields = QgsFields()
         fields.append(QgsField(FieldNames.HORIZON_TYPE, QVariant.String))
         fields.append(QgsField(FieldNames.ID_OBSERVER, QVariant.Int))
         fields.append(QgsField(FieldNames.OBSERVER_X, QVariant.Double))
         fields.append(QgsField(FieldNames.OBSERVER_Y, QVariant.Double))
-        # test
-        if horizon_type == NamesConstants.HORIZON_GLOBAL:
-            fields.append(QgsField(FieldNames.POINTS_ANGLE_DIFF_GH_LH, QVariant.String))
-            fields.append(QgsField(FieldNames.POINTS_ELEVATION_DIFF_GH_LH, QVariant.String))
-            fields.append(QgsField(FieldNames.POINTS_DISTANCE_GH, QVariant.String))
 
         sink, dest_id = self.parameterAsSink(parameters,
                                              self.OUTPUT_LAYER,
@@ -137,10 +146,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
             features = los_layer.getFeatures(request)
 
             line_points = []
-            view_angles = []
-            angle_diff_local_horizon = []
-            elev_diff_local_horizon = []
-            distances = []
+            values = []
 
             for los_feature in features:
 
@@ -151,23 +157,31 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
                 if horizon_type == NamesConstants.HORIZON_GLOBAL:
                     line_points.append(los.get_global_horizon())
-                    view_angles.append(los.get_global_horizon_angle())
-                    angle_diff_local_horizon.append(los.get_global_horizon_angle() - los.get_max_local_horizon_angle())
-                    elev_diff_local_horizon.append(
-                        math.tan(math.radians(los.get_global_horizon_angle() - los.get_max_local_horizon_angle()) *
-                                 los.get_global_horizon_distance() - los.get_max_local_horizon_distance())
-                    )
-                    distances.append(los.get_global_horizon_distance())
+
+                    if m_values == self.values_to_extract[0]:
+                        values.append(los.get_global_horizon_angle())
+                    elif m_values == self.values_to_extract[1]:
+                        values.append(los.get_global_horizon_angle() - los.get_max_local_horizon_angle())
+                    elif m_values == self.values_to_extract[2]:
+                        values.append(
+                            math.tan(math.radians(los.get_global_horizon_angle() - los.get_max_local_horizon_angle()) *
+                                     los.get_global_horizon_distance() - los.get_max_local_horizon_distance())
+                        )
+                    elif m_values == self.values_to_extract[3]:
+                        values.append(los.get_global_horizon_distance())
+                    else:
+                        values.append(los.get_global_horizon_angle())
+
                 elif horizon_type == NamesConstants.HORIZON_MAX_LOCAL:
                     line_points.append(los.get_max_local_horizon(direction_point=True))
-                    view_angles.append(los.get_max_local_horizon_angle())
+                    values.append(los.get_max_local_horizon_angle())
 
             if 1 < len(line_points):
                 line = QgsLineString(line_points)
                 line.addMValue()
 
                 for i in range(0, line.numPoints()):
-                    line.setMAt(i, view_angles[i])
+                    line.setMAt(i, values[i])
 
                 f = QgsFeature(fields)
                 f.setGeometry(line)
@@ -179,13 +193,6 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
                                los_feature.attribute(FieldNames.OBSERVER_Y))
                 f.setAttribute(f.fieldNameIndex(FieldNames.HORIZON_TYPE),
                                horizon_type)
-                if horizon_type == NamesConstants.HORIZON_GLOBAL:
-                    f.setAttribute(f.fieldNameIndex(FieldNames.POINTS_ANGLE_DIFF_GH_LH),
-                                   ";".join(map(str, angle_diff_local_horizon)))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.POINTS_ELEVATION_DIFF_GH_LH),
-                                   ";".join(map(str, elev_diff_local_horizon)))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.POINTS_DISTANCE_GH),
-                                   ";".join(map(str, distances)))
 
                 sink.addFeature(f)
                 i += 1
