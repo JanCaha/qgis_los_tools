@@ -206,6 +206,7 @@
 
 <h1 id="extract-horizon-lines">Extract Horizon Lines</h1>
 <p>Tool that extracts horizon lines from LoS without target (created using tool <a href="../../LoS%20Creation/tool_create_notarget_los/">Create no target LoS</a>. For other types of LoS this operation does not make sense.</p>
+<p>For global horizon line it is possible to select value that should be used as M dimension for points creating the line.</p>
 <h2 id="parameters">Parameters</h2>
 <table>
 <thead>
@@ -246,6 +247,12 @@
 <td><code>RefractionCoefficient</code></td>
 <td>[number] <br/><br/> Default: <br/> <code>0.13</code></td>
 <td>Value of refraction coefficient.</td>
+</tr>
+<tr>
+<td>Extract value as M dimension <br/>(for global horizon)</td>
+<td><code>ExtractAsM</code></td>
+<td>[enumeration] <br/><br/> Default: <br/> <code>0</code></td>
+<td>Type of values to extract as M dimension. <br/><br/> <strong>Values</strong>: <br/> <strong>0</strong> - view angles <br/> <strong>1</strong> - angle difference global to local horizon <br/> <strong>2</strong> - elevation difference global to local horizon <br/> <strong>3</strong> - horizon distance</td>
 </tr>
 </tbody>
 </table>
