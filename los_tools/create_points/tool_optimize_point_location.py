@@ -10,10 +10,9 @@ from qgis.core import (QgsProcessing,
                        QgsRasterLayer,
                        QgsRectangle,
                        QgsRasterBlock,
-                       QgsVectorLayer,
-                       QgsWkbTypes,
                        QgsPoint,
                        QgsFeature,
+                       QgsPointXY,
                        QgsProcessingFeatureSource)
 
 
@@ -176,7 +175,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
             if feedback.isCanceled():
                 break
 
-            point = input_layer_feature.geometry().asPoint()
+            point: QgsPointXY = input_layer_feature.geometry().asPoint()
 
             col = round((point.x() - raster_extent.xMinimum()) / cell_size)
             row = round((raster_extent.yMaximum() - point.y()) / cell_size)
@@ -252,4 +251,4 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         return OptimizePointLocationAlgorithm()
 
     def helpUrl(self):
-        return ""# "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_in_direction/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_optimize_point_location/"

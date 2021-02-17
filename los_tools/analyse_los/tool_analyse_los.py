@@ -10,7 +10,9 @@ from qgis.core import (
     QgsFields,
     QgsFeature,
     QgsFeatureIterator,
-    QgsProcessingUtils)
+    QgsProcessingUtils,
+    QgsProcessingFeedback,
+    QgsProcessingContext)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -78,7 +80,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
         return super().checkParameterValues(parameters, context)
 
-    def processAlgorithm(self, parameters, context, feedback):
+    def processAlgorithm(self, parameters, context: QgsProcessingContext, feedback: QgsProcessingFeedback):
 
         los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
         curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
@@ -124,12 +126,9 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
                                              los_layer.wkbType(),
                                              los_layer.sourceCrs())
 
-        feature_count = 0
+        feature_count = los_layer.dataProvider().featureCount()
 
-        los_layer_iterator: QgsFeatureIterator = los_layer.getFeatures()
-
-        for los_feature in enumerate(los_layer_iterator):
-            feature_count += 1
+        feedback.pushInfo(F"Analysing {feature_count} features.")
 
         los_layer_iterator: QgsFeatureIterator = los_layer.getFeatures()
 
