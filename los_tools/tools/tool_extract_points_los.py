@@ -124,11 +124,11 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.VISIBLE, QVariant.Bool))
 
         sink, self.dest_id = self.parameterAsSink(parameters,
-                                             self.OUTPUT_LAYER,
-                                             context,
-                                             fields,
-                                             QgsWkbTypes.Point25D,
-                                             los_layer.sourceCrs())
+                                                  self.OUTPUT_LAYER,
+                                                  context,
+                                                  fields,
+                                                  QgsWkbTypes.Point25D,
+                                                  los_layer.sourceCrs())
 
         feature_count = los_layer.featureCount()
 
