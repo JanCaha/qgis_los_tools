@@ -205,8 +205,7 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="extract-points-from-los">Extract Points from LoS</h1>
-<p>Create points set of points at given distance from points from input layer that span given angle offset from main direction layer.</p>
-<p>The default value produces range of values [-20;20] by one angle from azimuth of point in main direction layer.</p>
+<p>Extract individual points from lines-of-sight. It is possible to extract only visible points and also to calculate extended attributes for these points.</p>
 <h2 id="parameters">Parameters</h2>
 <table>
 <thead>
@@ -243,6 +242,12 @@
 <td>Export only visible points on LoS or export all points on LoS (not checked).</td>
 </tr>
 <tr>
+<td>Calculate extended attributes</td>
+<td><code>ExtendedAttributes</code></td>
+<td>[boolean]<br/><br/>Default: <code>False</code></td>
+<td>Calculate extended attributes for points (not checked).</td>
+</tr>
+<tr>
 <td>Output layer</td>
 <td><code>OutputLayer</code></td>
 <td>[vector: point]</td>
@@ -274,6 +279,18 @@
 <li><strong>id_observer</strong> - integer - value from expected field (<code>id_observer</code>) in <code>LoSLayer</code></li>
 <li><strong>id_target</strong> - integer - value from expected field (<code>id_target</code>) in <code>LoSLayer</code></li>
 <li><strong>visible</strong> - boolean - is the point visible</li>
+</ul>
+<h3 id="additional-fields-if-calculate-extended-attributes-is-true">Additional fields if <code>Calculate extended attributes</code> is <code>True</code></h3>
+<p>Calculation of these attributes can potentially significantly slow down the calculation.  </p>
+<p>For all types of LoS:</p>
+<ul>
+<li><strong>angle_difference_local_horizon</strong> - double</li>
+<li><strong>elevation_difference_local_horizon</strong> - double</li>
+</ul>
+<p>For Global and NoTarget LoS:</p>
+<ul>
+<li><strong>angle_difference_global_horizon</strong> - double</li>
+<li><strong>elevation_difference_global_horizon</strong> - double</li>
 </ul>
 <h2 id="tool-screenshot">Tool screenshot</h2>
 <p><img alt="Extract Points from LoS" src="../../../images/tool_extract_points_los.png" /></p></div>
