@@ -93,3 +93,26 @@ class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
         local_los_visible_points = QgsVectorLayer(output_path)
 
         self.assertTrue(local_los_visible_points.featureCount() < local_los_all_points.featureCount())
+
+        output_path = get_data_path_results(file="points_los_no_target_all.gpkg")
+
+        params = {
+            "LoSLayer": self.los_no_target,
+            "OutputLayer": output_path,
+            "CurvatureCorrections": True,
+            "RefractionCoefficient": 0.13,
+            "OnlyVisiblePoints": False,
+            "ExtendedAttributes": True
+        }
+
+        self.assertRunAlgorithm(parameters=params)
+
+        notarget_los_points = QgsVectorLayer(output_path)
+
+        self.assertTrue(notarget_los_points.featureCount() > self.los_no_target.featureCount())
+
+        self.assertFieldNamesInQgsVectorLayer([FieldNames.ANGLE_DIFF_GH,
+                                               FieldNames.ELEVATION_DIFF_GH,
+                                               FieldNames.ANGLE_DIFF_LH,
+                                               FieldNames.ELEVATION_DIFF_LH],
+                                              notarget_los_points)
