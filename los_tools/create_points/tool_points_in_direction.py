@@ -12,7 +12,8 @@ from qgis.core import (
     QgsFeature,
     QgsWkbTypes,
     QgsGeometry,
-    QgsFields)
+    QgsFields,
+    QgsPointXY)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -144,10 +145,11 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
 
             iterator_direction = main_direction_layer.getFeatures()
 
+            feature_point: QgsPointXY = feature.geometry().asPoint()
+
             for cnt_direction, feature_direction in enumerate(iterator_direction):
 
-                main_angle = feature.geometry().asPoint()\
-                    .azimuth(feature_direction.geometry().asPoint())
+                main_angle = feature_point.azimuth(feature_direction.geometry().asPoint())
 
                 angles = np.arange(main_angle - angle_offset,
                                    main_angle + angle_offset + 0.1*angle_step,
@@ -157,10 +159,10 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
 
                 for angle in angles:
 
-                    new_point = feature.geometry().asPoint().project(distance, angle)
+                    new_point: QgsPointXY = feature_point.project(distance, angle)
 
                     f = QgsFeature(fields)
-                    f.setGeometry(QgsGeometry.fromPointXY(new_point))
+                    f.setGeometry(QgsGeometry().fromPointXY(new_point))
                     f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
                                    int(feature.attribute(id_field)))
                     f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),

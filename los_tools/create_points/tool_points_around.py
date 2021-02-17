@@ -12,7 +12,8 @@ from qgis.core import (
     QgsFeature,
     QgsWkbTypes,
     QgsGeometry,
-    QgsFields)
+    QgsFields,
+    QgsPointXY)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -133,10 +134,10 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
 
             for angle in angles:
 
-                new_point = feature.geometry().asPoint().project(distance, angle)
+                new_point: QgsPointXY = feature.geometry().asPoint().project(distance, angle)
 
                 f = QgsFeature(fields)
-                f.setGeometry(QgsGeometry.fromPointXY(new_point))
+                f.setGeometry(QgsGeometry().fromPointXY(new_point))
                 f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT), int(feature.attribute(id_field)))
                 f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
 
