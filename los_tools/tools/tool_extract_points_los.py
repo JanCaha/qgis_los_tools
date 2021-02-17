@@ -32,6 +32,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
     CURVATURE_CORRECTIONS = "CurvatureCorrections"
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
     ONLY_VISIBLE = "OnlyVisiblePoints"
+    EXTENDED_ATTRIBUTES = "ExtendedAttributes"
 
     def initAlgorithm(self, config=None):
 
@@ -72,6 +73,13 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.EXTENDED_ATTRIBUTES,
+                "Calculate extended attributes?",
+                defaultValue=False)
+        )
+
     def checkParameterValues(self, parameters, context):
 
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
@@ -104,6 +112,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         renderer = QgsCategorizedSymbolRenderer(FieldNames.VISIBLE, symbols)
 
         output_layer.setRenderer(renderer)
+        output_layer.triggerRepaint()
 
         return {self.OUTPUT_LAYER: self.dest_id}
 
@@ -113,6 +122,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         curvature_corrections: bool = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
         ref_coeff: float = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
         only_visible: bool = self.parameterAsBool(parameters, self.ONLY_VISIBLE, context)
+        extended_attributes: bool = self.parameterAsBool(parameters, self.EXTENDED_ATTRIBUTES, context)
 
         field_names = los_layer.fields().names()
 
@@ -122,6 +132,16 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.ID_OBSERVER, QVariant.Int))
         fields.append(QgsField(FieldNames.ID_TARGET, QVariant.Int))
         fields.append(QgsField(FieldNames.VISIBLE, QVariant.Bool))
+
+        if extended_attributes:
+
+            fields.append(QgsField(FieldNames.ELEVATION_DIFF_LH, QVariant.Double))
+            fields.append(QgsField(FieldNames.ANGLE_DIFF_LH, QVariant.Double))
+
+            if los_type == NamesConstants.LOS_GLOBAL or los_type == NamesConstants.LOS_NO_TARGET:
+
+                fields.append(QgsField(FieldNames.ELEVATION_DIFF_GH, QVariant.Double))
+                fields.append(QgsField(FieldNames.ANGLE_DIFF_GH, QVariant.Double))
 
         sink, self.dest_id = self.parameterAsSink(parameters,
                                                   self.OUTPUT_LAYER,
@@ -181,6 +201,20 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
                                    los_feature.attribute(FieldNames.ID_TARGET))
                     f.setAttribute(f.fieldNameIndex(FieldNames.VISIBLE),
                                    los.visible[i])
+
+                    if extended_attributes:
+
+                        f.setAttribute(f.fieldNameIndex(FieldNames.ELEVATION_DIFF_LH),
+                                       los.get_elevation_difference_horizon_at_point(i))
+                        f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_DIFF_LH),
+                                       los.get_angle_difference_horizon_at_point(i))
+
+                        if los_type == NamesConstants.LOS_GLOBAL or los_type == NamesConstants.LOS_NO_TARGET:
+
+                            f.setAttribute(f.fieldNameIndex(FieldNames.ELEVATION_DIFF_GH),
+                                                            los.get_elevation_difference_global_horizon_at_point(i))
+                            f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_DIFF_GH),
+                                                            los.get_angle_difference_global_horizon_at_point(i))
 
                     sink.addFeature(f)
 
