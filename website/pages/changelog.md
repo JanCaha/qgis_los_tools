@@ -1,5 +1,17 @@
 # Changelog
 
+## version 0.5
+
+- added plugin icon
+
+- changes to underlying LoS classes and minor bug fixes
+
+- ExtractPointsLoSAlgorithm allows to calculate ExtendedAttributes
+
+- doc fixes
+
+- add tag to git to allow searching changes from version
+
 ## version 0.4
 
 - change exports to CSV to export to tables (vector data without geometry) to allow loading into QGIS
