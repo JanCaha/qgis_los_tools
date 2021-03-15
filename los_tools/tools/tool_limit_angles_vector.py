@@ -5,6 +5,9 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterField,
+    QgsGeometry,
+    QgsCoordinateTransform,
+    QgsProject,
     QgsField,
     QgsFeature,
     QgsWkbTypes,
@@ -85,6 +88,12 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
         object_layer = self.parameterAsVectorLayer(parameters, self.OBJECT_LAYER, context)
         field_id = self.parameterAsString(parameters, self.OBJECT_LAYER_FIELD_ID, context)
 
+
+        if object_layer.crs() != los_layer.crs():
+            coord_transform = QgsCoordinateTransform(object_layer.crs(), los_layer.crs(), QgsProject.instance())
+        else:
+            coord_transform = None
+
         fields = QgsFields()
         fields.append(QgsField(FieldNames.ID_OBSERVER, QVariant.Int))
         fields.append(QgsField(FieldNames.ID_OBJECT, QVariant.Int))
@@ -115,8 +124,13 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
                 if feedback.isCanceled():
                     break
 
+                geom_transform = QgsGeometry(object_layer_feature_geom)
+
+                if coord_transform:
+                    geom_transform.transform(coord_transform)
+
                 request = QgsFeatureRequest()
-                request.setFilterRect(object_layer_feature.geometry().boundingBox())
+                request.setFilterRect(geom_transform.boundingBox())
                 request.setFilterExpression("{} = '{}'".format(FieldNames.ID_OBSERVER, id_value))
                 order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
                 request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
@@ -127,10 +141,16 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
                 for feature in features:
 
-                    if feature.geometry().intersects(object_layer_feature_geom):
+                    if feature.geometry().intersects(geom_transform):
                         azimuths.append(feature.attribute(FieldNames.AZIMUTH))
 
                 if 1 < len(azimuths):
+
+                    az_step = azimuths[1] - azimuths[0]
+
+                    if abs((max(azimuths) - min(azimuths)) - (az_step * (len(azimuths)-1))) > 0.0001:
+                        azimuths = [x - 360 if x > 180 else x for x in azimuths]
+
                     f = QgsFeature(fields)
                     f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
                                    int(id_value))
@@ -139,7 +159,7 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
                     f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MAX),
                                    max(azimuths))
                     f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBJECT),
-                                   int(object_id))
+                                   object_id)
 
                     sink.addFeature(f)
 
