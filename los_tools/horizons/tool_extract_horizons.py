@@ -42,6 +42,9 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
                       NamesConstants.HORIZON_GLOBAL,
                       "all"]
 
+    dest_id: str
+    horizon_type:str
+    
     def initAlgorithm(self, config=None):
 
         self.addParameter(
@@ -148,6 +151,10 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
         if los_type == NamesConstants.LOS_NO_TARGET:
             fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
+            fields.append(QgsField(FieldNames.VIEWING_ANGLE, QVariant.Double))
+            fields.append(QgsField(FieldNames.CSV_HORIZON_DISTANCE, QVariant.Double))
+            fields.append(QgsField(FieldNames.CSV_HORIZON_ANGLE_DIFF, QVariant.Double))
+            fields.append(QgsField(FieldNames.CSV_HORIZON_ELEVATION_DIFF, QVariant.Double))
 
         sink, self.dest_id = self.parameterAsSink(parameters,
                                                   self.OUTPUT_LAYER,
@@ -284,5 +291,14 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
         if los_type == NamesConstants.LOS_NO_TARGET:
             f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
                            los_feature.attribute(FieldNames.AZIMUTH))
+
+            f.setAttribute(f.fieldNameIndex(FieldNames.VIEWING_ANGLE),
+                           los.get_global_horizon_angle())
+            f.setAttribute(f.fieldNameIndex(FieldNames.CSV_HORIZON_DISTANCE),
+                           los.get_global_horizon_distance())
+            f.setAttribute(f.fieldNameIndex(FieldNames.CSV_HORIZON_ANGLE_DIFF),
+                           los.get_global_horizon_angle_difference())
+            f.setAttribute(f.fieldNameIndex(FieldNames.CSV_HORIZON_ELEVATION_DIFF),
+                           los.get_global_horizon_angle_difference())
 
         sink.addFeature(f)
