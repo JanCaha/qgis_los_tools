@@ -163,3 +163,9 @@ def get_doc_file(file_path: str):
         return descriptions
 
     return ""
+
+
+def log(text):
+    QgsMessageLog.logMessage(str(text),
+                             "los_tools",
+                             Qgis.Info)
