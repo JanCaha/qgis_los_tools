@@ -12,7 +12,9 @@ from qgis.core import (
     QgsWkbTypes,
     QgsFeatureRequest,
     QgsFields,
-    QgsLineString)
+    QgsLineString,
+    QgsVectorLayer,
+    QgsProcessingFeedback)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -28,13 +30,9 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
     OUTPUT_LAYER = "OutputLayer"
     CURVATURE_CORRECTIONS = "CurvatureCorrections"
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
-    EXTRACT_AS_M = "ExtractAsM"
 
     horizons_types = [NamesConstants.HORIZON_MAX_LOCAL,
                       NamesConstants.HORIZON_GLOBAL]
-
-    values_to_extract = ["view angles", "angle difference global to local horizon",
-                         "elevation difference global to local horizon", "horizon distance"]
 
     def initAlgorithm(self, config=None):
 
@@ -75,14 +73,6 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterEnum(
-                self.EXTRACT_AS_M,
-                "Extract value as M dimension (for global horizon)",
-                options=self.values_to_extract,
-                defaultValue=0)
-        )
-
     def checkParameterValues(self, parameters, context):
 
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
@@ -105,20 +95,19 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
         return super().checkParameterValues(parameters, context)
 
-    def processAlgorithm(self, parameters, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
 
-        los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
+        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
         horizon_type = self.horizons_types[self.parameterAsEnum(parameters, self.HORIZON_TYPE, context)]
         curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
         ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
-
-        m_values = self.values_to_extract[self.parameterAsEnum(parameters, self.EXTRACT_AS_M, context)]
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.HORIZON_TYPE, QVariant.String))
         fields.append(QgsField(FieldNames.ID_OBSERVER, QVariant.Int))
         fields.append(QgsField(FieldNames.OBSERVER_X, QVariant.Double))
         fields.append(QgsField(FieldNames.OBSERVER_Y, QVariant.Double))
+        fields.append(QgsField(FieldNames.VIEWING_ANGLE, QVariant.String))
 
         sink, dest_id = self.parameterAsSink(parameters,
                                              self.OUTPUT_LAYER,
@@ -129,14 +118,11 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
         id_values = list(los_layer.uniqueValues(los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)))
 
-        total = 100.0 / len(id_values) if len(id_values) > 0 else 0
+        total = 100 / los_layer.featureCount() if los_layer.featureCount() else 0
 
         i = 0
 
         for id_value in id_values:
-
-            if feedback.isCanceled():
-                break
 
             request = QgsFeatureRequest()
             request.setFilterExpression("{} = '{}'".format(FieldNames.ID_OBSERVER, id_value))
@@ -150,6 +136,9 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
             for los_feature in features:
 
+                if feedback.isCanceled():
+                    break
+
                 los = LoSWithoutTarget(wkt_to_array_points(los_feature.geometry().asWkt()),
                                        observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
                                        use_curvature_corrections=curvature_corrections,
@@ -157,24 +146,14 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
                 if horizon_type == NamesConstants.HORIZON_GLOBAL:
                     line_points.append(los.get_global_horizon())
-
-                    if m_values == self.values_to_extract[0]:
-                        values.append(los.get_global_horizon_angle())
-                    elif m_values == self.values_to_extract[1]:
-                        values.append(los.get_global_horizon_angle() - los.get_max_local_horizon_angle())
-                    elif m_values == self.values_to_extract[2]:
-                        values.append(
-                            math.tan(math.radians(los.get_global_horizon_angle() - los.get_max_local_horizon_angle()) *
-                                     los.get_global_horizon_distance() - los.get_max_local_horizon_distance())
-                        )
-                    elif m_values == self.values_to_extract[3]:
-                        values.append(los.get_global_horizon_distance())
-                    else:
-                        values.append(los.get_global_horizon_angle())
+                    values.append(los.get_global_horizon_angle())
 
                 elif horizon_type == NamesConstants.HORIZON_MAX_LOCAL:
                     line_points.append(los.get_max_local_horizon(direction_point=True))
                     values.append(los.get_max_local_horizon_angle())
+
+                i += 1
+                feedback.setProgress(int(i * total))
 
             if 1 < len(line_points):
                 line = QgsLineString(line_points)
@@ -193,11 +172,10 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
                                los_feature.attribute(FieldNames.OBSERVER_Y))
                 f.setAttribute(f.fieldNameIndex(FieldNames.HORIZON_TYPE),
                                horizon_type)
+                f.setAttribute(f.fieldNameIndex(FieldNames.VIEWING_ANGLE),
+                               values)
 
                 sink.addFeature(f)
-                i += 1
-
-                feedback.setProgress((i/total)*100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
