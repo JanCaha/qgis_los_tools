@@ -107,7 +107,6 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.ID_OBSERVER, QVariant.Int))
         fields.append(QgsField(FieldNames.OBSERVER_X, QVariant.Double))
         fields.append(QgsField(FieldNames.OBSERVER_Y, QVariant.Double))
-        fields.append(QgsField(FieldNames.VIEWING_ANGLE, QVariant.String))
 
         sink, dest_id = self.parameterAsSink(parameters,
                                              self.OUTPUT_LAYER,
@@ -172,8 +171,6 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
                                los_feature.attribute(FieldNames.OBSERVER_Y))
                 f.setAttribute(f.fieldNameIndex(FieldNames.HORIZON_TYPE),
                                horizon_type)
-                f.setAttribute(f.fieldNameIndex(FieldNames.VIEWING_ANGLE),
-                               values)
 
                 sink.addFeature(f)
 
