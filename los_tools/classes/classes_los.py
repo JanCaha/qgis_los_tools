@@ -173,7 +173,7 @@ class LoS:
 
         return points
 
-    def __get_global_horizon_index(self) -> int:
+    def _get_global_horizon_index(self) -> int:
 
         if self.global_horizon_index is None:
             for i in range(len(self.points) - 1, -1, -1):
@@ -185,7 +185,7 @@ class LoS:
 
     def get_global_horizon(self) -> QgsPoint:
 
-        index = self.__get_global_horizon_index()
+        index = self._get_global_horizon_index()
 
         if index is None:
             index = -1
@@ -194,7 +194,7 @@ class LoS:
 
     def get_global_horizon_distance(self) -> float:
 
-        index = self.__get_global_horizon_index()
+        index = self._get_global_horizon_index()
 
         if index is not None:
             return self.points[index][2]
@@ -203,7 +203,7 @@ class LoS:
 
     def get_global_horizon_angle(self) -> float:
 
-        index = self.__get_global_horizon_index()
+        index = self._get_global_horizon_index()
 
         if index is not None:
             return self.points[index][self.VERTICAL_ANGLE]
@@ -213,15 +213,15 @@ class LoS:
     def get_angle_difference_global_horizon_at_point(self, index_point: int) -> float:
 
         horizon_angle = -90
-        if self.__get_global_horizon_index() != 0:
-            horizon_angle = self.points[self.__get_global_horizon_index()][self.VERTICAL_ANGLE]
+        if self._get_global_horizon_index() != 0:
+            horizon_angle = self.points[self._get_global_horizon_index()][self.VERTICAL_ANGLE]
         return self.points[index_point][self.VERTICAL_ANGLE] - horizon_angle
 
     def get_elevation_difference_global_horizon_at_point(self, index_point: int) -> float:
 
         elev_difference_horizon = self.points[index_point][self.Z] - \
                                   (self.points[0][self.Z] +
-                                   math.tan(math.radians(self.points[self.__get_global_horizon_index()]
+                                   math.tan(math.radians(self.points[self._get_global_horizon_index()]
                                                          [self.VERTICAL_ANGLE])) *
                                    self.points[index_point][self.DISTANCE])
         return elev_difference_horizon
@@ -491,19 +491,12 @@ class LoSWithoutTarget(LoS):
 
     def __get_max_local_horizon_index(self) -> int:
 
-        index_visible = None
         index_horizon = None
 
-        for i in range(len(self.points) - 1, -1, -1):
-            if self.visible[i]:
-                index_visible = i
+        for i in range(self._get_global_horizon_index() - 1, -1, -1):
+            if self.horizon[i]:
+                index_horizon = i
                 break
-
-        if 0 < index_visible:
-            for i in range(index_visible - 1, -1, -1):
-                if self.horizon[i]:
-                    index_horizon = i
-                    break
 
         return index_horizon
 
@@ -537,3 +530,12 @@ class LoSWithoutTarget(LoS):
                 index = 0
 
         return self.get_geom_at_index(index)
+
+    def get_global_horizon_angle_difference(self):
+        return self.points[self._get_global_horizon_index()][self.VERTICAL_ANGLE] - \
+               self.points[self.__get_max_local_horizon_index()][self.VERTICAL_ANGLE]
+
+    def get_global_horizon_elevation_difference(self):
+        return self.points[self._get_global_horizon_index()][self.Z] - \
+               math.tan(math.radians(self.points[self.__get_max_local_horizon_index()][self.VERTICAL_ANGLE])) * \
+               self.points[self._get_global_horizon_index()][self.DISTANCE]
