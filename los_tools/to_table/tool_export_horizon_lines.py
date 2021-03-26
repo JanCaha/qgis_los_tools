@@ -13,7 +13,9 @@ from qgis.core import (
     QgsWkbTypes,
     QgsMessageLog,
     QgsPointXY,
-    Qgis)
+    Qgis,
+    QgsFeatureSource)
+
 from PyQt5.QtCore import (QVariant)
 
 from los_tools.constants.field_names import FieldNames
@@ -64,7 +66,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        input_horizon_lines_layer = self.parameterAsSource(parameters, self.INPUT_HORIZON_LINES_LAYER, context)
+        input_horizon_lines_layer: QgsFeatureSource = self.parameterAsSource(parameters, self.INPUT_HORIZON_LINES_LAYER, context)
 
         horizon_lines_type = get_horizon_lines_type(input_horizon_lines_layer)
 
