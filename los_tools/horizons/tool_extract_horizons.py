@@ -44,7 +44,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
     dest_id: str
     horizon_type:str
-    
+
     def initAlgorithm(self, config=None):
 
         self.addParameter(
