@@ -10,6 +10,7 @@ from qgis.core import (
 
 from qgis.analysis import (QgsRasterCalculatorEntry, QgsRasterCalculator)
 import processing
+from processing.algs.gdal.GdalUtils import GdalUtils
 
 import tempfile
 import uuid
@@ -146,7 +147,7 @@ class ReplaceRasterValuesAlgorithm(QgsProcessingAlgorithm):
         calc = QgsRasterCalculator(
             expression,
             output_raster,
-            "GTiff",
+            GdalUtils.getFormatShortNameFromFilename(output_raster),
             raster_extent,
             raster_crs,
             int(raster_extent.width()),
