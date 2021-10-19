@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from qgis.core import (
     QgsProcessing,
     QgsFields,
@@ -79,10 +77,6 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.VIEWING_ANGLE, QVariant.Double))
         fields.append(QgsField(FieldNames.CSV_HORIZON_DISTANCE, QVariant.Double))
 
-        if horizon_lines_type == NamesConstants.HORIZON_GLOBAL:
-            fields.append(QgsField(FieldNames.CSV_HORIZON_ANGLE_DIFF, QVariant.Double))
-            fields.append(QgsField(FieldNames.CSV_HORIZON_ELEVATION_DIFF, QVariant.Double))
-
         sink: QgsFeatureSink
         sink, path_sink = self.parameterAsSink(parameters,
                                                self.OUTPUT,
@@ -104,10 +98,6 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
             observer_id = horizon_line_feature.attribute(FieldNames.ID_OBSERVER)
             horizon_type = horizon_line_feature.attribute(FieldNames.HORIZON_TYPE)
 
-            if horizon_lines_type == NamesConstants.HORIZON_GLOBAL:
-                angles_diff = horizon_line_feature.attribute(FieldNames.POINTS_ANGLE_DIFF_GH_LH).split(";")
-                elevs_diff = horizon_line_feature.attribute(FieldNames.POINTS_ELEVATION_DIFF_GH_LH).split(";")
-
             line_geometry = horizon_line_feature.geometry()
 
             i = 0
@@ -121,10 +111,6 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
                 feature.setAttribute(FieldNames.ANGLE, observer_point.azimuth(horizon_point))
                 feature.setAttribute(FieldNames.VIEWING_ANGLE, v.m())
                 feature.setAttribute(FieldNames.CSV_HORIZON_DISTANCE, observer_point.distance(v.x(), v.y()))
-
-                if horizon_lines_type == NamesConstants.HORIZON_GLOBAL:
-                    feature.setAttribute(FieldNames.CSV_HORIZON_ANGLE_DIFF, angles_diff[i])
-                    feature.setAttribute(FieldNames.CSV_HORIZON_ELEVATION_DIFF, elevs_diff[i])
 
                 i += 1
 
