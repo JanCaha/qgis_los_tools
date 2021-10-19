@@ -52,8 +52,6 @@ jobs:
           WORKFLOW: build-package
           DOCKER_TAG: ${{ matrix.docker_tags }}
           URL_ACTION: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}
-        with:
-          filename: .github/workflow-fail-template.md
 
 #  Check-code-quality:
 #
