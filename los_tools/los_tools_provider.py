@@ -40,6 +40,7 @@ from los_tools.create_points.tool_points_in_direction import CreatePointsInDirec
 from los_tools.create_los.tool_create_local_los import CreateLocalLosAlgorithm
 from los_tools.create_los.tool_create_global_los import CreateGlobalLosAlgorithm
 from los_tools.create_los.tool_create_notarget_los import CreateNoTargetLosAlgorithm
+from los_tools.create_los.tool_create_notarget_los_v2 import CreateNoTargetLosAlgorithmV2
 from los_tools.analyse_los.tool_analyse_los import AnalyseLosAlgorithm
 from los_tools.horizons.tool_extract_horizons import ExtractHorizonsAlgorithm
 from los_tools.horizons.tool_extract_horizon_lines import ExtractHorizonLinesAlgorithm
@@ -88,6 +89,7 @@ class los_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(OptimizePointLocationAlgorithm())
         self.addAlgorithm(AzimuthPointPolygonAlgorithm())
         self.addAlgorithm(ExtractLoSVisibilityPartsAlgorithm())
+        self.addAlgorithm(CreateNoTargetLosAlgorithmV2())
 
     def id(self):
         """
