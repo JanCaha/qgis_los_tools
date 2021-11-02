@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from typing import List, Any, NoReturn, Optional
+from typing import List, Any, Optional, Union
 
 from qgis.core import (
     QgsProcessing,
@@ -19,7 +19,8 @@ from qgis.core import (
     QgsGeometry,
     QgsProcessingUtils,
     QgsRasterDataProvider,
-    QgsRasterLayer)
+    QgsRasterLayer,
+    QgsVectorLayer)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.tools.util_functions import bilinear_interpolated_value, get_diagonal_size
@@ -40,6 +41,7 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
     DEM_RASTERS = "DemRasters"
     LINE_SETTINGS = "LineSettings"
+    LINE_SETTINGS_TABLE = "LineSettingsTable"
 
     def initAlgorithm(self, config=None):
 
@@ -54,11 +56,19 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterMatrix(
                 self.LINE_SETTINGS,
-                "Sampling distance - distance matrix: ",
+                "Sampling distance - distance matrix",
                 numberRows=3,
                 headers=["Sampling distance", "Distance limit"],
-                defaultValue=[1, "Inf"]
+                defaultValue=[1, -1]
             )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.LINE_SETTINGS_TABLE,
+                "Sampling distance - distance table",
+                [QgsProcessing.TypeVector],
+                optional=True)
         )
 
         self.addParameter(
@@ -157,7 +167,19 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
                 return False, msg
 
-            return SamplingDistanceMatrix.validate_table(self.parameterAsMatrix(parameters, self.LINE_SETTINGS, context))
+            line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE, context)
+
+            if line_settings_table:
+
+                validation, msg = SamplingDistanceMatrix.validate_table(line_settings_table)
+
+            else:
+                validation, msg = SamplingDistanceMatrix.validate_table(self.parameterAsMatrix(parameters,
+                                                                                               self.LINE_SETTINGS,
+                                                                                               context))
+
+            if not validation:
+                return validation, msg
 
         return super().checkParameterValues(parameters, context)
 
@@ -170,9 +192,19 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
         target_definition_id_field = self.parameterAsString(parameters, self.TARGET_DEFINITION_ID_FIELD, context)
 
-        self.rasters = self.get_raster_ordered_by_pixel_size(self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
+        self.rasters = self.get_raster_ordered_by_pixel_size(self.parameterAsLayerList(parameters,
+                                                                                       self.DEM_RASTERS,
+                                                                                       context))
 
-        self.distances = SamplingDistanceMatrix(self.parameterAsMatrix(parameters, self.LINE_SETTINGS, context))
+        line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE, context)
+
+        if line_settings_table:
+
+            self.distances = SamplingDistanceMatrix(line_settings_table)
+
+        else:
+
+            self.distances = SamplingDistanceMatrix(self.parameterAsMatrix(parameters, self.LINE_SETTINGS, context))
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.LOS_TYPE, QVariant.String))
@@ -194,18 +226,14 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
         observers_iterator = observers_layer.getFeatures()
 
-        max_length_extension = self.distances.maximum_distance
+        max_length_extension = 0
 
-        if math.isinf(max_length_extension):
+        for rast in self.rasters:
 
-            max_length_extension = 0
+            diagonal_distance = get_diagonal_size(rast)
 
-            for rast in self.rasters:
-
-                diagonal_distance = get_diagonal_size(rast)
-
-                if max_length_extension < diagonal_distance:
-                    max_length_extension = diagonal_distance
+            if max_length_extension < diagonal_distance:
+                max_length_extension = diagonal_distance
 
         self.distances.replace_inf_with_value(max_length_extension)
 
@@ -356,7 +384,8 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los/"
 
     def shortHelpString(self):
-        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
+        # return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
+        pass
 
 
 class SamplingDistanceMatrix:
@@ -366,24 +395,38 @@ class SamplingDistanceMatrix:
     INDEX_SAMPLING_DISTANCE = 0
     INDEX_DISTANCE = 1
 
-    def __init__(self, data: List[Any]):
+    def __init__(self, data: Union[List[Any], QgsVectorLayer]):
 
         self.data = []
 
-        i = 0
+        if isinstance(data, List):
 
-        while i < len(data):
+            i = 0
 
-            distance = data[i+1]
+            while i < len(data):
 
-            if str(distance).lower() == "inf":
-                distance = math.inf
+                distance = data[i+1]
 
-            self.data.append([float(data[i]), float(distance)])
+                self.data.append([float(data[i]), float(distance)])
 
-            i += 2
+                i += 2
 
-        self.data = sorted(self.data, key=lambda d: d[self.INDEX_DISTANCE])
+        elif isinstance(data, QgsVectorLayer):
+
+            feature: QgsFeature
+
+            for feature in data.getFeatures():
+
+                last_distance = feature.attribute(FieldNames.DISTANCE)
+                last_size = feature.attribute(FieldNames.SIZE)
+
+                self.data.append([feature.attribute(FieldNames.SIZE),
+                                  feature.attribute(FieldNames.DISTANCE)])
+
+            self.data.append([last_size,
+                              -1])
+
+        self.sort_data()
 
     def __repr__(self):
 
@@ -398,14 +441,28 @@ class SamplingDistanceMatrix:
     def __len__(self):
         return len(self.data)
 
-    def replace_inf_with_value(self, value: float) -> NoReturn:
+    def sort_data(self):
+        self.data = sorted(self.data, key=lambda d: d[self.INDEX_DISTANCE])
 
-        if math.isinf(self.maximum_distance):
+    def replace_inf_with_value(self, value: float) -> None:
 
-            self.data[-1][self.INDEX_DISTANCE] = value
+        sampling_distance_limit = self.data[0][self.INDEX_SAMPLING_DISTANCE]
 
-            while self.data[-1][self.INDEX_DISTANCE] < self.data[-2][self.INDEX_DISTANCE]:
-                self.data.remove(self.data[-2])
+        for row in self.data:
+            if value < row[self.INDEX_DISTANCE]:
+                sampling_distance_limit = row[self.INDEX_SAMPLING_DISTANCE]
+                break
+
+        if self.minimum_distance == -1:
+
+            self.data[0][self.INDEX_DISTANCE] = value
+            self.data[0][self.INDEX_SAMPLING_DISTANCE] = sampling_distance_limit
+
+            if 1 < len(self.data):
+                while self.data[0][self.INDEX_DISTANCE] < self.data[-1][self.INDEX_DISTANCE]:
+                    self.data.remove(self.data[-1])
+
+            self.sort_data()
 
     def get_row(self, index: int) -> List[float]:
         return self.data[index]
@@ -417,30 +474,46 @@ class SamplingDistanceMatrix:
         return self.get_row(index)[self.INDEX_SAMPLING_DISTANCE]
 
     @staticmethod
-    def validate_table(data: List[Any]):
+    def validate_table(data: Union[List[Any], QgsVectorLayer]):
 
-        i = 0
+        if isinstance(data, List):
 
-        while i < len(data):
+            i = 0
 
-            distance = data[i + 1]
+            while i < len(data):
 
-            if str(distance).lower() == "inf":
-                distance = math.inf
+                distance = data[i + 1]
 
-            try:
-                float(data[i])
-            except ValueError as e:
-                return False, f"Cannot convert value `{data[i]}` into type float."
+                try:
+                    float(data[i])
+                except ValueError as e:
+                    return False, f"Cannot convert value `{data[i]}` into type float."
 
-            try:
-                float(data[i+1])
-            except ValueError as e:
-                return False, f"Cannot convert value `{data[i+1]}` into type float."
+                try:
+                    float(distance)
+                except ValueError as e:
+                    return False, f"Cannot convert value `{distance}` into type float."
 
-            i += 2
+                i += 2
+
+        elif isinstance(data, QgsVectorLayer):
+
+            field_names = data.fields().names()
+
+            if FieldNames.SIZE_ANGLE not in field_names:
+                return False, f"Field `{FieldNames.SIZE_ANGLE}` does not exist but is required."
+
+            if FieldNames.DISTANCE not in field_names:
+                return False, f"Field `{FieldNames.DISTANCE}` does not exist but is required."
+
+            if FieldNames.SIZE not in field_names:
+                return False, f"Field `{FieldNames.SIZE}` does not exist but is required."
 
         return True, ""
+
+    @property
+    def minimum_distance(self) -> float:
+        return self.data[0][self.INDEX_DISTANCE]
 
     @property
     def maximum_distance(self) -> float:
