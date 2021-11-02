@@ -52,6 +52,8 @@ from los_tools.tools.tool_limit_angles_vector import LimitAnglesAlgorithm
 from los_tools.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
 from los_tools.tools.tool_azimuth import AzimuthPointPolygonAlgorithm
 from los_tools.tools.tool_extract_los_visibility_parts import ExtractLoSVisibilityPartsAlgorithm
+from los_tools.tools.tool_sizes_at_distances import ObjectSizesAlgorithm
+from los_tools.tools.tools_distances_for_sizes import ObjectDistancesAlgorithm
 
 
 class los_toolsProvider(QgsProcessingProvider):
@@ -89,6 +91,8 @@ class los_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(OptimizePointLocationAlgorithm())
         self.addAlgorithm(AzimuthPointPolygonAlgorithm())
         self.addAlgorithm(ExtractLoSVisibilityPartsAlgorithm())
+        self.addAlgorithm(ObjectSizesAlgorithm())
+        self.addAlgorithm(ObjectDistancesAlgorithm())
         self.addAlgorithm(CreateNoTargetLosAlgorithmV2())
 
     def id(self):
