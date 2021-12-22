@@ -199,12 +199,13 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
         i = 0
         for observer_count, observer_feature in enumerate(observers_iterator):
-            if feedback.isCanceled():
-                break
 
             targets_iterators = targets_layer.getFeatures()
 
             for target_count, target_feature in enumerate(targets_iterators):
+
+                if feedback.isCanceled():
+                    break
 
                 if observer_feature.attribute(observers_id) == target_feature.attribute(target_definition_id_field):
 
