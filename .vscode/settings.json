@@ -31,7 +31,7 @@
     ],
     "svg.preview.background": "custom",
     "python.testing.pytestArgs": [
-        "los_tools/test"
+        "tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true

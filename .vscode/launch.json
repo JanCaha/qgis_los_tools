@@ -8,7 +8,7 @@
             "name": "Python: Run project",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/los_tools/package_test_suite.py",
+            "program": "${workspaceFolder}/package_test_suite.py",
             "console": "integratedTerminal"
         }
     ]
