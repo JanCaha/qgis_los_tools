@@ -29,7 +29,7 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.raster = QgsRasterLayer(get_data_path(file="dsm.tif"))
-        self.polygons = QgsVectorLayer(get_data_path(file="polys.gpkg"))
+        self.polygons = f'{get_data_path(file="polys.gpkg")}|layername=polys'
 
         self.output_path = get_data_path_results(file="raster_new_values.tif")
 
@@ -71,7 +71,7 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
     def test_run_alg(self):
 
         Processing.initialize()
-
+        
         params = {
             "RasterLayer": self.raster,
             "VectorLayer": self.polygons,

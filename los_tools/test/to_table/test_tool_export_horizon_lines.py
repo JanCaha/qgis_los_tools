@@ -86,5 +86,5 @@ class ExportHorizonLinesAlgorithmTest(QgsProcessingAlgorithmTestCase):
         fields_layer = export_layer.fields().names()
         del fields_layer[0]
 
-        self.assertListEqual(fields + [FieldNames.CSV_HORIZON_ANGLE_DIFF, FieldNames.CSV_HORIZON_ELEVATION_DIFF],
+        self.assertListEqual(fields,
                              fields_layer)
