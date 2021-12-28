@@ -10,11 +10,11 @@ from qgis.core import (QgsVectorLayer,
 from los_tools.create_los.tool_create_local_los import CreateLocalLosAlgorithm
 from los_tools.constants.field_names import FieldNames
 
-from los_tools.test.utils_tests import (print_alg_params,
-                                        print_alg_outputs,
-                                        get_data_path,
-                                        get_data_path_results,
-                                        get_qgis_app)
+from tests.utils_tests import (print_alg_params,
+                               print_alg_outputs,
+                               get_data_path,
+                               get_data_path_results,
+                               get_qgis_app)
 
 
 class CreateLocalLosAlgorithmTest(unittest.TestCase):

@@ -16,11 +16,11 @@ from los_tools.constants.field_names import FieldNames
 from processing.core.Processing import Processing
 import processing
 
-from los_tools.test.utils_tests import (print_alg_params,
-                                        print_alg_outputs,
-                                        get_qgis_app,
-                                        get_data_path,
-                                        get_data_path_results)
+from tests.utils_tests import (print_alg_params,
+                               print_alg_outputs,
+                               get_qgis_app,
+                               get_data_path,
+                               get_data_path_results)
 
 QGIS = get_qgis_app()
 

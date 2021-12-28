@@ -7,14 +7,14 @@ from qgis.core import (QgsVectorLayer,
                        QgsProcessingFeedback,
                        QgsProcessingContext)
 
-from los_tools.test.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
+from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
 from los_tools.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
 
-from los_tools.test.utils_tests import (print_alg_params,
-                                        print_alg_outputs,
-                                        get_data_path,
-                                        get_data_path_results)
+from tests.utils_tests import (print_alg_params,
+                               print_alg_outputs,
+                               get_data_path,
+                               get_data_path_results)
 
 
 class OptimizePointLocationAlgorithmTest(QgsProcessingAlgorithmTestCase):

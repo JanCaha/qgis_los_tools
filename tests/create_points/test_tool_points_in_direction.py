@@ -11,10 +11,10 @@ from qgis.core import (QgsVectorLayer,
 from los_tools.create_points.tool_points_in_direction import CreatePointsInDirectionAlgorithm
 from los_tools.constants.field_names import FieldNames
 
-from los_tools.test.utils_tests import (print_alg_params,
-                                        print_alg_outputs,
-                                        get_data_path,
-                                        get_data_path_results)
+from tests.utils_tests import (print_alg_params,
+                               print_alg_outputs,
+                               get_data_path,
+                               get_data_path_results)
 
 
 class CreatePointsInDirectionAlgorithmTest(unittest.TestCase):

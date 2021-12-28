@@ -8,12 +8,12 @@ from qgis._core import QgsWkbTypes
 
 from los_tools.constants.field_names import FieldNames
 
-from los_tools.test.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
+from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
 from los_tools.to_table.tool_export_los import ExportLoSAlgorithm
 
-from los_tools.test.utils_tests import (get_data_path,
-                                        get_data_path_results)
+from tests.utils_tests import (get_data_path,
+                               get_data_path_results)
 
 
 class ExportLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):

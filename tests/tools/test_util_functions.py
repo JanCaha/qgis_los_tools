@@ -12,9 +12,9 @@ from los_tools.tools.util_functions import (bilinear_interpolated_value,
                                             calculate_distance,
                                             segmentize_line)
 
-from los_tools.test.utils_tests import get_qgis_app
-from los_tools.test.utils_tests import (get_data_path,
-                                        get_data_path_results)
+from tests.utils_tests import get_qgis_app
+from tests.utils_tests import (get_data_path,
+                               get_data_path_results)
 
 QGIS_APP = get_qgis_app()
 

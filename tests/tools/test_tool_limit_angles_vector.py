@@ -8,10 +8,10 @@ from qgis.core import (QgsVectorLayer,
 from los_tools.tools.tool_limit_angles_vector import LimitAnglesAlgorithm
 from los_tools.constants.field_names import FieldNames
 
-from los_tools.test.utils_tests import (print_alg_params,
-                                        print_alg_outputs,
-                                        get_data_path,
-                                        get_data_path_results)
+from tests.utils_tests import (print_alg_params,
+                               print_alg_outputs,
+                               get_data_path,
+                               get_data_path_results)
 
 
 class LimitAnglesAlgorithmTest(unittest.TestCase):

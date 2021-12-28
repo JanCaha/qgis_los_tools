@@ -5,10 +5,10 @@ from los_tools.tools.tool_extract_points_los import ExtractPointsLoSAlgorithm
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 
-from los_tools.test.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
+from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
-from los_tools.test.utils_tests import (get_data_path,
-                                        get_data_path_results)
+from tests.utils_tests import (get_data_path,
+                               get_data_path_results)
 
 
 class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
