@@ -6,7 +6,7 @@ def test_package():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    suite.addTests(loader.discover("los_tools"))
+    suite.addTests(loader.discover("tests"))
 
     print("################################")
     print("Tests for LOS TOOLS Plugin runned from the Test Suite.")
