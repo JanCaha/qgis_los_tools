@@ -1,8 +1,7 @@
 import numpy as np
 import math
-import os
 import json
-from typing import List
+from typing import List, Optional, Union
 import re
 from pathlib import Path
 
@@ -14,10 +13,8 @@ from qgis.core import (QgsGeometry,
                        QgsRectangle,
                        QgsVectorLayer,
                        QgsMessageLog,
-                       QgsProcessingUtils,
                        QgsProcessingException,
-                       Qgis,
-                       QgsProcessingAlgorithm)
+                       Qgis)
 
 from los_tools.constants.field_names import FieldNames
 
@@ -33,7 +30,7 @@ def get_los_type(los_layer: QgsVectorLayer, field_names: List[str]) -> str:
 
         QgsMessageLog.logMessage(msg,
                                  "los_tools",
-                                 Qgis.MessageLevel.Critical)
+                                 Qgis.Critical)
 
         raise QgsProcessingException(msg)
 
@@ -51,7 +48,7 @@ def get_horizon_lines_type(horizon_lines_layer: QgsVectorLayer) -> str:
 
         QgsMessageLog.logMessage(msg,
                                  "los_tools",
-                                 Qgis.MessageLevel.Critical)
+                                 Qgis.Critical)
 
         raise QgsProcessingException(msg)
 
@@ -70,14 +67,17 @@ def check_existence_los_fields(field_names: List[str]) -> None:
 
         QgsMessageLog.logMessage(msg,
                                  "los_tools",
-                                 Qgis.MessageLevel.Critical)
+                                 Qgis.Critical)
 
         raise QgsProcessingException(msg)
 
 
 def wkt_to_array_points(wkt: str) -> List[List[float]]:
+    
     reg = re.compile("(LINESTRING |LineStringZ )")
+    
     wkt = reg.sub("", wkt)
+    
     array = wkt.replace("(", "").replace(")", "").split(",")
 
     array_result: List[List[float]] = []
@@ -91,12 +91,12 @@ def wkt_to_array_points(wkt: str) -> List[List[float]]:
 
 def segmentize_line(line: QgsLineString, segment_length: float) -> QgsLineString:
 
-    line = QgsGeometry(line)
+    line_geom = QgsGeometry(line)
 
-    line = line.densifyByDistance(distance=np.nextafter(float(segment_length), np.Inf))
+    line_geom = line_geom.densifyByDistance(distance=np.nextafter(float(segment_length), np.Inf))
 
     line_res = QgsLineString()
-    line_res.fromWkt(line.asWkt())
+    line_res.fromWkt(line_geom.asWkt())
 
     return line_res
 
@@ -107,45 +107,57 @@ def get_diagonal_size(raster: QgsRasterDataProvider) -> float:
 
 
 # taken from plugin rasterinterpolation https://plugins.qgis.org/plugins/rasterinterpolation/
-def bilinear_interpolated_value(raster: QgsRasterDataProvider, point: (QgsPoint, QgsPointXY)) -> [float, None]:
+def bilinear_interpolated_value(raster: QgsRasterDataProvider, point: Union[QgsPoint, QgsPointXY]) -> Optional[float]:
     # see the implementation of raster data provider, identify method
     # https://github.com/qgis/Quantum-GIS/blob/master/src/core/raster/qgsrasterdataprovider.cpp#L268
     x = point.x()
     y = point.y()
+    
     extent = raster.extent()
+    
     xres = extent.width() / raster.xSize()
     yres = extent.height() / raster.ySize()
+    
     col = round((x - extent.xMinimum()) / xres)
     row = round((extent.yMaximum() - y) / yres)
+    
     xMin = extent.xMinimum() + (col - 1) * xres
     xMax = xMin + 2 * xres
     yMax = extent.yMaximum() - (row - 1) * yres
     yMin = yMax - 2 * yres
+    
     pixelExtent = QgsRectangle(xMin, yMin, xMax, yMax)
+    
     myBlock = raster.block(1, pixelExtent, 2, 2)
+    
     # http://en.wikipedia.org/wiki/Bilinear_interpolation#Algorithm
     v12 = myBlock.value(0, 0)
     v22 = myBlock.value(0, 1)
     v11 = myBlock.value(1, 0)
     v21 = myBlock.value(1, 1)
+    
     if raster.sourceNoDataValue(1) in (v12, v22, v11, v21):
         return None
+    
     x1 = xMin + xres / 2
     x2 = xMax - xres / 2
     y1 = yMin + yres / 2
     y2 = yMax - yres / 2
-    value = (v11 * (x2 - x) * (y2 - y)
-             + v21 * (x - x1) * (y2 - y)
-             + v12 * (x2 - x) * (y - y1)
-             + v22 * (x - x1) * (y - y1)
-             ) / ((x2 - x1) * (y2 - y1))
+    
+    value = (v11 * (x2 - x) * (y2 - y) +
+             v21 * (x - x1) * (y2 - y) +
+             v12 * (x2 - x) * (y - y1) +
+             v22 * (x - x1) * (y - y1)) / ((x2 - x1) * (y2 - y1))
+    
     if value is not None and value == raster.sourceNoDataValue(1):
         return None
+    
     return value
 
 
 def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
-    return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
+    
+    return math.sqrt(math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
 
 
 def get_doc_file(file_path: str):
@@ -166,6 +178,7 @@ def get_doc_file(file_path: str):
 
 
 def log(text):
+    
     QgsMessageLog.logMessage(str(text),
                              "los_tools",
                              Qgis.Info)
