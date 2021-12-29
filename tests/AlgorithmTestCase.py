@@ -143,6 +143,10 @@ class QgsProcessingAlgorithmTestCase(unittest.TestCase):
             raise AssertionError("Expected `geom type` id `{}` != `{}` of the `layer.wkbType()`."
                                  .format(geom_type, layer.wkbType()))
 
+        if crs:
         if layer.sourceCrs().authid() != crs.authid():
-            raise AssertionError("The authid for `layer` crs ({}) does not match expected `crs` ({})."
-                                 .format(layer.sourceCrs().authid(), crs.authid()))
+                raise AssertionError(
+                    "The authid for `layer` crs ({}) does not match expected `crs` ({}).".format(
+                        layer.sourceCrs().authid(), crs.authid()
+                    )
+                )
