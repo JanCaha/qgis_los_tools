@@ -29,6 +29,7 @@
         "--no-pretty",
         "--no-strict-optional"
     ],
+    "python.formatting.provider": "black",
     "svg.preview.background": "custom",
     "python.testing.unittestArgs": [
         "-v",
