@@ -27,6 +27,15 @@ class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputTable"),
                                           parameter_type="sink")
 
+    def test_settings(self) -> None:
+
+        self.assertEqual(self.alg.name(), "calculatedistances")
+        self.assertEqual(self.alg.displayName(), "Calculate object distances")
+        self.assertEqual(self.alg.group(), "Object distances")
+        self.assertEqual(self.alg.groupId(), "objectsizes")
+
+        self.assertEqual(self.alg.helpUrl(), None)
+
     def test_run_alg(self) -> None:
 
         output_path = get_data_path_results(file="table.xlsx")
