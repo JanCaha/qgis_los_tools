@@ -1,15 +1,8 @@
 import math
 
-from qgis.core import (
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterMatrix,
-    QgsProcessingParameterNumber,
-    QgsProcessingFeedback,
-    QgsFields,
-    QgsField,
-    QgsWkbTypes,
-    QgsProcessingParameterFeatureSink,
-    QgsFeature)
+from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterMatrix,
+                       QgsProcessingParameterNumber, QgsProcessingFeedback, QgsFields, QgsField,
+                       QgsWkbTypes, QgsProcessingParameterFeatureSink, QgsFeature)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -25,31 +18,22 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterNumber(
-                self.ANGLE,
-                "Angle size of object (in degrees)",
-                QgsProcessingParameterNumber.Double,
-                defaultValue=0.1,
-                minValue=0.0,
-                maxValue=100.0,
-                optional=False)
-        )
+            QgsProcessingParameterNumber(self.ANGLE,
+                                         "Angle size of object (in degrees)",
+                                         QgsProcessingParameterNumber.Double,
+                                         defaultValue=0.1,
+                                         minValue=0.0,
+                                         maxValue=100.0,
+                                         optional=False))
 
         self.addParameter(
-            QgsProcessingParameterMatrix(
-                self.DISTANCES,
-                "Distances to calculate object size (in meters)",
-                numberRows=1,
-                headers=["Distance"],
-                defaultValue=[1000]
-            )
-        )
+            QgsProcessingParameterMatrix(self.DISTANCES,
+                                         "Distances to calculate object size (in meters)",
+                                         numberRows=1,
+                                         headers=["Distance"],
+                                         defaultValue=[1000]))
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT_TABLE,
-                "Output table")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table"))
 
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
 
@@ -61,21 +45,18 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.DISTANCE, QVariant.Double))
         fields.append(QgsField(FieldNames.SIZE, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters,
-                                             self.OUTPUT_TABLE,
-                                             context,
-                                             fields,
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields,
                                              QgsWkbTypes.NoGeometry)
 
         result_string_print = "Sizes at distances:\n" \
                               "Distance - Size\n"
 
         sizes = []
-        
+
         angle = float(angle)
-        
+
         for distance in distances:
-            
+
             distance = float(distance)
 
             size = round((math.tan(math.radians(angle))) * distance, 3)
@@ -85,12 +66,9 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
             sizes.append(size)
 
             f = QgsFeature(fields)
-            f.setAttribute(f.fieldNameIndex(FieldNames.SIZE_ANGLE),
-                           float(angle))
-            f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE),
-                           float(distance))
-            f.setAttribute(f.fieldNameIndex(FieldNames.SIZE),
-                           float(size))
+            f.setAttribute(f.fieldNameIndex(FieldNames.SIZE_ANGLE), float(angle))
+            f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE), float(distance))
+            f.setAttribute(f.fieldNameIndex(FieldNames.SIZE), float(size))
 
             sink.addFeature(f)
 
