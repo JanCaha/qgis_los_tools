@@ -8,6 +8,7 @@ from tests.utils_tests import get_data_path_results
 
 
 class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
+
     def setUp(self) -> None:
 
         super().setUp()
@@ -17,17 +18,14 @@ class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def test_parameters(self) -> None:
 
-        self.assertQgsProcessingParameter(
-            self.alg.parameterDefinition("Angle"), parameter_type="number"
-        )
+        self.assertQgsProcessingParameter(self.alg.parameterDefinition("Angle"),
+                                          parameter_type="number")
 
-        self.assertQgsProcessingParameter(
-            self.alg.parameterDefinition("Size"), parameter_type="matrix"
-        )
+        self.assertQgsProcessingParameter(self.alg.parameterDefinition("Size"),
+                                          parameter_type="matrix")
 
-        self.assertQgsProcessingParameter(
-            self.alg.parameterDefinition("OutputTable"), parameter_type="sink"
-        )
+        self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputTable"),
+                                          parameter_type="sink")
 
     def test_run_alg(self) -> None:
 
@@ -46,7 +44,6 @@ class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.assertQgsVectorLayer(table, geom_type=QgsWkbTypes.NoGeometry, crs=None)
 
         self.assertFieldNamesInQgsVectorLayer(
-            [FieldNames.SIZE_ANGLE, FieldNames.DISTANCE, FieldNames.SIZE], table
-        )
+            [FieldNames.SIZE_ANGLE, FieldNames.DISTANCE, FieldNames.SIZE], table)
 
         self.assertEqual(table.featureCount(), 5)
