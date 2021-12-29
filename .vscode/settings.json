@@ -29,7 +29,11 @@
         "--no-pretty",
         "--no-strict-optional"
     ],
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "yapf",
+    "python.formatting.yapfArgs": [
+        "--style",
+        "{based_on_style: google, indent_width: 4, column_limit=99}"
+    ],
     "svg.preview.background": "custom",
     "python.testing.unittestArgs": [
         "-v",
