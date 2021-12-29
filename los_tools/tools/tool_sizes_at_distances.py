@@ -4,19 +4,16 @@ from qgis.core import (
     QgsProcessingAlgorithm,
     QgsProcessingParameterMatrix,
     QgsProcessingParameterNumber,
-    QgsProcessingOutputString,
     QgsProcessingFeedback,
     QgsFields,
     QgsField,
     QgsWkbTypes,
     QgsProcessingParameterFeatureSink,
-    QgsFeatureSink,
     QgsFeature)
 
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from .util_functions import log
 
 
 class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
@@ -30,7 +27,7 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.ANGLE,
-                "Angle size of object (in degress)",
+                "Angle size of object (in degrees)",
                 QgsProcessingParameterNumber.Double,
                 defaultValue=0.1,
                 minValue=0.0,

@@ -115,7 +115,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
                 sink.addFeature(f)
 
                 i += 1
-                feedback.setProgress((i/total)*100)
+                feedback.setProgress((i / total) * 100)
 
         return {self.OUTPUT_TABLE: dest_id}
 

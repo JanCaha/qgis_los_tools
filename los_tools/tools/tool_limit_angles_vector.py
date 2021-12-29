@@ -88,7 +88,6 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
         object_layer = self.parameterAsVectorLayer(parameters, self.OBJECT_LAYER, context)
         field_id = self.parameterAsString(parameters, self.OBJECT_LAYER_FIELD_ID, context)
 
-
         if object_layer.crs() != los_layer.crs():
             coord_transform = QgsCoordinateTransform(object_layer.crs(), los_layer.crs(), QgsProject.instance())
         else:
@@ -148,7 +147,7 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
                     az_step = azimuths[1] - azimuths[0]
 
-                    if abs((max(azimuths) - min(azimuths)) - (az_step * (len(azimuths)-1))) > 0.0001:
+                    if abs((max(azimuths) - min(azimuths)) - (az_step * (len(azimuths) - 1))) > 0.0001:
                         azimuths = [x - 360 if x > 180 else x for x in azimuths]
 
                     f = QgsFeature(fields)
@@ -164,7 +163,7 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
                     sink.addFeature(f)
 
                 i += 1
-                feedback.setProgress((i/total)*100)
+                feedback.setProgress((i / total) * 100)
 
         return {self.OUTPUT_TABLE: dest_id}
 

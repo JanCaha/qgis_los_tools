@@ -212,13 +212,13 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
                         if los_type == NamesConstants.LOS_GLOBAL or los_type == NamesConstants.LOS_NO_TARGET:
 
                             f.setAttribute(f.fieldNameIndex(FieldNames.ELEVATION_DIFF_GH),
-                                                            los.get_elevation_difference_global_horizon_at_point(i))
+                                           los.get_elevation_difference_global_horizon_at_point(i))
                             f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_DIFF_GH),
-                                                            los.get_angle_difference_global_horizon_at_point(i))
+                                           los.get_angle_difference_global_horizon_at_point(i))
 
                     sink.addFeature(f)
 
-            feedback.setProgress((feature_number/feature_count)*100)
+            feedback.setProgress((feature_number / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: self.dest_id}
 
