@@ -5,6 +5,7 @@ import sys
 import logging
 import os
 import atexit
+from pathlib import Path
 
 from qgis.core import QgsApplication, QgsProcessingAlgorithm
 from qgis.analysis import QgsNativeAlgorithms
@@ -15,7 +16,7 @@ from qgis.PyQt.QtWidgets import QWidget
 
 from .qgis_interface import QgisInterface
 
-LOGGER = logging.getLogger('QGIS')
+LOGGER = logging.getLogger("QGIS")
 QGIS_APP = None  # Static variable used to hold hand to running QGIS app
 CANVAS = None
 PARENT = None
@@ -23,7 +24,7 @@ IFACE = None
 
 
 def get_qgis_app(cleanup=True, debug=False):
-    """ Start one QGIS application to test against.
+    """Start one QGIS application to test against.
 
     :returns: Handle to QGIS app, canvas, iface and parent. If there are any
         errors the tuple members will be returned as None.
@@ -73,13 +74,15 @@ def get_qgis_app(cleanup=True, debug=False):
             :param level: log message level (severity)
             :return:
             """
-            print('{}({}): {}'.format(tag, level, message))
+            print("{}({}): {}".format(tag, level, message))
 
         if debug:
             QgsApplication.instance().messageLog().messageReceived.connect(
-                debug_log_message)
+                debug_log_message
+            )
 
         if cleanup:
+
             @atexit.register
             def exitQgis():  # pylint: disable=unused-variable
                 """
@@ -113,10 +116,11 @@ def print_alg_params(alg: QgsProcessingAlgorithm) -> None:
     params = alg.parameterDefinitions()
 
     for p in params:
-        print("{} - {} \n\t {} \t{}".format(p.name(),
-                                            p.type(),
-                                            p.description(),
-                                            p.asScriptCode()))
+        print(
+            "{} - {} \n\t {} \t{}".format(
+                p.name(), p.type(), p.description(), p.asScriptCode()
+            )
+        )
 
 
 def print_alg_outputs(alg: QgsProcessingAlgorithm) -> None:
@@ -124,26 +128,28 @@ def print_alg_outputs(alg: QgsProcessingAlgorithm) -> None:
     outputs = alg.outputDefinitions()
 
     for o in outputs:
-        print("{} - {} \n\t {}".format(o.name(),
-                                       o.type(),
-                                       o.description()))
+        print("{} - {} \n\t {}".format(o.name(), o.type(), o.description()))
 
 
 def get_data_path(file: str = None) -> str:
-    path = ""
-    if file is None:
-        path = os.path.join(os.path.dirname(__file__), "test_data")
-    else:
-        path = os.path.join(os.path.dirname(__file__), "test_data", file)
 
-    return path
+    this_file = Path(__file__)
+
+    if file is None:
+        path = this_file.parent / "_data"
+    else:
+        path = this_file.parent / "_data" / file
+
+    return path.as_posix()
 
 
 def get_data_path_results(file: str = None) -> str:
-    path = ""
-    if file is None:
-        path = os.path.join(get_data_path(), "results")
-    else:
-        path = os.path.join(get_data_path(), "results", file)
 
-    return path
+    folder = Path(get_data_path())
+
+    if file is None:
+        path = folder / "results"
+    else:
+        path = folder / "results" / file
+
+    return path.as_posix()
