@@ -30,9 +30,13 @@
         "--no-strict-optional"
     ],
     "svg.preview.background": "custom",
-    "python.testing.pytestArgs": [
-        "tests"
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        ".",
+        "-p",
+        "test_*.py"
     ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.unittestEnabled": true,
+    "python.testing.pytestEnabled": false
 }
