@@ -3,3 +3,5 @@
 /los_tools/test/test_data/results
 __pycache__
 .coverage
+/tests/_data/results
+!/tests/_data/results/__init__.txt
