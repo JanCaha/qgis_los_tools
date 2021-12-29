@@ -1,3 +1,4 @@
+from typing import Union
 from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
@@ -147,7 +148,10 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
                 f.setAttribute(i, att)
                 i += 1
 
+            los: Union[LoSLocal, LoSGlobal, LoSWithoutTarget]
+            
             if los_type == NamesConstants.LOS_LOCAL:
+                
                 los = LoSLocal(wkt_to_array_points(los_feature.geometry().asWkt()),
                                observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
                                target_offset=los_feature.attribute(FieldNames.TARGET_OFFSET),
@@ -172,6 +176,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
                                los.get_local_horizon_distance())
 
             elif los_type == NamesConstants.LOS_GLOBAL:
+                
                 los = LoSGlobal(wkt_to_array_points(los_feature.geometry().asWkt()),
                                 observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
                                 target_offset=los_feature.attribute(FieldNames.TARGET_OFFSET),
@@ -192,6 +197,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
                                los.get_horizon_distance())
 
             elif los_type == NamesConstants.LOS_NO_TARGET:
+                
                 los = LoSWithoutTarget(wkt_to_array_points(los_feature.geometry().asWkt()),
                                        observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
                                        use_curvature_corrections=curvature_corrections,
@@ -208,7 +214,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
             sink.addFeature(f)
 
-            feedback.setProgress((los_layer_count/feature_count)*100)
+            feedback.setProgress((los_layer_count / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
