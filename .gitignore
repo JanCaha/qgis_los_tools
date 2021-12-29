@@ -5,3 +5,5 @@ __pycache__
 .coverage
 /tests/_data/results
 !/tests/_data/results/__init__.txt
+/tests/_data/*.gpkg-wal
+/tests/_data/*.gpkg-shm
