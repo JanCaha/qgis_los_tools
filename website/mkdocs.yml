@@ -12,10 +12,19 @@ theme:
     name: cerulean
     custom_dir: custom_theme/
     
-extra_css: [css\additions.css]
+extra_css: 
+    - css\additions.css
+    - //cdnjs.cloudflare.com/ajax/libs/featherlight/v.1.7.14/featherlight.min.css
+
+extra_javascript:
+    - //code.jquery.com/jquery-3.6.0.min.js
+    - //cdnjs.cloudflare.com/ajax/libs/featherlight/v.1.7.14/featherlight.min.js
 
 docs_dir: pages
 site_dir: docs
     
 plugins:
     - search
+
+markdown_extensions:
+    - featherlight
