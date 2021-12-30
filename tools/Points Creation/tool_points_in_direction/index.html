@@ -12,12 +12,13 @@
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/color-brewer.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/color-brewer.min.css">
         <link href="../../../css/additions.css" rel="stylesheet">
+        <link href="//cdnjs.cloudflare.com/ajax/libs/featherlight/v.1.7.14/featherlight.min.css" rel="stylesheet">
 
         <script src="../../../js/jquery-1.10.2.min.js" defer></script>
         <script src="../../../js/bootstrap.min.js" defer></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script> 
     </head>
 
@@ -289,7 +290,7 @@
 <li><strong>difference_to_main_azimuth</strong> - double - difference of main point azimuth to this point's azimuth</li>
 </ul>
 <h2 id="tool-screenshot">Tool screenshot</h2>
-<p><img alt="Create points in direction" src="../../../images/tool_points_in_direction.png" /></p></div>
+<p><a data-featherlight="../../../images/tool_points_in_direction.png" href="#"><img alt="Create points in direction" src="../../../images/tool_points_in_direction.png" /></a></p></div>
             </div>
         </div>
 
@@ -303,6 +304,8 @@
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
         <script src="../../../js/base.js" defer></script>
+        <script src="//code.jquery.com/jquery-3.6.0.min.js" defer></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/featherlight/v.1.7.14/featherlight.min.js" defer></script>
         <script src="../../../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
@@ -313,16 +316,13 @@
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             </div>
             <div class="modal-body">
-                <p>
-                    From here you can search these documents. Enter
-                    your search terms below.
-                </p>
+                <p>From here you can search these documents. Enter your search terms below.</p>
                 <form>
                     <div class="form-group">
                         <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
-                <div id="mkdocs-search-results"></div>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
             </div>
             <div class="modal-footer">
             </div>
