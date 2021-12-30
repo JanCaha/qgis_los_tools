@@ -1,32 +1,17 @@
-import math
 import numpy as np
 from typing import List, Any, Optional, Union
 
-from qgis.core import (
-    QgsProcessing,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterField,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterMatrix,
-    QgsProcessingParameterMultipleLayers,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsPoint,
-    QgsFields,
-    QgsLineString,
-    QgsGeometry,
-    QgsProcessingUtils,
-    QgsRasterDataProvider,
-    QgsRasterLayer,
-    QgsVectorLayer)
+from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
+                       QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
+                       QgsProcessingParameterMultipleLayers, QgsField, QgsFeature, QgsWkbTypes,
+                       QgsPoint, QgsFields, QgsLineString, QgsGeometry, QgsRasterDataProvider,
+                       QgsRasterLayer, QgsVectorLayer)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.tools.util_functions import bilinear_interpolated_value, get_diagonal_size
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
-from los_tools.tools.util_functions import get_doc_file, log
+from los_tools.tools.util_functions import get_doc_file
 
 
 class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
@@ -40,96 +25,57 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
     OUTPUT_LAYER = "OutputLayer"
 
     DEM_RASTERS = "DemRasters"
-    LINE_SETTINGS = "LineSettings"
     LINE_SETTINGS_TABLE = "LineSettingsTable"
 
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterMultipleLayers(
-                self.DEM_RASTERS,
-                "Raster DEM Layers",
-                QgsProcessing.TypeRaster
-            )
-        )
+            QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers",
+                                                 QgsProcessing.TypeRaster))
 
         self.addParameter(
-            QgsProcessingParameterMatrix(
-                self.LINE_SETTINGS,
-                "Sampling distance - distance matrix",
-                numberRows=3,
-                headers=["Sampling distance", "Distance limit"],
-                defaultValue=[1, -1]
-            )
-        )
+            QgsProcessingParameterFeatureSource(self.LINE_SETTINGS_TABLE,
+                                                "Sampling distance - distance table",
+                                                [QgsProcessing.TypeVector]))
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.LINE_SETTINGS_TABLE,
-                "Sampling distance - distance table",
-                [QgsProcessing.TypeVector],
-                optional=True)
-        )
+            QgsProcessingParameterFeatureSource(self.OBSERVER_POINTS_LAYER,
+                                                "Observers point layer",
+                                                [QgsProcessing.TypeVectorPoint]))
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.OBSERVER_POINTS_LAYER,
-                "Observers point layer",
-                [QgsProcessing.TypeVectorPoint])
-        )
+            QgsProcessingParameterField(self.OBSERVER_ID_FIELD,
+                                        "Observer ID field",
+                                        parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.OBSERVER_ID_FIELD,
-                "Observer ID field",
-                parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
+            QgsProcessingParameterField(self.OBSERVER_OFFSET_FIELD,
+                                        "Observer offset field",
+                                        parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.OBSERVER_OFFSET_FIELD,
-                "Observer offset field",
-                parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
+            QgsProcessingParameterFeatureSource(self.TARGET_POINTS_LAYER, "Targets point layer",
+                                                [QgsProcessing.TypeVectorPoint]))
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.TARGET_POINTS_LAYER,
-                "Targets point layer",
-                [QgsProcessing.TypeVectorPoint])
-        )
+            QgsProcessingParameterField(self.TARGET_ID_FIELD,
+                                        "Target ID field",
+                                        parentLayerParameterName=self.TARGET_POINTS_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.TARGET_ID_FIELD,
-                "Target ID field",
-                parentLayerParameterName=self.TARGET_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
+            QgsProcessingParameterField(self.TARGET_DEFINITION_ID_FIELD,
+                                        "Target and Observer agreement ID field",
+                                        parentLayerParameterName=self.TARGET_POINTS_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
-        self.addParameter(
-            QgsProcessingParameterField(
-                self.TARGET_DEFINITION_ID_FIELD,
-                "Target and Observer agreement ID field",
-                parentLayerParameterName=self.TARGET_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT_LAYER,
-                "Output layer")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
     def checkParameterValues(self, parameters, context):
 
@@ -167,16 +113,16 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
                 return False, msg
 
-            line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE, context)
+            line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE,
+                                                              context)
 
             if line_settings_table:
 
                 validation, msg = SamplingDistanceMatrix.validate_table(line_settings_table)
 
             else:
-                validation, msg = SamplingDistanceMatrix.validate_table(self.parameterAsMatrix(parameters,
-                                                                                               self.LINE_SETTINGS,
-                                                                                               context))
+                validation, msg = SamplingDistanceMatrix.validate_table(
+                    self.parameterAsMatrix(parameters, self.LINE_SETTINGS, context))
 
             if not validation:
                 return validation, msg
@@ -190,21 +136,17 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         observers_offset = self.parameterAsString(parameters, self.OBSERVER_OFFSET_FIELD, context)
         targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
-        target_definition_id_field = self.parameterAsString(parameters, self.TARGET_DEFINITION_ID_FIELD, context)
+        target_definition_id_field = self.parameterAsString(parameters,
+                                                            self.TARGET_DEFINITION_ID_FIELD,
+                                                            context)
 
-        self.rasters = self.get_raster_ordered_by_pixel_size(self.parameterAsLayerList(parameters,
-                                                                                       self.DEM_RASTERS,
-                                                                                       context))
+        self.rasters = self.get_raster_ordered_by_pixel_size(
+            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
 
-        line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE, context)
+        line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE,
+                                                          context)
 
-        if line_settings_table:
-
-            self.distances = SamplingDistanceMatrix(line_settings_table)
-
-        else:
-
-            self.distances = SamplingDistanceMatrix(self.parameterAsMatrix(parameters, self.LINE_SETTINGS, context))
+        self.distances = SamplingDistanceMatrix(line_settings_table)
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.LOS_TYPE, QVariant.String))
@@ -215,11 +157,8 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.OBSERVER_X, QVariant.Double))
         fields.append(QgsField(FieldNames.OBSERVER_Y, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters,
-                                             self.OUTPUT_LAYER,
-                                             context,
-                                             fields,
-                                             QgsWkbTypes.LineString25D,
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context,
+                                             fields, QgsWkbTypes.LineString25D,
                                              observers_layer.sourceCrs())
 
         feature_count = targets_layer.featureCount()
@@ -248,7 +187,8 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
                 if feedback.isCanceled():
                     break
 
-                if observer_feature.attribute(observers_id) == target_feature.attribute(target_definition_id_field):
+                if observer_feature.attribute(observers_id) == target_feature.attribute(
+                        target_definition_id_field):
 
                     start_point = QgsPoint(observer_feature.geometry().asPoint())
                     end_point = QgsPoint(target_feature.geometry().asPoint())
@@ -287,7 +227,7 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
                     sink.addFeature(f)
                     i += 1
-                    feedback.setProgress((i/feature_count)*100)
+                    feedback.setProgress((i / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
@@ -300,11 +240,13 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
             if value is not None:
                 return value
 
-    def build_line(self,
-                   origin_point: QgsPoint,
-                   next_point: QgsPoint):
+        return None
+
+    def build_line(self, origin_point: QgsPoint, next_point: QgsPoint):
 
         directional_line = QgsLineString([origin_point, next_point])
+
+        line: Union[QgsLineString, QgsGeometry]
 
         lines = []
 
@@ -313,16 +255,19 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
             if i == 0:
 
                 if self.distances.get_row_distance(i) < directional_line.straightDistance2d():
-                    point = directional_line.interpolatePoint(self.distances.get_row_sampling_distance(i))
-                    line = QgsLineString([directional_line.startPoint(),
-                                          point])
+                    point = directional_line.interpolatePoint(
+                        self.distances.get_row_sampling_distance(i))
+                    line = QgsLineString([directional_line.startPoint(), point])
 
                 else:
                     line = directional_line
-                    line.extend(0, self.distances.get_row_distance(i) - directional_line.straightDistance2d())
+                    line.extend(
+                        0,
+                        self.distances.get_row_distance(i) - directional_line.straightDistance2d())
 
                 line = QgsGeometry(line)
-                line = line.densifyByDistance(distance=np.nextafter(self.distances.get_row_sampling_distance(i), np.Inf))
+                line = line.densifyByDistance(
+                    distance=np.nextafter(self.distances.get_row_sampling_distance(i), np.Inf))
 
                 line_res = QgsLineString()
                 line_res.fromWkt(line.asWkt())
@@ -332,12 +277,14 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
             else:
 
                 this_line: QgsLineString = lines[-1].clone()
-                this_line.extend(0, self.distances.get_row_distance(i) - self.distances.get_row_distance(i-1))
-                this_line = QgsLineString([lines[-1].endPoint(),
-                                           this_line.endPoint()])
+                this_line.extend(
+                    0,
+                    self.distances.get_row_distance(i) - self.distances.get_row_distance(i - 1))
+                this_line = QgsLineString([lines[-1].endPoint(), this_line.endPoint()])
 
                 line = QgsGeometry(this_line)
-                line = line.densifyByDistance(distance=np.nextafter(self.distances.get_row_sampling_distance(i), np.Inf))
+                line = line.densifyByDistance(
+                    distance=np.nextafter(self.distances.get_row_sampling_distance(i), np.Inf))
 
                 line_res = QgsLineString()
                 line_res.fromWkt(line.asWkt())
@@ -351,7 +298,8 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
         return result_line
 
-    def get_raster_ordered_by_pixel_size(self, layer_list: List[QgsRasterLayer]) -> List[QgsRasterDataProvider]:
+    def get_raster_ordered_by_pixel_size(
+            self, layer_list: List[QgsRasterLayer]) -> List[QgsRasterDataProvider]:
 
         tuples = []
 
@@ -406,7 +354,7 @@ class SamplingDistanceMatrix:
 
             while i < len(data):
 
-                distance = data[i+1]
+                distance = data[i + 1]
 
                 self.data.append([float(data[i]), float(distance)])
 
@@ -418,14 +366,13 @@ class SamplingDistanceMatrix:
 
             for feature in data.getFeatures():
 
-                last_distance = feature.attribute(FieldNames.DISTANCE)
                 last_size = feature.attribute(FieldNames.SIZE)
 
-                self.data.append([feature.attribute(FieldNames.SIZE),
-                                  feature.attribute(FieldNames.DISTANCE)])
+                self.data.append(
+                    [feature.attribute(FieldNames.SIZE),
+                     feature.attribute(FieldNames.DISTANCE)])
 
-            self.data.append([last_size,
-                              -1])
+            self.data.append([last_size, -1])
 
         self.sort_data()
 
@@ -487,12 +434,14 @@ class SamplingDistanceMatrix:
 
                 try:
                     float(data[i])
-                except ValueError as e:
+
+                except ValueError:
                     return False, f"Cannot convert value `{data[i]}` into type float."
 
                 try:
                     float(distance)
-                except ValueError as e:
+
+                except ValueError:
                     return False, f"Cannot convert value `{distance}` into type float."
 
                 i += 2
@@ -522,7 +471,9 @@ class SamplingDistanceMatrix:
 
     def next_distance(self, current_distance: float) -> float:
 
-        value_to_add = 0
+        value_to_add = 0.0
+
+        row: List[float]
 
         for row in self.data:
             if current_distance < row[self.INDEX_DISTANCE]:
