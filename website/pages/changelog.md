@@ -1,5 +1,15 @@
 # Changelog
 
+## version 0.7
+
+- add tools: Create no Target LoS V2, Calculate Object Distances, Calculate Object Sizes
+
+- minor fixes all around
+
+- fixes to website (zoomable images)
+
+- internal changes to handling tests  
+
 ## version 0.5
 
 - add plugin icon
