@@ -28,7 +28,7 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.table = QgsVectorLayer(get_data_path(file="size_distance.xlsx"))
 
-        self.output_path = get_data_path_results(file="los_no_target.gpkg")
+        self.output_path = get_data_path_results(file="los_no_target_v2.gpkg")
 
         self.alg = CreateNoTargetLosAlgorithmV2()
         self.alg.initAlgorithm()
