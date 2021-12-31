@@ -17,6 +17,15 @@
                 "panel": "new"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Show website",
+            "type": "shell",
+            "command": "mkdocs serve --config-file ./website/mkdocs.yml;google-chrome ./website/docs/index.html",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
