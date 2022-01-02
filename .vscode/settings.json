@@ -19,7 +19,7 @@
     "python.linting.flake8Enabled": true,
     "python.linting.flake8Args": [
         "--max-line-length=160",
-        "--ignore=W293,W5034"
+        "--ignore=W293,W503"
     ],
     "python.linting.mypyEnabled": true,
     "python.linting.mypyArgs": [
