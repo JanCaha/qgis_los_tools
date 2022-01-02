@@ -5,8 +5,7 @@ from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
-from tests.utils_tests import (get_data_path,
-                               get_data_path_results)
+from tests.utils_tests import (get_data_path, get_data_path_results)
 
 from tests.utils_tests import get_qgis_app
 
@@ -41,63 +40,43 @@ class AnalyseLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
     def test_check_wrong_params(self) -> None:
 
         # use layer that is not correctly constructed LoS layer
-        params = {
-            "LoSLayer": QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))
-        }
+        params = {"LoSLayer": QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))}
 
         self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="Fields specific for LoS not found in current layer"
-        )
+            parameters=params, message="Fields specific for LoS not found in current layer")
 
     def test_run_alg(self) -> None:
 
         output_path = get_data_path_results(file="los_local_analysed.gpkg")
 
-        params = {
-            "LoSLayer": self.los_local,
-            "OutputLayer": output_path
-        }
+        params = {"LoSLayer": self.los_local, "OutputLayer": output_path}
 
         self.assertRunAlgorithm(parameters=params)
 
-        self.assertFieldNamesInQgsVectorLayer([FieldNames.VISIBLE,
-                                               FieldNames.VIEWING_ANGLE,
-                                               FieldNames.ELEVATION_DIFF,
-                                               FieldNames.ANGLE_DIFF_LH,
-                                               FieldNames.ELEVATION_DIFF_LH,
-                                               FieldNames.SLOPE_DIFFERENCE_LH,
-                                               FieldNames.HORIZON_COUNT,
-                                               FieldNames.DISTANCE_LH],
-                                              QgsVectorLayer(output_path))
+        self.assertFieldNamesInQgsVectorLayer([
+            FieldNames.VISIBLE, FieldNames.VIEWING_ANGLE, FieldNames.ELEVATION_DIFF,
+            FieldNames.ANGLE_DIFF_LH, FieldNames.ELEVATION_DIFF_LH, FieldNames.SLOPE_DIFFERENCE_LH,
+            FieldNames.HORIZON_COUNT, FieldNames.DISTANCE_LH
+        ], QgsVectorLayer(output_path))
 
         output_path = get_data_path_results(file="los_global_analysed.gpkg")
 
-        params = {
-            "LoSLayer": self.los_global,
-            "OutputLayer": output_path
-        }
+        params = {"LoSLayer": self.los_global, "OutputLayer": output_path}
 
         self.assertRunAlgorithm(parameters=params)
 
-        self.assertFieldNamesInQgsVectorLayer([FieldNames.VISIBLE,
-                                               FieldNames.ANGLE_DIFF_GH,
-                                               FieldNames.ELEVATION_DIFF_GH,
-                                               FieldNames.HORIZON_COUNT_BEHIND,
-                                               FieldNames.DISTANCE_GH],
-                                              QgsVectorLayer(output_path))
+        self.assertFieldNamesInQgsVectorLayer([
+            FieldNames.VISIBLE, FieldNames.ANGLE_DIFF_GH, FieldNames.ELEVATION_DIFF_GH,
+            FieldNames.HORIZON_COUNT_BEHIND, FieldNames.DISTANCE_GH
+        ], QgsVectorLayer(output_path))
 
         output_path = get_data_path_results(file="los_notarget_analysed.gpkg")
 
-        params = {
-            "LoSLayer": self.los_no_target,
-            "OutputLayer": output_path
-        }
+        params = {"LoSLayer": self.los_no_target, "OutputLayer": output_path}
 
         self.assertRunAlgorithm(parameters=params)
 
-        self.assertFieldNamesInQgsVectorLayer([FieldNames.MAXIMAL_VERTICAL_ANGLE,
-                                               FieldNames.DISTANCE_GH,
-                                               FieldNames.DISTANCE_LH,
-                                               FieldNames.VERTICAL_ANGLE_LH],
-                                              QgsVectorLayer(output_path))
+        self.assertFieldNamesInQgsVectorLayer([
+            FieldNames.MAXIMAL_VERTICAL_ANGLE, FieldNames.DISTANCE_GH, FieldNames.DISTANCE_LH,
+            FieldNames.VERTICAL_ANGLE_LH
+        ], QgsVectorLayer(output_path))

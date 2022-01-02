@@ -1,8 +1,4 @@
-import unittest
-
-from qgis.core import (QgsVectorLayer,
-                       QgsRasterLayer,
-                       QgsFeatureRequest)
+from qgis.core import (QgsVectorLayer, QgsRasterLayer, QgsFeatureRequest)
 from qgis._core import QgsWkbTypes
 
 from los_tools.create_los.tool_create_global_los import CreateGlobalLosAlgorithm
@@ -11,8 +7,7 @@ from los_tools.tools.util_functions import get_diagonal_size
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
-from tests.utils_tests import (get_data_path,
-                               get_data_path_results)
+from tests.utils_tests import (get_data_path, get_data_path_results)
 
 
 class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
@@ -65,14 +60,10 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
     def test_check_wrong_params(self) -> None:
 
         # multiband raster fail
-        params = {
-            "DemRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))
-        }
+        params = {"DemRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))}
 
         self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="`Raster Layer DEM` can only have one band."
-        )
+            parameters=params, message="`Raster Layer DEM` can only have one band.")
 
         # observer layer with geographic coordinates
         params = {
@@ -81,9 +72,7 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
         }
 
         self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="`Observers point layer` crs must be projected."
-        )
+            parameters=params, message="`Observers point layer` crs must be projected.")
 
         # raster crs != observers crs
         params = {
@@ -93,8 +82,7 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.assertCheckParameterValuesRaisesMessage(
             parameters=params,
-            message="`Observers point layer` and `Raster Layer DEM` crs must be equal."
-        )
+            message="`Observers point layer` and `Raster Layer DEM` crs must be equal.")
 
         # observers crs != target crs
         params = {
@@ -105,8 +93,7 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.assertCheckParameterValuesRaisesMessage(
             parameters=params,
-            message="`Observers point layer` and `Targets point layer` crs must be equal."
-        )
+            message="`Observers point layer` and `Targets point layer` crs must be equal.")
 
     def test_run_alg(self) -> None:
 
@@ -130,16 +117,18 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                   geom_type=QgsWkbTypes.LineStringZ,
                                   crs=self.observers.sourceCrs())
 
-        self.assertFieldNamesInQgsVectorLayer([FieldNames.LOS_TYPE, FieldNames.ID_OBSERVER,
-                                               FieldNames.ID_TARGET, FieldNames.OBSERVER_OFFSET,
-                                               FieldNames.TARGET_OFFSET],
-                                              los_layer)
+        self.assertFieldNamesInQgsVectorLayer([
+            FieldNames.LOS_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET,
+            FieldNames.OBSERVER_OFFSET, FieldNames.TARGET_OFFSET
+        ], los_layer)
 
         self.assertEqual(self.observers.featureCount() * self.targets.featureCount(),
                          los_layer.featureCount())
 
-        observers_ids = list(self.observers.uniqueValues(self.observers.fields().lookupField(self.observers_id)))
-        targets_ids = list(self.targets.uniqueValues(self.targets.fields().lookupField(self.targets_id)))
+        observers_ids = list(
+            self.observers.uniqueValues(self.observers.fields().lookupField(self.observers_id)))
+        targets_ids = list(
+            self.targets.uniqueValues(self.targets.fields().lookupField(self.targets_id)))
 
         dsm_max_size = get_diagonal_size(self.dsm.dataProvider())
         dsm_extent = self.dsm.dataProvider().extent()
@@ -157,16 +146,14 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
                     target_feature = list(self.targets.getFeatures(request))[0]
 
                     request = QgsFeatureRequest()
-                    request.setFilterExpression("{} = '{}' AND {} = '{}'".
-                                                format(FieldNames.ID_OBSERVER, observer_id,
-                                                       FieldNames.ID_TARGET, target_id))
+                    request.setFilterExpression("{} = '{}' AND {} = '{}'".format(
+                        FieldNames.ID_OBSERVER, observer_id, FieldNames.ID_TARGET, target_id))
                     los_layer_feature = list(los_layer.getFeatures(request))[0]
 
-                    self.assertTrue(observer_feature.geometry().distance(target_feature.geometry()) <
-                                    los_layer_feature.geometry().length())
+                    self.assertTrue(observer_feature.geometry().distance(target_feature.geometry())
+                                    < los_layer_feature.geometry().length())
 
-                    self.assertTrue(los_layer_feature.geometry().length() <
-                                    dsm_max_size)
+                    self.assertTrue(los_layer_feature.geometry().length() < dsm_max_size)
 
                     vertices = los_layer_feature.geometry().asPolyline()
 
