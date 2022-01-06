@@ -254,16 +254,14 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
             if i == 0:
 
-                if self.distances.get_row_distance(i) < directional_line.straightDistance2d():
+                if self.distances.get_row_distance(i) < directional_line.length():
                     point = directional_line.interpolatePoint(
                         self.distances.get_row_sampling_distance(i))
                     line = QgsLineString([directional_line.startPoint(), point])
 
                 else:
                     line = directional_line
-                    line.extend(
-                        0,
-                        self.distances.get_row_distance(i) - directional_line.straightDistance2d())
+                    line.extend(0, self.distances.get_row_distance(i) - directional_line.length())
 
                 line = QgsGeometry(line)
                 line = line.densifyByDistance(
