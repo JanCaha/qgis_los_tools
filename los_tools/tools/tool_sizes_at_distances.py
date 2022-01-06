@@ -1,8 +1,9 @@
 import math
 
 from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterMatrix,
-                       QgsProcessingParameterNumber, QgsProcessingFeedback, QgsFields, QgsField,
-                       QgsWkbTypes, QgsProcessingParameterFeatureSink, QgsFeature)
+                       QgsProcessingParameterBoolean, QgsProcessingParameterNumber,
+                       QgsProcessingFeedback, QgsFields, QgsField, QgsWkbTypes,
+                       QgsProcessingParameterFeatureSink, QgsFeature)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -13,6 +14,7 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
 
     ANGLE = "Angle"
     DISTANCES = "Distance"
+    MAXIMALDISTANCE = "MaximalDistance"
     OUTPUT_TABLE = "OutputTable"
 
     def initAlgorithm(self, config=None):
@@ -33,12 +35,19 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
                                          headers=["Distance"],
                                          defaultValue=[1000]))
 
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.MAXIMALDISTANCE,
+                "Add maximal distance value (with sampling equal to maximal sampling distance)",
+                defaultValue=False))
+
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table"))
 
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
 
         angle = self.parameterAsDouble(parameters, self.ANGLE, context)
         distances = self.parameterAsMatrix(parameters, self.DISTANCES, context)
+        maximal_distance = self.parameterAsBoolean(parameters, self.MAXIMALDISTANCE, context)
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.SIZE_ANGLE, QVariant.Double))
@@ -51,9 +60,9 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
         result_string_print = "Sizes at distances:\n" \
                               "Distance - Size\n"
 
-        sizes = []
-
         angle = float(angle)
+
+        maximal_sampling_distance = 0
 
         for distance in distances:
 
@@ -63,12 +72,24 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
 
             result_string_print += f"{distance} - {size}\n"
 
-            sizes.append(size)
+            if maximal_sampling_distance < size:
+                maximal_sampling_distance = size
 
             f = QgsFeature(fields)
             f.setAttribute(f.fieldNameIndex(FieldNames.SIZE_ANGLE), float(angle))
             f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE), float(distance))
             f.setAttribute(f.fieldNameIndex(FieldNames.SIZE), float(size))
+
+            sink.addFeature(f)
+
+        if maximal_distance:
+
+            f = QgsFeature(fields)
+            f.setAttribute(f.fieldNameIndex(FieldNames.SIZE_ANGLE), float(angle))
+            f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE), -1)
+            f.setAttribute(f.fieldNameIndex(FieldNames.SIZE), maximal_sampling_distance)
+
+            result_string_print += f"{-1} - {maximal_sampling_distance}\n"
 
             sink.addFeature(f)
 
