@@ -116,13 +116,7 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
             line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE,
                                                               context)
 
-            if line_settings_table:
-
-                validation, msg = SamplingDistanceMatrix.validate_table(line_settings_table)
-
-            else:
-                validation, msg = SamplingDistanceMatrix.validate_table(
-                    self.parameterAsMatrix(parameters, self.LINE_SETTINGS, context))
+            validation, msg = SamplingDistanceMatrix.validate_table(line_settings_table)
 
             if not validation:
                 return validation, msg
@@ -343,35 +337,17 @@ class SamplingDistanceMatrix:
     INDEX_SAMPLING_DISTANCE = 0
     INDEX_DISTANCE = 1
 
-    def __init__(self, data: Union[List[Any], QgsVectorLayer]):
+    def __init__(self, data: QgsVectorLayer):
 
         self.data = []
 
-        if isinstance(data, List):
+        feature: QgsFeature
 
-            i = 0
+        for feature in data.getFeatures():
 
-            while i < len(data):
-
-                distance = data[i + 1]
-
-                self.data.append([float(data[i]), float(distance)])
-
-                i += 2
-
-        elif isinstance(data, QgsVectorLayer):
-
-            feature: QgsFeature
-
-            for feature in data.getFeatures():
-
-                last_size = feature.attribute(FieldNames.SIZE)
-
-                self.data.append(
-                    [feature.attribute(FieldNames.SIZE),
-                     feature.attribute(FieldNames.DISTANCE)])
-
-            self.data.append([last_size, -1])
+            self.data.append(
+                [feature.attribute(FieldNames.SIZE),
+                 feature.attribute(FieldNames.DISTANCE)])
 
         self.sort_data()
 
@@ -421,42 +397,21 @@ class SamplingDistanceMatrix:
         return self.get_row(index)[self.INDEX_SAMPLING_DISTANCE]
 
     @staticmethod
-    def validate_table(data: Union[List[Any], QgsVectorLayer]):
+    def validate_table(data: QgsVectorLayer):
 
-        if isinstance(data, List):
+        field_names = data.fields().names()
 
-            i = 0
+        if FieldNames.SIZE_ANGLE not in field_names:
+            return False, f"Field `{FieldNames.SIZE_ANGLE}` does not exist but is required."
 
-            while i < len(data):
+        if FieldNames.DISTANCE not in field_names:
+            return False, f"Field `{FieldNames.DISTANCE}` does not exist but is required."
 
-                distance = data[i + 1]
+        if FieldNames.SIZE not in field_names:
+            return False, f"Field `{FieldNames.SIZE}` does not exist but is required."
 
-                try:
-                    float(data[i])
-
-                except ValueError:
-                    return False, f"Cannot convert value `{data[i]}` into type float."
-
-                try:
-                    float(distance)
-
-                except ValueError:
-                    return False, f"Cannot convert value `{distance}` into type float."
-
-                i += 2
-
-        elif isinstance(data, QgsVectorLayer):
-
-            field_names = data.fields().names()
-
-            if FieldNames.SIZE_ANGLE not in field_names:
-                return False, f"Field `{FieldNames.SIZE_ANGLE}` does not exist but is required."
-
-            if FieldNames.DISTANCE not in field_names:
-                return False, f"Field `{FieldNames.DISTANCE}` does not exist but is required."
-
-            if FieldNames.SIZE not in field_names:
-                return False, f"Field `{FieldNames.SIZE}` does not exist but is required."
+        if data.featureCount() < 1:
+            return False, "There are no features in the sampling distance - distance table (layer)."
 
         return True, ""
 
