@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
 /***************************************************************************
  los_tools
@@ -54,6 +53,7 @@ from los_tools.tools.tool_azimuth import AzimuthPointPolygonAlgorithm
 from los_tools.tools.tool_extract_los_visibility_parts import ExtractLoSVisibilityPartsAlgorithm
 from los_tools.tools.tool_sizes_at_distances import ObjectSizesAlgorithm
 from los_tools.tools.tools_distances_for_sizes import ObjectDistancesAlgorithm
+from los_tools.tools.tool_extract_los_visibility_polygons import ExtractLoSVisibilityPolygonsAlgorithm
 
 
 class los_toolsProvider(QgsProcessingProvider):
@@ -94,6 +94,7 @@ class los_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ObjectSizesAlgorithm())
         self.addAlgorithm(ObjectDistancesAlgorithm())
         self.addAlgorithm(CreateNoTargetLosAlgorithmV2())
+        self.addAlgorithm(ExtractLoSVisibilityPolygonsAlgorithm())
 
     def id(self):
         """
