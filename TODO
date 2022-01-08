@@ -4,3 +4,5 @@ Todo:
 Web:
   ☐ tool_create_notarget_los_v2.md - missing screenshot and links to tools
   ☐ create pages for tools to calculate distances and sizes
+  ☐ document STEP_ANGLE field in tool_points_around result and tool_create_notarget_los_v2 (add also to tool_create_notarget_los???)
+  ☐ does TARGET ID field makes sense for tool_create_notarget_los_v2?
