@@ -64,3 +64,5 @@ class FieldNames:
     SIZE_ANGLE = "Object size (angle)"
     DISTANCE = "Distance (meters)"
     SIZE = "Size of object (meters)"
+
+    ANGLE_STEP = "angle_step_between_los"
