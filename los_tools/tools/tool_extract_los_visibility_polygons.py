@@ -2,14 +2,14 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterBoolean, QgsField, QgsFeature, QgsWkbTypes, QgsFields,
                        QgsVectorLayer, QgsFeatureIterator, QgsProcessingUtils, QgsMapLayer,
-                       QgsSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer,
-                       QgsMultiLineString, QgsLineString, QgsPoint, QgsPolygon, QgsMultiPolygon,
-                       QgsPointXY, QgsGeometry)
+                       QgsSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsLineString,
+                       QgsPolygon, QgsMultiPolygon, QgsPointXY, QgsProcessingFeedback)
+from qgis.analysis import (QgsInternalGeometrySnapper, QgsGeometrySnapper)
 
 from qgis.PyQt.QtCore import QVariant, Qt
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.textlabels import TextLabels
-from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
+from los_tools.classes.classes_los import LoSWithoutTarget
 from los_tools.tools.util_functions import log, wkt_to_array_points, get_los_type
 from los_tools.constants.names_constants import NamesConstants
 
@@ -79,7 +79,7 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
 
         return {self.OUTPUT_LAYER: self.dest_id}
 
-    def processAlgorithm(self, parameters, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
 
         los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER,
                                                                 context)
@@ -102,6 +102,9 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
         feature_count = los_layer.featureCount()
 
         los_iterator: QgsFeatureIterator = los_layer.getFeatures()
+
+        geometry_snapper = QgsInternalGeometrySnapper(0.000001,
+                                                      QgsGeometrySnapper.EndPointToEndPoint)
 
         for feature_number, los_feature in enumerate(los_iterator):
 
@@ -203,6 +206,12 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
                                            los_feature.attribute(FieldNames.ID_OBSERVER))
             feature_invisible.setAttribute(FieldNames.ID_TARGET,
                                            los_feature.attribute(FieldNames.ID_TARGET))
+
+            geom_visible = geometry_snapper.snapFeature(feature_visible)
+            feature_visible.setGeometry(geom_visible)
+
+            geom_invisible = geometry_snapper.snapFeature(feature_invisible)
+            feature_invisible.setGeometry(geom_invisible)
 
             sink.addFeature(feature_visible)
             sink.addFeature(feature_invisible)
