@@ -3,7 +3,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterBoolean, QgsField, QgsFeature, QgsWkbTypes, QgsFields,
                        QgsVectorLayer, QgsFeatureIterator, QgsProcessingUtils, QgsMapLayer,
                        QgsSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsLineString,
-                       QgsPolygon, QgsMultiPolygon, QgsPointXY, QgsProcessingFeedback)
+                       QgsMultiPolygon, QgsPointXY, QgsProcessingFeedback)
 from qgis.analysis import (QgsInternalGeometrySnapper, QgsGeometrySnapper)
 
 from qgis.PyQt.QtCore import QVariant, Qt
