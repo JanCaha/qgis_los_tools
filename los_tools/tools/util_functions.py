@@ -5,18 +5,36 @@ from typing import List, Optional, Union
 import re
 from pathlib import Path
 
-from qgis.core import (QgsGeometry,
-                       QgsLineString,
-                       QgsPoint,
-                       QgsPointXY,
-                       QgsRasterDataProvider,
-                       QgsRectangle,
-                       QgsVectorLayer,
-                       QgsMessageLog,
-                       QgsProcessingException,
-                       Qgis)
+from qgis.core import (QgsGeometry, QgsLineString, QgsPoint, QgsPointXY, QgsRasterDataProvider,
+                       QgsRectangle, QgsVectorLayer, QgsMessageLog, QgsProcessingException, Qgis,
+                       QgsPolygon)
 
 from los_tools.constants.field_names import FieldNames
+
+
+def line_to_polygon(line: QgsLineString, observer_point: QgsPointXY,
+                    angle_width: float) -> QgsPolygon:
+
+    angle_width = angle_width / 2
+
+    line_start_point = QgsPointXY(line.startPoint())
+    line_end_point = QgsPointXY(line.endPoint())
+
+    azimuth = observer_point.azimuth(line_end_point)
+
+    point_1 = observer_point.project(observer_point.distance(line_start_point),
+                                     azimuth + angle_width)
+    point_2 = observer_point.project(observer_point.distance(line_end_point),
+                                     azimuth + angle_width)
+    point_3 = observer_point.project(observer_point.distance(line_end_point),
+                                     azimuth - angle_width)
+    point_4 = observer_point.project(observer_point.distance(line_start_point),
+                                     azimuth - angle_width)
+
+    poly = QgsPolygon(
+        QgsLineString([line_start_point, point_1, point_2, line_end_point, point_3, point_4]))
+
+    return poly
 
 
 def get_los_type(los_layer: QgsVectorLayer, field_names: List[str]) -> str:
@@ -28,9 +46,7 @@ def get_los_type(los_layer: QgsVectorLayer, field_names: List[str]) -> str:
         msg = "More than one type of LoS present in layer. Cannot process such layer. " \
               "Existing LoS types are {0}.".format(", ".join(los_types))
 
-        QgsMessageLog.logMessage(msg,
-                                 "los_tools",
-                                 Qgis.Critical)
+        QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)
 
         raise QgsProcessingException(msg)
 
@@ -46,9 +62,7 @@ def get_horizon_lines_type(horizon_lines_layer: QgsVectorLayer) -> str:
         msg = "More than one type of horizon lines present in layer. Cannot process such layer. " \
               "Existing LoS types are {0}.".format(", ".join(horizon_lines_types))
 
-        QgsMessageLog.logMessage(msg,
-                                 "los_tools",
-                                 Qgis.Critical)
+        QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)
 
         raise QgsProcessingException(msg)
 
@@ -57,27 +71,24 @@ def get_horizon_lines_type(horizon_lines_layer: QgsVectorLayer) -> str:
 
 def check_existence_los_fields(field_names: List[str]) -> None:
 
-    if not (FieldNames.LOS_TYPE in field_names or
-            FieldNames.ID_OBSERVER in field_names or
+    if not (FieldNames.LOS_TYPE in field_names or FieldNames.ID_OBSERVER in field_names or
             FieldNames.ID_TARGET in field_names):
         msg = "Fields specific for LoS not found in current layer ({0}, {1}, {2}). " \
               "Cannot analyse the layer as LoS.".format(FieldNames.LOS_TYPE,
                                                         FieldNames.ID_OBSERVER,
                                                         FieldNames.ID_TARGET)
 
-        QgsMessageLog.logMessage(msg,
-                                 "los_tools",
-                                 Qgis.Critical)
+        QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)
 
         raise QgsProcessingException(msg)
 
 
 def wkt_to_array_points(wkt: str) -> List[List[float]]:
-    
+
     reg = re.compile("(LINESTRING |LineStringZ )")
-    
+
     wkt = reg.sub("", wkt)
-    
+
     array = wkt.replace("(", "").replace(")", "").split(",")
 
     array_result: List[List[float]] = []
@@ -107,56 +118,55 @@ def get_diagonal_size(raster: QgsRasterDataProvider) -> float:
 
 
 # taken from plugin rasterinterpolation https://plugins.qgis.org/plugins/rasterinterpolation/
-def bilinear_interpolated_value(raster: QgsRasterDataProvider, point: Union[QgsPoint, QgsPointXY]) -> Optional[float]:
+def bilinear_interpolated_value(raster: QgsRasterDataProvider,
+                                point: Union[QgsPoint, QgsPointXY]) -> Optional[float]:
     # see the implementation of raster data provider, identify method
     # https://github.com/qgis/Quantum-GIS/blob/master/src/core/raster/qgsrasterdataprovider.cpp#L268
     x = point.x()
     y = point.y()
-    
+
     extent = raster.extent()
-    
+
     xres = extent.width() / raster.xSize()
     yres = extent.height() / raster.ySize()
-    
+
     col = round((x - extent.xMinimum()) / xres)
     row = round((extent.yMaximum() - y) / yres)
-    
+
     xMin = extent.xMinimum() + (col - 1) * xres
     xMax = xMin + 2 * xres
     yMax = extent.yMaximum() - (row - 1) * yres
     yMin = yMax - 2 * yres
-    
+
     pixelExtent = QgsRectangle(xMin, yMin, xMax, yMax)
-    
+
     myBlock = raster.block(1, pixelExtent, 2, 2)
-    
+
     # http://en.wikipedia.org/wiki/Bilinear_interpolation#Algorithm
     v12 = myBlock.value(0, 0)
     v22 = myBlock.value(0, 1)
     v11 = myBlock.value(1, 0)
     v21 = myBlock.value(1, 1)
-    
+
     if raster.sourceNoDataValue(1) in (v12, v22, v11, v21):
         return None
-    
+
     x1 = xMin + xres / 2
     x2 = xMax - xres / 2
     y1 = yMin + yres / 2
     y2 = yMax - yres / 2
-    
-    value = (v11 * (x2 - x) * (y2 - y) +
-             v21 * (x - x1) * (y2 - y) +
-             v12 * (x2 - x) * (y - y1) +
-             v22 * (x - x1) * (y - y1)) / ((x2 - x1) * (y2 - y1))
-    
+
+    value = (v11 * (x2 - x) * (y2 - y) + v21 * (x - x1) * (y2 - y) + v12 * (x2 - x) *
+             (y - y1) + v22 * (x - x1) * (y - y1)) / ((x2 - x1) * (y2 - y1))
+
     if value is not None and value == raster.sourceNoDataValue(1):
         return None
-    
+
     return value
 
 
 def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
-    
+
     return math.sqrt(math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
 
 
@@ -178,7 +188,5 @@ def get_doc_file(file_path: str):
 
 
 def log(text):
-    
-    QgsMessageLog.logMessage(str(text),
-                             "los_tools",
-                             Qgis.Info)
+
+    QgsMessageLog.logMessage(str(text), "los_tools", Qgis.Info)

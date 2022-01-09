@@ -10,7 +10,7 @@ from qgis.PyQt.QtCore import QVariant, Qt
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.textlabels import TextLabels
 from los_tools.classes.classes_los import LoSWithoutTarget
-from los_tools.tools.util_functions import log, wkt_to_array_points, get_los_type
+from los_tools.tools.util_functions import log, wkt_to_array_points, get_los_type, line_to_polygon
 from los_tools.constants.names_constants import NamesConstants
 
 
@@ -129,33 +129,6 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
             angle_width = los_feature.attribute(FieldNames.ANGLE_STEP)
 
             line: QgsLineString = QgsLineString()
-
-            def line_to_polygon(line: QgsLineString, observer_point: QgsPointXY,
-                                angle_width: float) -> QgsPolygon:
-
-                angle_width = angle_width / 2
-
-                line_start_point = QgsPointXY(line.startPoint())
-                line_end_point = QgsPointXY(line.endPoint())
-
-                azimuth = observer_point.azimuth(line_end_point)
-
-                point_1 = observer_point.project(observer_point.distance(line_start_point),
-                                                 round(azimuth + angle_width, 2))
-                point_2 = observer_point.project(observer_point.distance(line_end_point),
-                                                 round(azimuth + angle_width, 2))
-                point_3 = observer_point.project(observer_point.distance(line_end_point),
-                                                 round(azimuth - angle_width, 2))
-                point_4 = observer_point.project(observer_point.distance(line_start_point),
-                                                 round(azimuth - angle_width, 2))
-
-                poly = QgsPolygon(
-                    QgsLineString(
-                        [line_start_point, point_1, point_2, line_end_point, point_3, point_4]))
-
-                # poly = poly.snappedToGrid(0.000001, 0.000001)
-
-                return poly
 
             for i in range(0, len(los.points)):
 
