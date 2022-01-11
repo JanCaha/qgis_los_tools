@@ -156,9 +156,7 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
         distance_matrix.replace_minus_one_with_value(list_rasters.maximal_diagonal_size())
 
-        i = 0
-
-        for observer_count, observer_feature in enumerate(observers_iterator):
+        for observer_feature in observers_iterator:
 
             targets_iterators = targets_layer.getFeatures()
 
@@ -171,9 +169,9 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
                         target_definition_id_field):
 
                     start_point = QgsPoint(observer_feature.geometry().asPoint())
-                    end_point = QgsPoint(target_feature.geometry().asPoint())
+                    direction_point = QgsPoint(target_feature.geometry().asPoint())
 
-                    line = distance_matrix.build_line(start_point, end_point)
+                    line = distance_matrix.build_line(start_point, direction_point)
 
                     points = line.points()
 
@@ -211,8 +209,7 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
                                        target_feature.attribute(FieldNames.ANGLE_STEP))
 
                     sink.addFeature(f)
-                    i += 1
-                    feedback.setProgress((i / feature_count) * 100)
+                    feedback.setProgress((target_count / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
