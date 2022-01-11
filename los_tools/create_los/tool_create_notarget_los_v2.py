@@ -216,59 +216,6 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
         return {self.OUTPUT_LAYER: dest_id}
 
-    def build_line(self, origin_point: QgsPoint, next_point: QgsPoint,
-                   sampling_distance_matrix: SamplingDistanceMatrix):
-
-        directional_line = QgsLineString([origin_point, next_point])
-
-        line: Union[QgsLineString, QgsGeometry]
-
-        lines = []
-
-        for i in range(len(sampling_distance_matrix)):
-
-            if i == 0:
-
-                line = QgsGeometry(
-                    QgsLineString([
-                        origin_point,
-                        origin_point.project(sampling_distance_matrix.get_row_distance(i),
-                                             origin_point.azimuth(next_point))
-                    ]))
-
-                line = line.densifyByDistance(distance=np.nextafter(
-                    sampling_distance_matrix.get_row_sampling_distance(i), np.Inf))
-
-                line_res = QgsLineString()
-                line_res.fromWkt(line.asWkt())
-
-                lines.append(line_res)
-
-            else:
-
-                this_line: QgsLineString = lines[-1].clone()
-                this_line.extend(
-                    0,
-                    sampling_distance_matrix.get_row_distance(i) -
-                    sampling_distance_matrix.get_row_distance(i - 1))
-                this_line = QgsLineString([lines[-1].endPoint(), this_line.endPoint()])
-
-                line = QgsGeometry(this_line)
-                line = line.densifyByDistance(distance=np.nextafter(
-                    sampling_distance_matrix.get_row_sampling_distance(i), np.Inf))
-
-                line_res = QgsLineString()
-                line_res.fromWkt(line.asWkt())
-
-                lines.append(line_res)
-
-        result_line = QgsLineString()
-
-        for line_part in lines:
-            result_line.append(line_part)
-
-        return result_line
-
     def name(self):
         return "notargetlos2"
 
