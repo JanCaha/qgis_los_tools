@@ -1,33 +1,24 @@
 import unittest
-import os
 
 from osgeo import gdal
 import numpy as np
 
-from qgis.core import (QgsVectorLayer,
-                       QgsRasterLayer,
-                       QgsProcessingParameterField,
-                       QgsProcessingFeedback,
+from qgis.core import (QgsRasterLayer, QgsProcessingParameterField, QgsProcessingFeedback,
                        QgsProcessingContext)
 
-from los_tools.tools.tool_replace_raster_values import ReplaceRasterValuesAlgorithm
-from los_tools.constants.field_names import FieldNames
-
 from processing.core.Processing import Processing
-import processing
 
-from tests.utils_tests import (print_alg_params,
-                               print_alg_outputs,
-                               get_qgis_app,
-                               get_data_path,
+from los_tools.tools.tool_replace_raster_values import ReplaceRasterValuesAlgorithm
+
+from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
+from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
                                get_data_path_results)
 
-QGIS = get_qgis_app()
 
-
-class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
+class ReplaceRasterValuesAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def setUp(self) -> None:
+
         self.raster = QgsRasterLayer(get_data_path(file="dsm.tif"))
         self.polygons = f'{get_data_path(file="polys.gpkg")}|layername=polys'
 
@@ -46,6 +37,10 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
         print_alg_params(self.alg)
         print("----------------------------------")
         print_alg_outputs(self.alg)
+
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
 
     def test_parameters(self) -> None:
         param_raster_layer = self.alg.parameterDefinition("RasterLayer")
@@ -71,7 +66,7 @@ class ReplaceRasterValuesAlgorithmTest(unittest.TestCase):
     def test_run_alg(self):
 
         Processing.initialize()
-        
+
         params = {
             "RasterLayer": self.raster,
             "VectorLayer": self.polygons,

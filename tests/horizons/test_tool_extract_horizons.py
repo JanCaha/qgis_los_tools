@@ -7,8 +7,7 @@ from los_tools.constants.names_constants import NamesConstants
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
-from tests.utils_tests import (get_data_path,
-                               get_data_path_results)
+from tests.utils_tests import (get_data_path, get_data_path_results)
 
 
 class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
@@ -25,6 +24,7 @@ class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.alg.initAlgorithm()
 
     def test_parameters(self) -> None:
+
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("LoSLayer"),
                                           parameter_type="source")
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("HorizonType"),
@@ -39,28 +39,24 @@ class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                           parameter_type="number",
                                           default_value=0.13)
 
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
+
     def test_check_wrong_params(self) -> None:
 
         # use layer that is not corrently constructed LoS layer
-        params = {
-            "LoSLayer": QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))
-        }
+        params = {"LoSLayer": QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))}
 
         self.assertCheckParameterValuesRaisesMessage(
             parameters=params,
-            message="Fields specific for LoS not found in current layer (los_type)."
-        )
+            message="Fields specific for LoS not found in current layer (los_type).")
 
         # try to extract global horizon from local LoS
-        params = {
-            "LoSLayer": self.los_local,
-            "HorizonType": 1
-        }
+        params = {"LoSLayer": self.los_local, "HorizonType": 1}
 
         self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="Cannot extract global horizon from local LoS."
-        )
+            parameters=params, message="Cannot extract global horizon from local LoS.")
 
     def test_run_alg(self) -> None:
 
@@ -82,14 +78,14 @@ class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                   geom_type=QgsWkbTypes.PointZ,
                                   crs=self.los_local.sourceCrs())
 
-        self.assertFieldNamesInQgsVectorLayer([FieldNames.HORIZON_TYPE,
-                                               FieldNames.ID_OBSERVER,
-                                               FieldNames.ID_TARGET],
-                                              horizon_layer)
+        self.assertFieldNamesInQgsVectorLayer(
+            [FieldNames.HORIZON_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET], horizon_layer)
 
-        self.assertEqual(NamesConstants.HORIZON_LOCAL,
-                         list(horizon_layer.uniqueValues(horizon_layer.fields().
-                                                         lookupField(FieldNames.HORIZON_TYPE)))[0])
+        self.assertEqual(
+            NamesConstants.HORIZON_LOCAL,
+            list(
+                horizon_layer.uniqueValues(horizon_layer.fields().lookupField(
+                    FieldNames.HORIZON_TYPE)))[0])
 
         output_path = get_data_path_results(file="horizons_global.gpkg")
 
@@ -109,14 +105,13 @@ class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                   geom_type=QgsWkbTypes.PointZ,
                                   crs=self.los_local.sourceCrs())
 
-        self.assertFieldNamesInQgsVectorLayer([FieldNames.HORIZON_TYPE,
-                                               FieldNames.ID_OBSERVER,
-                                               FieldNames.ID_TARGET],
-                                              horizon_layer)
+        self.assertFieldNamesInQgsVectorLayer(
+            [FieldNames.HORIZON_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET], horizon_layer)
 
-        self.assertEqual(NamesConstants.HORIZON_GLOBAL,
-                         list(horizon_layer.uniqueValues(horizon_layer.fields().
-                                                         lookupField(FieldNames.HORIZON_TYPE)))[0])
+        self.assertEqual(
+            NamesConstants.HORIZON_GLOBAL,
+            list(
+                horizon_layer.uniqueValues(horizon_layer.fields().lookupField(
+                    FieldNames.HORIZON_TYPE)))[0])
 
-        self.assertEqual(self.los_global.featureCount(),
-                         horizon_layer.featureCount())
+        self.assertEqual(self.los_global.featureCount(), horizon_layer.featureCount())

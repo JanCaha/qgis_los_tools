@@ -1,19 +1,11 @@
 import unittest
-import os
 
-from qgis.core import (QgsVectorLayer,
-                       QgsRasterLayer,
-                       QgsWkbTypes,
-                       QgsProcessingFeedback,
-                       QgsProcessingContext)
-
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
+from qgis.core import (QgsVectorLayer, QgsRasterLayer, QgsProcessingFeedback, QgsProcessingContext)
 
 from los_tools.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
 
-from tests.utils_tests import (print_alg_params,
-                               print_alg_outputs,
-                               get_data_path,
+from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
+from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
                                get_data_path_results)
 
 
@@ -54,12 +46,14 @@ class OptimizePointLocationAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.assertEqual(30, param_distance.defaultValue())
 
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
+
     def test_check_wrong_params(self) -> None:
 
         # multiband raster fail
-        params = {
-            "InputRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))
-        }
+        params = {"InputRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))}
 
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
@@ -86,7 +80,8 @@ class OptimizePointLocationAlgorithmTest(QgsProcessingAlgorithmTestCase):
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertFalse(can_run)
-        self.assertIn("`Input point layer` and `Location optimization raster` crs must be equal.", msg)
+        self.assertIn("`Input point layer` and `Location optimization raster` crs must be equal.",
+                      msg)
 
         # mask raster errors
         params = {
@@ -109,7 +104,8 @@ class OptimizePointLocationAlgorithmTest(QgsProcessingAlgorithmTestCase):
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertFalse(can_run)
-        self.assertIn("CRS for `Mask raster` and `Location optimization raster` must be equal.", msg)
+        self.assertIn("CRS for `Mask raster` and `Location optimization raster` must be equal.",
+                      msg)
 
     def test_run_alg(self):
 

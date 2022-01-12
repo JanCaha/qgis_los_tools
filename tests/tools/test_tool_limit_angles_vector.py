@@ -1,20 +1,17 @@
 import unittest
 import os
 
-from qgis.core import (QgsVectorLayer,
-                       QgsProcessingFeedback,
-                       QgsProcessingContext)
+from qgis.core import (QgsVectorLayer, QgsProcessingFeedback, QgsProcessingContext)
 
 from los_tools.tools.tool_limit_angles_vector import LimitAnglesAlgorithm
 from los_tools.constants.field_names import FieldNames
 
-from tests.utils_tests import (print_alg_params,
-                               print_alg_outputs,
-                               get_data_path,
+from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
+from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
                                get_data_path_results)
 
 
-class LimitAnglesAlgorithmTest(unittest.TestCase):
+class LimitAnglesAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def setUp(self) -> None:
         self.los_no_target = QgsVectorLayer(get_data_path(file="no_target_los.gpkg"))
@@ -38,6 +35,10 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
         print("----------------------------------")
         print_alg_outputs(self.alg)
 
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
+
     def test_parameters(self) -> None:
         param_los_layer = self.alg.parameterDefinition("LoSLayer")
         param_object_layer = self.alg.parameterDefinition("ObjectLayer")
@@ -58,8 +59,8 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertFalse(can_run)
-        self.assertIn("Fields specific for LoS without target not found in current layer (los_type).",
-                      msg)
+        self.assertIn(
+            "Fields specific for LoS without target not found in current layer (los_type).", msg)
 
     def test_run_alg(self) -> None:
 
@@ -83,6 +84,7 @@ class LimitAnglesAlgorithmTest(unittest.TestCase):
         self.assertIn(FieldNames.ID_OBSERVER, table.fields().names())
         self.assertIn(FieldNames.ID_OBJECT, table.fields().names())
 
-        unique_ids = self.los_no_target.uniqueValues(self.los_no_target.fields().lookupField(FieldNames.ID_OBSERVER))
+        unique_ids = self.los_no_target.uniqueValues(self.los_no_target.fields().lookupField(
+            FieldNames.ID_OBSERVER))
 
         self.assertEqual(table.featureCount(), len(unique_ids))

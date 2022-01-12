@@ -1,19 +1,15 @@
 import unittest
-import os
 
-from qgis.core import (QgsVectorLayer,
-                       QgsProcessingFeedback,
-                       QgsProcessingContext)
+from qgis.core import (QgsVectorLayer, QgsProcessingFeedback, QgsProcessingContext)
 
 from los_tools.create_points.tool_points_around import CreatePointsAroundAlgorithm
 
-from tests.utils_tests import (print_alg_params,
-                               print_alg_outputs,
-                               get_data_path,
+from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
+from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
                                get_data_path_results)
 
 
-class CreatePointsAroundAlgorithmTest(unittest.TestCase):
+class CreatePointsAroundAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def setUp(self) -> None:
         self.feedback = QgsProcessingFeedback()
@@ -56,6 +52,10 @@ class CreatePointsAroundAlgorithmTest(unittest.TestCase):
         self.assertEqual(359.999, param_angle_end.defaultValue())
         self.assertEqual(1, param_angle_step.defaultValue())
         self.assertEqual(10, param_distance.defaultValue())
+
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
 
     def test_check_wrong_params(self) -> None:
         # does not apply, there are no checks for parameters

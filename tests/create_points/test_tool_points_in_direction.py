@@ -3,21 +3,18 @@ import unittest
 import numpy as np
 import math
 
-from qgis.core import (QgsVectorLayer,
-                       QgsFeatureRequest,
-                       QgsProcessingFeedback,
+from qgis.core import (QgsVectorLayer, QgsFeatureRequest, QgsProcessingFeedback,
                        QgsProcessingContext)
 
 from los_tools.create_points.tool_points_in_direction import CreatePointsInDirectionAlgorithm
 from los_tools.constants.field_names import FieldNames
 
-from tests.utils_tests import (print_alg_params,
-                               print_alg_outputs,
-                               get_data_path,
+from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
+from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
                                get_data_path_results)
 
 
-class CreatePointsInDirectionAlgorithmTest(unittest.TestCase):
+class CreatePointsInDirectionAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def setUp(self) -> None:
         self.points = QgsVectorLayer(get_data_path(file="points.gpkg"))
@@ -39,6 +36,7 @@ class CreatePointsInDirectionAlgorithmTest(unittest.TestCase):
         print_alg_outputs(self.alg)
 
     def test_parameters(self) -> None:
+
         param_input_layer = self.alg.parameterDefinition("InputLayer")
         param_id_field = self.alg.parameterDefinition("IdField")
         param_direction_layer = self.alg.parameterDefinition("DirectionLayer")
@@ -62,6 +60,10 @@ class CreatePointsInDirectionAlgorithmTest(unittest.TestCase):
         self.assertEqual(1, param_angle_step.defaultValue())
         self.assertEqual(10, param_distance.defaultValue())
 
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
+
     def test_check_wrong_params(self) -> None:
 
         output_path = get_data_path_results(file="points_direction.gpkg")
@@ -79,8 +81,7 @@ class CreatePointsInDirectionAlgorithmTest(unittest.TestCase):
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertFalse(can_run)
-        self.assertIn("`Main direction point layer` should only containt one feature.",
-                      msg)
+        self.assertIn("`Main direction point layer` should only containt one feature.", msg)
 
     def test_run_alg(self) -> None:
 
@@ -113,13 +114,15 @@ class CreatePointsInDirectionAlgorithmTest(unittest.TestCase):
         self.assertIn(FieldNames.ID_POINT, output_layer.fields().names())
         self.assertIn(FieldNames.AZIMUTH, output_layer.fields().names())
 
-        unique_ids_orig = list(self.points.uniqueValues(self.points.fields().lookupField(self.points_id_field)))
-        unique_ids_new = list(output_layer.uniqueValues(output_layer.fields().lookupField(FieldNames.ID_ORIGINAL_POINT)))
+        unique_ids_orig = list(
+            self.points.uniqueValues(self.points.fields().lookupField(self.points_id_field)))
+        unique_ids_new = list(
+            output_layer.uniqueValues(output_layer.fields().lookupField(
+                FieldNames.ID_ORIGINAL_POINT)))
 
         self.assertListEqual(unique_ids_orig, unique_ids_new)
 
-        angles = np.arange(0 - angle_offset,
-                           0 + angle_offset + 0.1*angle_step,
+        angles = np.arange(0 - angle_offset, 0 + angle_offset + 0.1 * angle_step,
                            step=angle_step).tolist()
 
         number_of_elements = len(angles) * len(unique_ids_orig)
@@ -135,8 +138,9 @@ class CreatePointsInDirectionAlgorithmTest(unittest.TestCase):
 
             features = list(output_layer.getFeatures(request))
 
-            for i in range(0, len(features)-1):
+            for i in range(0, len(features) - 1):
                 with self.subTest(id_original_point=id_orig, point_range=i):
-                    self.assertAlmostEqual(features[i].geometry().distance(features[i+1].geometry()),
-                                           math.radians(angle_step)*distance,
+                    self.assertAlmostEqual(features[i].geometry().distance(features[i +
+                                                                                    1].geometry()),
+                                           math.radians(angle_step) * distance,
                                            places=5)
