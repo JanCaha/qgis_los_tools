@@ -2,7 +2,7 @@ from typing import List, Tuple, Optional
 import math
 
 from qgis.core import (QgsMapLayer, QgsRasterLayer, QgsCoordinateReferenceSystem,
-                       QgsRasterDataProvider, QgsRectangle, QgsPoint)
+                       QgsRasterDataProvider, QgsRectangle, QgsPoint, QgsLineString)
 
 from los_tools.tools.util_functions import bilinear_interpolated_value
 
@@ -87,3 +87,16 @@ class ListOfRasters:
                 return value
 
         return None
+
+    def add_z_values(self, points: List[QgsPoint]) -> QgsLineString:
+
+        points3d = []
+
+        for point in points:
+
+            z = self.extract_interpolated_value(point)
+
+            if z is not None:
+                points3d.append(QgsPoint(point.x(), point.y(), z))
+
+        return QgsLineString(points3d)
