@@ -29,7 +29,7 @@ class ListOfRasters:
 
             if dem_band_count != 1:
 
-                msg = f"`{raster.name()}` can only have one band. Currently there are `{dem_band_count}` bands."
+                msg = f"Rasters can only have one band. Currently there are rasters with `{dem_band_count}` bands."
 
                 return False, msg
 
@@ -41,8 +41,8 @@ class ListOfRasters:
 
             if not raster.crs() == crs:
 
-                msg = f"`Observers point layer` and `{raster.name()}` crs must be equal. " \
-                    f"Right now they are not."
+                msg = "`Observers point layer` and raster layers crs must be equal. " \
+                    "Right now they are not."
 
                 return False, msg
 
