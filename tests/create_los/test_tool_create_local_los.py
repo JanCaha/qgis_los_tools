@@ -1,20 +1,13 @@
 import unittest
 
-from qgis.core import (QgsVectorLayer,
-                       QgsRasterLayer,
-                       QgsFeatureRequest,
-                       QgsProcessingFeedback,
-                       QgsProcessingContext,
-                       QgsWkbTypes)
+from qgis.core import (QgsVectorLayer, QgsRasterLayer, QgsFeatureRequest, QgsProcessingFeedback,
+                       QgsProcessingContext, QgsWkbTypes)
 
 from los_tools.create_los.tool_create_local_los import CreateLocalLosAlgorithm
 from los_tools.constants.field_names import FieldNames
 
-from tests.utils_tests import (print_alg_params,
-                               print_alg_outputs,
-                               get_data_path,
-                               get_data_path_results,
-                               get_qgis_app)
+from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
+                               get_data_path_results, get_qgis_app)
 
 
 class CreateLocalLosAlgorithmTest(unittest.TestCase):
@@ -47,7 +40,7 @@ class CreateLocalLosAlgorithmTest(unittest.TestCase):
         print_alg_outputs(self.alg)
 
     def test_parameters(self) -> None:
-        param_dem_raster = self.alg.parameterDefinition("DemRaster")
+        param_dem_raster = self.alg.parameterDefinition("DemRasters")
         param_observers = self.alg.parameterDefinition("ObserverPoints")
         param_observers_id_field = self.alg.parameterDefinition("ObserverIdField")
         param_observers_offset_field = self.alg.parameterDefinition("ObserverOffset")
@@ -57,7 +50,7 @@ class CreateLocalLosAlgorithmTest(unittest.TestCase):
         param_line_density = self.alg.parameterDefinition("LineDensity")
         param_output_layer = self.alg.parameterDefinition("OutputLayer")
 
-        self.assertEqual("raster", param_dem_raster.type())
+        self.assertEqual("multilayer", param_dem_raster.type())
         self.assertEqual("source", param_observers.type())
         self.assertEqual("field", param_observers_id_field.type())
         self.assertEqual("field", param_observers_offset_field.type())
@@ -78,17 +71,19 @@ class CreateLocalLosAlgorithmTest(unittest.TestCase):
 
         # multiband raster fail
         params = {
-            "DemRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))
+            "DemRasters": [QgsRasterLayer(get_data_path(file="raster_multiband.tif"))],
+            "ObserverPoints": self.observers,
+            "TargetPoints": self.targets
         }
 
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertFalse(can_run)
-        self.assertIn("`Raster Layer DEM` can only have one band.", msg)
+        self.assertIn("Rasters can only have one band", msg)
 
         # observer layer with geographic coordinates
         params = {
-            "DemRaster": self.dsm,
+            "DemRasters": [self.dsm],
             "ObserverPoints": QgsVectorLayer(get_data_path(file="single_point_wgs84.gpkg")),
         }
 
@@ -99,20 +94,29 @@ class CreateLocalLosAlgorithmTest(unittest.TestCase):
 
         # raster crs != observers crs
         params = {
-            "DemRaster": QgsRasterLayer(get_data_path(file="dsm_epsg_5514.tif")),
-            "ObserverPoints": self.observers
+            "DemRasters": [QgsRasterLayer(get_data_path(file="dsm_epsg_5514.tif"))],
+            "ObserverPoints": self.targets,
+            "TargetPoints": self.targets,
+            "ObserverIdField": self.observers_id,
+            "ObserverOffset": self.observers_offset,
+            "TargetIdField": self.targets_id,
+            "TargetOffset": self.targets_offset
         }
 
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertFalse(can_run)
-        self.assertIn("`Observers point layer` and `Raster Layer DEM` crs must be equal.", msg)
+        self.assertIn("`Observers point layer` and raster layers crs must be equal", msg)
 
         # observers crs != target crs
         params = {
-            "DemRaster": self.dsm,
+            "DemRasters": [self.dsm],
             "ObserverPoints": self.observers,
-            "TargetPoints": QgsVectorLayer(get_data_path(file="points_epsg_5514.gpkg"))
+            "TargetPoints": QgsVectorLayer(get_data_path(file="points_epsg_5514.gpkg")),
+            "ObserverIdField": self.observers_id,
+            "ObserverOffset": self.observers_offset,
+            "TargetIdField": self.targets_id,
+            "TargetOffset": self.targets_offset
         }
 
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
@@ -125,7 +129,7 @@ class CreateLocalLosAlgorithmTest(unittest.TestCase):
         output_path = get_data_path_results(file="los_local.gpkg")
 
         params = {
-            "DemRaster": self.dsm,
+            "DemRasters": [self.dsm],
             "ObserverPoints": self.observers,
             "ObserverIdField": self.observers_id,
             "ObserverOffset": self.observers_offset,
@@ -156,8 +160,10 @@ class CreateLocalLosAlgorithmTest(unittest.TestCase):
         self.assertEqual(self.observers.featureCount() * self.targets.featureCount(),
                          los_layer.featureCount())
 
-        observers_ids = list(self.observers.uniqueValues(self.observers.fields().lookupField(self.observers_id)))
-        targets_ids = list(self.targets.uniqueValues(self.targets.fields().lookupField(self.targets_id)))
+        observers_ids = list(
+            self.observers.uniqueValues(self.observers.fields().lookupField(self.observers_id)))
+        targets_ids = list(
+            self.targets.uniqueValues(self.targets.fields().lookupField(self.targets_id)))
 
         for observer_id in observers_ids:
             for target_id in targets_ids:
@@ -172,12 +178,12 @@ class CreateLocalLosAlgorithmTest(unittest.TestCase):
                     target_feature = list(self.targets.getFeatures(request))[0]
 
                     request = QgsFeatureRequest()
-                    request.setFilterExpression("{} = '{}' AND {} = '{}'".
-                                                format(FieldNames.ID_OBSERVER, observer_id,
-                                                       FieldNames.ID_TARGET, target_id))
+                    request.setFilterExpression("{} = '{}' AND {} = '{}'".format(
+                        FieldNames.ID_OBSERVER, observer_id, FieldNames.ID_TARGET, target_id))
                     los_layer_feature = list(los_layer.getFeatures(request))[0]
 
-                    self.assertAlmostEqual(observer_feature.geometry().distance(target_feature.geometry()),
+                    self.assertAlmostEqual(observer_feature.geometry().distance(
+                        target_feature.geometry()),
                                            los_layer_feature.geometry().length(),
                                            places=9)
 

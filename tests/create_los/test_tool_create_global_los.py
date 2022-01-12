@@ -10,7 +10,7 @@ from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from tests.utils_tests import (get_data_path, get_data_path_results)
 
 
-class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
+class CreateGlobalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def setUp(self) -> None:
 
@@ -33,8 +33,8 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def test_parameters(self) -> None:
 
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("DemRaster"),
-                                          parameter_type="raster")
+        self.assertQgsProcessingParameter(self.alg.parameterDefinition("DemRasters"),
+                                          parameter_type="multilayer")
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("ObserverPoints"),
                                           parameter_type="source")
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("ObserverIdField"),
@@ -60,15 +60,20 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
     def test_check_wrong_params(self) -> None:
 
         # multiband raster fail
-        params = {"DemRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))}
+        params = {
+            "DemRasters": [QgsRasterLayer(get_data_path(file="raster_multiband.tif"))],
+            "ObserverPoints": self.observers,
+            "TargetPoints": self.targets
+        }
 
-        self.assertCheckParameterValuesRaisesMessage(
-            parameters=params, message="`Raster Layer DEM` can only have one band.")
+        self.assertCheckParameterValuesRaisesMessage(parameters=params,
+                                                     message="Rasters can only have one band")
 
         # observer layer with geographic coordinates
         params = {
-            "DemRaster": self.dsm,
+            "DemRasters": [self.dsm],
             "ObserverPoints": QgsVectorLayer(get_data_path(file="single_point_wgs84.gpkg")),
+            "TargetPoints": self.targets
         }
 
         self.assertCheckParameterValuesRaisesMessage(
@@ -76,17 +81,19 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         # raster crs != observers crs
         params = {
-            "DemRaster": QgsRasterLayer(get_data_path(file="dsm_epsg_5514.tif")),
-            "ObserverPoints": self.observers
+            "DemRasters": [QgsRasterLayer(get_data_path(file="dsm_epsg_5514.tif"))],
+            "ObserverPoints": self.observers,
+            "TargetPoints": self.targets
         }
 
         self.assertCheckParameterValuesRaisesMessage(
             parameters=params,
-            message="`Observers point layer` and `Raster Layer DEM` crs must be equal.")
+            message=
+            "`Observers point layer` and raster layers crs must be equal. Right now they are not.")
 
         # observers crs != target crs
         params = {
-            "DemRaster": self.dsm,
+            "DemRasters": [self.dsm],
             "ObserverPoints": self.observers,
             "TargetPoints": QgsVectorLayer(get_data_path(file="points_epsg_5514.gpkg"))
         }
@@ -98,7 +105,7 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
     def test_run_alg(self) -> None:
 
         params = {
-            "DemRaster": self.dsm,
+            "DemRasters": [self.dsm],
             "ObserverPoints": self.observers,
             "ObserverIdField": self.observers_id,
             "ObserverOffset": self.observers_offset,

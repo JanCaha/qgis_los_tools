@@ -1,8 +1,7 @@
-from qgis.core import (QgsProcessingContext, QgsProcessingFeedback, QgsVectorLayer, QgsRasterLayer)
+from qgis.core import (QgsVectorLayer, QgsRasterLayer)
 from qgis._core import QgsWkbTypes
 
 from los_tools.create_los.tool_create_notarget_los_v2 import CreateNoTargetLosAlgorithmV2
-from los_tools.tools.tools_distances_for_sizes import ObjectDistancesAlgorithm
 from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
@@ -67,8 +66,8 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
             'TargetPoints': self.targets
         }
 
-        self.assertCheckParameterValuesRaisesMessage(
-            parameters=params, message="`raster_multiband` can only have one band.")
+        self.assertCheckParameterValuesRaisesMessage(parameters=params,
+                                                     message="can only have one band.")
 
         # observer layer with geographic coordinates
         params = {
@@ -89,7 +88,7 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.assertCheckParameterValuesRaisesMessage(
             parameters=params,
-            message="`Observers point layer` and `dsm_epsg_5514` crs must be equal.")
+            message="`Observers point layer` and raster layers crs must be equal")
 
         # observers crs != target crs
         params = {
