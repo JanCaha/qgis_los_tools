@@ -1,18 +1,8 @@
-from qgis.core import (
-    QgsProcessing,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterField,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterRasterLayer,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsPoint,
-    QgsFields,
-    QgsLineString,
-    QgsProcessingUtils)
+from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
+                       QgsProcessingParameterFeatureSource, QgsProcessingParameterField,
+                       QgsProcessingParameterFeatureSink, QgsProcessingParameterRasterLayer,
+                       QgsField, QgsFeature, QgsWkbTypes, QgsPoint, QgsFields, QgsLineString,
+                       QgsProcessingUtils)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -21,14 +11,15 @@ from los_tools.tools.util_functions import segmentize_line, bilinear_interpolate
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.tools.util_functions import get_doc_file
+from los_tools.classes.list_raster import ListOfRasters
 
 
 class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        dem = self.parameterAsRasterLayer(parameters, self.DEM, context)
-        dem = dem.dataProvider()
+        list_rasters = ListOfRasters(
+            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
 
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
         observers_id = self.parameterAsString(parameters, self.OBSERVER_ID_FIELD, context)
@@ -49,20 +40,18 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
         fields.append(QgsField(FieldNames.TARGET_X, QVariant.Double))
         fields.append(QgsField(FieldNames.TARGET_Y, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters,
-                                             self.OUTPUT_LAYER,
-                                             context,
-                                             fields,
-                                             QgsWkbTypes.LineString25D,
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context,
+                                             fields, QgsWkbTypes.LineString25D,
                                              observers_layer.sourceCrs())
 
         feature_count = observers_layer.featureCount() * targets_layer.featureCount()
 
         observers_iterator = observers_layer.getFeatures()
 
-        max_length_extension = get_diagonal_size(dem)
+        max_length_extension = list_rasters.maximal_diagonal_size()
 
         for observer_count, observer_feature in enumerate(observers_iterator):
+
             if feedback.isCanceled():
                 break
 
@@ -70,15 +59,19 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
 
             for target_count, target_feature in enumerate(targets_iterators):
 
-                line = QgsLineString([QgsPoint(observer_feature.geometry().asPoint()),
-                                      QgsPoint(target_feature.geometry().asPoint())])
+                line = QgsLineString([
+                    QgsPoint(observer_feature.geometry().asPoint()),
+                    QgsPoint(target_feature.geometry().asPoint())
+                ])
 
                 line_temp = line.clone()
                 line_temp.extend(0, max_length_extension)
 
-                line = QgsLineString([QgsPoint(observer_feature.geometry().asPoint()),
-                                      QgsPoint(target_feature.geometry().asPoint()),
-                                      line_temp.endPoint()])
+                line = QgsLineString([
+                    QgsPoint(observer_feature.geometry().asPoint()),
+                    QgsPoint(target_feature.geometry().asPoint()),
+                    line_temp.endPoint()
+                ])
 
                 line = segmentize_line(line, segment_length=sampling_distance)
 
@@ -87,7 +80,9 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
                 points3d = []
 
                 for p in points:
-                    z = bilinear_interpolated_value(dem, p)
+
+                    z = list_rasters.extract_interpolated_value(p)
+
                     if z is not None:
                         points3d.append(QgsPoint(p.x(), p.y(), z))
 
@@ -95,8 +90,7 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
 
                 f = QgsFeature(fields)
                 f.setGeometry(line)
-                f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE),
-                               NamesConstants.LOS_GLOBAL)
+                f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_GLOBAL)
                 f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
                                int(observer_feature.attribute(observers_id)))
                 f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
@@ -112,7 +106,8 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
 
                 sink.addFeature(f)
 
-                feedback.setProgress(((observer_count + 1 * target_count + 1 + target_count)/feature_count)*100)
+                feedback.setProgress(
+                    ((observer_count + 1 * target_count + 1 + target_count) / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
