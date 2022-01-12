@@ -156,18 +156,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
                 line = segmentize_line(line, segment_length=sampling_distance)
 
-                points = line.points()
-
-                points3d = []
-
-                for p in points:
-
-                    z = list_rasters.extract_interpolated_value(p)
-
-                    if z is not None:
-                        points3d.append(QgsPoint(p.x(), p.y(), z))
-
-                line = QgsLineString(points3d)
+                line = list_rasters.add_z_values(line.points())
 
                 f = QgsFeature(fields)
                 f.setGeometry(line)
