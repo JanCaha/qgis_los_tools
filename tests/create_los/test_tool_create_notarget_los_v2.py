@@ -57,6 +57,10 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputLayer"),
                                           parameter_type="sink")
 
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
+
     def test_check_wrong_params(self) -> None:
 
         # multiband raster fail

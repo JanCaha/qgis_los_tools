@@ -28,14 +28,21 @@ class AnalyseLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.alg.initAlgorithm()
 
     def test_parameters(self) -> None:
+
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("LoSLayer"),
                                           parameter_type="source")
+
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("CurvatureCorrections"),
                                           parameter_type="boolean",
                                           default_value=True)
+
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("RefractionCoefficient"),
                                           parameter_type="number",
                                           default_value=0.13)
+
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
 
     def test_check_wrong_params(self) -> None:
 

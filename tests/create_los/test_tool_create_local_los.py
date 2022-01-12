@@ -6,11 +6,12 @@ from qgis.core import (QgsVectorLayer, QgsRasterLayer, QgsFeatureRequest, QgsPro
 from los_tools.create_los.tool_create_local_los import CreateLocalLosAlgorithm
 from los_tools.constants.field_names import FieldNames
 
+from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
-                               get_data_path_results, get_qgis_app)
+                               get_data_path_results)
 
 
-class CreateLocalLosAlgorithmTest(unittest.TestCase):
+class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def setUp(self) -> None:
         self.observers = QgsVectorLayer(get_data_path(file="points.gpkg"))
@@ -66,6 +67,10 @@ class CreateLocalLosAlgorithmTest(unittest.TestCase):
         self.assertEqual("TargetPoints", param_targets_offset_field.parentLayerParameterName())
 
         self.assertEqual(1, param_line_density.defaultValue())
+
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
 
     def test_check_wrong_params(self) -> None:
 

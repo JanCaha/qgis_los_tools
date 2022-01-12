@@ -1,6 +1,4 @@
-from qgis.core import (QgsVectorLayer,
-                       QgsRasterLayer,
-                       QgsFeatureRequest)
+from qgis.core import (QgsVectorLayer, QgsRasterLayer, QgsFeatureRequest)
 from qgis._core import QgsWkbTypes
 
 from los_tools.create_los.tool_create_notarget_los import CreateNoTargetLosAlgorithm
@@ -8,8 +6,7 @@ from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
-from tests.utils_tests import (get_data_path,
-                               get_data_path_results)
+from tests.utils_tests import (get_data_path, get_data_path_results)
 
 
 class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
@@ -61,17 +58,17 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputLayer"),
                                           parameter_type="sink")
 
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
+
     def test_check_wrong_params(self) -> None:
 
         # multiband raster fail
-        params = {
-            "DemRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))
-        }
+        params = {"DemRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))}
 
         self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="`Raster Layer DEM` can only have one band."
-        )
+            parameters=params, message="`Raster Layer DEM` can only have one band.")
 
         # observer layer with geographic coordinates
         params = {
@@ -80,9 +77,7 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
         }
 
         self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="`Observers point layer` crs must be projected."
-        )
+            parameters=params, message="`Observers point layer` crs must be projected.")
 
         # raster crs != observers crs
         params = {
@@ -92,8 +87,7 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.assertCheckParameterValuesRaisesMessage(
             parameters=params,
-            message="`Observers point layer` and `Raster Layer DEM` crs must be equal."
-        )
+            message="`Observers point layer` and `Raster Layer DEM` crs must be equal.")
 
         # observers crs != target crs
         params = {
@@ -104,8 +98,7 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.assertCheckParameterValuesRaisesMessage(
             parameters=params,
-            message="`Observers point layer` and `Targets point layer` crs must be equal."
-        )
+            message="`Observers point layer` and `Targets point layer` crs must be equal.")
 
     def test_run_alg(self) -> None:
 
@@ -130,14 +123,10 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                   geom_type=QgsWkbTypes.LineStringZ,
                                   crs=self.observers.sourceCrs())
 
-        self.assertFieldNamesInQgsVectorLayer([FieldNames.LOS_TYPE,
-                                               FieldNames.ID_OBSERVER,
-                                               FieldNames.ID_TARGET,
-                                               FieldNames.OBSERVER_OFFSET,
-                                               FieldNames.AZIMUTH,
-                                               FieldNames.OBSERVER_X,
-                                               FieldNames.OBSERVER_Y],
-                                              los_layer)
+        self.assertFieldNamesInQgsVectorLayer([
+            FieldNames.LOS_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET,
+            FieldNames.OBSERVER_OFFSET, FieldNames.AZIMUTH, FieldNames.OBSERVER_X,
+            FieldNames.OBSERVER_Y
+        ], los_layer)
 
-        self.assertEqual(self.targets.featureCount(),
-                         los_layer.featureCount())
+        self.assertEqual(self.targets.featureCount(), los_layer.featureCount())

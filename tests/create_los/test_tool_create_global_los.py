@@ -6,7 +6,6 @@ from los_tools.constants.field_names import FieldNames
 from los_tools.tools.util_functions import get_diagonal_size
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
-
 from tests.utils_tests import (get_data_path, get_data_path_results)
 
 
@@ -56,6 +55,10 @@ class CreateGlobalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
                                           default_value=1)
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputLayer"),
                                           parameter_type="sink")
+
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
 
     def test_check_wrong_params(self) -> None:
 
