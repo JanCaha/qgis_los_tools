@@ -6,3 +6,4 @@ Web:
   ☐ create pages for tools to calculate distances and sizes
   ☐ document STEP_ANGLE field in tool_points_around result and tool_create_notarget_los_v2 (add also to tool_create_notarget_los???)
   ☐ does TARGET ID field makes sense for tool_create_notarget_los_v2?
+  ☐ changes in Local and Global LoS
