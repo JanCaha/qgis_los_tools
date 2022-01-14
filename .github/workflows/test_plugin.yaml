@@ -10,7 +10,7 @@ env:
   # plugin name/directory where the code for the plugin is stored
   PLUGIN_NAME: los_tools
   # the path to file that handles test running inside the github repository
-  PATH_TO_TEST_RUNNER: los_tools.test.package_test_suite.test_package
+  PATH_TO_TEST_RUNNER: los_tools.tests.package_test_suite.test_package
   # Docker settings
   DOCKER_IMAGE: qgis/qgis
 
@@ -39,10 +39,10 @@ jobs:
           docker exec qgis-testing-environment sh -c "qgis_setup.sh $PLUGIN_NAME"
           docker exec qgis-testing-environment sh -c "rm -f /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME"
           docker exec qgis-testing-environment sh -c "ln -s /tests_directory/$PLUGIN_NAME /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME"
-          docker exec qgis-testing-environment sh -c "mkdir -p /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME/test/tests"
-          docker exec qgis-testing-environment sh -c "ln -s /tests_directory/tests /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME/test/tests"
-          docker exec qgis-testing-environment sh -c "ln -s /tests_directory/package_test_suite.py /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME/test/"
-          docker exec qgis-testing-environment sh -c "touch /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME/test/__init__.py"
+          docker exec qgis-testing-environment sh -c "mkdir -p /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME/tests"
+          docker exec qgis-testing-environment sh -c "ln -s /tests_directory/tests /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME/tests"
+          docker exec qgis-testing-environment sh -c "ln -s /tests_directory/package_test_suite.py /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME"
+          docker exec qgis-testing-environment sh -c "touch /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$PLUGIN_NAME/tests/__init__.py"
           docker exec qgis-testing-environment sh -c "pip3 install -r /tests_directory/REQUIREMENTS_TESTING.txt"
 
       - name: Docker run plugin tests
