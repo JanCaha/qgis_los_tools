@@ -13,7 +13,6 @@ from los_tools.constants.names_constants import NamesConstants
 from los_tools.constants.textlabels import TextLabels
 from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
 from los_tools.tools.util_functions import wkt_to_array_points, get_los_type
-from los_tools.constants.names_constants import NamesConstants
 
 
 # TODO příznak horizontu na konci DSM

@@ -1,17 +1,7 @@
-from qgis.core import (
-    QgsFeature,
-    QgsFields,
-    QgsField,
-    QgsProcessing,
-    QgsFeatureSink,
-    QgsWkbTypes,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
-    QgsProcessingParameterBoolean,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsMessageLog,
-    Qgis)
+from qgis.core import (QgsFeature, QgsFields, QgsField, QgsProcessing, QgsFeatureSink, QgsWkbTypes,
+                       QgsProcessingAlgorithm, QgsProcessingParameterNumber,
+                       QgsProcessingParameterBoolean, QgsProcessingParameterFeatureSource,
+                       QgsProcessingParameterFeatureSink)
 
 from PyQt5.QtCore import (QVariant)
 
@@ -31,34 +21,21 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LOS_LAYER,
-                "LoS layer",
-                [QgsProcessing.TypeVectorLine])
-        )
+            QgsProcessingParameterFeatureSource(self.INPUT_LOS_LAYER, "LoS layer",
+                                                [QgsProcessing.TypeVectorLine]))
 
         self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.CURVATURE_CORRECTIONS,
-                "Use curvature corrections?",
-                defaultValue=True)
-        )
+            QgsProcessingParameterBoolean(self.CURVATURE_CORRECTIONS,
+                                          "Use curvature corrections?",
+                                          defaultValue=True))
 
         self.addParameter(
-            QgsProcessingParameterNumber(
-                self.REFRACTION_COEFFICIENT,
-                "Refraction coefficient value",
-                type=QgsProcessingParameterNumber.Double,
-                defaultValue=0.13
-            )
-        )
+            QgsProcessingParameterNumber(self.REFRACTION_COEFFICIENT,
+                                         "Refraction coefficient value",
+                                         type=QgsProcessingParameterNumber.Double,
+                                         defaultValue=0.13))
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                "Output file"
-            )
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Output file"))
 
     def checkParameterValues(self, parameters, context):
 
@@ -70,9 +47,6 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
             msg = "Fields specific for LoS not found in current layer ({0}). " \
                   "Cannot to_table the layer as horizon lines.".format(FieldNames.LOS_TYPE)
 
-            QgsMessageLog.logMessage(msg,
-                                     "los_tools",
-                                     Qgis.MessageLevel.Critical)
             return False, msg
 
         return True, "OK"
@@ -80,7 +54,8 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback):
 
         input_los_layer = self.parameterAsSource(parameters, self.INPUT_LOS_LAYER, context)
-        curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
+        curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS,
+                                                     context)
         ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
         feature_count = input_los_layer.featureCount()
@@ -115,12 +90,8 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
         #     pass
 
         sink: QgsFeatureSink
-        sink, path_sink = self.parameterAsSink(parameters,
-                                               self.OUTPUT,
-                                               context,
-                                               fields,
-                                               QgsWkbTypes.NoGeometry,
-                                               input_los_layer.sourceCrs())
+        sink, path_sink = self.parameterAsSink(parameters, self.OUTPUT, context, fields,
+                                               QgsWkbTypes.NoGeometry, input_los_layer.sourceCrs())
 
         los_feature: QgsFeature
         for cnt, los_feature in enumerate(iterator):
@@ -158,11 +129,12 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
                                 use_curvature_corrections=curvature_corrections,
                                 refraction_coefficient=ref_coeff)
 
-            #elif los_type == NamesConstants.LOS_NO_TARGET:
+            # elif los_type == NamesConstants.LOS_NO_TARGET:
             else:
 
                 los = LoSWithoutTarget(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                       observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
+                                       observer_offset=los_feature.attribute(
+                                           FieldNames.OBSERVER_OFFSET),
                                        use_curvature_corrections=curvature_corrections,
                                        refraction_coefficient=ref_coeff)
 
@@ -172,47 +144,33 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
 
                 if los_type == NamesConstants.LOS_LOCAL:
 
-                    feature.setAttributes([los_id,
-                                           observer_id,
-                                           observer_offset,
-                                           los.points[i][LoSLocal.DISTANCE],
-                                           los.points[i][LoSLocal.Z],
-                                           los.visible[i],
-                                           los.horizon[i],
-                                           target_id,
-                                           target_offset])
+                    feature.setAttributes([
+                        los_id, observer_id, observer_offset, los.points[i][LoSLocal.DISTANCE],
+                        los.points[i][LoSLocal.Z], los.visible[i], los.horizon[i], target_id,
+                        target_offset
+                    ])
 
                 elif los_type == NamesConstants.LOS_GLOBAL:
 
                     is_target = i == los.target_index
 
-                    feature.setAttributes([los_id,
-                                           observer_id,
-                                           observer_offset,
-                                           los.points[i][LoSGlobal.DISTANCE],
-                                           los.points[i][LoSGlobal.Z],
-                                           los.visible[i],
-                                           los.horizon[i],
-                                           target_id,
-                                           target_offset,
-                                           target_x,
-                                           target_y,
-                                           is_target])
+                    feature.setAttributes([
+                        los_id, observer_id, observer_offset, los.points[i][LoSGlobal.DISTANCE],
+                        los.points[i][LoSGlobal.Z], los.visible[i], los.horizon[i], target_id,
+                        target_offset, target_x, target_y, is_target
+                    ])
 
                 # elif los_type == NamesConstants.LOS_NO_TARGET:
                 else:
 
-                    feature.setAttributes([los_id,
-                                           observer_id,
-                                           observer_offset,
-                                           los.points[i][2],
-                                           los.points[i][3],
-                                           los.visible[i],
-                                           los.horizon[i]])
+                    feature.setAttributes([
+                        los_id, observer_id, observer_offset, los.points[i][2], los.points[i][3],
+                        los.visible[i], los.horizon[i]
+                    ])
 
                 sink.addFeature(feature)
 
-            feedback.setProgress((cnt/feature_count)*100)
+            feedback.setProgress((cnt / feature_count) * 100)
 
         return {self.OUTPUT: path_sink}
 

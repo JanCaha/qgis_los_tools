@@ -1,24 +1,11 @@
-from qgis.core import (
-    QgsProcessing,
-    QgsFields,
-    QgsField,
-    QgsFeature,
-    QgsFeatureSink,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsWkbTypes,
-    QgsMessageLog,
-    QgsPointXY,
-    Qgis,
-    QgsFeatureSource)
+from qgis.core import (QgsProcessing, QgsFields, QgsField, QgsFeature, QgsFeatureSink,
+                       QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
+                       QgsProcessingFeatureSource, QgsProcessingParameterFeatureSink, QgsWkbTypes,
+                       QgsMessageLog, QgsPointXY, Qgis, QgsFeatureSource)
 
 from PyQt5.QtCore import (QVariant)
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.constants.names_constants import NamesConstants
-from los_tools.tools.util_functions import get_horizon_lines_type
 
 
 class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
@@ -29,25 +16,16 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_HORIZON_LINES_LAYER,
-                "Horizon Lines Layer",
-                [QgsProcessing.TypeVectorLine]
-            )
-        )
+            QgsProcessingParameterFeatureSource(self.INPUT_HORIZON_LINES_LAYER,
+                                                "Horizon Lines Layer",
+                                                [QgsProcessing.TypeVectorLine]))
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                "Output file"
-            )
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Output file"))
 
     def checkParameterValues(self, parameters, context):
 
-        input_horizon_lines_layer: QgsProcessingFeatureSource = self.parameterAsSource(parameters,
-                                                                                       self.INPUT_HORIZON_LINES_LAYER,
-                                                                                       context)
+        input_horizon_lines_layer: QgsProcessingFeatureSource = self.parameterAsSource(
+            parameters, self.INPUT_HORIZON_LINES_LAYER, context)
 
         field_names = input_horizon_lines_layer.fields().names()
 
@@ -55,18 +33,15 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
             msg = "Fields specific for horizon lines not found in current layer ({0}). " \
                   "Cannot to_table the layer as horizon lines.".format(FieldNames.HORIZON_TYPE)
 
-            QgsMessageLog.logMessage(msg,
-                                     "los_tools",
-                                     Qgis.MessageLevel.Critical)
+            QgsMessageLog.logMessage(msg, "los_tools", Qgis.MessageLevel.Critical)
             return False, msg
 
         return True, "OK"
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        input_horizon_lines_layer: QgsFeatureSource = self.parameterAsSource(parameters, self.INPUT_HORIZON_LINES_LAYER, context)
-
-        horizon_lines_type = get_horizon_lines_type(input_horizon_lines_layer)
+        input_horizon_lines_layer: QgsFeatureSource = self.parameterAsSource(
+            parameters, self.INPUT_HORIZON_LINES_LAYER, context)
 
         feature_count = input_horizon_lines_layer.featureCount()
 
@@ -78,10 +53,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.CSV_HORIZON_DISTANCE, QVariant.Double))
 
         sink: QgsFeatureSink
-        sink, path_sink = self.parameterAsSink(parameters,
-                                               self.OUTPUT,
-                                               context,
-                                               fields,
+        sink, path_sink = self.parameterAsSink(parameters, self.OUTPUT, context, fields,
                                                QgsWkbTypes.NoGeometry,
                                                input_horizon_lines_layer.sourceCrs())
 
@@ -110,13 +82,14 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
                 feature.setAttribute(FieldNames.HORIZON_TYPE, horizon_type)
                 feature.setAttribute(FieldNames.ANGLE, observer_point.azimuth(horizon_point))
                 feature.setAttribute(FieldNames.VIEWING_ANGLE, v.m())
-                feature.setAttribute(FieldNames.CSV_HORIZON_DISTANCE, observer_point.distance(v.x(), v.y()))
+                feature.setAttribute(FieldNames.CSV_HORIZON_DISTANCE,
+                                     observer_point.distance(v.x(), v.y()))
 
                 i += 1
 
                 sink.addFeature(feature)
 
-            feedback.setProgress((cnt/feature_count)*100)
+            feedback.setProgress((cnt / feature_count) * 100)
 
         return {self.OUTPUT: path_sink}
 
