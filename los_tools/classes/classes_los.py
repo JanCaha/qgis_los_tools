@@ -1,9 +1,11 @@
+from __future__ import annotations
 import math
 from typing import List, Optional, Union
 
-from qgis.core import (QgsPoint)
+from qgis.core import (QgsPoint, QgsFeature)
 
-from los_tools.tools.util_functions import calculate_distance
+from los_tools.tools.util_functions import calculate_distance, wkt_to_array_points
+from los_tools.constants.field_names import FieldNames
 
 
 class LoS:
@@ -297,6 +299,20 @@ class LoSLocal(LoS):
         self.target_angle = self.points[-1][self.VERTICAL_ANGLE]
         self.highest_local_horizon_index = None
 
+    @classmethod
+    def from_feature(cls,
+                     feature: QgsFeature,
+                     sampling_distance: float = None,
+                     curvature_corrections: bool = True,
+                     refraction_coefficient: float = 0.13) -> LoSLocal:
+
+        return cls(points=wkt_to_array_points(feature.geometry().asWkt()),
+                   observer_offset=feature.attribute(FieldNames.OBSERVER_OFFSET),
+                   target_offset=feature.attribute(FieldNames.TARGET_OFFSET),
+                   use_curvature_corrections=curvature_corrections,
+                   refraction_coefficient=refraction_coefficient,
+                   sampling_distance=sampling_distance)
+
     def is_target_visible(self, return_integer: bool = False):
 
         return self.is_visible_at_index(index=-1, return_integer=return_integer)
@@ -396,6 +412,22 @@ class LoSGlobal(LoS):
 
         self.global_horizon_index = None
 
+    @classmethod
+    def from_feature(cls,
+                     feature: QgsFeature,
+                     curvature_corrections: bool = True,
+                     refraction_coefficient: float = 0.13,
+                     sampling_distance: float = None) -> LoSGlobal:
+
+        return cls(wkt_to_array_points(feature.geometry().asWkt()),
+                   observer_offset=feature.attribute(FieldNames.OBSERVER_OFFSET),
+                   target_offset=feature.attribute(FieldNames.TARGET_OFFSET),
+                   target_x=feature.attribute(FieldNames.TARGET_X),
+                   target_y=feature.attribute(FieldNames.TARGET_Y),
+                   use_curvature_corrections=curvature_corrections,
+                   refraction_coefficient=refraction_coefficient,
+                   sampling_distance=sampling_distance)
+
     def is_target_visible(self, return_integer: bool = False) -> Union[bool, int]:
 
         return self.is_visible_at_index(index=self.target_index, return_integer=return_integer)
@@ -473,6 +505,19 @@ class LoSWithoutTarget(LoS):
                          sampling_distance=sampling_distance,
                          use_curvature_corrections=use_curvature_corrections,
                          refraction_coefficient=refraction_coefficient)
+
+    @classmethod
+    def from_feature(cls,
+                     feature: QgsFeature,
+                     curvature_corrections: bool = True,
+                     refraction_coefficient: float = 0.13,
+                     sampling_distance: float = None) -> LoSWithoutTarget:
+
+        return cls(points=wkt_to_array_points(feature.geometry().asWkt()),
+                   observer_offset=feature.attribute(FieldNames.OBSERVER_OFFSET),
+                   use_curvature_corrections=curvature_corrections,
+                   refraction_coefficient=refraction_coefficient,
+                   sampling_distance=sampling_distance)
 
     def get_horizontal_angle(self) -> float:
 
