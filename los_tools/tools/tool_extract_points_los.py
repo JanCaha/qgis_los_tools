@@ -1,21 +1,8 @@
-from qgis.core import (
-    QgsProcessing,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterBoolean,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsFields,
-    QgsVectorLayer,
-    QgsFeatureIterator,
-    QgsProcessingUtils,
-    QgsMapLayer,
-    QgsSymbol,
-    QgsRendererCategory,
-    QgsCategorizedSymbolRenderer)
+from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
+                       QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink,
+                       QgsProcessingParameterBoolean, QgsField, QgsFeature, QgsWkbTypes, QgsFields,
+                       QgsVectorLayer, QgsFeatureIterator, QgsProcessingUtils, QgsMapLayer,
+                       QgsSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer)
 
 from qgis.PyQt.QtCore import QVariant, Qt
 from los_tools.constants.field_names import FieldNames
@@ -37,48 +24,31 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.LOS_LAYER,
-                "LoS layer",
-                [QgsProcessing.TypeVectorLine])
-        )
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer",
+                                                [QgsProcessing.TypeVectorLine]))
+
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
         self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT_LAYER,
-                "Output layer")
-        )
+            QgsProcessingParameterBoolean(self.CURVATURE_CORRECTIONS,
+                                          "Use curvature corrections?",
+                                          defaultValue=True))
 
         self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.CURVATURE_CORRECTIONS,
-                "Use curvature corrections?",
-                defaultValue=True)
-        )
+            QgsProcessingParameterNumber(self.REFRACTION_COEFFICIENT,
+                                         "Refraction coefficient value",
+                                         type=QgsProcessingParameterNumber.Double,
+                                         defaultValue=0.13))
 
         self.addParameter(
-            QgsProcessingParameterNumber(
-                self.REFRACTION_COEFFICIENT,
-                "Refraction coefficient value",
-                type=QgsProcessingParameterNumber.Double,
-                defaultValue=0.13
-            )
-        )
+            QgsProcessingParameterBoolean(self.ONLY_VISIBLE,
+                                          "Export only visible points",
+                                          defaultValue=False))
 
         self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.ONLY_VISIBLE,
-                "Export only visible points",
-                defaultValue=False
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.EXTENDED_ATTRIBUTES,
-                "Calculate extended attributes?",
-                defaultValue=False)
-        )
+            QgsProcessingParameterBoolean(self.EXTENDED_ATTRIBUTES,
+                                          "Calculate extended attributes?",
+                                          defaultValue=False))
 
     def checkParameterValues(self, parameters, context):
 
@@ -118,11 +88,14 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
-        curvature_corrections: bool = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
+        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER,
+                                                                context)
+        curvature_corrections: bool = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS,
+                                                           context)
         ref_coeff: float = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
         only_visible: bool = self.parameterAsBool(parameters, self.ONLY_VISIBLE, context)
-        extended_attributes: bool = self.parameterAsBool(parameters, self.EXTENDED_ATTRIBUTES, context)
+        extended_attributes: bool = self.parameterAsBool(parameters, self.EXTENDED_ATTRIBUTES,
+                                                         context)
 
         field_names = los_layer.fields().names()
 
@@ -143,12 +116,8 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
                 fields.append(QgsField(FieldNames.ELEVATION_DIFF_GH, QVariant.Double))
                 fields.append(QgsField(FieldNames.ANGLE_DIFF_GH, QVariant.Double))
 
-        sink, self.dest_id = self.parameterAsSink(parameters,
-                                                  self.OUTPUT_LAYER,
-                                                  context,
-                                                  fields,
-                                                  QgsWkbTypes.Point25D,
-                                                  los_layer.sourceCrs())
+        sink, self.dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
+                                                  QgsWkbTypes.Point25D, los_layer.sourceCrs())
 
         feature_count = los_layer.featureCount()
 
@@ -177,7 +146,8 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
 
             elif los_type == NamesConstants.LOS_NO_TARGET:
                 los = LoSWithoutTarget(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                       observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
+                                       observer_offset=los_feature.attribute(
+                                           FieldNames.OBSERVER_OFFSET),
                                        use_curvature_corrections=curvature_corrections,
                                        refraction_coefficient=ref_coeff)
 
@@ -199,8 +169,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
                                    los_feature.attribute(FieldNames.ID_OBSERVER))
                     f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
                                    los_feature.attribute(FieldNames.ID_TARGET))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.VISIBLE),
-                                   los.visible[i])
+                    f.setAttribute(f.fieldNameIndex(FieldNames.VISIBLE), los.visible[i])
 
                     if extended_attributes:
 

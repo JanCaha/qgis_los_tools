@@ -1,15 +1,11 @@
-import numpy as np
-from typing import List, Any, Union
-
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterMultipleLayers, QgsField, QgsFeature, QgsWkbTypes,
-                       QgsPoint, QgsFields, QgsLineString, QgsGeometry, QgsProcessingFeedback)
+                       QgsPoint, QgsFields, QgsLineString, QgsProcessingFeedback)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
-from los_tools.tools.util_functions import get_doc_file
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
 

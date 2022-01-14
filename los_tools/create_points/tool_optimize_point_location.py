@@ -1,18 +1,9 @@
 import math
 
-from qgis.core import (QgsProcessing,
-                       QgsProcessingAlgorithm,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterDistance,
-                       QgsProcessingParameterFeatureSink,
-                       QgsRasterDataProvider,
-                       QgsRasterLayer,
-                       QgsRectangle,
-                       QgsRasterBlock,
-                       QgsPoint,
-                       QgsFeature,
-                       QgsPointXY,
+from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterRasterLayer,
+                       QgsProcessingParameterFeatureSource, QgsProcessingParameterDistance,
+                       QgsProcessingParameterFeatureSink, QgsRasterDataProvider, QgsRasterLayer,
+                       QgsRectangle, QgsRasterBlock, QgsPoint, QgsFeature, QgsPointXY,
                        QgsProcessingFeatureSource)
 
 
@@ -27,47 +18,30 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterRasterLayer(
-                self.INPUT_RASTER,
-                "Location optimization raster",
-                [QgsProcessing.TypeRaster]
-            )
-        )
+            QgsProcessingParameterRasterLayer(self.INPUT_RASTER, "Location optimization raster",
+                                              [QgsProcessing.TypeRaster]))
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER,
-                "Input point layer (points to optimize)",
-                [QgsProcessing.TypeVectorPoint]
-            )
-        )
+            QgsProcessingParameterFeatureSource(self.INPUT_LAYER,
+                                                "Input point layer (points to optimize)",
+                                                [QgsProcessing.TypeVectorPoint]))
 
         self.addParameter(
-            QgsProcessingParameterDistance(
-                self.DISTANCE,
-                "Search radius",
-                defaultValue=30.0,
-                minValue=0.001,
-                optional=False,
-                parentParameterName=self.INPUT_RASTER
-            )
-        )
+            QgsProcessingParameterDistance(self.DISTANCE,
+                                           "Search radius",
+                                           defaultValue=30.0,
+                                           minValue=0.001,
+                                           optional=False,
+                                           parentParameterName=self.INPUT_RASTER))
 
         self.addParameter(
-            QgsProcessingParameterRasterLayer(
-                self.MASK_RASTER,
-                "Mask raster",
-                [QgsProcessing.TypeRaster],
-                optional=True
-            )
-        )
+            QgsProcessingParameterRasterLayer(self.MASK_RASTER,
+                                              "Mask raster", [QgsProcessing.TypeRaster],
+                                              optional=True))
 
         self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT_LAYER,
-                "Output layer (optimized points)"
-            )
-        )
+            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER,
+                                              "Output layer (optimized points)"))
 
     def checkParameterValues(self, parameters, context):
 
@@ -134,10 +108,12 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        input_layer: QgsProcessingFeatureSource = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
+        input_layer: QgsProcessingFeatureSource = self.parameterAsSource(
+            parameters, self.INPUT_LAYER, context)
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 
-        raster: QgsRasterLayer = self.parameterAsRasterLayer(parameters, self.INPUT_RASTER, context)
+        raster: QgsRasterLayer = self.parameterAsRasterLayer(parameters, self.INPUT_RASTER,
+                                                             context)
         raster: QgsRasterDataProvider = raster.dataProvider()
 
         mask_raster = self.parameterAsRasterLayer(parameters, self.MASK_RASTER, context)
@@ -153,7 +129,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
         raster_extent: QgsRectangle = raster.extent()
 
-        max_size = math.sqrt(math.pow(raster_extent.width(), 2) + math.pow(raster_extent.height(), 2))
+        max_size = math.sqrt(
+            math.pow(raster_extent.width(), 2) + math.pow(raster_extent.height(), 2))
 
         if max_size < distance:
             distance = max_size
@@ -187,10 +164,12 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
             pixel_extent: QgsRectangle = QgsRectangle(x_min, y_min, x_max, y_max)
 
-            block_values: QgsRasterBlock = raster.block(1, pixel_extent, distance_cells*2, distance_cells*2)
+            block_values: QgsRasterBlock = raster.block(1, pixel_extent, distance_cells * 2,
+                                                        distance_cells * 2)
 
             if mask_raster is not None:
-                mask_block_values: QgsRasterBlock = mask_raster.block(1, pixel_extent, distance_cells*2, distance_cells*2)
+                mask_block_values: QgsRasterBlock = mask_raster.block(
+                    1, pixel_extent, distance_cells * 2, distance_cells * 2)
 
             max_value_x = -math.inf
             max_value_y = -math.inf
@@ -199,7 +178,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
             for i in range(0, block_values.width()):
                 for j in range(0, block_values.height()):
 
-                    dist = math.sqrt(math.pow(distance_cells - i, 2) + math.pow(distance_cells - j, 2))
+                    dist = math.sqrt(
+                        math.pow(distance_cells - i, 2) + math.pow(distance_cells - j, 2))
 
                     value = block_values.value(i, j)
 
@@ -220,8 +200,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
                 max_value_x = max_value_x - distance_cells
                 max_value_y = max_value_y - distance_cells
 
-                max_value_x = pixel_extent.center().x() + cell_size/2 + max_value_x * cell_size
-                max_value_y = pixel_extent.center().y() - cell_size/2 - max_value_y * cell_size
+                max_value_x = pixel_extent.center().x() + cell_size / 2 + max_value_x * cell_size
+                max_value_y = pixel_extent.center().y() - cell_size / 2 - max_value_y * cell_size
             else:
                 max_value_x = point.x()
                 max_value_y = point.y()

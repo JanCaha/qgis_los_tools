@@ -1,17 +1,7 @@
-from qgis.core import (
-    QgsProcessing,
-    QgsProcessingAlgorithm,
-    QgsFeatureRequest,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterField,
-    QgsGeometry,
-    QgsCoordinateTransform,
-    QgsProject,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsFields)
+from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsFeatureRequest,
+                       QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink,
+                       QgsProcessingParameterField, QgsGeometry, QgsCoordinateTransform,
+                       QgsProject, QgsField, QgsFeature, QgsWkbTypes, QgsFields)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -29,34 +19,22 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.LOS_LAYER,
-                "LoS layer",
-                [QgsProcessing.TypeVectorLine])
-        )
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer",
+                                                [QgsProcessing.TypeVectorLine]))
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                self.OBJECT_LAYER,
-                "Object layer",
-                [QgsProcessing.TypeVectorLine, QgsProcessing.TypeVectorPolygon])
-        )
+                self.OBJECT_LAYER, "Object layer",
+                [QgsProcessing.TypeVectorLine, QgsProcessing.TypeVectorPolygon]))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.OBJECT_LAYER_FIELD_ID,
-                "Objects layer ID field",
-                parentLayerParameterName=self.OBJECT_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
+            QgsProcessingParameterField(self.OBJECT_LAYER_FIELD_ID,
+                                        "Objects layer ID field",
+                                        parentLayerParameterName=self.OBJECT_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT_TABLE,
-                "Output table")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table"))
 
     def checkParameterValues(self, parameters, context):
 
@@ -89,7 +67,8 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
         field_id = self.parameterAsString(parameters, self.OBJECT_LAYER_FIELD_ID, context)
 
         if object_layer.crs() != los_layer.crs():
-            coord_transform = QgsCoordinateTransform(object_layer.crs(), los_layer.crs(), QgsProject.instance())
+            coord_transform = QgsCoordinateTransform(object_layer.crs(), los_layer.crs(),
+                                                     QgsProject.instance())
         else:
             coord_transform = None
 
@@ -99,16 +78,14 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.AZIMUTH_MIN, QVariant.Double))
         fields.append(QgsField(FieldNames.AZIMUTH_MAX, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters,
-                                             self.OUTPUT_TABLE,
-                                             context,
-                                             fields,
-                                             QgsWkbTypes.NoGeometry,
-                                             los_layer.sourceCrs())
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields,
+                                             QgsWkbTypes.NoGeometry, los_layer.sourceCrs())
 
-        id_values = list(los_layer.uniqueValues(los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)))
+        id_values = list(
+            los_layer.uniqueValues(los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)))
 
-        total = los_layer.dataProvider().featureCount() * object_layer.dataProvider().featureCount()
+        total = los_layer.dataProvider().featureCount() * object_layer.dataProvider().featureCount(
+        )
         i = 0
 
         object_layer_features = object_layer.getFeatures()
@@ -131,7 +108,8 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
                 request = QgsFeatureRequest()
                 request.setFilterRect(geom_transform.boundingBox())
                 request.setFilterExpression("{} = '{}'".format(FieldNames.ID_OBSERVER, id_value))
-                order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
+                order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH,
+                                                                  ascending=True)
                 request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
 
                 features = los_layer.getFeatures(request)
@@ -147,18 +125,15 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
                     az_step = azimuths[1] - azimuths[0]
 
-                    if abs((max(azimuths) - min(azimuths)) - (az_step * (len(azimuths) - 1))) > 0.0001:
+                    if abs((max(azimuths) - min(azimuths)) - (az_step *
+                                                              (len(azimuths) - 1))) > 0.0001:
                         azimuths = [x - 360 if x > 180 else x for x in azimuths]
 
                     f = QgsFeature(fields)
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
-                                   int(id_value))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MIN),
-                                   min(azimuths))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MAX),
-                                   max(azimuths))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBJECT),
-                                   object_id)
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER), int(id_value))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MIN), min(azimuths))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MAX), max(azimuths))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBJECT), object_id)
 
                     sink.addFeature(f)
 

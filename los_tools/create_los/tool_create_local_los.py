@@ -5,7 +5,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingUtils)
 
 from qgis.PyQt.QtCore import QVariant
-from los_tools.tools.util_functions import segmentize_line, bilinear_interpolated_value
+from los_tools.tools.util_functions import segmentize_line
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.tools.util_functions import get_doc_file

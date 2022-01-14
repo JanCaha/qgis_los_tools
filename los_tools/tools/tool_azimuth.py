@@ -1,13 +1,6 @@
-from qgis.core import (
-    QgsProcessing,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterField,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsFields)
+from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
+                       QgsProcessingParameterFeatureSink, QgsProcessingParameterField, QgsField,
+                       QgsFeature, QgsWkbTypes, QgsFields)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -24,44 +17,29 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.POINT_LAYER,
-                "Point layer",
-                [QgsProcessing.TypeVectorPoint])
-        )
+            QgsProcessingParameterFeatureSource(self.POINT_LAYER, "Point layer",
+                                                [QgsProcessing.TypeVectorPoint]))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.POINT_LAYER_FIELD_ID,
-                "Point layer ID field",
-                parentLayerParameterName=self.POINT_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
+            QgsProcessingParameterField(self.POINT_LAYER_FIELD_ID,
+                                        "Point layer ID field",
+                                        parentLayerParameterName=self.POINT_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                self.OBJECT_LAYER,
-                "Object layer",
-                [QgsProcessing.TypeVectorLine, QgsProcessing.TypeVectorPolygon])
-        )
+                self.OBJECT_LAYER, "Object layer",
+                [QgsProcessing.TypeVectorLine, QgsProcessing.TypeVectorPolygon]))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.OBJECT_LAYER_FIELD_ID,
-                "Object layer ID field",
-                parentLayerParameterName=self.OBJECT_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
+            QgsProcessingParameterField(self.OBJECT_LAYER_FIELD_ID,
+                                        "Object layer ID field",
+                                        parentLayerParameterName=self.OBJECT_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT_TABLE,
-                "Output table")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table"))
 
     def checkParameterValues(self, parameters, context):
 
@@ -79,21 +57,19 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.ID_OBJECT, QVariant.Int))
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters,
-                                             self.OUTPUT_TABLE,
-                                             context,
-                                             fields,
-                                             QgsWkbTypes.NoGeometry,
-                                             point_layer.sourceCrs())
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields,
+                                             QgsWkbTypes.NoGeometry, point_layer.sourceCrs())
 
-        total = point_layer.dataProvider().featureCount() * object_layer.dataProvider().featureCount()
+        total = point_layer.dataProvider().featureCount() * object_layer.dataProvider(
+        ).featureCount()
         i = 0
 
         object_layer_features = object_layer.getFeatures()
 
         for object_layer_feature_count, object_layer_feature in enumerate(object_layer_features):
 
-            for point_layer_feature_count, point_layer_feature in enumerate(point_layer.getFeatures()):
+            for point_layer_feature_count, point_layer_feature in enumerate(
+                    point_layer.getFeatures()):
 
                 if feedback.isCanceled():
                     break
@@ -109,8 +85,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
                                point_layer_feature.attribute(point_field_id))
                 f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBJECT),
                                object_layer_feature.attribute(object_field_id))
-                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
-                               azimuth)
+                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), azimuth)
 
                 sink.addFeature(f)
 

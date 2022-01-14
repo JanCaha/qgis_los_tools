@@ -1,13 +1,10 @@
-from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
-                       QgsProcessingParameterFeatureSource, QgsProcessingParameterField,
-                       QgsProcessingParameterFeatureSink, QgsProcessingParameterRasterLayer,
-                       QgsField, QgsFeature, QgsWkbTypes, QgsPoint, QgsFields, QgsLineString,
+from qgis.core import (QgsField, QgsFeature, QgsWkbTypes, QgsPoint, QgsFields, QgsLineString,
                        QgsProcessingUtils)
 
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.create_los.tool_create_local_los import CreateLocalLosAlgorithm
-from los_tools.tools.util_functions import segmentize_line, bilinear_interpolated_value, get_diagonal_size
+from los_tools.tools.util_functions import segmentize_line
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.tools.util_functions import get_doc_file

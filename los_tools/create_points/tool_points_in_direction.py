@@ -1,19 +1,9 @@
 import numpy as np
 
-from qgis.core import (
-    QgsProcessing,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterField,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterDistance,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsGeometry,
-    QgsFields,
-    QgsPointXY)
+from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
+                       QgsProcessingParameterFeatureSource, QgsProcessingParameterField,
+                       QgsProcessingParameterFeatureSink, QgsProcessingParameterDistance, QgsField,
+                       QgsFeature, QgsWkbTypes, QgsGeometry, QgsFields, QgsPointXY)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -33,72 +23,47 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER,
-                "Input point layer",
-                [QgsProcessing.TypeVectorPoint]
-            )
-        )
+            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer",
+                                                [QgsProcessing.TypeVectorPoint]))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.ID_FIELD,
-                "ID field to assign to output",
-                parentLayerParameterName=self.INPUT_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=True
-            )
-        )
+            QgsProcessingParameterField(self.ID_FIELD,
+                                        "ID field to assign to output",
+                                        parentLayerParameterName=self.INPUT_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=True))
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.DIRECTION_LAYER,
-                "Main direction point layer",
-                [QgsProcessing.TypeVectorPoint]
-            )
-        )
+            QgsProcessingParameterFeatureSource(self.DIRECTION_LAYER, "Main direction point layer",
+                                                [QgsProcessing.TypeVectorPoint]))
 
         self.addParameter(
-            QgsProcessingParameterNumber(
-                self.ANGLE_OFFSET,
-                "Angle offset from the main direction",
-                QgsProcessingParameterNumber.Double,
-                defaultValue=20.0,
-                minValue=0.0,
-                maxValue=180.0,
-                optional=False
-            )
-        )
+            QgsProcessingParameterNumber(self.ANGLE_OFFSET,
+                                         "Angle offset from the main direction",
+                                         QgsProcessingParameterNumber.Double,
+                                         defaultValue=20.0,
+                                         minValue=0.0,
+                                         maxValue=180.0,
+                                         optional=False))
 
         self.addParameter(
-            QgsProcessingParameterNumber(
-                self.ANGLE_STEP,
-                "Angle step",
-                QgsProcessingParameterNumber.Double,
-                defaultValue=1.0,
-                minValue=0.001,
-                maxValue=180.0,
-                optional=False
-            )
-        )
+            QgsProcessingParameterNumber(self.ANGLE_STEP,
+                                         "Angle step",
+                                         QgsProcessingParameterNumber.Double,
+                                         defaultValue=1.0,
+                                         minValue=0.001,
+                                         maxValue=180.0,
+                                         optional=False))
 
         self.addParameter(
-            QgsProcessingParameterDistance(
-                self.DISTANCE,
-                "Distance",
-                parentParameterName=self.INPUT_LAYER,
-                defaultValue=10.0,
-                minValue=0.001,
-                optional=False
-            )
-        )
+            QgsProcessingParameterDistance(self.DISTANCE,
+                                           "Distance",
+                                           parentParameterName=self.INPUT_LAYER,
+                                           defaultValue=10.0,
+                                           minValue=0.001,
+                                           optional=False))
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT_LAYER,
-                "Output layer"
-            )
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
     def checkParameterValues(self, parameters, context):
 
@@ -127,12 +92,8 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
         fields.append(QgsField(FieldNames.DIFF_TO_MAIN_AZIMUTH, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters,
-                                             self.OUTPUT_LAYER,
-                                             context,
-                                             fields,
-                                             QgsWkbTypes.Point,
-                                             input_layer.sourceCrs())
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
+                                             QgsWkbTypes.Point, input_layer.sourceCrs())
 
         feature_count = input_layer.featureCount()
 
@@ -152,7 +113,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                 main_angle = feature_point.azimuth(feature_direction.geometry().asPoint())
 
                 angles = np.arange(main_angle - angle_offset,
-                                   main_angle + angle_offset + 0.1*angle_step,
+                                   main_angle + angle_offset + 0.1 * angle_step,
                                    step=angle_step).tolist()
 
                 i = 0
@@ -165,17 +126,15 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                     f.setGeometry(QgsGeometry().fromPointXY(new_point))
                     f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
                                    int(feature.attribute(id_field)))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
-                                   float(angle))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_POINT),
-                                   int(i))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_POINT), int(i))
                     f.setAttribute(f.fieldNameIndex(FieldNames.DIFF_TO_MAIN_AZIMUTH),
                                    main_angle - float(angle))
 
                     sink.addFeature(f)
                     i += 1
 
-            feedback.setProgress((cnt/feature_count)*100)
+            feedback.setProgress((cnt / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 

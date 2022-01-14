@@ -1,24 +1,15 @@
-from qgis.core import (
-    QgsProcessing,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterField,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterRasterLayer,
-    QgsProcessingParameterDistance,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsPoint,
-    QgsFields,
-    QgsLineString,
-    QgsProcessingUtils)
+from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
+                       QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
+                       QgsProcessingParameterMultipleLayers, QgsProcessingParameterDistance,
+                       QgsField, QgsFeature, QgsWkbTypes, QgsPoint, QgsFields, QgsLineString,
+                       QgsProcessingUtils)
 
 from qgis.PyQt.QtCore import QVariant
-from los_tools.tools.util_functions import segmentize_line, bilinear_interpolated_value, get_diagonal_size
+from los_tools.tools.util_functions import segmentize_line
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.tools.util_functions import get_doc_file
+from los_tools.classes.list_raster import ListOfRasters
 
 
 class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
@@ -32,110 +23,71 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
     OUTPUT_LAYER = "OutputLayer"
     LINE_DENSITY = "LineDensity"
     MAX_LOS_LENGTH = "MaxLoSLength"
-    DEM = "DemRaster"
+    DEM_RASTERS = "DemRasters"
 
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterRasterLayer(
-                self.DEM,
-                "Raster Layer DEM",
-                [QgsProcessing.TypeRaster]
-            )
-        )
+            QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers",
+                                                 QgsProcessing.TypeRaster))
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.OBSERVER_POINTS_LAYER,
-                "Observers point layer",
-                [QgsProcessing.TypeVectorPoint])
-        )
+            QgsProcessingParameterFeatureSource(self.OBSERVER_POINTS_LAYER,
+                                                "Observers point layer",
+                                                [QgsProcessing.TypeVectorPoint]))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.OBSERVER_ID_FIELD,
-                "Observer ID field",
-                parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
+            QgsProcessingParameterField(self.OBSERVER_ID_FIELD,
+                                        "Observer ID field",
+                                        parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.OBSERVER_OFFSET_FIELD,
-                "Observer offset field",
-                parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
+            QgsProcessingParameterField(self.OBSERVER_OFFSET_FIELD,
+                                        "Observer offset field",
+                                        parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.TARGET_POINTS_LAYER,
-                "Targets point layer",
-                [QgsProcessing.TypeVectorPoint])
-        )
+            QgsProcessingParameterFeatureSource(self.TARGET_POINTS_LAYER, "Targets point layer",
+                                                [QgsProcessing.TypeVectorPoint]))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.TARGET_ID_FIELD,
-                "Target ID field",
-                parentLayerParameterName=self.TARGET_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
+            QgsProcessingParameterField(self.TARGET_ID_FIELD,
+                                        "Target ID field",
+                                        parentLayerParameterName=self.TARGET_POINTS_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
         self.addParameter(
-            QgsProcessingParameterField(
-                self.TARGET_DEFINITION_ID_FIELD,
-                "Target and Observer agreement ID field",
-                parentLayerParameterName=self.TARGET_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
-                optional=False
-            )
-        )
+            QgsProcessingParameterField(self.TARGET_DEFINITION_ID_FIELD,
+                                        "Target and Observer agreement ID field",
+                                        parentLayerParameterName=self.TARGET_POINTS_LAYER,
+                                        type=QgsProcessingParameterField.Numeric,
+                                        optional=False))
 
         self.addParameter(
-            QgsProcessingParameterDistance(
-                self.LINE_DENSITY,
-                "LoS sampling distance",
-                parentParameterName=self.OBSERVER_POINTS_LAYER,
-                defaultValue=1,
-                minValue=0.01,
-                maxValue=1000.0,
-                optional=False)
-        )
+            QgsProcessingParameterDistance(self.LINE_DENSITY,
+                                           "LoS sampling distance",
+                                           parentParameterName=self.OBSERVER_POINTS_LAYER,
+                                           defaultValue=1,
+                                           minValue=0.01,
+                                           maxValue=1000.0,
+                                           optional=False))
 
         self.addParameter(
-            QgsProcessingParameterDistance(
-                self.MAX_LOS_LENGTH,
-                "Maximal length of LoS (0 means unlimited)",
-                parentParameterName=self.OBSERVER_POINTS_LAYER,
-                defaultValue=0,
-                minValue=0,
-                optional=False
-            )
-        )
+            QgsProcessingParameterDistance(self.MAX_LOS_LENGTH,
+                                           "Maximal length of LoS (0 means unlimited)",
+                                           parentParameterName=self.OBSERVER_POINTS_LAYER,
+                                           defaultValue=0,
+                                           minValue=0,
+                                           optional=False))
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT_LAYER,
-                "Output layer")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
     def checkParameterValues(self, parameters, context):
-
-        dem = self.parameterAsRasterLayer(parameters, self.DEM, context)
-        raster_crs = dem.crs()
-        dem_band_count = dem.bandCount()
-
-        if dem_band_count != 1:
-            msg = "`Raster Layer DEM` can only have one band. Currently there are `{0}` bands.".format(dem_band_count)
-
-            return False, msg
 
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
         targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
@@ -146,31 +98,40 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
             return False, msg
 
-        if not raster_crs == observers_layer.sourceCrs():
-            msg = "`Observers point layer` and `Raster Layer DEM` crs must be equal. " \
-                  "Right now they are not."
-
-            return False, msg
-
         if not observers_layer.sourceCrs() == targets_layer.sourceCrs():
             msg = "`Observers point layer` and `Targets point layer` crs must be equal. " \
                   "Right now they are not."
 
             return False, msg
 
+        list_rasters = ListOfRasters(
+            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
+
+        correct, msg = list_rasters.validate_bands()
+
+        if not correct:
+            return correct, msg
+
+        correct, msg = list_rasters.validate_crs(crs=observers_layer.sourceCrs())
+
+        if not correct:
+            return correct, msg
+
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        dem = self.parameterAsRasterLayer(parameters, self.DEM, context)
-        dem = dem.dataProvider()
+        list_rasters = ListOfRasters(
+            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
 
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
         observers_id = self.parameterAsString(parameters, self.OBSERVER_ID_FIELD, context)
         observers_offset = self.parameterAsString(parameters, self.OBSERVER_OFFSET_FIELD, context)
         targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
-        target_definition_id_field = self.parameterAsString(parameters, self.TARGET_DEFINITION_ID_FIELD, context)
+        target_definition_id_field = self.parameterAsString(parameters,
+                                                            self.TARGET_DEFINITION_ID_FIELD,
+                                                            context)
         sampling_distance = self.parameterAsDouble(parameters, self.LINE_DENSITY, context)
         max_los_length = self.parameterAsDouble(parameters, self.MAX_LOS_LENGTH, context)
 
@@ -183,18 +144,15 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.OBSERVER_X, QVariant.Double))
         fields.append(QgsField(FieldNames.OBSERVER_Y, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters,
-                                             self.OUTPUT_LAYER,
-                                             context,
-                                             fields,
-                                             QgsWkbTypes.LineString25D,
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context,
+                                             fields, QgsWkbTypes.LineString25D,
                                              observers_layer.sourceCrs())
 
         feature_count = targets_layer.featureCount()
 
         observers_iterator = observers_layer.getFeatures()
 
-        max_length_extension = get_diagonal_size(dem)
+        max_length_extension = list_rasters.maximal_diagonal_size()
 
         i = 0
         for observer_count, observer_feature in enumerate(observers_iterator):
@@ -206,7 +164,8 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                 if feedback.isCanceled():
                     break
 
-                if observer_feature.attribute(observers_id) == target_feature.attribute(target_definition_id_field):
+                if observer_feature.attribute(observers_id) == target_feature.attribute(
+                        target_definition_id_field):
 
                     start_point = QgsPoint(observer_feature.geometry().asPoint())
                     end_point = QgsPoint(target_feature.geometry().asPoint())
@@ -220,22 +179,15 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                     else:
                         line_temp.extend(0, max_length_extension)
 
-                    line = QgsLineString([QgsPoint(observer_feature.geometry().asPoint()),
-                                          QgsPoint(target_feature.geometry().asPoint()),
-                                          line_temp.endPoint()])
+                    line = QgsLineString([
+                        QgsPoint(observer_feature.geometry().asPoint()),
+                        QgsPoint(target_feature.geometry().asPoint()),
+                        line_temp.endPoint()
+                    ])
 
                     line = segmentize_line(line, segment_length=sampling_distance)
 
-                    points = line.points()
-
-                    points3d = []
-
-                    for p in points:
-                        z = bilinear_interpolated_value(dem, p)
-                        if z is not None:
-                            points3d.append(QgsPoint(p.x(), p.y(), z))
-
-                    line = QgsLineString(points3d)
+                    line = list_rasters.add_z_values(line.points())
 
                     f = QgsFeature(fields)
                     f.setGeometry(line)
@@ -256,7 +208,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
                     sink.addFeature(f)
                     i += 1
-                    feedback.setProgress((i/feature_count)*100)
+                    feedback.setProgress((i / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
