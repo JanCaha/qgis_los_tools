@@ -531,13 +531,28 @@ class LoSWithoutTarget(LoS):
 
         return self.get_geom_at_index(index)
 
-    def get_global_horizon_angle_difference(self):
+    def get_global_horizon_angle_difference(self) -> Optional[float]:
+
+        global_horizon_index = self._get_global_horizon_index()
+        local_horizon_index = self.__get_max_local_horizon_index()
+
+        if global_horizon_index is not None and local_horizon_index is not None:
         
-        return self.points[self._get_global_horizon_index()][self.VERTICAL_ANGLE] - \
-            self.points[self.__get_max_local_horizon_index()][self.VERTICAL_ANGLE]
+            return self.points[global_horizon_index][self.VERTICAL_ANGLE] - \
+                self.points[local_horizon_index][self.VERTICAL_ANGLE]
+        else:
+            return None
 
     def get_global_horizon_elevation_difference(self):
         
-        return self.points[self._get_global_horizon_index()][self.Z] - \
-            math.tan(math.radians(self.points[self.__get_max_local_horizon_index()][self.VERTICAL_ANGLE])) * \
-            self.points[self._get_global_horizon_index()][self.DISTANCE]
+        global_horizon_index = self._get_global_horizon_index()
+        local_horizon_index = self.__get_max_local_horizon_index()
+
+        if global_horizon_index is not None and local_horizon_index is not None:
+
+            return self.points[global_horizon_index][self.Z] - \
+                math.tan(math.radians(self.points[local_horizon_index][self.VERTICAL_ANGLE])) * \
+                self.points[global_horizon_index][self.DISTANCE]
+
+        else:
+            return None
