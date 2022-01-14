@@ -31,8 +31,8 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.alg.initAlgorithm()
 
     def test_parameters(self) -> None:
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("DemRaster"),
-                                          parameter_type="raster")
+        self.assertQgsProcessingParameter(self.alg.parameterDefinition("DemRasters"),
+                                          parameter_type="multilayer")
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("ObserverPoints"),
                                           parameter_type="source")
         self.assertQgsProcessingParameter(self.alg.parameterDefinition("ObserverIdField"),
@@ -65,15 +65,29 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
     def test_check_wrong_params(self) -> None:
 
         # multiband raster fail
-        params = {"DemRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))}
+        params = {
+            "DemRasters": [QgsRasterLayer(get_data_path(file="raster_multiband.tif"))],
+            "ObserverPoints": self.observers,
+            "ObserverIdField": self.observers_id,
+            "ObserverOffset": self.observers_offset,
+            "TargetPoints": self.targets,
+            "TargetIdField": self.targets_id,
+            "TargetDefinitionIdField": self.targets_origin_id
+        }
 
         self.assertCheckParameterValuesRaisesMessage(
-            parameters=params, message="`Raster Layer DEM` can only have one band.")
+            parameters=params,
+            message="Rasters can only have one band. Currently there are rasters with `3` bands.")
 
         # observer layer with geographic coordinates
         params = {
-            "DemRaster": self.dsm,
+            "DemRasters": [self.dsm],
             "ObserverPoints": QgsVectorLayer(get_data_path(file="single_point_wgs84.gpkg")),
+            "ObserverIdField": self.observers_id,
+            "ObserverOffset": self.observers_offset,
+            "TargetPoints": self.targets,
+            "TargetIdField": self.targets_id,
+            "TargetDefinitionIdField": self.targets_origin_id
         }
 
         self.assertCheckParameterValuesRaisesMessage(
@@ -81,19 +95,29 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         # raster crs != observers crs
         params = {
-            "DemRaster": QgsRasterLayer(get_data_path(file="dsm_epsg_5514.tif")),
-            "ObserverPoints": self.observers
+            "DemRasters": [QgsRasterLayer(get_data_path(file="dsm_epsg_5514.tif"))],
+            "ObserverPoints": self.observers,
+            "ObserverIdField": self.observers_id,
+            "ObserverOffset": self.observers_offset,
+            "TargetPoints": self.targets,
+            "TargetIdField": self.targets_id,
+            "TargetDefinitionIdField": self.targets_origin_id
         }
 
         self.assertCheckParameterValuesRaisesMessage(
             parameters=params,
-            message="`Observers point layer` and `Raster Layer DEM` crs must be equal.")
+            message=
+            "`Observers point layer` and raster layers crs must be equal. Right now they are not.")
 
         # observers crs != target crs
         params = {
-            "DemRaster": self.dsm,
+            "DemRasters": [self.dsm],
             "ObserverPoints": self.observers,
-            "TargetPoints": QgsVectorLayer(get_data_path(file="points_epsg_5514.gpkg"))
+            "TargetPoints": QgsVectorLayer(get_data_path(file="points_epsg_5514.gpkg")),
+            "ObserverIdField": self.observers_id,
+            "ObserverOffset": self.observers_offset,
+            "TargetIdField": self.targets_id,
+            "TargetDefinitionIdField": self.targets_origin_id
         }
 
         self.assertCheckParameterValuesRaisesMessage(
@@ -103,7 +127,7 @@ class CreateNoTargetLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
     def test_run_alg(self) -> None:
 
         params = {
-            "DemRaster": self.dsm,
+            "DemRasters": [self.dsm],
             "ObserverPoints": self.observers,
             "ObserverIdField": self.observers_id,
             "ObserverOffset": self.observers_offset,
