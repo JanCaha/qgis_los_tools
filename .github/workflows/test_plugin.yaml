@@ -10,7 +10,7 @@ env:
   # plugin name/directory where the code for the plugin is stored
   PLUGIN_NAME: los_tools
   # the path to file that handles test running inside the github repository
-  PATH_TO_TEST_RUNNER: los_tools.tests.package_test_suite.test_package
+  PATH_TO_TEST_RUNNER: los_tools.package_test_suite.test_package
   # Docker settings
   DOCKER_IMAGE: qgis/qgis
 
