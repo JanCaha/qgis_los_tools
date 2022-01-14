@@ -10,7 +10,7 @@ from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
-from los_tools.tools.util_functions import wkt_to_array_points, get_los_type
+from los_tools.tools.util_functions import get_los_type
 from los_tools.tools.util_functions import get_doc_file
 
 
@@ -133,11 +133,9 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
             if los_type == NamesConstants.LOS_LOCAL:
 
-                los = LoSLocal(wkt_to_array_points(los_feature.geometry().asWkt()),
-                               observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
-                               target_offset=los_feature.attribute(FieldNames.TARGET_OFFSET),
-                               use_curvature_corrections=curvature_corrections,
-                               refraction_coefficient=ref_coeff)
+                los = LoSLocal.from_feature(feature=los_feature,
+                                            curvature_corrections=curvature_corrections,
+                                            refraction_coefficient=ref_coeff)
 
                 f.setAttribute(f.fieldNameIndex(FieldNames.VISIBLE), los.is_target_visible())
                 f.setAttribute(f.fieldNameIndex(FieldNames.VIEWING_ANGLE), los.get_view_angle())
@@ -156,13 +154,9 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
             elif los_type == NamesConstants.LOS_GLOBAL:
 
-                los = LoSGlobal(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
-                                target_offset=los_feature.attribute(FieldNames.TARGET_OFFSET),
-                                target_x=los_feature.attribute(FieldNames.TARGET_X),
-                                target_y=los_feature.attribute(FieldNames.TARGET_Y),
-                                use_curvature_corrections=curvature_corrections,
-                                refraction_coefficient=ref_coeff)
+                los = LoSGlobal.from_feature(feature=los_feature,
+                                             curvature_corrections=curvature_corrections,
+                                             refraction_coefficient=ref_coeff)
 
                 f.setAttribute(f.fieldNameIndex(FieldNames.VISIBLE), los.is_target_visible())
                 f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_DIFF_GH),
@@ -176,11 +170,9 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
             elif los_type == NamesConstants.LOS_NO_TARGET:
 
-                los = LoSWithoutTarget(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                       observer_offset=los_feature.attribute(
-                                           FieldNames.OBSERVER_OFFSET),
-                                       use_curvature_corrections=curvature_corrections,
-                                       refraction_coefficient=ref_coeff)
+                los = LoSWithoutTarget.from_feature(feature=los_feature,
+                                                    curvature_corrections=curvature_corrections,
+                                                    refraction_coefficient=ref_coeff)
 
                 f.setAttribute(f.fieldNameIndex(FieldNames.MAXIMAL_VERTICAL_ANGLE),
                                los.get_maximal_vertical_angle())
