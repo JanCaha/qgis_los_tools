@@ -143,6 +143,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
         fields.append(QgsField(FieldNames.OBSERVER_X, QVariant.Double))
         fields.append(QgsField(FieldNames.OBSERVER_Y, QVariant.Double))
+        fields.append(QgsField(FieldNames.ANGLE_STEP, QVariant.Double))
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context,
                                              fields, QgsWkbTypes.LineString25D,
@@ -205,6 +206,11 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                                    observer_feature.geometry().asPoint().x())
                     f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_Y),
                                    observer_feature.geometry().asPoint().y())
+
+                    # TODO compatability with older version
+                    if FieldNames.ANGLE_STEP in targets_layer.fields().names():
+                        f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP),
+                                       target_feature.attribute(FieldNames.ANGLE_STEP))
 
                     sink.addFeature(f)
                     i += 1
