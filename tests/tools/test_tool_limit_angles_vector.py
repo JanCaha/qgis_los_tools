@@ -1,5 +1,4 @@
 import unittest
-import os
 
 from qgis.core import (QgsVectorLayer, QgsProcessingFeedback, QgsProcessingContext)
 
@@ -68,6 +67,31 @@ class LimitAnglesAlgorithmTest(QgsProcessingAlgorithmTestCase):
             "LoSLayer": self.los_no_target,
             "ObjectLayerID": "fid",
             "ObjectLayer": self.polygon,
+            "OutputTable": self.output_path,
+        }
+
+        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
+        self.assertTrue(can_run)
+        self.assertIn("", msg)
+
+        self.alg.run(parameters=params, context=self.context, feedback=self.feedback)
+
+        table = QgsVectorLayer(self.output_path)
+
+        self.assertIn(FieldNames.AZIMUTH_MIN, table.fields().names())
+        self.assertIn(FieldNames.AZIMUTH_MAX, table.fields().names())
+        self.assertIn(FieldNames.ID_OBSERVER, table.fields().names())
+        self.assertIn(FieldNames.ID_OBJECT, table.fields().names())
+
+        unique_ids = self.los_no_target.uniqueValues(self.los_no_target.fields().lookupField(
+            FieldNames.ID_OBSERVER))
+
+        self.assertEqual(table.featureCount(), len(unique_ids))
+
+        params = {
+            "LoSLayer": self.los_no_target,
+            "ObjectLayerID": "fid",
+            "ObjectLayer": QgsVectorLayer(get_data_path(file="poly_epsg_5514.gpkg")),
             "OutputTable": self.output_path,
         }
 
