@@ -129,7 +129,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                     f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
                     f.setAttribute(f.fieldNameIndex(FieldNames.ID_POINT), int(i))
                     f.setAttribute(f.fieldNameIndex(FieldNames.DIFF_TO_MAIN_AZIMUTH),
-                                   main_angle - float(angle))
+                                   float(angle) - main_angle)
 
                     sink.addFeature(f)
                     i += 1
