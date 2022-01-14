@@ -20,6 +20,8 @@ class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.los_local = QgsVectorLayer(get_data_path(file="los_local.gpkg"))
 
+        self.los_no_target = QgsVectorLayer(get_data_path(file="no_target_los.gpkg"))
+
         self.alg = ExtractHorizonsAlgorithm()
         self.alg.initAlgorithm()
 
@@ -58,7 +60,7 @@ class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.assertCheckParameterValuesRaisesMessage(
             parameters=params, message="Cannot extract global horizon from local LoS.")
 
-    def test_run_alg(self) -> None:
+    def test_run_alg_los_local(self) -> None:
 
         output_path = get_data_path_results(file="horizons_local.gpkg")
 
@@ -86,6 +88,8 @@ class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
             list(
                 horizon_layer.uniqueValues(horizon_layer.fields().lookupField(
                     FieldNames.HORIZON_TYPE)))[0])
+
+    def test_run_alg_los_global(self) -> None:
 
         output_path = get_data_path_results(file="horizons_global.gpkg")
 
@@ -115,3 +119,51 @@ class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
                     FieldNames.HORIZON_TYPE)))[0])
 
         self.assertEqual(self.los_global.featureCount(), horizon_layer.featureCount())
+
+    def test_run_alg_los_no_targe(self) -> None:
+
+        output_path = get_data_path_results(file="horizons_no_target.gpkg")
+
+        params = {
+            "LoSLayer": self.los_no_target,
+            "HorizonType": 0,
+            "OutputLayer": output_path,
+            "CurvatureCorrections": True,
+            "RefractionCoefficient": 0.13
+        }
+
+        self.assertRunAlgorithm(parameters=params)
+
+        horizon_layer = QgsVectorLayer(output_path)
+
+        self.assertQgsVectorLayer(horizon_layer,
+                                  geom_type=QgsWkbTypes.PointZ,
+                                  crs=self.los_no_target.sourceCrs())
+
+        self.assertFieldNamesInQgsVectorLayer([
+            FieldNames.HORIZON_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET,
+            FieldNames.AZIMUTH
+        ], horizon_layer)
+
+        output_path = get_data_path_results(file="horizons_no_target.gpkg")
+
+        params = {
+            "LoSLayer": self.los_no_target,
+            "HorizonType": 2,
+            "OutputLayer": output_path,
+            "CurvatureCorrections": True,
+            "RefractionCoefficient": 0.13
+        }
+
+        self.assertRunAlgorithm(parameters=params)
+
+        horizon_layer = QgsVectorLayer(output_path)
+
+        self.assertQgsVectorLayer(horizon_layer,
+                                  geom_type=QgsWkbTypes.PointZ,
+                                  crs=self.los_no_target.sourceCrs())
+
+        self.assertFieldNamesInQgsVectorLayer([
+            FieldNames.HORIZON_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET,
+            FieldNames.AZIMUTH
+        ], horizon_layer)

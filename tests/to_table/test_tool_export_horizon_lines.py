@@ -1,7 +1,4 @@
-from qgis.core import (QgsVectorLayer,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterNumber,
-                       QgsProcessingParameterFeatureSource,
+from qgis.core import (QgsVectorLayer, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
 
 from qgis._core import QgsWkbTypes
@@ -12,8 +9,7 @@ from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
 from los_tools.to_table.tool_export_horizon_lines import ExportHorizonLinesAlgorithm
 
-from tests.utils_tests import (get_data_path,
-                               get_data_path_results)
+from tests.utils_tests import (get_data_path, get_data_path_results)
 
 
 class ExportHorizonLinesAlgorithmTest(QgsProcessingAlgorithmTestCase):
@@ -29,8 +25,14 @@ class ExportHorizonLinesAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.alg.initAlgorithm()
 
     def test_parameters(self) -> None:
-        self.assertIsInstance(self.alg.parameterDefinition("HorizonLinesLayer"), QgsProcessingParameterFeatureSource)
-        self.assertIsInstance(self.alg.parameterDefinition("OutputFile"), QgsProcessingParameterFeatureSink)
+        self.assertIsInstance(self.alg.parameterDefinition("HorizonLinesLayer"),
+                              QgsProcessingParameterFeatureSource)
+        self.assertIsInstance(self.alg.parameterDefinition("OutputFile"),
+                              QgsProcessingParameterFeatureSink)
+
+    def test_alg_settings(self) -> None:
+
+        self.assertAlgSettings()
 
     def test_check_wrong_params(self) -> None:
 
@@ -41,16 +43,14 @@ class ExportHorizonLinesAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.assertCheckParameterValuesRaisesMessage(
             parameters=params,
-            message="Fields specific for horizon lines not found in current layer"
-        )
+            message="Fields specific for horizon lines not found in current layer")
 
     def test_run_alg(self) -> None:
 
-        fields = [FieldNames.ID_OBSERVER,
-                  FieldNames.HORIZON_TYPE,
-                  FieldNames.ANGLE,
-                  FieldNames.VIEWING_ANGLE,
-                  FieldNames.CSV_HORIZON_DISTANCE]
+        fields = [
+            FieldNames.ID_OBSERVER, FieldNames.HORIZON_TYPE, FieldNames.ANGLE,
+            FieldNames.VIEWING_ANGLE, FieldNames.CSV_HORIZON_DISTANCE
+        ]
 
         output_path = get_data_path_results(file="export_horizon_lines.gpkg")
 
@@ -86,5 +86,4 @@ class ExportHorizonLinesAlgorithmTest(QgsProcessingAlgorithmTestCase):
         fields_layer = export_layer.fields().names()
         del fields_layer[0]
 
-        self.assertListEqual(fields,
-                             fields_layer)
+        self.assertListEqual(fields, fields_layer)
