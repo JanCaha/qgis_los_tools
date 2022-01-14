@@ -91,6 +91,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.ID_POINT, QVariant.Int))
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
         fields.append(QgsField(FieldNames.DIFF_TO_MAIN_AZIMUTH, QVariant.Double))
+        fields.append(QgsField(FieldNames.ANGLE_STEP, QVariant.Double))
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
                                              QgsWkbTypes.Point, input_layer.sourceCrs())
@@ -130,6 +131,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                     f.setAttribute(f.fieldNameIndex(FieldNames.ID_POINT), int(i))
                     f.setAttribute(f.fieldNameIndex(FieldNames.DIFF_TO_MAIN_AZIMUTH),
                                    float(angle) - main_angle)
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP), angle_step)
 
                     sink.addFeature(f)
                     i += 1
