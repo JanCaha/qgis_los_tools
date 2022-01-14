@@ -8,7 +8,7 @@ from qgis.PyQt.QtCore import QVariant, Qt
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.textlabels import TextLabels
 from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
-from los_tools.tools.util_functions import wkt_to_array_points, get_los_type
+from los_tools.tools.util_functions import get_los_type
 from los_tools.constants.names_constants import NamesConstants
 
 
@@ -129,27 +129,22 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
                 break
 
             if los_type == NamesConstants.LOS_LOCAL:
-                los = LoSLocal(wkt_to_array_points(los_feature.geometry().asWkt()),
-                               observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
-                               target_offset=los_feature.attribute(FieldNames.TARGET_OFFSET),
-                               use_curvature_corrections=curvature_corrections,
-                               refraction_coefficient=ref_coeff)
+
+                los = LoSLocal.from_feature(feature=los_feature,
+                                            curvature_corrections=curvature_corrections,
+                                            refraction_coefficient=ref_coeff)
 
             elif los_type == NamesConstants.LOS_GLOBAL:
-                los = LoSGlobal(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                observer_offset=los_feature.attribute(FieldNames.OBSERVER_OFFSET),
-                                target_offset=los_feature.attribute(FieldNames.TARGET_OFFSET),
-                                target_x=los_feature.attribute(FieldNames.TARGET_X),
-                                target_y=los_feature.attribute(FieldNames.TARGET_Y),
-                                use_curvature_corrections=curvature_corrections,
-                                refraction_coefficient=ref_coeff)
+
+                los = LoSGlobal.from_feature(feature=los_feature,
+                                             curvature_corrections=curvature_corrections,
+                                             refraction_coefficient=ref_coeff)
 
             elif los_type == NamesConstants.LOS_NO_TARGET:
-                los = LoSWithoutTarget(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                       observer_offset=los_feature.attribute(
-                                           FieldNames.OBSERVER_OFFSET),
-                                       use_curvature_corrections=curvature_corrections,
-                                       refraction_coefficient=ref_coeff)
+
+                los = LoSWithoutTarget.from_feature(feature=los_feature,
+                                                    curvature_corrections=curvature_corrections,
+                                                    refraction_coefficient=ref_coeff)
 
             for i in range(0, len(los.points)):
 

@@ -5,7 +5,7 @@ from qgis.core import (QgsFeature, QgsFields, QgsField, QgsProcessing, QgsFeatur
 
 from PyQt5.QtCore import (QVariant)
 
-from los_tools.tools.util_functions import wkt_to_array_points, get_los_type
+from los_tools.tools.util_functions import get_los_type
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
@@ -108,11 +108,9 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
                 target_id = los_feature.attribute(FieldNames.ID_TARGET)
                 target_offset = los_feature.attribute(FieldNames.TARGET_OFFSET)
 
-                los = LoSLocal(wkt_to_array_points(los_feature.geometry().asWkt()),
-                               observer_offset=observer_offset,
-                               target_offset=target_offset,
-                               use_curvature_corrections=curvature_corrections,
-                               refraction_coefficient=ref_coeff)
+                los = LoSLocal.from_feature(feature=los_feature,
+                                            curvature_corrections=curvature_corrections,
+                                            refraction_coefficient=ref_coeff)
 
             elif los_type == NamesConstants.LOS_GLOBAL:
 
@@ -121,22 +119,16 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
                 target_x = los_feature.attribute(FieldNames.TARGET_X)
                 target_y = los_feature.attribute(FieldNames.TARGET_Y)
 
-                los = LoSGlobal(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                observer_offset=observer_offset,
-                                target_offset=target_offset,
-                                target_x=target_x,
-                                target_y=target_y,
-                                use_curvature_corrections=curvature_corrections,
-                                refraction_coefficient=ref_coeff)
+                los = LoSGlobal.from_feature(feature=los_feature,
+                                             curvature_corrections=curvature_corrections,
+                                             refraction_coefficient=ref_coeff)
 
             # elif los_type == NamesConstants.LOS_NO_TARGET:
             else:
 
-                los = LoSWithoutTarget(wkt_to_array_points(los_feature.geometry().asWkt()),
-                                       observer_offset=los_feature.attribute(
-                                           FieldNames.OBSERVER_OFFSET),
-                                       use_curvature_corrections=curvature_corrections,
-                                       refraction_coefficient=ref_coeff)
+                los = LoSWithoutTarget.from_feature(feature=los_feature,
+                                                    curvature_corrections=curvature_corrections,
+                                                    refraction_coefficient=ref_coeff)
 
             for i in range(0, len(los.points)):
 
