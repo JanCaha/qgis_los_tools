@@ -6,3 +6,4 @@ pep257
 pylint
 pycodestyle
 pytest
+pytest-cov
