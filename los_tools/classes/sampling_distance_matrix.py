@@ -125,7 +125,7 @@ class SamplingDistanceMatrix:
                 line = QgsGeometry(
                     QgsLineString([
                         origin_point,
-                        origin_point.project(self.get_row_distance(i),
+                        origin_point.project(self.get_row_distance(i + 1),
                                              origin_point.azimuth(direction_point))
                     ]))
 
@@ -139,18 +139,20 @@ class SamplingDistanceMatrix:
 
             else:
 
-                this_line: QgsLineString = lines[-1].clone()
-                this_line.extend(0, self.get_row_distance(i) - self.get_row_distance(i - 1))
-                this_line = QgsLineString([lines[-1].endPoint(), this_line.endPoint()])
+                if i + 1 < len(self):
 
-                line = QgsGeometry(this_line)
-                line = line.densifyByDistance(
-                    distance=np.nextafter(self.get_row_sampling_distance(i), np.Inf))
+                    this_line: QgsLineString = lines[-1].clone()
+                    this_line.extend(0, self.get_row_distance(i + 1) - self.get_row_distance(i))
+                    this_line = QgsLineString([lines[-1].endPoint(), this_line.endPoint()])
 
-                line_res = QgsLineString()
-                line_res.fromWkt(line.asWkt())
+                    line = QgsGeometry(this_line)
+                    line = line.densifyByDistance(
+                        distance=np.nextafter(self.get_row_sampling_distance(i), np.Inf))
 
-                lines.append(line_res)
+                    line_res = QgsLineString()
+                    line_res.fromWkt(line.asWkt())
+
+                    lines.append(line_res)
 
         result_line = QgsLineString()
 
