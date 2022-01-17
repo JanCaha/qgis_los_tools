@@ -7,7 +7,7 @@
         {
             "label": "Run Pytest tests",
             "type": "shell",
-            "command": "pytest tests --cov=los_tools --cov-report=term-missing:skip-covered -rP",
+            "command": "pytest tests --cov=los_tools --cov-report=term-missing:skip-covered -rP -s",
             "group": {
                 "kind": "test",
                 "isDefault": true
