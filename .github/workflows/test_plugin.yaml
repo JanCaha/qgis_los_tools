@@ -5,14 +5,7 @@ on:
     paths:
     - "los_tools/**"
     - ".github/workflows/test_plugin.yaml"
-
-env:
-  # plugin name/directory where the code for the plugin is stored
-  PLUGIN_NAME: los_tools
-  # the path to file that handles test running inside the github repository
-  PATH_TO_TEST_RUNNER: los_tools.package_test_suite.test_package
-  # Docker settings
-  DOCKER_IMAGE: qgis/qgis
+    - "tests/**"
 
 jobs:
 
@@ -20,51 +13,13 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        docker_tags: [ release-3_16, release-3_20, release-3_22, latest ]
+    container: cahik/vscode-ubuntu-qgis-testing:v1
 
     steps:
 
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Docker pull and create qgis-testing-environment
+      - name: Run Tests
         run: |
-          docker pull "$DOCKER_IMAGE":${{ matrix.docker_tags }}
-          docker run -d --name qgis-testing-environment -v "$GITHUB_WORKSPACE":/tests_directory -e DISPLAY=:99 "$DOCKER_IMAGE":${{ matrix.docker_tags }}
-
-      - name: Docker set up QGIS
-        run: |
-          docker exec qgis-testing-environment sh -c "qgis_setup.sh $PLUGIN_NAME"
-          docker exec qgis-testing-environment sh -c "pip3 install -r /tests_directory/REQUIREMENTS_TESTING.txt"
-          docker exec qgis-testing-environment sh -c "export PYTHONPATH=PYTHONPATH:/tests_directory"
-          
-      - name: Docker run plugin tests
-        run: |
-          docker exec qgis-testing-environment sh -c "pytest tests --cov=los_tools --cov-report=term-missing:skip-covered -rP -s"
-
-#  Check-code-quality:
-#
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#
-#      - name: Install Python
-#        uses: actions/setup-python@v1
-#        with:
-#          python-version: '3.8'
-#          architecture: 'x64'
-#
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#
-#      - name: Install packages
-#        run: |
-#          pip install -r REQUIREMENTS_TESTING.txt
-#
-#      - name: Pylint
-#        run: pylint --reports=n --rcfile=pylintrc "$PLUGIN_NAME"
-#
-#      - name: Pycodestyle
-#        run: pycodestyle --repeat --ignore=E203,E121,E122,E123,E124,E125,E126,E127,E128,E402,E501,W504 --exclude "test" "$PLUGIN_NAME"
+          pytest tests --cov=los_tools --cov-report=term-missing:skip-covered -rP -s
