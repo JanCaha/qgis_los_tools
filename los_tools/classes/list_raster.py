@@ -13,9 +13,13 @@ class ListOfRasters:
 
     def __init__(self, rasters: List[QgsMapLayer]):
 
+        first_crs = rasters[0].crs()
+
         for raster in rasters:
             if not isinstance(raster, QgsRasterLayer):
                 raise ValueError("All inputs must be QgsRasterLayer.")
+            if not first_crs == raster.crs():
+                raise ValueError("All CRS must be equal.")
 
         self.rasters = rasters
 
@@ -37,11 +41,20 @@ class ListOfRasters:
 
     def validate_crs(self, crs: QgsCoordinateReferenceSystem) -> Tuple[bool, str]:
 
+        first_raster_crs = self.rasters[0].crs()
+
         for raster in self.rasters:
 
             if not raster.crs() == crs:
 
                 msg = "`Observers point layer` and raster layers crs must be equal. " \
+                    "Right now they are not."
+
+                return False, msg
+
+            if not first_raster_crs == raster.crs():
+
+                msg = "All CRS for all rasters must be equal. " \
                     "Right now they are not."
 
                 return False, msg
