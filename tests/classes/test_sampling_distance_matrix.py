@@ -98,8 +98,8 @@ class SamplingDistanceMatrixTest(QgsProcessingAlgorithmTestCase):
 
         self.assertIsInstance(distance_sampling_matrix.get_row(0), list)
 
-        self.assertIsInstance(distance_sampling_matrix.get_row_distance(0), int)
-        self.assertIsInstance(distance_sampling_matrix.get_row_sampling_distance(0), int)
+        self.assertIsInstance(distance_sampling_matrix.get_row_distance(0), (int, float))
+        self.assertIsInstance(distance_sampling_matrix.get_row_sampling_distance(0), (int, float))
 
     def test_validate_table(self):
 
