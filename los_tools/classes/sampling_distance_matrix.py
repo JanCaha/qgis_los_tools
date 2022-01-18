@@ -107,7 +107,7 @@ class SamplingDistanceMatrix:
         row: List[float]
 
         for row in self.data:
-            if current_distance < row[self.INDEX_DISTANCE]:
+            if row[self.INDEX_DISTANCE] < current_distance + row[self.INDEX_SAMPLING_DISTANCE]:
                 value_to_add = row[self.INDEX_SAMPLING_DISTANCE]
 
         return current_distance + value_to_add
