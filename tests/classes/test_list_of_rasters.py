@@ -1,8 +1,7 @@
-from qgis.core import (QgsRasterLayer, QgsVectorLayer, QgsRasterDataProvider, QgsPoint)
+from qgis.core import (QgsRasterLayer, QgsVectorLayer, QgsRasterDataProvider, QgsPoint,
+                       QgsCoordinateReferenceSystem)
 
 from los_tools.classes.list_raster import ListOfRasters
-from los_tools.constants.field_names import FieldNames
-
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from tests.utils_tests import (get_data_path)
 
@@ -18,6 +17,8 @@ class ListOfRastersTest(QgsProcessingAlgorithmTestCase):
         self.raster_large = QgsRasterLayer(get_data_path("srtm.tif"))
 
         self.raster_wrong_crs = QgsRasterLayer(get_data_path("dsm_epsg_5514.tif"))
+
+        self.raster_multi_band = QgsRasterLayer(get_data_path("raster_multiband.tif"))
 
         self.vector = QgsVectorLayer(get_data_path("los_local.gpkg"))
 
@@ -56,3 +57,37 @@ class ListOfRastersTest(QgsProcessingAlgorithmTestCase):
         self.assertEqual(list_rasters.extract_interpolated_value(point_1), 1007.409252288644)
         self.assertEqual(list_rasters.extract_interpolated_value(point_2), 1076.6832007948944)
         self.assertIsNone(list_rasters.extract_interpolated_value(point_3))
+
+    def test_validate_crs(self):
+
+        status, msg = ListOfRasters.validate_crs([self.raster_small, self.raster_large],
+                                                 crs=QgsCoordinateReferenceSystem("EPSG:8353"))
+
+        self.assertTrue(status)
+        self.assertEqual(msg, "")
+
+        status, msg = ListOfRasters.validate_crs([self.raster_small, self.raster_large],
+                                                 crs=QgsCoordinateReferenceSystem("EPSG:5514"))
+
+        self.assertFalse(status)
+        self.assertRegex(msg, "Provided crs template and raster layers crs must be equal")
+
+        status, msg = ListOfRasters.validate_crs(
+            [self.raster_small, self.raster_wrong_crs, self.raster_large],
+            crs=QgsCoordinateReferenceSystem("EPSG:8353"))
+
+        self.assertFalse(status)
+        self.assertRegex(msg, "All CRS for all rasters must be equal")
+
+    def test_validate_bands(self):
+
+        status, msg = ListOfRasters.validate_bands([self.raster_small, self.raster_large])
+
+        self.assertTrue(status)
+        self.assertEqual(msg, "")
+
+        status, msg = ListOfRasters.validate_bands(
+            [self.raster_small, self.raster_large, self.raster_multi_band])
+
+        self.assertFalse(status)
+        self.assertRegex(msg, "Rasters can only have one band")
