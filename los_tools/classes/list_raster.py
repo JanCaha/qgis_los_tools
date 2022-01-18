@@ -25,9 +25,10 @@ class ListOfRasters:
 
         self.order_by_pixel_size()
 
-    def validate_bands(self) -> Tuple[bool, str]:
+    @staticmethod
+    def validate_bands(rasters: List[QgsMapLayer]) -> Tuple[bool, str]:
 
-        for raster in self.rasters:
+        for raster in rasters:
 
             dem_band_count = raster.bandCount()
 
@@ -39,22 +40,24 @@ class ListOfRasters:
 
         return True, ""
 
-    def validate_crs(self, crs: QgsCoordinateReferenceSystem) -> Tuple[bool, str]:
+    @staticmethod
+    def validate_crs(rasters: List[QgsMapLayer],
+                     crs: QgsCoordinateReferenceSystem) -> Tuple[bool, str]:
 
-        first_raster_crs = self.rasters[0].crs()
+        first_raster_crs = rasters[0].crs()
 
-        for raster in self.rasters:
-
-            if not raster.crs() == crs:
-
-                msg = "`Observers point layer` and raster layers crs must be equal. " \
-                    "Right now they are not."
-
-                return False, msg
+        for raster in rasters:
 
             if not first_raster_crs == raster.crs():
 
                 msg = "All CRS for all rasters must be equal. " \
+                    "Right now they are not."
+
+                return False, msg
+
+            if not raster.crs() == crs:
+
+                msg = "Provided crs template and raster layers crs must be equal. " \
                     "Right now they are not."
 
                 return False, msg
