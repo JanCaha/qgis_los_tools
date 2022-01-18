@@ -111,7 +111,7 @@ class CreateLocalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
         can_run, msg = self.alg.checkParameterValues(params, context=self.context)
 
         self.assertFalse(can_run)
-        self.assertIn("`Observers point layer` and raster layers crs must be equal", msg)
+        self.assertIn("Provided crs template and raster layers crs must be equal", msg)
 
         # observers crs != target crs
         params = {

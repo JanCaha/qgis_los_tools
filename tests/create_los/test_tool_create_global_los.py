@@ -90,9 +90,7 @@ class CreateGlobalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
         }
 
         self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message=
-            "`Observers point layer` and raster layers crs must be equal. Right now they are not.")
+            parameters=params, message="Provided crs template and raster layers crs must be equal")
 
         # observers crs != target crs
         params = {
