@@ -1,9 +1,9 @@
 import math
 
 from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterMatrix,
-                       QgsProcessingParameterNumber, QgsProcessingParameterBoolean,
-                       QgsProcessingParameterNumber, QgsProcessingFeedback, QgsFields, QgsField,
-                       QgsWkbTypes, QgsProcessingParameterFeatureSink, QgsFeature)
+                       QgsProcessingParameterBoolean, QgsProcessingParameterNumber,
+                       QgsProcessingFeedback, QgsFields, QgsField, QgsWkbTypes,
+                       QgsProcessingParameterFeatureSink, QgsFeature)
 
 from qgis.PyQt.QtCore import QVariant
 
