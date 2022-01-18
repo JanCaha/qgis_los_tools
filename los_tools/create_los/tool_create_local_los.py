@@ -95,15 +95,14 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
             return False, msg
 
-        list_rasters = ListOfRasters(
-            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
+        rasters = self.parameterAsLayerList(parameters, self.DEM_RASTERS, context)
 
-        correct, msg = list_rasters.validate_bands()
+        correct, msg = ListOfRasters.validate_bands(rasters)
 
         if not correct:
             return correct, msg
 
-        correct, msg = list_rasters.validate_crs(crs=observers_layer.sourceCrs())
+        correct, msg = ListOfRasters.validate_crs(rasters, crs=observers_layer.sourceCrs())
 
         if not correct:
             return correct, msg
