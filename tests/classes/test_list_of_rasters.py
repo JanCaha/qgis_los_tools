@@ -43,7 +43,7 @@ class ListOfRastersTest(QgsProcessingAlgorithmTestCase):
 
         list_rasters = ListOfRasters([self.raster_small, self.raster_large])
 
-        self.assertEqual(list_rasters.maximal_diagonal_size(), 0)
+        self.assertEqual(list_rasters.maximal_diagonal_size(), 4954.494401943971)
 
     def test_extract_interpolated_value(self):
 
