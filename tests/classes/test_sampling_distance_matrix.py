@@ -156,3 +156,26 @@ class SamplingDistanceMatrixTest(QgsProcessingAlgorithmTestCase):
         self.assertTrue(
             "1994.7643979057593242 0.00000000000011767, 1997.3821989528796621 0.00000000000011782, 2000 0.00000000000011797)"
             in line.asWkt())
+
+    def test_values_minus_one(self):
+
+        fields = self.table.fields()
+
+        field_index_angle = fields.indexFromName(FieldNames.SIZE_ANGLE)
+        field_index_distance = fields.indexFromName(FieldNames.DISTANCE)
+        field_index_size = fields.indexFromName(FieldNames.SIZE)
+
+        f = QgsFeature(fields)
+        f.setAttribute(field_index_angle, 0.1)
+        f.setAttribute(field_index_distance, -1)
+        f.setAttribute(field_index_size, 3.491)
+
+        self.table_dp.addFeature(f)
+
+        distance_sampling_matrix = SamplingDistanceMatrix(self.table)
+
+        self.assertEqual(distance_sampling_matrix.minimum_distance, -1)
+
+        distance_sampling_matrix.replace_minus_one_with_value(10000)
+
+        self.assertEqual(distance_sampling_matrix.maximum_distance, 10000)
