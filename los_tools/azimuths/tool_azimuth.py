@@ -98,13 +98,13 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
         return "azimuth"
 
     def displayName(self):
-        return "Extract Azimuth between Points and centroids of Polygons/Lines"
+        return "Extract Azimuth between Points and Centroids"
 
     def group(self):
-        return "Angles"
+        return "Azimuths"
 
     def groupId(self):
-        return "angles"
+        return "azimuths"
 
     def createInstance(self):
         return AzimuthPointPolygonAlgorithm()

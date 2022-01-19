@@ -143,16 +143,16 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
         return {self.OUTPUT_TABLE: dest_id}
 
     def name(self):
-        return "limitangles"
+        return "limitazimuths"
 
     def displayName(self):
-        return "Extract Limit Angles"
+        return "Extract Limit Azimuths"
 
     def group(self):
-        return "Angles"
+        return "Azimuths"
 
     def groupId(self):
-        return "angles"
+        return "azimuths"
 
     def createInstance(self):
         return LimitAnglesAlgorithm()

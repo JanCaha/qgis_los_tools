@@ -2,7 +2,7 @@ import unittest
 
 from qgis.core import (QgsVectorLayer, QgsProcessingFeedback, QgsProcessingContext)
 
-from los_tools.tools.tool_limit_angles_vector import LimitAnglesAlgorithm
+from los_tools.azimuths.tool_limit_angles_vector import LimitAnglesAlgorithm
 from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
