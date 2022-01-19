@@ -3,7 +3,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterBoolean,
                        QgsVectorLayer, QgsField, QgsProcessingParameterFeatureSink, QgsFields,
                        QgsFeature, QgsFeatureIterator, QgsProcessingUtils, QgsProcessingFeedback,
-                       QgsProcessingContext)
+                       QgsProcessingContext, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -63,6 +63,10 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
         los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER,
                                                                 context)
+
+        if los_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
+
         curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS,
                                                      context)
         ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
@@ -107,6 +111,9 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
                                              los_layer.wkbType(), los_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = los_layer.dataProvider().featureCount()
 

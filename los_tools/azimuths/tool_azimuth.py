@@ -1,6 +1,6 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink, QgsProcessingParameterField, QgsField,
-                       QgsFeature, QgsWkbTypes, QgsFields)
+                       QgsFeature, QgsWkbTypes, QgsFields, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -48,8 +48,17 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback):
 
         point_layer = self.parameterAsVectorLayer(parameters, self.POINT_LAYER, context)
+
+        if point_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.POINT_LAYER))
+
         point_field_id = self.parameterAsString(parameters, self.POINT_LAYER_FIELD_ID, context)
+
         object_layer = self.parameterAsVectorLayer(parameters, self.OBJECT_LAYER, context)
+
+        if object_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.OBJECT_LAYER))
+
         object_field_id = self.parameterAsString(parameters, self.OBJECT_LAYER_FIELD_ID, context)
 
         fields = QgsFields()
@@ -59,6 +68,9 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields,
                                              QgsWkbTypes.NoGeometry, point_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_TABLE))
 
         total = point_layer.dataProvider().featureCount() * object_layer.dataProvider(
         ).featureCount()

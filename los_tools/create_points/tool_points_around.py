@@ -3,7 +3,8 @@ import numpy as np
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterField,
                        QgsProcessingParameterFeatureSink, QgsProcessingParameterDistance, QgsField,
-                       QgsFeature, QgsWkbTypes, QgsGeometry, QgsFields, QgsPointXY)
+                       QgsFeature, QgsWkbTypes, QgsGeometry, QgsFields, QgsPointXY,
+                       QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -73,6 +74,10 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback):
 
         input_layer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
+
+        if input_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LAYER))
+
         id_field = self.parameterAsString(parameters, self.ID_FIELD, context)
         angle_min = self.parameterAsDouble(parameters, self.ANGLE_START, context)
         angle_max = self.parameterAsDouble(parameters, self.ANGLE_END, context)
@@ -90,6 +95,9 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
                                              QgsWkbTypes.Point, input_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = input_layer.featureCount()
 

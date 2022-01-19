@@ -3,7 +3,7 @@ import math
 from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterMatrix,
                        QgsProcessingParameterBoolean, QgsProcessingParameterNumber,
                        QgsProcessingFeedback, QgsFields, QgsField, QgsWkbTypes,
-                       QgsProcessingParameterFeatureSink, QgsFeature)
+                       QgsProcessingParameterFeatureSink, QgsFeature, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -89,6 +89,9 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields,
                                              QgsWkbTypes.NoGeometry)
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_TABLE))
 
         result_string_print = "Sizes at distances:\n" \
                               "Distance - Size\n"

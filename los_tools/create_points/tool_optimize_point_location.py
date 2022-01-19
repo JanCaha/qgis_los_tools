@@ -4,7 +4,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterDistance,
                        QgsProcessingParameterFeatureSink, QgsRasterDataProvider, QgsRasterLayer,
                        QgsRectangle, QgsRasterBlock, QgsPoint, QgsFeature, QgsPointXY,
-                       QgsProcessingFeatureSource)
+                       QgsProcessingFeatureSource, QgsProcessingException)
 
 
 class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
@@ -110,13 +110,22 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
         input_layer: QgsProcessingFeatureSource = self.parameterAsSource(
             parameters, self.INPUT_LAYER, context)
+
+        if input_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LAYER))
+
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 
         raster: QgsRasterLayer = self.parameterAsRasterLayer(parameters, self.INPUT_RASTER,
                                                              context)
+
+        if raster is None:
+            raise QgsProcessingException(self.invalidRasterError(parameters, self.INPUT_RASTER))
+
         raster: QgsRasterDataProvider = raster.dataProvider()
 
         mask_raster = self.parameterAsRasterLayer(parameters, self.MASK_RASTER, context)
+
         if mask_raster is not None:
             mask_raster: QgsRasterDataProvider = mask_raster.dataProvider()
 
@@ -126,6 +135,9 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
                                              fields=input_layer.fields(),
                                              geometryType=input_layer.wkbType(),
                                              crs=input_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         raster_extent: QgsRectangle = raster.extent()
 

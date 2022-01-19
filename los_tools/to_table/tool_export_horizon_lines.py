@@ -1,9 +1,9 @@
 from qgis.core import (QgsProcessing, QgsFields, QgsField, QgsFeature, QgsFeatureSink,
                        QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
                        QgsProcessingFeatureSource, QgsProcessingParameterFeatureSink, QgsWkbTypes,
-                       QgsMessageLog, QgsPointXY, Qgis, QgsFeatureSource)
+                       QgsMessageLog, QgsPointXY, Qgis, QgsFeatureSource, QgsProcessingException)
 
-from PyQt5.QtCore import (QVariant)
+from qgis.PyQt.QtCore import (QVariant)
 
 from los_tools.constants.field_names import FieldNames
 
@@ -43,6 +43,10 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         input_horizon_lines_layer: QgsFeatureSource = self.parameterAsSource(
             parameters, self.INPUT_HORIZON_LINES_LAYER, context)
 
+        if input_horizon_lines_layer is None:
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.INPUT_HORIZON_LINES_LAYER))
+
         feature_count = input_horizon_lines_layer.featureCount()
 
         fields = QgsFields()
@@ -56,6 +60,9 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         sink, path_sink = self.parameterAsSink(parameters, self.OUTPUT, context, fields,
                                                QgsWkbTypes.NoGeometry,
                                                input_horizon_lines_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         iterator = input_horizon_lines_layer.getFeatures()
 

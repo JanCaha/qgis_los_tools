@@ -1,9 +1,9 @@
 from qgis.core import (QgsFeature, QgsFields, QgsField, QgsProcessing, QgsFeatureSink, QgsWkbTypes,
                        QgsProcessingAlgorithm, QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean, QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingParameterFeatureSink, QgsProcessingException)
 
-from PyQt5.QtCore import (QVariant)
+from qgis.PyQt.QtCore import (QVariant)
 
 from los_tools.tools.util_functions import get_los_type
 from los_tools.constants.field_names import FieldNames
@@ -54,6 +54,10 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback):
 
         input_los_layer = self.parameterAsSource(parameters, self.INPUT_LOS_LAYER, context)
+
+        if input_los_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LOS_LAYER))
+
         curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS,
                                                      context)
         ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
@@ -92,6 +96,9 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
         sink: QgsFeatureSink
         sink, path_sink = self.parameterAsSink(parameters, self.OUTPUT, context, fields,
                                                QgsWkbTypes.NoGeometry, input_los_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         los_feature: QgsFeature
         for cnt, los_feature in enumerate(iterator):

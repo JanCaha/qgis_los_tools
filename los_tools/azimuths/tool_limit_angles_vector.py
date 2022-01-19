@@ -1,7 +1,8 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsFeatureRequest,
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterField, QgsGeometry, QgsCoordinateTransform,
-                       QgsProject, QgsField, QgsFeature, QgsWkbTypes, QgsFields)
+                       QgsProject, QgsField, QgsFeature, QgsWkbTypes, QgsFields,
+                       QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -63,7 +64,15 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback):
 
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
+
+        if los_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
+
         object_layer = self.parameterAsVectorLayer(parameters, self.OBJECT_LAYER, context)
+
+        if object_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.OBJECT_LAYER))
+
         field_id = self.parameterAsString(parameters, self.OBJECT_LAYER_FIELD_ID, context)
 
         if object_layer.crs() != los_layer.crs():
@@ -80,6 +89,9 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields,
                                              QgsWkbTypes.NoGeometry, los_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_TABLE))
 
         id_values = list(
             los_layer.uniqueValues(los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)))

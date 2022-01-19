@@ -1,7 +1,7 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterRasterDestination, QgsProcessingParameterField,
-                       QgsProcessingParameterRasterLayer, QgsRasterLayer)
+                       QgsProcessingParameterRasterLayer, QgsRasterLayer, QgsProcessingException)
 
 from qgis.analysis import (QgsRasterCalculatorEntry, QgsRasterCalculator)
 import processing
@@ -47,9 +47,17 @@ class ReplaceRasterValuesAlgorithm(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback):
 
         raster_layer = self.parameterAsRasterLayer(parameters, self.RASTER_LAYER, context)
+
+        if raster_layer is None:
+            raise QgsProcessingException(self.invalidRasterError(parameters, self.RASTER_LAYER))
+
         raster_new_value = self.parameterAsDouble(parameters, self.RASTER_VALUE, context)
         value_field_name = self.parameterAsString(parameters, self.VALUE_FIELD, context)
         vector_layer = self.parameterAsVectorLayer(parameters, self.VECTOR_LAYER, context)
+
+        if vector_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.VECTOR_LAYER))
+
         output_raster = self.parameterAsOutputLayer(parameters, self.OUTPUT_RASTER, context)
 
         raster_crs = raster_layer.crs()

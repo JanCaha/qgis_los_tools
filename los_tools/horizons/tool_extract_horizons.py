@@ -5,7 +5,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterFeatureSink, QgsProcessingParameterBoolean,
                        QgsFeatureSink, QgsField, QgsFeature, QgsWkbTypes, QgsFields, QgsMapLayer,
                        QgsProcessingUtils, QgsSymbol, QgsRendererCategory,
-                       QgsCategorizedSymbolRenderer)
+                       QgsCategorizedSymbolRenderer, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant, Qt
 from los_tools.constants.field_names import FieldNames
@@ -111,6 +111,10 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback):
 
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
+
+        if los_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
+
         horizon_type = self.horizons_types[self.parameterAsEnum(parameters, self.HORIZON_TYPE,
                                                                 context)]
         curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS,
@@ -133,6 +137,9 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
         sink, self.dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
                                                   QgsWkbTypes.Point25D, los_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = los_layer.featureCount()
 

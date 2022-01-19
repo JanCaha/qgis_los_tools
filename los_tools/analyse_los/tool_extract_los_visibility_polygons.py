@@ -3,7 +3,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterBoolean, QgsField, QgsFeature, QgsWkbTypes, QgsFields,
                        QgsVectorLayer, QgsFeatureIterator, QgsProcessingUtils, QgsMapLayer,
                        QgsSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsLineString,
-                       QgsMultiPolygon, QgsPointXY, QgsProcessingFeedback)
+                       QgsMultiPolygon, QgsPointXY, QgsProcessingFeedback, QgsProcessingException)
 from qgis.analysis import (QgsInternalGeometrySnapper, QgsGeometrySnapper)
 
 from qgis.PyQt.QtCore import QVariant, Qt
@@ -83,6 +83,10 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
 
         los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER,
                                                                 context)
+
+        if los_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
+
         curvature_corrections: bool = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS,
                                                            context)
         ref_coeff: float = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
@@ -98,6 +102,9 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
 
         sink, self.dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
                                                   QgsWkbTypes.MultiPolygon, los_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = los_layer.featureCount()
 

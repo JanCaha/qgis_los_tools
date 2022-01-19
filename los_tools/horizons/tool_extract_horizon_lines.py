@@ -2,7 +2,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterNumber, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink, QgsProcessingParameterBoolean, QgsField,
                        QgsFeature, QgsWkbTypes, QgsFeatureRequest, QgsFields, QgsLineString,
-                       QgsVectorLayer, QgsProcessingFeedback)
+                       QgsVectorLayer, QgsProcessingFeedback, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -72,6 +72,10 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
         los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER,
                                                                 context)
+
+        if los_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
+
         horizon_type = self.horizons_types[self.parameterAsEnum(parameters, self.HORIZON_TYPE,
                                                                 context)]
         curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS,
@@ -86,6 +90,9 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
                                              QgsWkbTypes.LineStringZM, los_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         id_values = list(
             los_layer.uniqueValues(los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)))
