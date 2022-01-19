@@ -221,7 +221,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         return "notargetlos"
 
     def displayName(self):
-        return "Create no target LoS"
+        return "Create No Target LoS"
 
     def group(self):
         return "LoS Creation"

@@ -180,7 +180,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         return "locallos"
 
     def displayName(self):
-        return "Create local LoS"
+        return "Create Local LoS"
 
     def group(self):
         return "LoS Creation"

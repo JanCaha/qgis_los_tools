@@ -101,7 +101,7 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
         return "globallos"
 
     def displayName(self):
-        return "Create global LoS"
+        return "Create Global LoS"
 
     def createInstance(self):
         return CreateGlobalLosAlgorithm()
