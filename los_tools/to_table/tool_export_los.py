@@ -170,7 +170,7 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
         return "exportlos"
 
     def displayName(self):
-        return "Export LoS Layer to table"
+        return "Export LoS Layer"
 
     def group(self):
         return "Export to table"
