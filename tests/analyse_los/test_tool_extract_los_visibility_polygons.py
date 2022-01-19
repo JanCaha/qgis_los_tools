@@ -1,6 +1,6 @@
 from qgis.core import (QgsVectorLayer, QgsWkbTypes)
 
-from los_tools.tools.tool_extract_los_visibility_parts import ExtractLoSVisibilityPartsAlgorithm
+from los_tools.analyse_los.tool_extract_los_visibility_polygons import ExtractLoSVisibilityPolygonsAlgorithm
 from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
@@ -20,7 +20,7 @@ class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.los_no_target = QgsVectorLayer(get_data_path(file="no_target_los.gpkg"))
 
-        self.alg = ExtractLoSVisibilityPartsAlgorithm()
+        self.alg = ExtractLoSVisibilityPolygonsAlgorithm()
         self.alg.initAlgorithm()
 
     def test_parameters(self) -> None:
@@ -54,50 +54,6 @@ class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
         output_path = get_data_path_results(file="los_parts.gpkg")
 
         params = {
-            "LoSLayer": self.los_local,
-            "OutputLayer": output_path,
-            "CurvatureCorrections": True,
-            "RefractionCoefficient": 0.13
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        los_parts = QgsVectorLayer(output_path)
-
-        self.assertQgsVectorLayer(los_parts,
-                                  geom_type=QgsWkbTypes.MultiLineStringZ,
-                                  crs=self.los_local.sourceCrs())
-
-        self.assertFieldNamesInQgsVectorLayer(
-            [FieldNames.ID_OBSERVER, FieldNames.ID_TARGET, FieldNames.VISIBLE], los_parts)
-
-        self.assertEqual(los_parts.featureCount(), self.los_local.featureCount() * 2)
-
-        output_path = get_data_path_results(file="los_parts.gpkg")
-
-        params = {
-            "LoSLayer": self.los_global,
-            "OutputLayer": output_path,
-            "CurvatureCorrections": True,
-            "RefractionCoefficient": 0.13
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        los_parts = QgsVectorLayer(output_path)
-
-        self.assertQgsVectorLayer(los_parts,
-                                  geom_type=QgsWkbTypes.MultiLineStringZ,
-                                  crs=self.los_local.sourceCrs())
-
-        self.assertFieldNamesInQgsVectorLayer(
-            [FieldNames.ID_OBSERVER, FieldNames.ID_TARGET, FieldNames.VISIBLE], los_parts)
-
-        self.assertEqual(los_parts.featureCount(), self.los_global.featureCount() * 2)
-
-        output_path = get_data_path_results(file="los_parts.gpkg")
-
-        params = {
             "LoSLayer": self.los_no_target,
             "OutputLayer": output_path,
             "CurvatureCorrections": True,
@@ -109,7 +65,7 @@ class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
         los_parts = QgsVectorLayer(output_path)
 
         self.assertQgsVectorLayer(los_parts,
-                                  geom_type=QgsWkbTypes.MultiLineStringZ,
+                                  geom_type=QgsWkbTypes.MultiPolygon,
                                   crs=self.los_local.sourceCrs())
 
         self.assertFieldNamesInQgsVectorLayer(

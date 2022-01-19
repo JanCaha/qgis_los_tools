@@ -2,7 +2,8 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterBoolean, QgsField, QgsFeature, QgsWkbTypes, QgsFields,
                        QgsVectorLayer, QgsFeatureIterator, QgsProcessingUtils, QgsMapLayer,
-                       QgsSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer)
+                       QgsSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer,
+                       QgsMultiLineString, QgsLineString)
 
 from qgis.PyQt.QtCore import QVariant, Qt
 from los_tools.constants.field_names import FieldNames
@@ -12,14 +13,12 @@ from los_tools.tools.util_functions import get_los_type
 from los_tools.constants.names_constants import NamesConstants
 
 
-class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
+class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
 
     LOS_LAYER = "LoSLayer"
     OUTPUT_LAYER = "OutputLayer"
     CURVATURE_CORRECTIONS = "CurvatureCorrections"
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
-    ONLY_VISIBLE = "OnlyVisiblePoints"
-    EXTENDED_ATTRIBUTES = "ExtendedAttributes"
 
     def initAlgorithm(self, config=None):
 
@@ -27,7 +26,8 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer",
                                                 [QgsProcessing.TypeVectorLine]))
 
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output LoS parts layer"))
 
         self.addParameter(
             QgsProcessingParameterBoolean(self.CURVATURE_CORRECTIONS,
@@ -39,16 +39,6 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
                                          "Refraction coefficient value",
                                          type=QgsProcessingParameterNumber.Double,
                                          defaultValue=0.13))
-
-        self.addParameter(
-            QgsProcessingParameterBoolean(self.ONLY_VISIBLE,
-                                          "Export only visible points",
-                                          defaultValue=False))
-
-        self.addParameter(
-            QgsProcessingParameterBoolean(self.EXTENDED_ATTRIBUTES,
-                                          "Calculate extended attributes?",
-                                          defaultValue=False))
 
     def checkParameterValues(self, parameters, context):
 
@@ -71,18 +61,17 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
 
         symbols = []
 
-        symbol_invisible = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
+        symbol_invisible = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
         symbol_invisible.setColor(Qt.red)
         symbols.append(QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE))
 
-        symbol_visible = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
+        symbol_visible = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
         symbol_visible.setColor(Qt.green)
         symbols.append(QgsRendererCategory(True, symbol_visible, TextLabels.VISIBLE))
 
         renderer = QgsCategorizedSymbolRenderer(FieldNames.VISIBLE, symbols)
 
         output_layer.setRenderer(renderer)
-        output_layer.triggerRepaint()
 
         return {self.OUTPUT_LAYER: self.dest_id}
 
@@ -93,9 +82,6 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         curvature_corrections: bool = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS,
                                                            context)
         ref_coeff: float = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
-        only_visible: bool = self.parameterAsBool(parameters, self.ONLY_VISIBLE, context)
-        extended_attributes: bool = self.parameterAsBool(parameters, self.EXTENDED_ATTRIBUTES,
-                                                         context)
 
         field_names = los_layer.fields().names()
 
@@ -106,18 +92,9 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.ID_TARGET, QVariant.Int))
         fields.append(QgsField(FieldNames.VISIBLE, QVariant.Bool))
 
-        if extended_attributes:
-
-            fields.append(QgsField(FieldNames.ELEVATION_DIFF_LH, QVariant.Double))
-            fields.append(QgsField(FieldNames.ANGLE_DIFF_LH, QVariant.Double))
-
-            if los_type == NamesConstants.LOS_GLOBAL or los_type == NamesConstants.LOS_NO_TARGET:
-
-                fields.append(QgsField(FieldNames.ELEVATION_DIFF_GH, QVariant.Double))
-                fields.append(QgsField(FieldNames.ANGLE_DIFF_GH, QVariant.Double))
-
         sink, self.dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
-                                                  QgsWkbTypes.Point25D, los_layer.sourceCrs())
+                                                  QgsWkbTypes.MultiLineString25D,
+                                                  los_layer.sourceCrs())
 
         feature_count = los_layer.featureCount()
 
@@ -146,60 +123,72 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
                                                     curvature_corrections=curvature_corrections,
                                                     refraction_coefficient=ref_coeff)
 
+            previous_point_visibility = True
+
+            line_string_visible = QgsMultiLineString()
+            line_string_invisible = QgsMultiLineString()
+
+            line: QgsLineString = QgsLineString()
+
             for i in range(0, len(los.points)):
 
-                export_point = False
+                line.addVertex(los.get_geom_at_index(i))
 
-                if only_visible:
+                if los.visible[i] != previous_point_visibility:
+
+                    if previous_point_visibility:
+                        line_string_visible.addGeometry(line)
+                    else:
+                        line_string_invisible.addGeometry(line)
+
+                    line: QgsLineString = QgsLineString()
+                    line.addVertex(los.get_geom_at_index(i))
+                    previous_point_visibility = los.visible[i]
+
+                if i == len(los.points) - 1:
                     if los.visible[i]:
-                        export_point = True
-                else:
-                    export_point = True
+                        line_string_visible.addGeometry(line)
+                    else:
+                        line_string_invisible.addGeometry(line)
 
-                if export_point:
+            feature_visible = QgsFeature(fields)
+            feature_visible.setGeometry(line_string_visible)
+            feature_visible.setAttribute(FieldNames.VISIBLE, True)
+            feature_visible.setAttribute(FieldNames.ID_OBSERVER,
+                                         los_feature.attribute(FieldNames.ID_OBSERVER))
+            feature_visible.setAttribute(FieldNames.ID_TARGET,
+                                         los_feature.attribute(FieldNames.ID_TARGET))
 
-                    f = QgsFeature(fields)
-                    f.setGeometry(los.get_geom_at_index(i))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
-                                   los_feature.attribute(FieldNames.ID_OBSERVER))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
-                                   los_feature.attribute(FieldNames.ID_TARGET))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.VISIBLE), los.visible[i])
+            feature_invisible = QgsFeature(fields)
+            feature_invisible.setGeometry(line_string_invisible)
+            feature_invisible.setAttribute(FieldNames.VISIBLE, False)
+            feature_invisible.setAttribute(FieldNames.ID_OBSERVER,
+                                           los_feature.attribute(FieldNames.ID_OBSERVER))
+            feature_invisible.setAttribute(FieldNames.ID_TARGET,
+                                           los_feature.attribute(FieldNames.ID_TARGET))
 
-                    if extended_attributes:
-
-                        f.setAttribute(f.fieldNameIndex(FieldNames.ELEVATION_DIFF_LH),
-                                       los.get_elevation_difference_horizon_at_point(i))
-                        f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_DIFF_LH),
-                                       los.get_angle_difference_horizon_at_point(i))
-
-                        if los_type == NamesConstants.LOS_GLOBAL or los_type == NamesConstants.LOS_NO_TARGET:
-
-                            f.setAttribute(f.fieldNameIndex(FieldNames.ELEVATION_DIFF_GH),
-                                           los.get_elevation_difference_global_horizon_at_point(i))
-                            f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_DIFF_GH),
-                                           los.get_angle_difference_global_horizon_at_point(i))
-
-                    sink.addFeature(f)
+            sink.addFeature(feature_visible)
+            sink.addFeature(feature_invisible)
 
             feedback.setProgress((feature_number / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: self.dest_id}
 
     def name(self):
-        return "extractpointslos"
+        return "extractvisibilitypartslos"
 
     def displayName(self):
-        return "Extract Points from LoS"
+        return "Extract Visible/Invisible Lines from LoS"
 
     def group(self):
-        return "LoS Points"
+        return "LoS Analysis"
 
     def groupId(self):
-        return "points"
+        return "losanalysis"
 
     def createInstance(self):
-        return ExtractPointsLoSAlgorithm()
+        return ExtractLoSVisibilityPartsAlgorithm()
 
     def helpUrl(self):
-        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Points/tool_extract_points_los/"
+        # FIXME add help page
+        return ""  # "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Points/tool_extract_points_los/"

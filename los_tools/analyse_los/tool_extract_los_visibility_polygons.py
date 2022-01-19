@@ -197,13 +197,13 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
         return "extractvisibilitypolygonslos"
 
     def displayName(self):
-        return "Extract Visibility Polygons from LoS"
+        return "Extract Visible/Invisible Polygons from LoS"
 
     def group(self):
-        return "LoS Points"
+        return "LoS Analysis"
 
     def groupId(self):
-        return "points"
+        return "losanalysis"
 
     def createInstance(self):
         return ExtractLoSVisibilityPolygonsAlgorithm()
