@@ -2,7 +2,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterMultipleLayers, QgsProcessingParameterDistance,
                        QgsField, QgsFeature, QgsWkbTypes, QgsPoint, QgsFields, QgsLineString,
-                       QgsProcessingUtils)
+                       QgsProcessingUtils, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.tools.util_functions import segmentize_line
@@ -124,9 +124,20 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
             self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
 
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
+
+        if observers_layer is None:
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.OBSERVER_POINTS_LAYER))
+
         observers_id = self.parameterAsString(parameters, self.OBSERVER_ID_FIELD, context)
         observers_offset = self.parameterAsString(parameters, self.OBSERVER_OFFSET_FIELD, context)
+
         targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
+
+        if targets_layer is None:
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.TARGET_POINTS_LAYER))
+
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
         target_definition_id_field = self.parameterAsString(parameters,
                                                             self.TARGET_DEFINITION_ID_FIELD,
@@ -147,6 +158,9 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context,
                                              fields, QgsWkbTypes.LineString25D,
                                              observers_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = targets_layer.featureCount()
 

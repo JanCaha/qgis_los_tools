@@ -1,7 +1,8 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterMultipleLayers, QgsField, QgsFeature, QgsWkbTypes,
-                       QgsPoint, QgsFields, QgsLineString, QgsProcessingFeedback)
+                       QgsPoint, QgsFields, QgsLineString, QgsProcessingFeedback,
+                       QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -115,9 +116,20 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
 
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
+
+        if observers_layer is None:
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.OBSERVER_POINTS_LAYER))
+
         observers_id = self.parameterAsString(parameters, self.OBSERVER_ID_FIELD, context)
         observers_offset = self.parameterAsString(parameters, self.OBSERVER_OFFSET_FIELD, context)
+
         targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
+
+        if targets_layer is None:
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.TARGET_POINTS_LAYER))
+
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
         target_definition_id_field = self.parameterAsString(parameters,
                                                             self.TARGET_DEFINITION_ID_FIELD,
@@ -144,6 +156,9 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context,
                                              fields, QgsWkbTypes.LineString25D,
                                              observers_layer.sourceCrs())
+
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = targets_layer.featureCount()
 
