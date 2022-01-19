@@ -1,6 +1,6 @@
 from qgis.core import QgsVectorLayer, QgsWkbTypes
 
-from los_tools.tools.tools_distances_for_sizes import ObjectDistancesAlgorithm
+from los_tools.parameter_settings.tool_distances_for_sizes import ObjectDistancesAlgorithm
 from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
@@ -29,12 +29,7 @@ class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
     def test_settings(self) -> None:
 
-        self.assertEqual(self.alg.name(), "calculatedistances")
-        self.assertEqual(self.alg.displayName(), "Calculate object distances")
-        self.assertEqual(self.alg.group(), "Object distances")
-        self.assertEqual(self.alg.groupId(), "objectsizes")
-
-        self.assertEqual(self.alg.helpUrl(), None)
+        self.assertAlgSettings()
 
     def test_run_alg(self) -> None:
 

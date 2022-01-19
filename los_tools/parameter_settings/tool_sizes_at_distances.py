@@ -143,13 +143,13 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
         return "calculatesizes"
 
     def displayName(self):
-        return "Calculate object sizes"
+        return "Calculate Object Sizes"
 
     def group(self):
-        return "Object sizes"
+        return "Calculate Parameters Settings"
 
     def groupId(self):
-        return "objectsizes"
+        return "parametersettings"
 
     def createInstance(self):
         return ObjectSizesAlgorithm()

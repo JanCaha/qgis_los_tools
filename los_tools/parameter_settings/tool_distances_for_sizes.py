@@ -101,13 +101,13 @@ class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
         return "calculatedistances"
 
     def displayName(self):
-        return "Calculate object distances"
+        return "Calculate Object Distances"
 
     def group(self):
-        return "Object distances"
+        return "Calculate Parameters Settings"
 
     def groupId(self):
-        return "objectsizes"
+        return "parametersettings"
 
     def createInstance(self):
         return ObjectDistancesAlgorithm()

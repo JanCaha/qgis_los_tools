@@ -56,13 +56,13 @@ class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
         return "calculateobjectangle"
 
     def displayName(self):
-        return "Calculate object detection angle"
+        return "Calculate Object Detection Angle"
 
     def group(self):
-        return "Object distances"
+        return "Calculate Parameters Settings"
 
     def groupId(self):
-        return "objectsizes"
+        return "parametersettings"
 
     def createInstance(self):
         return ObjectDetectionAngleAlgorithm()
