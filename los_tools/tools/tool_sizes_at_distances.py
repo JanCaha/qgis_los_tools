@@ -64,7 +64,7 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
         for distance in distances:
 
             try:
-                value = float(distance)
+                float(distance)
 
             except ValueError:
 
