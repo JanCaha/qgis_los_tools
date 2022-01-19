@@ -219,7 +219,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         return "pointlocationoptimization"
 
     def displayName(self):
-        return "Optimize point location"
+        return "Optimize Point Location"
 
     def group(self):
         return "Points creation"

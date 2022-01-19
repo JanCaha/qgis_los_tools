@@ -121,7 +121,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
         return "pointsaround"
 
     def displayName(self):
-        return "Create points around"
+        return "Create Points Around"
 
     def group(self):
         return "Points creation"
