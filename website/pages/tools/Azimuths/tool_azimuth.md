@@ -1,6 +1,6 @@
-# Extract Azimuth between Points and centroids of Polygons/Lines
+# Extract Azimuth between Points and Centroids
 
-Calculates azimuth between points in one layer and centroids of polygons or lines in second layer.
+Calculates azimuths between points in one layer and centroids of polygons or lines in second layer.
 
 ## Parameters
 
@@ -28,5 +28,5 @@ For $n$ points and $m$ lines/polygons the output layer will have $n \times m$ ro
 
 ## Tool screenshot
 
-![Extract Limit Angles](../../images/tool_azimuth.png)
+![Extract Azimuth between Points and Centroids](../../images/tool_azimuth.png)
 	
