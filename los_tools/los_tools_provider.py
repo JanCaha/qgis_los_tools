@@ -54,6 +54,7 @@ from los_tools.tools.tool_extract_los_visibility_parts import ExtractLoSVisibili
 from los_tools.tools.tool_sizes_at_distances import ObjectSizesAlgorithm
 from los_tools.tools.tools_distances_for_sizes import ObjectDistancesAlgorithm
 from los_tools.tools.tool_extract_los_visibility_polygons import ExtractLoSVisibilityPolygonsAlgorithm
+from los_tools.tools.tools_angle_at_distance_for_size import ObjectDetectionAngleAlgorithm
 
 
 class los_toolsProvider(QgsProcessingProvider):
@@ -95,6 +96,7 @@ class los_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ObjectDistancesAlgorithm())
         self.addAlgorithm(CreateNoTargetLosAlgorithmV2())
         self.addAlgorithm(ExtractLoSVisibilityPolygonsAlgorithm())
+        self.addAlgorithm(ObjectDetectionAngleAlgorithm())
 
     def id(self):
         """
