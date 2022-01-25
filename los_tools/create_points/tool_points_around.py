@@ -91,7 +91,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
         fields = QgsFields()
         fields.append(QgsField(FieldNames.ID_ORIGINAL_POINT, QVariant.Int))
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
-        fields.append(QgsField(FieldNames.ANGLE_STEP, QVariant.Double))
+        fields.append(QgsField(FieldNames.ANGLE_STEP_POINTS, QVariant.Double))
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
                                              QgsWkbTypes.Point, input_layer.sourceCrs())
@@ -117,7 +117,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
                 f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
                                int(feature.attribute(id_field)))
                 f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP), float(angle_step))
+                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), float(angle_step))
 
                 sink.addFeature(f)
 
