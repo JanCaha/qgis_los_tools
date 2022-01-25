@@ -2,7 +2,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterMultipleLayers, QgsField, QgsFeature, QgsWkbTypes,
                        QgsPoint, QgsFields, QgsLineString, QgsProcessingFeedback,
-                       QgsProcessingException)
+                       QgsFeatureRequest, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
@@ -166,60 +166,61 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
         distance_matrix.replace_minus_one_with_value(list_rasters.maximal_diagonal_size())
 
+        i = 0
+
         for observer_feature in observers_iterator:
 
-            targets_iterators = targets_layer.getFeatures()
+            request = QgsFeatureRequest()
+            request.setFilterExpression("{} = {}".format(target_definition_id_field,
+                                                         observer_feature.attribute(observers_id)))
 
-            for target_count, target_feature in enumerate(targets_iterators):
+            targets_iterators = targets_layer.getFeatures(request)
+
+            for target_feature in targets_iterators:
 
                 if feedback.isCanceled():
                     break
 
-                if observer_feature.attribute(observers_id) == target_feature.attribute(
-                        target_definition_id_field):
+                start_point = QgsPoint(observer_feature.geometry().asPoint())
+                direction_point = QgsPoint(target_feature.geometry().asPoint())
 
-                    start_point = QgsPoint(observer_feature.geometry().asPoint())
-                    direction_point = QgsPoint(target_feature.geometry().asPoint())
+                line = distance_matrix.build_line(start_point, direction_point)
 
-                    line = distance_matrix.build_line(start_point, direction_point)
+                points = line.points()
 
-                    points = line.points()
+                points3d = []
 
-                    points3d = []
+                for p in points:
 
-                    for p in points:
+                    z = list_rasters.extract_interpolated_value(p)
 
-                        z = list_rasters.extract_interpolated_value(p)
+                    if z is not None:
+                        points3d.append(QgsPoint(p.x(), p.y(), z))
 
-                        if z is not None:
-                            points3d.append(QgsPoint(p.x(), p.y(), z))
+                line = QgsLineString(points3d)
 
-                    line = QgsLineString(points3d)
+                f = QgsFeature(fields)
+                f.setGeometry(line)
+                f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_NO_TARGET)
+                f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
+                               int(observer_feature.attribute(observers_id)))
+                f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
+                               int(target_feature.attribute(targets_id)))
+                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
+                               float(observer_feature.attribute(observers_offset)))
+                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
+                               target_feature.attribute(FieldNames.AZIMUTH))
+                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_X),
+                               observer_feature.geometry().asPoint().x())
+                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_Y),
+                               observer_feature.geometry().asPoint().y())
+                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP),
+                               target_feature.attribute(FieldNames.ANGLE_STEP_POINTS))
 
-                    f = QgsFeature(fields)
-                    f.setGeometry(line)
-                    f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE),
-                                   NamesConstants.LOS_NO_TARGET)
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
-                                   int(observer_feature.attribute(observers_id)))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
-                                   int(target_feature.attribute(targets_id)))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
-                                   float(observer_feature.attribute(observers_offset)))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
-                                   target_feature.attribute(FieldNames.AZIMUTH))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_X),
-                                   observer_feature.geometry().asPoint().x())
-                    f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_Y),
-                                   observer_feature.geometry().asPoint().y())
+                sink.addFeature(f)
 
-                    # TODO compatability with older version
-                    if FieldNames.ANGLE_STEP in targets_layer.fields().names():
-                        f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP),
-                                       target_feature.attribute(FieldNames.ANGLE_STEP))
-
-                    sink.addFeature(f)
-                    feedback.setProgress((target_count / feature_count) * 100)
+                feedback.setProgress((i / feature_count) * 100)
+                i += 1
 
         return {self.OUTPUT_LAYER: dest_id}
 
