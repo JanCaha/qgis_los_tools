@@ -35,14 +35,18 @@ class los_toolsProvider(QgsProcessingProvider):
         """
         super().__init__()
 
+        path = Path(__file__).parent / 'metadata.txt'
+
+        config = configparser.ConfigParser()
+        config.read(path)
+
+        self.version = config['general']['version']
+
     def versionInfo(self):
         """
         Provider plugin version
         """
-        config = configparser.ConfigParser()
-        config.read('metadata.txt')
-
-        return config['general']['version']
+        return self.version
 
     def loadAlgorithms(self):
         """
