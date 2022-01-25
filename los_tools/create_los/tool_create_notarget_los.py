@@ -168,7 +168,6 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
         max_length_extension = list_rasters.maximal_diagonal_size()
 
-        i = 0
         for observer_count, observer_feature in enumerate(observers_iterator):
 
             targets_iterators = targets_layer.getFeatures()
@@ -219,15 +218,12 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                                    observer_feature.geometry().asPoint().x())
                     f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_Y),
                                    observer_feature.geometry().asPoint().y())
-
-                    # TODO compatability with older version
-                    if FieldNames.ANGLE_STEP in targets_layer.fields().names():
-                        f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP),
-                                       target_feature.attribute(FieldNames.ANGLE_STEP))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP),
+                                   target_feature.attribute(FieldNames.ANGLE_STEP_POINTS))
 
                     sink.addFeature(f)
-                    i += 1
-                    feedback.setProgress((i / feature_count) * 100)
+
+                    feedback.setProgress((target_count / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
