@@ -113,6 +113,7 @@ class CreatePointsInDirectionAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.assertIn(FieldNames.ID_ORIGINAL_POINT, output_layer.fields().names())
         self.assertIn(FieldNames.ID_POINT, output_layer.fields().names())
         self.assertIn(FieldNames.AZIMUTH, output_layer.fields().names())
+        self.assertIn(FieldNames.ANGLE_STEP_POINTS, output_layer.fields().names())
 
         unique_ids_orig = list(
             self.points.uniqueValues(self.points.fields().lookupField(self.points_id_field)))

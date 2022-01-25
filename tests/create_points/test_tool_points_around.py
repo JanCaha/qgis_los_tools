@@ -3,6 +3,7 @@ import unittest
 from qgis.core import (QgsVectorLayer, QgsProcessingFeedback, QgsProcessingContext)
 
 from los_tools.create_points.tool_points_around import CreatePointsAroundAlgorithm
+from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
@@ -80,4 +81,9 @@ class CreatePointsAroundAlgorithmTest(QgsProcessingAlgorithmTestCase):
         output_layer = QgsVectorLayer(output_path)
 
         self.assertIsInstance(output_layer, QgsVectorLayer)
+
         self.assertEqual(2160, output_layer.featureCount())
+
+        self.assertFieldNamesInQgsVectorLayer(
+            [FieldNames.ID_ORIGINAL_POINT, FieldNames.AZIMUTH, FieldNames.ANGLE_STEP_POINTS],
+            output_layer)
