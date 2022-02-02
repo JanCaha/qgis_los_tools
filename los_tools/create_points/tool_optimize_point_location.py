@@ -234,7 +234,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         return "Optimize Point Location"
 
     def group(self):
-        return "Points creation"
+        return "Points Creation"
 
     def groupId(self):
         return "pointscreation"

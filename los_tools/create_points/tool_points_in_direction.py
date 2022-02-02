@@ -160,7 +160,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
         return "Create Points in Direction"
 
     def group(self):
-        return "Points creation"
+        return "Points Creation"
 
     def groupId(self):
         return "pointscreation"

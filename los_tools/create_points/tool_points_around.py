@@ -132,7 +132,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
         return "Create Points Around"
 
     def group(self):
-        return "Points creation"
+        return "Points Creation"
 
     def groupId(self):
         return "pointscreation"
