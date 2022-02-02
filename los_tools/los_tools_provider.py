@@ -25,6 +25,7 @@ from los_tools.parameter_settings.tool_sizes_at_distances import ObjectSizesAlgo
 from los_tools.parameter_settings.tool_distances_for_sizes import ObjectDistancesAlgorithm
 from los_tools.analyse_los.tool_extract_los_visibility_polygons import ExtractLoSVisibilityPolygonsAlgorithm
 from los_tools.parameter_settings.tool_angle_at_distance_for_size import ObjectDetectionAngleAlgorithm
+from los_tools.create_points.tool_points_by_azimuths import CreatePointsInAzimuthsAlgorithm
 
 
 class los_toolsProvider(QgsProcessingProvider):
@@ -73,6 +74,7 @@ class los_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(CreateNoTargetLosAlgorithmV2())
         self.addAlgorithm(ExtractLoSVisibilityPolygonsAlgorithm())
         self.addAlgorithm(ObjectDetectionAngleAlgorithm())
+        self.addAlgorithm(CreatePointsInAzimuthsAlgorithm())
 
     def id(self):
         """
