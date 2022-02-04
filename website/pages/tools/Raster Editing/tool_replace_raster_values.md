@@ -1,6 +1,6 @@
 # Replace Raster Values
 
-Tool to replace raster values in polygons with either constant value (specified by `RasterValue`) or by field value (definied by `ValueField`). 
+Tool to replace raster values in polygons with either constant value (specified by `RasterValue`) or by field value (defined by `ValueField`). 
 
 ## Parameters
 
