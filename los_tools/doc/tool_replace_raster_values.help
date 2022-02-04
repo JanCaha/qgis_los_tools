@@ -5,5 +5,5 @@
 	"VectorLayer": "Vector layer that specifies areas of raster to replace the values.", 
 	"RasterValue": "Value to use as replacement.",
 	"ValueField": "Field from vector layer that defines values that should be used in output raster. Optional.",
-	"OutputRaster": "Output raster with new values.",
+	"OutputRaster": "Output raster with new values."
 }
