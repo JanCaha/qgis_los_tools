@@ -2,7 +2,7 @@
 	"ALG_DESC": "Create line-of-sight between each point from observers layer and targets layer, where `Observer ID field` value from observer is equal to `Target and Observer agreement ID field` of target. This ensures that each point from targets layer is linked to one point from observers layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.",
 	"ALG_CREATOR": "Jan Caha",
 	"DemRasters": "List of DEM rasters on which the LoS is calculated. The rasters are ordered from smallest spatial resolution to highest. Elevation for LoS is taken from the raster with smallest spatial resolution, that has a value.",
-	"LineSettings": "Matrix of sampling distances with respect to distance limit. Each row specifies what sampling distance should be used on LoS for defined distance from observer."
+	"LineSettingsTable": "Distance table, specify sampling size on LoS by distance.",
 	"ObserverPoints": "Point layer representing the observers.",
 	"ObserverIdField": "Field containing ID for observer points.",
 	"ObserverOffset": "Field containing offset above DEM for observer points.",
