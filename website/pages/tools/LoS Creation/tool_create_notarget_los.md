@@ -6,23 +6,23 @@ The target points can be and usually should be created by tools [Create points a
 
 ## Parameters
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
-| Raster Layer DEM | `DemRaster` | [raster] | Raster DEM on which the LoS is calculated. |
-| Observers point layer | `ObserverPoints` | [vector: point] | Point layer representing the observers. |
-| Observer ID field | `ObserverIdField` | [tablefield: numeric] | Field containing ID for observer points. |
-| Observer offset field | `ObserverOffset` | [tablefield: numeric] | Field containing offset above DEM for observer points. |
-| Targets point layer | `TargetPoints` | [vector: point] | Point layer representing the targets. |
-| Target ID field | `TargetIdField` | [tablefield: numeric] | Field containing ID for target points. |
-| Target and Observer agreement ID field | `TargetDefinitionIdField` | [tablefield: numeric] | Field that specifies which target point is linked to which observer point. Values in this field are compared to `ObserverIdField`. |
-| LoS sampling distance | `LineDensity` | [distance]  <br/><br/> Default: <br/> `1` | The distance by which the LoS is segmentized. |
-| Maximal length of LoS (0 means unlimited) | `MaxLoSLength` | [distance]  <br/><br/> Default: <br/> `0` | Maximal length of LoS generated. |
-| Output layer | `OutputLayer` | [vector: line] | Output layer containing LoS. |
+| Label                                     | Name                      | Type                                      | Description                                                                                                                        |
+| ----------------------------------------- | ------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Raster Layer DEM                          | `DemRasters`              | [raster][list]                            | Raster DEMs on which the LoS is calculated.                                                                                        |
+| Observers point layer                     | `ObserverPoints`          | [vector: point]                           | Point layer representing the observers.                                                                                            |
+| Observer ID field                         | `ObserverIdField`         | [tablefield: numeric]                     | Field containing ID for observer points.                                                                                           |
+| Observer offset field                     | `ObserverOffset`          | [tablefield: numeric]                     | Field containing offset above DEM for observer points.                                                                             |
+| Targets point layer                       | `TargetPoints`            | [vector: point]                           | Point layer representing the targets.                                                                                              |
+| Target ID field                           | `TargetIdField`           | [tablefield: numeric]                     | Field containing ID for target points.                                                                                             |
+| Target and Observer agreement ID field    | `TargetDefinitionIdField` | [tablefield: numeric]                     | Field that specifies which target point is linked to which observer point. Values in this field are compared to `ObserverIdField`. |
+| LoS sampling distance                     | `LineDensity`             | [distance]  <br/><br/> Default: <br/> `1` | The distance by which the LoS is segmentized.                                                                                      |
+| Maximal length of LoS (0 means unlimited) | `MaxLoSLength`            | [distance]  <br/><br/> Default: <br/> `0` | Maximal length of LoS generated.                                                                                                   |
+| Output layer                              | `OutputLayer`             | [vector: line]                            | Output layer containing LoS.                                                                                                       |
 
 ## Outputs
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
+| Label        | Name          | Type           | Description                  |
+| ------------ | ------------- | -------------- | ---------------------------- |
 | Output layer | `OutputLayer` | [vector: line] | Output layer containing LoS. |
 
 ### Fields in the output layer
@@ -34,7 +34,8 @@ The target points can be and usually should be created by tools [Create points a
 * __azimuth__ - double - double - value from the field specified in `Target offset field`
 * __target_x__ - double - X coordinate of point in `Targets point layer`, used later in analyses
 * __target_y__ - double - Y coordinate of point in `Targets point layer`, used later in analyses
-
+* __angle_step_between_los__ - double - difference between LoS from one viewpoint as angle (degrees)
+  
 ## Tool screenshot
 
 ![Create no target LoS](../../images/tool_create_notarget_los.png)
