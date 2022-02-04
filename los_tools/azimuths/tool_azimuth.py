@@ -1,9 +1,11 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink, QgsProcessingParameterField, QgsField,
-                       QgsFeature, QgsWkbTypes, QgsFields, QgsProcessingException)
+                       QgsFeature, QgsWkbTypes, QgsFields, QgsProcessingUtils,
+                       QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
+from los_tools.tools.util_functions import get_doc_file
 
 
 class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
@@ -123,3 +125,6 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/Angles/tool_azimuth/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)

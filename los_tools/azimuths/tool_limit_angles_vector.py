@@ -2,11 +2,11 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsFeatureRequest,
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterField, QgsGeometry, QgsCoordinateTransform,
                        QgsProject, QgsField, QgsFeature, QgsWkbTypes, QgsFields,
-                       QgsProcessingException)
+                       QgsProcessingUtils, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
-from los_tools.tools.util_functions import get_los_type
+from los_tools.tools.util_functions import get_los_type, get_doc_file
 from los_tools.constants.names_constants import NamesConstants
 
 
@@ -171,3 +171,6 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/Angles/tool_limit_angles_vector/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
