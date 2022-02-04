@@ -2,12 +2,13 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterNumber, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink, QgsProcessingParameterBoolean, QgsField,
                        QgsFeature, QgsWkbTypes, QgsFeatureRequest, QgsFields, QgsLineString,
-                       QgsVectorLayer, QgsProcessingFeedback, QgsProcessingException)
+                       QgsVectorLayer, QgsProcessingFeedback, QgsProcessingUtils,
+                       QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
 from los_tools.classes.classes_los import LoSWithoutTarget
-from los_tools.tools.util_functions import wkt_to_array_points, get_los_type
+from los_tools.tools.util_functions import wkt_to_array_points, get_los_type, get_doc_file
 from los_tools.constants.names_constants import NamesConstants
 
 
@@ -176,3 +177,6 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/Horizons/tool_extract_horizon_lines/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
