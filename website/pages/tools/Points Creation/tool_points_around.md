@@ -9,7 +9,7 @@ The default values create points from angle 0 (north) to angle 359 (almost north
 | Label                        | Name          | Type                                     | Description                                                       |
 | ---------------------------- | ------------- | ---------------------------------------- | ----------------------------------------------------------------- |
 | Input point layer            | `InputLayer`  | [vector: point]                          | Point layer around which the new points will be created.          |
-| ID field to assign to output | `IdField`     | [tablefield: numeric]                    | Field value to assing to `id_original_point` for new layer.       |
+| ID field to assign to output | `IdField`     | [tablefield: numeric]                    | Field value to assign to `id_original_point` for new layer.       |
 | Minimal angle                | `AngleStart`  | [number] <br/><br/> Default: <br/> `0`   | Angle (azimuth) at which the generation of points should start.   |
 | Maximal angle                | `AngleEnd`    | [number] <br/><br/> Default: <br/> `359` | Angle (azimuth) at which the generation of points should end.     |
 | Angle step                   | `AngleStep`   | [number] <br/><br/> Default: <br/> `1`   | Step size between `Minimal angle` and `Maximal angle`.            |
