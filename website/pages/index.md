@@ -28,20 +28,21 @@ Local horizon is any horizon on LoS that is not global. There may be any number 
 ### DEM use in the plugin
 
 Most tools in the plugin allow you to use more then one DEM raster. The rasters are ordered from smallest cell size to the biggest. Elevation is always obtained from raster with smallest cell size that has valid elevation value (no data is not considered as valid value). This allows utilization of DEM with large cells as addition to DEM with smaller cells. For example DEM with cell size 1 meter can be used within city for areas close to observers and SRTM data (30 meter cell size) in areas around the city, far from the observer.
+
 ## Citation
 
 The citation for the plugin should be:
 
 ```
-Jan Caha (2020). LoS Tools. QGIS Plugin version 0.2. https://jancaha.github.io/qgis_los_tools/
+Jan Caha (2022). LoS Tools. QGIS Plugin version 0.7. https://jancaha.github.io/qgis_los_tools/
 ```
 
 ```
 @Manual{,
   title = {LoS Tools},
   author = {Jan Caha},
-  year = {2020},
-  note = {QGIS Plugin version 0.2},
+  year = {2022},
+  note = {QGIS Plugin version 0.7},
   url = {https://jancaha.github.io/qgis_los_tools/}
 }
 ```  
