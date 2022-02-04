@@ -25,6 +25,9 @@ Global horizon is a horizon that is highest on LoS and if the surface raster ext
 
 Local horizon is any horizon on LoS that is not global. There may be any number of local horizons on LoS. Amogst these local horizons the highest local horizon can be useful for some analyses. The maximal local horizon is the highest horizon that is not global.
 
+### DEM use in the plugin
+
+Most tools in the plugin allow you to use more then one DEM raster. The rasters are ordered from smallest cell size to the biggest. Elevation is always obtained from raster with smallest cell size that has valid elevation value (no data is not considered as valid value). This allows utilization of DEM with large cells as addition to DEM with smaller cells. For example DEM with cell size 1 meter can be used within city for areas close to observers and SRTM data (30 meter cell size) in areas around the city, far from the observer.
 ## Citation
 
 The citation for the plugin should be:
