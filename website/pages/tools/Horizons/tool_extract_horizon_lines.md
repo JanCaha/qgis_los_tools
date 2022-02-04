@@ -6,20 +6,19 @@ For global horizon line it is possible to select value that should be used as M 
 
 ## Parameters
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
-| LoS layer | `LoSLayer` | [vector: line] | LoS layer to analyse. |
-| Horizon type | `HorizonType` | [enumeration] <br/><br/> Default: <br/> `1` | Type of horizon line to extract. <br/><br/> **Values**: <br/> **0** - maximal local <br/> **1** - global |
-| Output layer | `OutputLayer` | [vector: line] | Output layer horizon lines. |
-| Use curvature corrections? | `CurvatureCorrections` | [boolean]<br/><br/>Default: `True` | Should the curvarture and refraction corrections be used? |
-| Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of refraction coefficient. |
-| Extract value as M dimension <br/>(for global horizon) | `ExtractAsM` | [enumeration] <br/><br/> Default: <br/> `0` | Type of values to extract as M dimension. <br/><br/> **Values**: <br/> **0** - view angles <br/> **1** - angle difference global to local horizon <br/> **2** - elevation difference global to local horizon <br/> **3** - horizon distance |
+| Label                        | Name                    | Type                                        | Description                                                                                              |
+| ---------------------------- | ----------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| LoS layer                    | `LoSLayer`              | [vector: line]                              | LoS layer to analyse.                                                                                    |
+| Horizon type                 | `HorizonType`           | [enumeration] <br/><br/> Default: <br/> `1` | Type of horizon line to extract. <br/><br/> **Values**: <br/> **0** - maximal local <br/> **1** - global |
+| Output layer                 | `OutputLayer`           | [vector: line]                              | Output layer horizon lines.                                                                              |
+| Use curvature corrections?   | `CurvatureCorrections`  | [boolean]<br/><br/>Default: `True`          | Should the curvarture and refraction corrections be used?                                                |
+| Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13`   | Value of refraction coefficient.                                                                         |
 
 
 ## Outputs
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
+| Label        | Name          | Type           | Description                 |
+| ------------ | ------------- | -------------- | --------------------------- |
 | Output layer | `OutputLayer` | [vector: line] | Output layer horizon lines. |
 
 ### Fields in the output layer
