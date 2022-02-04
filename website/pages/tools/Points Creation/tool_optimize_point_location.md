@@ -6,18 +6,18 @@ The optimization process is guided by two addition parameters - `Distance` and `
 
 ## Parameters
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
-| Location optimization raster | `InputRaster` | [raster] | Raster layer used as optimization criterion. Higher valeus are better. |
-| Input point layer (points to optimize) | `InputLayer` | [vector: point] | Point layer that specifies input points.  |
-| Search radius | `Distance` | [number] <br/><br/> Default: <br/> `30` | Distance around point to search for better value. Linked to parameter `InputRaster`. |
-| Mask raster | `MaskRaster` | [raster] | Raster specifing areas that can be used. Values `NoData` and `0` marks areas that unavailable. |
-| Output layer (optimized points) | `OutputLayer` | [vector: point] | Copy of `InputLayer` with position of points changed. |
+| Label                                  | Name          | Type                                    | Description                                                                                     |
+| -------------------------------------- | ------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Location optimization raster           | `InputRaster` | [raster]                                | Raster layer used as optimization criterion. Higher values are better.                          |
+| Input point layer (points to optimize) | `InputLayer`  | [vector: point]                         | Point layer that specifies input points.                                                        |
+| Search radius                          | `Distance`    | [number] <br/><br/> Default: <br/> `30` | Distance around point to search for better value. Linked to parameter `InputRaster`.            |
+| Mask raster                            | `MaskRaster`  | [raster]                                | Raster specifying areas that can be used. Values `NoData` and `0` marks areas that unavailable. |
+| Output layer (optimized points)        | `OutputLayer` | [vector: point]                         | Copy of `InputLayer` with position of points changed.                                           |
 
 ## Outputs
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
+| Label                           | Name          | Type            | Description                                           |
+| ------------------------------- | ------------- | --------------- | ----------------------------------------------------- |
 | Output layer (optimized points) | `OutputLayer` | [vector: point] | Copy of `InputLayer` with position of points changed. |
 
 ### Fields in the output layer
