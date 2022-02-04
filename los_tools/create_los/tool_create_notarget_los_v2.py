@@ -240,8 +240,7 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         return CreateNoTargetLosAlgorithmV2()
 
     def helpUrl(self):
-        # return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los/"
-        pass
+        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los_v2/"
 
     def shortHelpString(self):
         # return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)

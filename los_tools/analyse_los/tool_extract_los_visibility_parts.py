@@ -197,5 +197,4 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
         return ExtractLoSVisibilityPartsAlgorithm()
 
     def helpUrl(self):
-        # FIXME add help page
-        return ""  # "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Points/tool_extract_points_los/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Analysis/tool_extract_visibility_parts/"

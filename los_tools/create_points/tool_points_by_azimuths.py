@@ -181,5 +181,4 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
         return CreatePointsInAzimuthsAlgorithm()
 
     def helpUrl(self):
-        pass
-        # return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_in_direction/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_by_azimuths/"
