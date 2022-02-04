@@ -1,0 +1,8 @@
+{
+	"ALG_DESC": "Export LoS layer (or only selected features) to table suitable for export outside of QGIS. In the output table every row is a single point on specific LoS.",
+	"ALG_CREATOR": "Jan Caha", 
+	"LoSLayer": "LoS layer to export.", 
+	"CurvatureCorrections": "Should the curvature and refraction corrections be used?",
+	"RefractionCoefficient": "Value of refraction coefficient. Default value: 0.13.",
+	"OutputFile": "Output containing exported points."
+}
