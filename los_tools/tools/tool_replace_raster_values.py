@@ -1,7 +1,8 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterRasterDestination, QgsProcessingParameterField,
-                       QgsProcessingParameterRasterLayer, QgsRasterLayer, QgsProcessingException)
+                       QgsProcessingUtils, QgsProcessingParameterRasterLayer, QgsRasterLayer,
+                       QgsProcessingException)
 
 from qgis.analysis import (QgsRasterCalculatorEntry, QgsRasterCalculator)
 import processing
@@ -9,6 +10,8 @@ from processing.algs.gdal.GdalUtils import GdalUtils
 
 import tempfile
 import uuid
+
+from los_tools.tools.util_functions import get_doc_file
 
 
 class ReplaceRasterValuesAlgorithm(QgsProcessingAlgorithm):
@@ -160,3 +163,6 @@ class ReplaceRasterValuesAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/Raster%20Editing/tool_replace_raster_values/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
