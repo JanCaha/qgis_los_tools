@@ -1,0 +1,9 @@
+{
+	"ALG_DESC": "Optimizes point location for visibility analyses using optimization raster. The values of `InputRaster` serve as optimization criterion with higher values marking better options. The result is the copy of `InputLayer` with points location changed.",
+	"ALG_CREATOR": "Jan Caha", 
+	"InputRaster": "Raster layer used as optimization criterion. Higher values are better.", 
+	"InputLayer": "Point layer that specifies input points.", 
+	"Distance": "Distance around point to search for better value. Linked to parameter `InputRaster`.",
+	"MaskRaster": "Raster specifying areas that can be used. Values `NoData` and `0` marks areas that unavailable.",
+	"OutputLayer": "Copy of `InputLayer` with position of points changed.",
+}
