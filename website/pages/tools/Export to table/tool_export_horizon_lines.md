@@ -4,15 +4,15 @@ Export horizon lines layer (or only selected features) to table suitable for exp
 
 ## Parameters
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
-| Horizon Lines Layer | `HorizonLinesLayer` | [vector: line] | Horizon lines layer to export. |
-| Output file | `OutputFile` | [table] | Output containing exported points of horizon lines. |
+| Label               | Name                | Type           | Description                                         |
+| ------------------- | ------------------- | -------------- | --------------------------------------------------- |
+| Horizon Lines Layer | `HorizonLinesLayer` | [vector: line] | Horizon lines layer to export.                      |
+| Output file         | `OutputFile`        | [table]        | Output containing exported points of horizon lines. |
 
 ## Outputs
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
+| Label       | Name         | Type    | Description                                         |
+| ----------- | ------------ | ------- | --------------------------------------------------- |
 | Output file | `OutputFile` | [table] | Output containing exported points of horizon lines. |
 
 ### Fields in the output layer
