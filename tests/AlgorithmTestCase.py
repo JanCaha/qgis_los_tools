@@ -115,9 +115,10 @@ class QgsProcessingAlgorithmTestCase(unittest.TestCase):
         result = self.alg.run(parameters=parameters, context=self.context, feedback=self.feedback)
 
         if len(result[0]) != len(self.alg.outputDefinitions()):
-            raise AssertionError("Number of provided outputs of the algorithm ({}) "
-                                 "does not match the number of outputs specified ({}).".format(
-                                     len(result[0]), len(self.alg.outputDefinitions())))
+            raise AssertionError(
+                "Number of provided outputs of the algorithm ({}) "
+                "does not match the number of outputs specified ({}). Result: {}".format(
+                    len(result[0]), len(self.alg.outputDefinitions()), result))
 
         if not allow_none_outputs:
             for output, output_value in result[0].items():
