@@ -4,12 +4,12 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterField,
                        QgsProcessingParameterFeatureSink, QgsProcessingParameterDistance, QgsField,
                        QgsFeature, QgsWkbTypes, QgsGeometry, QgsFields, QgsPointXY,
-                       QgsProcessingException)
+                       QgsProcessingUtils, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.tools.util_functions import get_max_decimal_numbers, round_all_values
+from los_tools.tools.util_functions import get_max_decimal_numbers, round_all_values, get_doc_file
 
 
 class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
@@ -147,3 +147,6 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_around/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
