@@ -1,0 +1,11 @@
+{
+	"ALG_DESC": "Create points at given distance from points from input layer that span from minimal to maximal angle with specified angle step.",
+	"ALG_CREATOR": "Jan Caha", 
+	"InputLayer": "Point layer around which the new points will be created.", 
+	"IdField": "Field value to assign to `id_original_point` for new layer.",
+	"AngleStart": "Angle (azimuth) at which the generation of points should start.",
+	"AngleEnd": "Angle (azimuth) at which the generation of points should end.",
+	"AngleStep": "Step size between `Minimal angle` and `Maximal angle`.",
+	"Distance": "How far from the original point the new points should be created.",
+	"OutputLayer": "Output layer containing LoS with new attributes."
+}

@@ -1,0 +1,11 @@
+{
+	"ALG_DESC": "Create points set of points at given distance from points from input layer that span given angle offset from main direction layer.",
+	"ALG_CREATOR": "Jan Caha", 
+	"InputLayer": "Point layer around which the new points will be created.", 
+	"DirectionLayer": "Point layer (containing only one point) that specifies main direction.", 
+	"IdField": Field value to assign to `id_original_point` for new layer.",
+	"AngleOffset": "Offset from main direction, the whole range is [main azimuth + angleOffset;main azimuth + angleOffset].",
+	"AngleStep": "Step size between `Minimal angle` and `Maximal angle`.",
+	"Distance": "How far from the original point the new points should be created.",
+	"OutputLayer": "Output layer containing LoS with new attributes."
+}

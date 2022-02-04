@@ -1,0 +1,12 @@
+{
+	"ALG_DESC": "Create points set of points at given distance from points from input layer that span given angle offset from main direction layer.",
+	"ALG_CREATOR": "Jan Caha", 
+	"InputLayer": "Point layer around which the new points will be created.", 
+	"IdField": Field value to assign to `id_original_point` for new layer.",
+	"AngleStart": "Angle (azimuth) at which the generation of points should start.",
+	"AngleEnd": "Angle (azimuth) at which the generation of points should end.",
+	"OverNorth": "Specify if the number goes trough North (azimuth 0), as there are two ways to connect azimuths 90 - 270, one through south (over azimuth 180) and second through north (azimuth 0 or 360).",
+	"AngleStep": "Step size between `Minimal angle` and `Maximal angle`.",
+	"Distance": "How far from the original point the new points should be created.",
+	"OutputLayer": "Output layer containing LoS with new attributes."
+}
