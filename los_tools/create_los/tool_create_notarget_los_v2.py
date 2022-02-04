@@ -2,13 +2,14 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterMultipleLayers, QgsField, QgsFeature, QgsWkbTypes,
                        QgsPoint, QgsFields, QgsLineString, QgsProcessingFeedback,
-                       QgsFeatureRequest, QgsProcessingException)
+                       QgsFeatureRequest, QgsProcessingUtils, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
+from los_tools.tools.util_functions import get_doc_file
 
 
 class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
@@ -243,5 +244,4 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los_v2/"
 
     def shortHelpString(self):
-        # return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
-        pass
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
