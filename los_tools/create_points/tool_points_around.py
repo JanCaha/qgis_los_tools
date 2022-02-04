@@ -9,6 +9,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
+from los_tools.tools.util_functions import get_max_decimal_numbers, round_all_values
 
 
 class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
@@ -85,6 +86,10 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
 
         angles = np.arange(angle_min, angle_max + 0.000000001 * angle_step,
                            step=angle_step).tolist()
+
+        round_digits = get_max_decimal_numbers([angle_min, angle_max, angle_step])
+
+        angles = round_all_values(angles, round_digits)
 
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 

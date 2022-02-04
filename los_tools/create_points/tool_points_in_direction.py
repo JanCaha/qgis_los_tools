@@ -9,6 +9,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
+from los_tools.tools.util_functions import get_max_decimal_numbers, round_all_values
 
 
 class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
@@ -129,6 +130,10 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                 angles = np.arange(main_angle - angle_offset,
                                    main_angle + angle_offset + 0.1 * angle_step,
                                    step=angle_step).tolist()
+
+                round_digits = get_max_decimal_numbers([main_angle, angle_offset, angle_step])
+
+                angles = round_all_values(angles, round_digits)
 
                 i = 0
 

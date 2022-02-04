@@ -9,6 +9,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
+from los_tools.tools.util_functions import get_max_decimal_numbers, round_all_values
 
 
 class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
@@ -102,7 +103,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
         angle_step = self.parameterAsDouble(parameters, self.ANGLE_STEP, context)
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 
-        round_digits = len(str(angle_step).split(".")[1])
+        round_digits = get_max_decimal_numbers([angle_min, angle_max, angle_step])
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.ID_ORIGINAL_POINT, QVariant.Int))
@@ -131,7 +132,6 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
                 angles = np.arange(angle_min, angle_max + 0.1 * angle_step,
                                    step=angle_step).tolist()
 
-                angles = [round(x, round_digits) for x in angles]
             else:
 
                 angles2 = np.arange(angle_max, 360 - 0.1 * angle_step, step=angle_step).tolist()
@@ -142,7 +142,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
 
                 angles = angles1 + angles2
 
-                angles = [round(x, round_digits) for x in angles]
+            angles = round_all_values(angles, round_digits)
 
             i = 0
 

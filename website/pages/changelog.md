@@ -4,6 +4,8 @@
 
 - add tools: Create no Target LoS V2, Calculate Object Distances, Calculate Object Sizes
 
+- fixes for tools that work with angles, now round angles to sensible values
+
 - minor fixes all around
 
 - fixes to website (zoomable images)

@@ -190,3 +190,16 @@ def get_doc_file(file_path: str):
 def log(text):
 
     QgsMessageLog.logMessage(str(text), "los_tools", Qgis.Info)
+
+
+def get_max_decimal_numbers(values: List[Union[int, float]]) -> int:
+
+    values = [len(str(x).split(".")[1]) for x in values]
+
+    return int(max(values))
+
+
+def round_all_values(values: List[Union[int, float]],
+                     number_of_digits: int) -> List[Union[int, float]]:
+
+    return [round(x, number_of_digits) for x in values]
