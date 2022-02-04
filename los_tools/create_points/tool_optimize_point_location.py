@@ -4,7 +4,9 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterDistance,
                        QgsProcessingParameterFeatureSink, QgsRasterDataProvider, QgsRasterLayer,
                        QgsRectangle, QgsRasterBlock, QgsPoint, QgsFeature, QgsPointXY,
-                       QgsProcessingFeatureSource, QgsProcessingException)
+                       QgsProcessingFeatureSource, QgsProcessingUtils, QgsProcessingException)
+
+from los_tools.tools.util_functions import get_doc_file
 
 
 class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
@@ -244,3 +246,6 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_optimize_point_location/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
