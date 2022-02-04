@@ -1,11 +1,12 @@
 from qgis.core import (QgsFeature, QgsFields, QgsField, QgsProcessing, QgsFeatureSink, QgsWkbTypes,
                        QgsProcessingAlgorithm, QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean, QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink, QgsProcessingException)
+                       QgsProcessingParameterFeatureSink, QgsProcessingUtils,
+                       QgsProcessingException)
 
 from qgis.PyQt.QtCore import (QVariant)
 
-from los_tools.tools.util_functions import get_los_type
+from los_tools.tools.util_functions import get_los_type, get_doc_file
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
@@ -190,3 +191,6 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/Export%20to%20table/tool_export_los/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)

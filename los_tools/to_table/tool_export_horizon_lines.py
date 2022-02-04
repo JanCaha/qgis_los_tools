@@ -1,11 +1,13 @@
 from qgis.core import (QgsProcessing, QgsFields, QgsField, QgsFeature, QgsFeatureSink,
                        QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
                        QgsProcessingFeatureSource, QgsProcessingParameterFeatureSink, QgsWkbTypes,
-                       QgsMessageLog, QgsPointXY, Qgis, QgsFeatureSource, QgsProcessingException)
+                       QgsMessageLog, QgsPointXY, Qgis, QgsFeatureSource, QgsProcessingUtils,
+                       QgsProcessingException)
 
 from qgis.PyQt.QtCore import (QVariant)
 
 from los_tools.constants.field_names import FieldNames
+from los_tools.tools.util_functions import get_doc_file
 
 
 class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
@@ -117,3 +119,6 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         return "https://jancaha.github.io/qgis_los_tools/tools/Export%20to%20table/tool_export_horizon_lines/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
