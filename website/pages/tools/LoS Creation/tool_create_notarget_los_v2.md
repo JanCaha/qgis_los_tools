@@ -37,8 +37,9 @@ This variant of the tool specifies sampling and length of LoS by table `Sampling
 * __azimuth__ - double - double - value from the field specified in `Target offset field`
 * __target_x__ - double - X coordinate of point in `Targets point layer`, used later in analyses
 * __target_y__ - double - Y coordinate of point in `Targets point layer`, used later in analyses
+* __angle_step_between_los__ - double - difference between LoS from one viewpoint as angle (degrees)
 
 ## Tool screenshot
 
-![Create no target LoS](../../images/tool_create_notarget_los.png)
+![Create no target LoS V2](../../images/tool_create_notarget_los_v2.png)
 	
