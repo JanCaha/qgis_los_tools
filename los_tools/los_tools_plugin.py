@@ -3,7 +3,7 @@ import sys
 import inspect
 
 from qgis.core import QgsApplication
-from los_tools.los_tools_provider import los_toolsProvider
+from qgis.gui import QgisInterface
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
@@ -13,7 +13,9 @@ if cmd_folder not in sys.path:
 
 class los_toolsPlugin():
 
-    def __init__(self):
+    def __init__(self, iface):
+
+        self.iface: QgisInterface = iface
         self.provider = los_toolsProvider()
 
     def initProcessing(self):
