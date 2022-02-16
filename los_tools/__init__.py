@@ -26,8 +26,7 @@ __author__ = 'Jan Caha'
 __date__ = '2020-03-05'
 __copyright__ = '(C) 2020 by Jan Caha'
 
-
-from los_tools.los_tools_plugin import los_toolsPlugin
+from .los_tools_plugin import los_toolsPlugin
 
 
 # noinspection PyPep8Naming
@@ -37,4 +36,4 @@ def classFactory(iface):
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
     """
-    return los_toolsPlugin()
+    return los_toolsPlugin(iface)
