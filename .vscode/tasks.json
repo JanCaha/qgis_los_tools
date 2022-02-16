@@ -21,7 +21,7 @@
         {
             "label": "Show website",
             "type": "shell",
-            "command": "mkdocs serve --config-file ./website/mkdocs.yml;google-chrome ./website/docs/index.html",
+            "command": "mkdocs serve --config-file ./website/mkdocs.yml",
             "group": {
                 "kind": "build",
                 "isDefault": true
