@@ -1,7 +1,8 @@
 import math
 
 from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterNumber, QgsProcessingFeedback,
-                       QgsProcessingOutputNumber)
+                       QgsProcessingOutputNumber, QgsProcessingUtils)
+from los_tools.tools.util_functions import get_doc_file
 
 
 class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
@@ -24,7 +25,7 @@ class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(param)
 
         param = QgsProcessingParameterNumber(self.DISTANCE,
-                                             "Distance of the object (in meters)",
+                                             "Distance of the object from observer (in meters)",
                                              QgsProcessingParameterNumber.Double,
                                              defaultValue=1000,
                                              minValue=0.001,
@@ -35,9 +36,7 @@ class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(param)
 
         self.addOutput(
-            QgsProcessingOutputNumber(
-                self.OUTPUT_ANGLE,
-                "Angle size (in degrees) to detect object of given size and the given distance"))
+            QgsProcessingOutputNumber(self.OUTPUT_ANGLE, "Angle size (in degrees) of object"))
 
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
 
@@ -70,3 +69,6 @@ class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
     def helpUrl(self):
         pass
         # return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_around/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
