@@ -2,9 +2,9 @@ from typing import List
 import math
 
 from qgis.core import (QgsPointXY, QgsProject, QgsMasterLayoutInterface, QgsMapLayerProxyModel,
-                       QgsVector3D, QgsPointLocator, QgsWkbTypes)
+                       QgsVector3D, QgsPointLocator, QgsWkbTypes, QgsSettings, QgsRasterLayer)
 from qgis.gui import (QgsMapCanvas, QgsMapLayerComboBox, QgisInterface, QgsMapToolEmitPoint,
-                      QgsMapMouseEvent, QgsRubberBand)
+                      QgsMapMouseEvent, QgsRubberBand, QgsVertexMarker)
 from qgis._3d import (QgsLayoutItem3DMap)
 from qgis.PyQt.QtWidgets import (QDialog, QLabel, QVBoxLayout, QHBoxLayout, QComboBox,
                                  QDialogButtonBox, QToolButton, QLineEdit, QDoubleSpinBox)
@@ -222,11 +222,12 @@ class SetCameraTool(QDialog):
         settings = self.layout_item_3d.mapSettings()
         camera_pose = self.layout_item_3d.cameraPose()
 
-        observer_z = bilinear_interpolated_value(self.dsm_cb.currentLayer().dataProvider(),
+        current_layer: QgsRasterLayer = self.dsm_cb.currentLayer()
+
+        observer_z = bilinear_interpolated_value(current_layer.dataProvider(),
                                                  self.observer) + self.offset_sb.value()
 
-        target_z = bilinear_interpolated_value(self.dsm_cb.currentLayer().dataProvider(),
-                                               self.target)
+        target_z = bilinear_interpolated_value(current_layer.dataProvider(), self.target)
 
         look_at_point = settings.mapToWorldCoordinates(
             QgsVector3D(self.target.x(), self.target.y(), target_z))
@@ -244,8 +245,6 @@ class SetCameraTool(QDialog):
         vert_angle = math.degrees(math.atan((look_from_point.y() - look_at_point.y()) / distance))
 
         vert_angle = 90 - (vert_angle)
-
-        log("{} - {} - {}".format(distance, angle, vert_angle))
 
         camera_pose.setCenterPoint(look_at_point)
         camera_pose.setHeadingAngle(angle)
@@ -268,26 +267,30 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
     _current_point: QgsPointXY = None
     _snapped: bool = False
     _snap_layer_name: str = ""
+    _canvas: QgsMapCanvas
 
     def __init__(self, canvas: QgsMapCanvas):
+
         QgsMapToolEmitPoint.__init__(self, canvas)
 
-        self.canvas = canvas
+        self._canvas = canvas
         self.cursor = Qt.CrossCursor
 
-        self.snapper = self.canvas.snappingUtils()
+        self.snapper = self._canvas.snappingUtils()
 
-        self.rubber = QgsRubberBand(self.canvas, QgsWkbTypes.PointGeometry)
+        self.rubber = QgsRubberBand(self._canvas, QgsWkbTypes.PointGeometry)
 
-        self.rubber.setColor(QColor(255, 0, 0))
-        self.rubber.setIconSize(15)
+        settings = QgsSettings()
+        self.snap_color = settings.value("/qgis/digitizing/snap_color", QColor("#ff00ff"))
+
+        self.snap_marker = QgsVertexMarker(self._canvas)
 
     def deactivate(self):
-        self.rubber.reset()
+        self.update_snap_marker()
         QgsMapToolEmitPoint.deactivate(self)
 
     def activate(self):
-        self.canvas.setCursor(self.cursor)
+        self._canvas.setCursor(self.cursor)
 
     def canvasReleaseEvent(self, event):
         self.complete.emit()
@@ -300,15 +303,18 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
 
         result = self.snapper.snapToMap(point)
 
-        self.rubber.reset(QgsWkbTypes.PointGeometry)
-
         if result.type() == QgsPointLocator.Vertex:
+
             self._current_point = result.point()
             self._snapped = True
             self._snap_layer_name = result.layer().name()
-            self.rubber.addPoint(result.point())
+
+            self.update_snap_marker(result.point())
 
         else:
+
+            self.update_snap_marker()
+
             self._current_point = self.toMapCoordinates(point)
             self._snapped = False
             self._snap_layer_name = ""
@@ -321,3 +327,22 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
 
     def snap_layer(self) -> str:
         return self._snap_layer_name
+
+    def update_snap_marker(self, snapped_point: QgsPointXY = None):
+
+        self._canvas.scene().removeItem(self.snap_marker)
+
+        if snapped_point is None:
+            return
+
+        self.create_vertex_marker(snapped_point)
+
+    def create_vertex_marker(self, snapped_point: QgsPointXY):
+
+        self.snap_marker = QgsVertexMarker(self._canvas)
+
+        self.snap_marker.setCenter(snapped_point)
+        self.snap_marker.setIconSize(16)
+        self.snap_marker.setIconType(QgsVertexMarker.ICON_BOX)
+        self.snap_marker.setPenWidth(3)
+        self.snap_marker.setColor(self.snap_color)
