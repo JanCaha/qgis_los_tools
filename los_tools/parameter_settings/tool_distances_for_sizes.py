@@ -3,11 +3,13 @@ import math
 from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterMatrix,
                        QgsProcessingParameterNumber, QgsProcessingParameterBoolean,
                        QgsProcessingFeedback, QgsFields, QgsField, QgsWkbTypes,
-                       QgsProcessingParameterFeatureSink, QgsFeature, QgsProcessingException)
+                       QgsProcessingParameterFeatureSink, QgsFeature, QgsProcessingException,
+                       QgsProcessingUtils)
 
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
+from ..tools.util_functions import get_doc_file
 
 
 class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
@@ -116,5 +118,7 @@ class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
         return ObjectDistancesAlgorithm()
 
     def helpUrl(self):
-        pass
-        # return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_around/"
+        return "https://jancaha.github.io/qgis_los_tools/tools//Calculate%20Parameters%20Settings/tool_distances_for_sizes/"
+
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
