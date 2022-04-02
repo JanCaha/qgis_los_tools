@@ -16,4 +16,4 @@ This tool sets up camera for 3D Map layout item to specific point on a raster lo
 
 ## Tool screenshot
 
-![Set Camera](../../images/tool_set_camera.png)
+![Set Camera](../images/tool_set_camera.png)
