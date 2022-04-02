@@ -2,3 +2,9 @@
 /los_tools/zip_build
 /los_tools/test/test_data/results
 __pycache__
+.coverage
+/tests/_data/results
+!/tests/_data/results/__init__.txt
+/tests/_data/*.gpkg-wal
+/tests/_data/*.gpkg-shm
+/website/docs
