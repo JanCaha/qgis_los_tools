@@ -2,9 +2,11 @@
 
 ## version 0.7
 
-- add tools: Create no Target LoS V2, Calculate Object Distances, Calculate Object Sizes
+- add tools: Create no Target LoS V2, Calculate Object Distances, Calculate Object Sizes, Calculate Parameters Settings, Extract Visible/Invisible Lines from LoS, Extract Visible/Invisible Polygons from LoS
 
 - fixes for tools that work with angles, now round angles to sensible values
+
+- text updates and changes to tools
 
 - minor fixes all around
 
