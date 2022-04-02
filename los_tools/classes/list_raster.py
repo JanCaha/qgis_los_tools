@@ -64,6 +64,21 @@ class ListOfRasters:
 
         return True, ""
 
+    @staticmethod
+    def validate_ordering(rasters: List[QgsMapLayer]) -> Tuple[bool, str]:
+
+        values: List[float] = []
+
+        for raster in rasters:
+
+            values.append(raster.extent().width() / raster.width())
+
+        if len(rasters) != len(set(values)):
+
+            return False, f"Raster sizes must be unique to form complete ordering. The values [{','.join([str(x) for x in values])}] are not unique."
+
+        return True, ""
+
     def order_by_pixel_size(self) -> None:
 
         tuples = []

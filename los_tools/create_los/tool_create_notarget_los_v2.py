@@ -104,6 +104,11 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         if not correct:
             return correct, msg
 
+        correct, msg = ListOfRasters.validate_ordering(rasters)
+
+        if not correct:
+            return correct, msg
+
         line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE,
                                                           context)
 

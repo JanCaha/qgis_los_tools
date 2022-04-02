@@ -116,6 +116,11 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         if not correct:
             return correct, msg
 
+        correct, msg = ListOfRasters.validate_ordering(rasters)
+
+        if not correct:
+            return correct, msg
+
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):

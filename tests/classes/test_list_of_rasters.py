@@ -91,3 +91,16 @@ class ListOfRastersTest(QgsProcessingAlgorithmTestCase):
 
         self.assertFalse(status)
         self.assertRegex(msg, "Rasters can only have one band")
+
+    def test_validate_ordering(self):
+
+        status, msg = ListOfRasters.validate_ordering([self.raster_small, self.raster_large])
+
+        self.assertTrue(status)
+        self.assertEqual(msg, "")
+
+        status, msg = ListOfRasters.validate_ordering(
+            [self.raster_small, self.raster_small, self.raster_large, self.raster_large])
+
+        self.assertFalse(status)
+        self.assertRegex(msg, "Raster sizes must be unique to form complete ordering")
