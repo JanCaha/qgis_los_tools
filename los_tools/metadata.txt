@@ -10,7 +10,7 @@ version=0.7
 author=Jan Caha
 email=jan.caha@outlook.com
 
-about=This plugin creates and analyzes lines-of-sight (LoS) and also provides supporting tools. The plugin is focused on point to point visibility, in contrast to classic viewshed analysis which is point to area. Besides that it provides tools for identification of horizon points (on LoS), horizon lines (from a set of LoS) and also additional useful tools related to visibility analysis.
+about=This plugin creates and analyzes lines-of-sight (LoS) and also provides supporting tools. The plugin is focused on point to point visibility, in contrast to classic viewshed analysis which is point to area. Besides that it provides tools for identification of horizon points (on LoS), horizon lines (from a set of LoS) and also additional useful tools related to visibility analysis. Take a look at the website for details and further info.
 
 tracker=https://github.com/JanCaha/qgis_los_tools/issues
 repository=https://github.com/JanCaha/qgis_los_tools
