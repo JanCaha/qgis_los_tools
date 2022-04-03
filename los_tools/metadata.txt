@@ -23,7 +23,7 @@ hasProcessingProvider=yes
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=analysis, dem, landscape, visibility
+tags=analysis, dem, dsm, landscape, visibility, los
 
 homepage=https://jancaha.github.io/qgis_los_tools/
 category=Plugins
@@ -41,7 +41,7 @@ deprecated=False
 # plugin_dependencies=
 
 # Category of the plugin: Raster, Vector, Database or Web
-# category=
+category=Vector
 
 # If the plugin can run on QGIS Server.
 server=False
