@@ -27,7 +27,7 @@ tags=analysis, dem, dsm, landscape, visibility, los
 
 homepage=https://jancaha.github.io/qgis_los_tools/
 category=Plugins
-#icon=icon.png
+icon=los_tools_icon.png
 
 # experimental flag
 experimental=False
