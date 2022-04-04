@@ -19,5 +19,5 @@ Tool to replace raster values in polygons with field value (defined by `ValueFie
 
 ## Tool screenshot
 
-![Replace Raster Values](../../images/tool_replace_raster_values.png)
+![Replace Raster Values by Field Values](../../images/tool_replace_raster_values_by_field.png)
 	

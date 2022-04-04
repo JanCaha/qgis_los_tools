@@ -19,5 +19,5 @@ Tool to replace raster values in polygons with either constant value (specified 
 
 ## Tool screenshot
 
-![Replace Raster Values](../../images/tool_replace_raster_values.png)
+![Replace Raster Values by Constant Value](../../images/tool_replace_raster_values_by_constant.png)
 	
