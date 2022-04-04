@@ -11,7 +11,8 @@ from .create_los.tool_create_notarget_los_v2 import CreateNoTargetLosAlgorithmV2
 from .analyse_los.tool_analyse_los import AnalyseLosAlgorithm
 from .horizons.tool_extract_horizons import ExtractHorizonsAlgorithm
 from .horizons.tool_extract_horizon_lines import ExtractHorizonLinesAlgorithm
-from .tools.tool_replace_raster_values import ReplaceRasterValuesAlgorithm
+from .tools.tool_replace_raster_values_by_constant import ReplaceRasterValuesByConstantValueAlgorithm
+from .tools.tool_replace_raster_values_by_field import ReplaceRasterValuesByFieldValuesAlgorithm
 from .to_table.tool_export_los import ExportLoSAlgorithm
 from .to_table.tool_export_horizon_lines import ExportHorizonLinesAlgorithm
 from .analyse_los.tool_extract_points_los import ExtractPointsLoSAlgorithm
@@ -46,7 +47,8 @@ class los_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(AnalyseLosAlgorithm())
         self.addAlgorithm(ExtractHorizonsAlgorithm())
         self.addAlgorithm(ExtractHorizonLinesAlgorithm())
-        self.addAlgorithm(ReplaceRasterValuesAlgorithm())
+        self.addAlgorithm(ReplaceRasterValuesByConstantValueAlgorithm())
+        self.addAlgorithm(ReplaceRasterValuesByFieldValuesAlgorithm())
         self.addAlgorithm(ExportLoSAlgorithm())
         self.addAlgorithm(ExportHorizonLinesAlgorithm())
         self.addAlgorithm(ExtractPointsLoSAlgorithm())
