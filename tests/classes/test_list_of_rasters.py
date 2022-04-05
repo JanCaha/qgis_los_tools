@@ -103,4 +103,4 @@ class ListOfRastersTest(QgsProcessingAlgorithmTestCase):
             [self.raster_small, self.raster_small, self.raster_large, self.raster_large])
 
         self.assertFalse(status)
-        self.assertRegex(msg, "Raster sizes must be unique to form complete ordering")
+        self.assertRegex(msg, "Raster cell sizes must be unique to form complete ordering")
