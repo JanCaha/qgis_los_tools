@@ -75,7 +75,7 @@ class ListOfRasters:
 
         if len(rasters) != len(set(values)):
 
-            return False, f"Raster sizes must be unique to form complete ordering. The values [{','.join([str(x) for x in values])}] are not unique."
+            return False, f"Raster cell sizes must be unique to form complete ordering. Rasters are order strictly by cell size, same cell size for multiple rasters does not allow strict ordering. The values [{','.join([str(x) for x in values])}] are not unique."
 
         return True, ""
 
