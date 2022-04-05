@@ -32,7 +32,7 @@ class ReplaceRasterValuesByFieldValuesAlgorithm(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterField(self.VALUE_FIELD,
-                                        "Field specifying the addition",
+                                        "Field specifying the replacement values",
                                         parentLayerParameterName=self.VECTOR_LAYER,
                                         type=QgsProcessingParameterField.Numeric,
                                         optional=False))

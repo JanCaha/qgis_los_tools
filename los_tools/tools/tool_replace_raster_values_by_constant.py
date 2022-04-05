@@ -31,9 +31,7 @@ class ReplaceRasterValuesByConstantValueAlgorithm(QgsProcessingAlgorithm):
                                                 [QgsProcessing.TypeVectorPolygon]))
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.RASTER_VALUE,
-                                         "Raster value for polygon",
-                                         defaultValue=1))
+            QgsProcessingParameterNumber(self.RASTER_VALUE, "Replacement value", defaultValue=1))
 
         self.addParameter(
             QgsProcessingParameterRasterDestination(self.OUTPUT_RASTER, "Output Raster"))
