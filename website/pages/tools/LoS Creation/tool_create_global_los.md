@@ -1,4 +1,4 @@
-# Create global LoS
+# Create Global LoS
 
 Create line-of-sight from each point from observers layer through each point in targets layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.
 
@@ -27,8 +27,8 @@ Create line-of-sight from each point from observers layer through each point in 
 * __los_type__ - string - for this tool the values is always `global`
 * __id_observer__ - integer - value from field specified in `Observer ID field`
 * __id_target__ - integer - value from field specified in `Target ID field`
-* __observer_offset__ - double - double - value from the field specified in `Observer offset field`
-* __target_offset__ - double - double - value from the field specified in `Target offset field`
+* __observer_offset__ - double - value from the field specified in `Observer offset field`
+* __target_offset__ - double - value from the field specified in `Target offset field`
 * __target_x__ - double - X coordinate of point in `Targets point layer`, used later in analyses
 * __target_y__ - double - Y coordinate of point in `Targets point layer`, used later in analyses
 

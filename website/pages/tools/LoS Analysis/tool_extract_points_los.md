@@ -10,7 +10,7 @@ Extract individual points from lines-of-sight. It is possible to extract only vi
 | Use curvature corrections?    | `CurvatureCorrections`  | [boolean]<br/><br/>Default: `True`        | Should the curvature and refraction corrections be used?                     |
 | Refraction coefficient value  | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of refraction coefficient.                                             |
 | Export only visible points    | `OnlyVisiblePoints`     | [boolean]<br/><br/>Default: `False`       | Export only visible points on LoS or export all points on LoS (not checked). |
-| Calculate extended attributes | `ExtendedAttributes`    | [boolean]<br/><br/>Default: `False`       | Calculate extended attributes for points (not checked).                      |
+| Calculate extended attributes | `ExtendedAttributes`    | [boolean]<br/><br/>Default: `False`       | Calculate extended attributes of visibility for points (not checked).        |
 | Output layer                  | `OutputLayer`           | [vector: point]                           | Output layer containing points.                                              |
 
 ## Outputs

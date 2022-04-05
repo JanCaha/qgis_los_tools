@@ -1,6 +1,6 @@
 # Extract Horizons
 
-Tool that extracts horizons from LoS. 
+Tool that extracts horizons as points from LoS. 
 
 Some combinations of LoS type and horizon to extract might not make a sense. E.g. extracting global horizon from local LoS raises an error.
 
@@ -13,13 +13,13 @@ Some combinations of LoS type and horizon to extract might not make a sense. E.g
 | Output layer                 | `OutputLayer`           | [vector: point]                             | Output layer of horizon points.                                                                   |
 | Use curvature corrections?   | `CurvatureCorrections`  | [boolean]<br/><br/>Default: `True`          | Should the curvature and refraction corrections be used?                                          |
 | Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13`   | Value of refraction coefficient.                                                                  |
-
+| Output layer                 | `OutputLayer`           | [vector: point]                             | Output point layer of horizon points.                                                             |
 
 ## Outputs
 
-| Label        | Name          | Type            | Description                     |
-| ------------ | ------------- | --------------- | ------------------------------- |
-| Output layer | `OutputLayer` | [vector: point] | Output layer of horizon points. |
+| Label        | Name          | Type            | Description                           |
+| ------------ | ------------- | --------------- | ------------------------------------- |
+| Output layer | `OutputLayer` | [vector: point] | Output point layer of horizon points. |
 
 ### Fields in the output layer
 

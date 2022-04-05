@@ -5,7 +5,7 @@
 	"IdField": "Field value to assign to `id_original_point` for new layer.",
 	"AngleStart": "Angle (azimuth) at which the generation of points should start.",
 	"AngleEnd": "Angle (azimuth) at which the generation of points should end.",
-	"AngleStep": "Step size between `Minimal angle` and `Maximal angle`.",
+	"AngleStep": "Determines density of point placement between `Minimal angle` and `Maximal angle`. Angular distance of points. Number of points will be (`Maximal angle` - `Minimal angle`) / `AngleStep`.",
 	"Distance": "How far from the original point the new points should be created.",
 	"OutputLayer": "Output layer containing LoS with new attributes."
 }

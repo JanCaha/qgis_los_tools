@@ -6,7 +6,7 @@
 	"AngleStart": "Angle (azimuth) at which the generation of points should start.",
 	"AngleEnd": "Angle (azimuth) at which the generation of points should end.",
 	"OverNorth": "Specify if the number goes trough North (azimuth 0), as there are two ways to connect azimuths 90 - 270, one through south (over azimuth 180) and second through north (azimuth 0 or 360).",
-	"AngleStep": "Step size between `Minimal angle` and `Maximal angle`.",
+	"AngleStep": "Determines density of point placement between `Minimal angle` and `Maximal angle`. Angular distance of points. Number of points will be (`Maximal angle` - `Minimal angle`) / `AngleStep`.",
 	"Distance": "How far from the original point the new points should be created.",
 	"OutputLayer": "Output layer containing LoS with new attributes."
 }

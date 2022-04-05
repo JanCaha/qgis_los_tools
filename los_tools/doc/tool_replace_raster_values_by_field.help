@@ -1,5 +1,5 @@
 {
-	"ALG_DESC": "Tool to replace raster values in polygons with either constant value (specified by `RasterValue`) or by field value (defined by `ValueField`). ",
+	"ALG_DESC": "Tool to replace raster values in polygons by field value (defined by `ValueField`). ",
 	"ALG_CREATOR": "Jan Caha", 
 	"RasterLayer": "Raster layer to use as base.", 
 	"VectorLayer": "Vector layer that specifies areas of raster to replace the values.", 

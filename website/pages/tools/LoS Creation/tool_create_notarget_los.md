@@ -1,4 +1,4 @@
-# Create no target LoS
+# Create No Target LoS
 
 Create line-of-sight between each point from observers layer and targets layer, where `Observer ID field` value from observer is equal to `Target and Observer agreement ID field` of target. This ensures that each point from targets layer is linked to one point from observers layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.
 
@@ -30,8 +30,8 @@ The target points can be and usually should be created by tools [Create points a
 * __los_type__ - string - for this tool the values is always `without target`
 * __id_observer__ - integer - value from field specified in `Observer ID field`
 * __id_target__ - integer - value from field specified in `Target ID field`
-* __observer_offset__ - double - double - value from the field specified in `Observer offset field`
-* __azimuth__ - double - double - value from the field specified in `Target offset field`
+* __observer_offset__ - double - value from the field specified in `Observer offset field`
+* __azimuth__ - double - value from the field specified in `Target offset field`
 * __target_x__ - double - X coordinate of point in `Targets point layer`, used later in analyses
 * __target_y__ - double - Y coordinate of point in `Targets point layer`, used later in analyses
 * __angle_step_between_los__ - double - difference between LoS from one viewpoint as angle (degrees)

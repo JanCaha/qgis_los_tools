@@ -2,7 +2,7 @@
 
 The tool calculates distances at which objects of specified size (specified in the table) have given horizontal angular size.
 
-I.e. at which distances have objects of size 1, 5 and 10 meters angular size of 0.1 degree.
+I.e. at which distances will object of size 1, 5 and 10 meters be detected when the angular size of 0.1 degree is set?
 
 To be usable in other plugin tools, there is a necessary parameter to be set maximal distance. It special row into the output table so that it can be later correctly processed.
 	

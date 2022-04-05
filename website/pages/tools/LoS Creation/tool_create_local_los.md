@@ -1,4 +1,4 @@
-# Create local LoS
+# Create Local LoS
 
 Create line-of-sight between each point from observers layer and targets layer. Each line-of-sight starts at observer and ends at target.
 

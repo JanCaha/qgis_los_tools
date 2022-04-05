@@ -1,6 +1,6 @@
-# Create no target LoS V2
+# Create No Target LoS V2
 
-Create line-of-sight between each point from observers layer and targets layer, where `Observer ID field` value from observer is equal to `Target and Observer agreement ID field` of target. This ensures that each point from targets layer is linked to one point from observers layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.
+Create line-of-sight between each point from observer’s layer and targets layer, where `Observer ID field` value from observer is equal to `Target and Observer agreement ID field` of target. This ensures that each point from target’s layer is linked to one point from observers layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.
 
 The target points can be and usually should be created by tools [Create points around](../Points Creation/tool_points_around.md) and [Create points in direction](../Points Creation/tool_points_in_direction.md).
 
@@ -33,8 +33,8 @@ This variant of the tool specifies sampling and length of LoS by table `Sampling
 * __los_type__ - string - for this tool the values is always `without target`
 * __id_observer__ - integer - value from field specified in `Observer ID field`
 * __id_target__ - integer - value from field specified in `Target ID field`
-* __observer_offset__ - double - double - value from the field specified in `Observer offset field`
-* __azimuth__ - double - double - value from the field specified in `Target offset field`
+* __observer_offset__ - double - value from the field specified in `Observer offset field`
+* __azimuth__ - double - value from the field specified in `Target offset field`
 * __target_x__ - double - X coordinate of point in `Targets point layer`, used later in analyses
 * __target_y__ - double - Y coordinate of point in `Targets point layer`, used later in analyses
 * __angle_step_between_los__ - double - difference between LoS from one viewpoint as angle (degrees)

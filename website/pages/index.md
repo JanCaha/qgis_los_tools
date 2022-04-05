@@ -26,8 +26,15 @@ Global horizon is a horizon that is highest on LoS and if the surface raster ext
 Local horizon is any horizon on LoS that is not global. There may be any number of local horizons on LoS. Amogst these local horizons the highest local horizon can be useful for some analyses. The maximal local horizon is the highest horizon that is not global.
 
 ### DEM use in the plugin
+Most tools in the plugin allow you to use more than one DEM raster. The rasters are ordered from smallest cell size to the biggest. The cell size of each raster must be unique to form complete ordering of rasters. Elevation is always obtained from raster with smallest cell size that has valid elevation value (no data is not considered as valid value). This allows utilization of DEM with large cells as addition to DEM with smaller cells. For example DEM with cell size 1 meter can be used within city for areas close to observers and SRTM data (30 meter cell size) in areas around the city, far from the observer.
 
-Most tools in the plugin allow you to use more then one DEM raster. The rasters are ordered from smallest cell size to the biggest. Elevation is always obtained from raster with smallest cell size that has valid elevation value (no data is not considered as valid value). This allows utilization of DEM with large cells as addition to DEM with smaller cells. For example DEM with cell size 1 meter can be used within city for areas close to observers and SRTM data (30 meter cell size) in areas around the city, far from the observer.
+### LoS Sampling strategy
+
+For tools [Create Global LoS](./tools/LoS%20Creation/tool_create_global_los.md), [Create Local LoS](./tools/LoS%20Creation/tool_create_local_los.md), [Create No Target LoS](./tools/LoS%20Creation/tool_create_notarget_los.md) the LoS is determined by **sampling distance**, which determines how often a point is placed on the LoS, and optionally by **maximal LoS length**. 
+
+[# Create No Target LoS V2](./tools/LoS%20Creation/tool_create_notarget_los_v2.md) parametrizes LoS by so called **Sampling distance - distance table**. This approach is significantly more flexible, as it allows the sampling distance to change based on distance from the observer. The table is output of tools Calculate Object Distances[](tools/Calculate%20Parameters%20Settings/tool_distances_for_sizes.md) and [Calculate Object Sizes](tools/Calculate%20Parameters%20Settings/tool_sizes_at_distances.md). Each row specifies distance from which specific sampling size should be used. For example row with column values of __Distance (meters)__ 1000 and __Size of object (meters)__ 1.754 specifies that sampling distance of 1.754 meters should be used on LoS when the length exceeds 1000 meters. Maximal length of LoS is given by maximal value of __Distance (meters)__. 
+
+There can be two special rows in the table with values of __Distance (meters)__ 0 and -1. Row with value 0 specifies sampling distance for distance smaller than smallest provided distance (default value is 1). Row with value -1 means that there is no maximal LoS length and that the limit is provided by raster data extent.
 
 ## Citation
 

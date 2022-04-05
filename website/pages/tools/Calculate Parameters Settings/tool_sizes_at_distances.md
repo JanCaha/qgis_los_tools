@@ -4,8 +4,9 @@ The tool calculates sizes of objects at specific distances (specified in the tab
 
 I.e. what sizes of objects have given horizontal angular size at distances specified in the table.
 
-To be usable in other plugin tools, there are two necessary parameter to be set: default sampling size, used before first distance from the table is used, and maximal distance. Both adds special row into the output table so that it can be later correctly processed.
+To be usable in other plugin tools, there are two necessary parameters to be set: default sampling size, used before first distance from the table is used, and maximal distance. Both add a special row into the output table so that it can be later correctly processed.
 	
+`Default sampling size` parameter specifies default size of object used for values of distance smaller than smallest value in `Distance`. This is necessary for further processing of output table. For example, for angular size of 0.1 degree and distance 1000 meters the size is 1.745 meter. For LoS sampling we know that to detect object of angular size 0.1 at 1 km the sampling distance can be 1.745 meter. However, sampling distance for values in distance range 0 - 1000 meter need to be specified. This is done by this parameter. 
 
 ## Parameters
 
@@ -13,7 +14,7 @@ To be usable in other plugin tools, there are two necessary parameter to be set:
 | ----------------------------------------------------------------------------- | ------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Angle size of object (in degrees)                                             | `Angle`                   | [number]<br/><br/> Default: <br/> `0.1` | Horizontal angular size that the objects should have (in degrees).                                                                                                                                  |
 | Distances to calculate object size (in meters)                                | `Distance`                | [matrix]                                | Distances of the objects in meters (table).                                                                                                                                                         |
-| Default sampling size (in meters)                                             | `DefaultSamplingDistance` | [number]<br/><br/> Default: <br/> `1.0` | Sampling distance to used, in tools that work with this table, for values smaller then smallest distance.                                                                                           |
+| Default sampling size (in meters)                                             | `DefaultSamplingDistance` | [number]<br/><br/> Default: <br/> `1.0` | Sampling distance to used, in tools that work with this table, for values smaller than smallest distance.                                                                                           |
 | Add maximal distance value (with sampling equal to maximal sampling distance) | `MaximalDistance`         | [boolean]<br/><br/>Default: `True`      | Add special row to the output used in other tools. The row has size of the object equal to maximum size in the input table and distance -1. This is used to indicate maximal possible legth of LoS. |
 | Output table                                                                  | `OutputTable`             | [table]                                 | Output table containing information about angle size, size of objects and relevant distances (without geometry).                                                                                    |
 

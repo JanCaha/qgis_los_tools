@@ -6,7 +6,7 @@ Tool to replace raster values in polygons with field value (defined by `ValueFie
 
 | Label                         | Name           | Type                  | Description                                                                       |
 | ----------------------------- | -------------- | --------------------- | --------------------------------------------------------------------------------- |
-| Raster Layer                  | `RasterLayer`  | [vector: line]        | Raster layer to use as base.                                                      |
+| Raster Layer                  | `RasterLayer`  | [raster]              | Raster layer to use as base.                                                      |
 | Vector Layer                  | `VectorLayer`  | [vector: polygon]     | Vector layer that specifies areas of raster to replace the values.                |
 | Field specifying the addition | `ValueField`   | [tablefield: numeric] | Field from vector layer that defines values that should be used in output raster. |
 | Output Raster                 | `OutputRaster` | [raster]              | Output raster with new values.                                                    |
