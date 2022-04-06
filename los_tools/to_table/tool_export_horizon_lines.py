@@ -109,7 +109,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         return "Export Horizon Lines Layer"
 
     def group(self):
-        return "Export to table"
+        return "Export to Table"
 
     def groupId(self):
         return "to_table"

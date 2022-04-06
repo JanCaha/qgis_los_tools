@@ -181,7 +181,7 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
         return "Export LoS Layer"
 
     def group(self):
-        return "Export to table"
+        return "Export to Table"
 
     def groupId(self):
         return "to_table"
