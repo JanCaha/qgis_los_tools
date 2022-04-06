@@ -1,4 +1,4 @@
-# Optimize point location
+# Optimize Point Location
 
 Optimizes point location for visibility analyses using optimization raster. The values of `InputRaster` serve as optimization criterion with higher values marking better options. The result is the copy of `InputLayer` with points location changed.
 

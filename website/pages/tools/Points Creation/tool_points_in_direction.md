@@ -1,4 +1,4 @@
-# Create points in direction
+# Create Points in Direction
 
 Create points set of points at given distance from points from input layer that span given angle offset from main direction layer.
 

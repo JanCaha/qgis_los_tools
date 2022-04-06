@@ -1,4 +1,4 @@
-# Create points around
+# Create Points Around
 
 Create points at given distance from points from input layer that span from minimal to maximal angle with specified angle step.
 
