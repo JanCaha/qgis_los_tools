@@ -1,5 +1,5 @@
 {
-	"ALG_DESC": "Create points set of points at given distance from points from input layer that span given angle offset from main direction layer.",
+	"ALG_DESC": "Create set of points at given distance from points from input layer that span given angle offset from main direction layer.",
 	"ALG_CREATOR": "Jan Caha", 
 	"InputLayer": "Point layer around which the new points will be created.", 
 	"DirectionLayer": "Point layer (containing only one point) that specifies main direction.", 

@@ -1,6 +1,6 @@
 # Create Points in Direction
 
-Create points set of points at given distance from points from input layer that span given angle offset from main direction layer.
+Create set of points at given distance from points from input layer that span given angle offset from main direction layer.
 
 The default value produces range of values [-20;20] by one angle from azimuth of point in main direction layer.
 
