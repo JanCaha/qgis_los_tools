@@ -77,7 +77,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         xres = raster_extent.width() / raster.dataProvider().xSize()
         yres = raster_extent.height() / raster.dataProvider().ySize()
 
-        if qgsDoubleNearSig(xres, yres, significantDigits=3):
+        if not qgsDoubleNearSig(xres, yres, significantDigits=3):
             msg = "Raster must have equal resolution in both directions."
 
             return False, msg
