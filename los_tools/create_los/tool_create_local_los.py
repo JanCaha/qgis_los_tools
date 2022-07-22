@@ -112,6 +112,11 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         if not correct:
             return correct, msg
 
+        correct, msg = ListOfRasters.validate_square_cell_size(rasters)
+
+        if not correct:
+            return correct, msg
+
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
