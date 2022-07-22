@@ -98,9 +98,7 @@ class los_toolsPlugin():
         return action
 
     def run_tool_set_camera(self):
-
         if self.camera_tool is None:
-
             self.camera_tool = SetCameraTool(parent=self.iface.mainWindow(),
                                              canvas=self.iface.mapCanvas(),
                                              iface=self.iface)
