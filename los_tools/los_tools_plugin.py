@@ -10,6 +10,7 @@ from qgis.PyQt.QtWidgets import (QAction)
 
 from .los_tools_provider import los_toolsProvider
 from .gui.dialog_tool_set_camera import SetCameraTool
+from .gui.dialog_los_settings import LoSSettings
 from .constants.plugin import PluginConstants
 from .utils import get_icon_path
 
@@ -43,6 +44,12 @@ class los_toolsPlugin():
         self.add_action(icon_path=get_icon_path("camera.svg"),
                         text="Set Camera",
                         callback=self.run_tool_set_camera,
+                        add_to_toolbar=False,
+                        add_to_specific_toolbar=self.toolbar)
+
+        self.add_action(icon_path=get_icon_path("los_tools_icon.svg"),
+                        text="Calculate Notarget Los Settings",
+                        callback=self.run_tool_los_settings,
                         add_to_toolbar=False,
                         add_to_specific_toolbar=self.toolbar)
 
@@ -105,3 +112,7 @@ class los_toolsPlugin():
             self.camera_tool.update_camera_position()
         else:
             self.camera_tool.restore_canvas_tools()
+
+    def run_tool_los_settings(self):
+        tool = LoSSettings(self.iface.mainWindow())
+        tool.exec1()
