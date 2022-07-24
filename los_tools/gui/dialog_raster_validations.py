@@ -29,7 +29,7 @@ class RasterValidations(QDialog):
 
     def init_gui(self):
 
-        self.setWindowTitle("Raster Validation")
+        self.setWindowTitle("Rasters Validation and Sampling")
 
         layout = QFormLayout(self)
         self.setLayout(layout)
@@ -39,9 +39,11 @@ class RasterValidations(QDialog):
         self._rasters_view = QTreeWidget(self)
         self._rasters_view.setColumnCount(1)
         self._rasters_view.setHeaderLabels(["Rasters", "Cell size"])
+        self._rasters_view.setMaximumHeight(150)
         layout.addRow(self._rasters_view)
 
         self.text = QTextBrowser(self)
+        self.text.setMaximumHeight(75)
 
         layout.addRow(self.text)
 
@@ -67,7 +69,8 @@ class RasterValidations(QDialog):
         group_box.setLayout(group_layout)
 
         group_layout.addRow(self.select_point)
-        group_layout.addRow("Selected point", self.point_coordinate)
+        group_layout.addRow(QLabel("Selected point"))
+        group_layout.addRow(self.point_coordinate)
         group_layout.addRow("Value sampled from", self.sampled_from_raster)
         group_layout.addRow("Sampled value", self.sampled_value)
 
