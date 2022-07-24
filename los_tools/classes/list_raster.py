@@ -145,6 +145,9 @@ class ListOfRasters:
     def _convert_point_to_crs_of_raster(self, point: QgsPointXY,
                                         crs: QgsCoordinateReferenceSystem) -> QgsPoint:
 
+        if crs.toWkt() == self.rasters[0].crs().toWkt():
+            return QgsPoint(point.x(), point.y())
+
         transformer = QgsCoordinateTransform(crs, self.rasters[0].crs(),
                                              QgsCoordinateTransformContext())
         geom = QgsGeometry.fromPointXY(point)
