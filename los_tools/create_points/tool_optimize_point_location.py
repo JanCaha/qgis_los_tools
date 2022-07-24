@@ -5,7 +5,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingParameterFeatureSink, QgsRasterDataProvider, QgsRasterLayer,
                        QgsRectangle, QgsRasterBlock, QgsPoint, QgsFeature, QgsPointXY,
                        QgsProcessingFeatureSource, QgsProcessingUtils, QgsProcessingException,
-                       qgsDoubleNearSig)
+                       qgsFloatNear)
 
 from los_tools.tools.util_functions import get_doc_file
 
@@ -77,7 +77,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         xres = raster_extent.width() / raster.dataProvider().xSize()
         yres = raster_extent.height() / raster.dataProvider().ySize()
 
-        if not qgsDoubleNearSig(xres, yres, significantDigits=3):
+        if not qgsFloatNear(xres, yres, epsilon=0.001):
             msg = "Raster must have equal resolution in both directions."
 
             return False, msg

@@ -88,10 +88,10 @@ class ListOfRasters:
             xres = raster.extent().width() / raster.width()
             yres = raster.extent().height() / raster.height()
 
-            if not qgsDoubleNearSig(xres, yres, significantDigits=3):
+            if not qgsFloatNear(xres, yres, epsilon=0.001):
 
                 return False, "Rasters have to have square cells. "\
-                    f"Right now they are not squared for `{raster.name()}`."
+                    f"Right now they are not squared for `{raster.name()}` {xres} != {yres} ."
 
         return True, ""
 
