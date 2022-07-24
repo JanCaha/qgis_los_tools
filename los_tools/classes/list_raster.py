@@ -2,8 +2,9 @@ from typing import List, Tuple, Optional
 import math
 
 from qgis.core import (QgsMapLayer, QgsRasterLayer, QgsCoordinateReferenceSystem,
-                       QgsRasterDataProvider, QgsRectangle, QgsPoint, QgsLineString,
-                       qgsDoubleNearSig)
+                       QgsRasterDataProvider, QgsRectangle, QgsPoint, QgsLineString, qgsFloatNear,
+                       QgsPointXY, QgsCoordinateTransform, QgsCoordinateTransformContext,
+                       QgsGeometry)
 
 from los_tools.tools.util_functions import bilinear_interpolated_value
 
@@ -20,7 +21,7 @@ class ListOfRasters:
             if not first_crs == raster.crs():
                 raise ValueError("All CRS must be equal.")
 
-        self.rasters = rasters
+        self.rasters: List[QgsRasterLayer] = rasters
 
         self.order_by_pixel_size()
 
@@ -41,7 +42,10 @@ class ListOfRasters:
 
     @staticmethod
     def validate_crs(rasters: List[QgsMapLayer],
-                     crs: QgsCoordinateReferenceSystem) -> Tuple[bool, str]:
+                     crs: QgsCoordinateReferenceSystem = None) -> Tuple[bool, str]:
+
+        if crs is None:
+            crs = rasters[0].crs()
 
         first_raster_crs = rasters[0].crs()
 
@@ -136,6 +140,30 @@ class ListOfRasters:
             if value is not None:
                 return value
 
+        return None
+
+    def _convert_point_to_crs_of_raster(self, point: QgsPointXY,
+                                        crs: QgsCoordinateReferenceSystem) -> QgsPoint:
+
+        transformer = QgsCoordinateTransform(crs, self.rasters[0].crs(),
+                                             QgsCoordinateTransformContext())
+        geom = QgsGeometry.fromPointXY(point)
+        geom.transform(transformer)
+        transformed_point = geom.asPoint()
+        return QgsPoint(transformed_point.x(), transformed_point.y())
+
+    def extract_interpolated_value_at_point(self, point: QgsPointXY,
+                                            crs: QgsCoordinateReferenceSystem) -> float:
+        return self.extract_interpolated_value(self._convert_point_to_crs_of_raster(point, crs))
+
+    def sampling_from_raster_at_point(self, point: QgsPointXY,
+                                      crs: QgsCoordinateReferenceSystem) -> str:
+
+        point = self._convert_point_to_crs_of_raster(point, crs)
+        for i, raster_dp in enumerate(self.rasters_dp):
+            value = bilinear_interpolated_value(raster_dp, point)
+            if value is not None:
+                return self.rasters[i].name()
         return None
 
     def add_z_values(self, points: List[QgsPoint]) -> QgsLineString:
