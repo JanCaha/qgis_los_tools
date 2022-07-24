@@ -11,6 +11,7 @@ from qgis.PyQt.QtWidgets import (QAction)
 from .los_tools_provider import los_toolsProvider
 from .gui.dialog_tool_set_camera import SetCameraTool
 from .gui.dialog_los_settings import LoSSettings
+from .gui.dialog_raster_validations import RasterValidations
 from .constants.plugin import PluginConstants
 from .utils import get_icon_path
 
@@ -35,6 +36,8 @@ class los_toolsPlugin():
         self.toolbar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
         self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
 
+        self.rasterValidationsTool = RasterValidations(iface=self.iface)
+
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
 
@@ -50,6 +53,12 @@ class los_toolsPlugin():
         self.add_action(icon_path=get_icon_path("los_tools_icon.svg"),
                         text="Calculate Notarget Los Settings",
                         callback=self.run_tool_los_settings,
+                        add_to_toolbar=False,
+                        add_to_specific_toolbar=self.toolbar)
+
+        self.add_action(icon_path=None,
+                        text="Raster Validatations",
+                        callback=self.run_raster_validations,
                         add_to_toolbar=False,
                         add_to_specific_toolbar=self.toolbar)
 
@@ -113,4 +122,7 @@ class los_toolsPlugin():
 
     def run_tool_los_settings(self):
         tool = LoSSettings(self.iface.mainWindow())
-        tool.exec1()
+        tool.exec()
+
+    def run_raster_validations(self):
+        self.rasterValidationsTool.exec()
