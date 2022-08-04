@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from qgis.core import (QgsProject, QgsRasterLayer, QgsPointXY)
 from qgis.PyQt.QtWidgets import (QDialog, QPushButton, QFormLayout, QTreeWidget, QLabel,
@@ -24,6 +24,7 @@ class RasterValidations(QDialog):
         self.map_tool.canvasClicked.connect(self.update_test_point)
 
         self.rasters: List[QgsRasterLayer] = []
+        self.rasters_selected: Dict[str, bool] = {}
 
         self.init_gui()
 
@@ -49,6 +50,7 @@ class RasterValidations(QDialog):
 
         self._rasters_view.itemChanged.connect(self.validate)
         self._rasters_view.itemChanged.connect(self.test_interpolated_value_at_point)
+        self._rasters_view.itemChanged.connect(self.update_selected_rasters)
 
         self.select_point = QPushButton()
         self.select_point.setText("Choose sample point on the map")
@@ -82,7 +84,13 @@ class RasterValidations(QDialog):
             item = QTreeWidgetItem()
             item.setText(0, raster.name())
             item.setData(0, Qt.UserRole, raster)
-            item.setCheckState(0, Qt.CheckState.Unchecked)
+            if self.rasters_selected.get(raster.id()) is not None:
+                if self.rasters_selected.get(raster.id()):
+                    item.setCheckState(0, Qt.CheckState.Checked)
+                else:
+                    item.setCheckState(0, Qt.CheckState.Unchecked)
+            else:
+                item.setCheckState(0, Qt.CheckState.Unchecked)
 
             item.setText(
                 1, "{} - {}".format(round(raster.extent().width() / raster.width(), 3),
@@ -91,20 +99,26 @@ class RasterValidations(QDialog):
 
             self._rasters_view.addTopLevelItem(item)
 
+    def _raster_layers(self) -> List[QgsRasterLayer]:
+        project = QgsProject.instance()
+        rasters_tmp = []
+        for layerId in self._raster_layers_ids():
+            layer = project.mapLayer(layerId)
+            if isinstance(layer, QgsRasterLayer):
+                rasters_tmp.append(layer)
+
+        return rasters_tmp
+
+    def _raster_layers_ids(self) -> List[str]:
+        project = QgsProject.instance()
+        layers = [x for x in project.mapLayers(True)]
+        return layers
+
     def _data_reset(self) -> None:
         self._prev_map_tool = self._canvas.mapTool()
         self._prev_cursor = self._canvas.cursor()
 
-        project = QgsProject.instance()
-
-        layers = [x for x in project.mapLayers(True)]
-
-        rasters_tmp = []
-
-        for layerId in layers:
-            layer = project.mapLayer(layerId)
-            if isinstance(layer, QgsRasterLayer):
-                rasters_tmp.append(layer)
+        rasters_tmp = self._raster_layers()
 
         if self.rasters != rasters_tmp:
             self.rasters = rasters_tmp
@@ -134,6 +148,10 @@ class RasterValidations(QDialog):
     def restore_canvas_tools(self) -> None:
         self._canvas.setMapTool(self._prev_map_tool)
         self._canvas.setCursor(self._prev_cursor)
+
+    def update_selected_rasters(self, item: QTreeWidgetItem, column: int) -> None:
+        raster: QgsRasterLayer = item.data(0, Qt.UserRole)
+        self.rasters_selected[raster.id()] = item.checkState(0) == Qt.CheckState.Checked
 
     def test_interpolated_value_at_point(self):
 
