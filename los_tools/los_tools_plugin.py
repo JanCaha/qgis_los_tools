@@ -6,7 +6,7 @@ from qgis.core import QgsApplication
 from qgis.gui import QgisInterface
 
 from qgis.PyQt.QtGui import (QIcon)
-from qgis.PyQt.QtWidgets import (QAction)
+from qgis.PyQt.QtWidgets import (QAction, QPushButton, QToolBar)
 
 from .los_tools_provider import los_toolsProvider
 from .gui.dialog_tool_set_camera import SetCameraTool
@@ -14,6 +14,7 @@ from .gui.dialog_los_settings import LoSSettings
 from .gui.dialog_raster_validations import RasterValidations
 from .constants.plugin import PluginConstants
 from .utils import get_icon_path
+from .gui.los_without_target import LosNoTargetMapTool
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
@@ -25,6 +26,8 @@ class los_toolsPlugin():
 
     camera_tool: SetCameraTool = None
 
+    los_notarget_action_name = "Visualize LoS No Target Tool"
+
     def __init__(self, iface):
 
         self.iface: QgisInterface = iface
@@ -33,10 +36,13 @@ class los_toolsPlugin():
         self.actions = []
         self.menu = PluginConstants.plugin_name
 
-        self.toolbar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
+        self.toolbar: QToolBar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
         self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
 
-        self.rasterValidationsTool = RasterValidations(iface=self.iface)
+        self.raster_validations_dialog = RasterValidations(iface=self.iface)
+        self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
+        self.los_notarget_tool = LosNoTargetMapTool(self.iface)
+        self.los_notarget_tool.deactivated.connect(self.deactivateTool)
 
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
@@ -52,15 +58,22 @@ class los_toolsPlugin():
 
         self.add_action(icon_path=get_icon_path("los_tools_icon.svg"),
                         text="Calculate Notarget Los Settings",
-                        callback=self.run_tool_los_settings,
+                        callback=self.open_dialog_los_settings,
                         add_to_toolbar=False,
                         add_to_specific_toolbar=self.toolbar)
 
-        self.add_action(icon_path=None,
+        self.add_action(icon_path=get_icon_path("rasters_list.svg"),
                         text="Raster Validatations",
-                        callback=self.run_raster_validations,
+                        callback=self.open_dialog_raster_validations,
                         add_to_toolbar=False,
                         add_to_specific_toolbar=self.toolbar)
+
+        self.add_action(icon_path=get_icon_path("los_no_target_tool.svg"),
+                        text=self.los_notarget_action_name,
+                        callback=self.run_visualize_los_notarget_tool,
+                        add_to_toolbar=False,
+                        add_to_specific_toolbar=self.toolbar,
+                        checkable=True)
 
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
@@ -79,12 +92,15 @@ class los_toolsPlugin():
                    status_tip=None,
                    whats_this=None,
                    parent=None,
-                   add_to_specific_toolbar=None):
+                   add_to_specific_toolbar: QToolBar = None,
+                   checkable: bool = False):
 
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
+        if checkable:
+            action.setCheckable(True)
 
         if status_tip is not None:
             action.setStatusTip(status_tip)
@@ -120,9 +136,21 @@ class los_toolsPlugin():
         else:
             self.camera_tool.restore_canvas_tools()
 
-    def run_tool_los_settings(self):
-        tool = LoSSettings(self.iface.mainWindow())
-        tool.exec()
+    def open_dialog_los_settings(self):
+        self.los_settings_dialog.exec()
 
-    def run_raster_validations(self):
-        self.rasterValidationsTool.exec()
+    def open_dialog_raster_validations(self):
+        self.raster_validations_dialog.exec()
+
+    def run_visualize_los_notarget_tool(self):
+        self.get_action_by_text(self.los_notarget_action_name).setChecked(True)
+        self.iface.mapCanvas().setMapTool(self.los_notarget_tool)
+
+    def get_action_by_text(self, action_text: str) -> QAction:
+        action: QAction
+        for action in self.actions:
+            if action.text() == action_text:
+                return action
+
+    def deactivateTool(self):
+        self.get_action_by_text(self.los_notarget_action_name).setChecked(False)
