@@ -1,12 +1,13 @@
 import os
 import sys
 import inspect
+from functools import partial
 
 from qgis.core import QgsApplication
 from qgis.gui import QgisInterface
 
 from qgis.PyQt.QtGui import (QIcon)
-from qgis.PyQt.QtWidgets import (QAction, QPushButton, QToolBar)
+from qgis.PyQt.QtWidgets import (QAction, QToolBar)
 
 from .los_tools_provider import los_toolsProvider
 from .gui.dialog_tool_set_camera import SetCameraTool
@@ -41,8 +42,10 @@ class los_toolsPlugin():
 
         self.raster_validations_dialog = RasterValidations(iface=self.iface)
         self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
+
         self.los_notarget_tool = LosNoTargetMapTool(self.iface)
-        self.los_notarget_tool.deactivated.connect(self.deactivateTool)
+        self.los_notarget_tool.deactivated.connect(
+            partial(self.deactivateTool, self.los_notarget_action_name))
 
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
@@ -152,5 +155,5 @@ class los_toolsPlugin():
             if action.text() == action_text:
                 return action
 
-    def deactivateTool(self):
-        self.get_action_by_text(self.los_notarget_action_name).setChecked(False)
+    def deactivateTool(self, action_name: str):
+        self.get_action_by_text(action_name).setChecked(False)
