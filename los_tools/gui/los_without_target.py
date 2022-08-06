@@ -50,6 +50,7 @@ class LosNoTargetMapTool(QgsMapToolEdit):
 
     def activate(self) -> None:
         self.show_widgets()
+        self._snapper = self._canvas.snappingUtils()
         return super(LosNoTargetMapTool, self).activate()
 
     def clean(self) -> None:
