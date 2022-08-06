@@ -153,11 +153,15 @@ class RasterValidations(QDialog):
         raster: QgsRasterLayer = item.data(0, Qt.UserRole)
         self.rasters_selected[raster.id()] = item.checkState(0) == Qt.CheckState.Checked
 
+    @property
+    def listOfRasters(self) -> ListOfRasters:
+        return ListOfRasters(self.list_of_selected_rasters)
+
     def test_interpolated_value_at_point(self):
 
         if self.list_of_selected_rasters and self._point and self._point_crs:
 
-            list_of_rasters = ListOfRasters(self.list_of_selected_rasters)
+            list_of_rasters = self.listOfRasters
             value = list_of_rasters.extract_interpolated_value_at_point(
                 self._point, self._point_crs)
             if value:
