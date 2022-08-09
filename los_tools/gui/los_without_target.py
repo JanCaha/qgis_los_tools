@@ -73,7 +73,6 @@ class LosNoTargetMapTool(QgsMapToolEdit):
             else:
                 self._point = e.mapPoint()
             self.draw_los()
-        # return super().canvasPressEvent(e)
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
         result = self._snapper.snapToMap(event.pos())
