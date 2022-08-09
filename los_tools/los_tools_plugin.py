@@ -85,6 +85,8 @@ class los_toolsPlugin():
             self.iface.removePluginMenu(PluginConstants.plugin_name, action)
             self.iface.removeToolBarIcon(action)
 
+        del self.toolbar
+
     def add_action(self,
                    icon_path,
                    text,
