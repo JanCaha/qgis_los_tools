@@ -60,11 +60,12 @@ class LosNoTargetMapTool(QgsMapToolEdit):
 
     def deactivate(self) -> None:
         self.clean()
+        self._iface.mapCanvas().unsetMapTool(self)
         super(LosNoTargetMapTool, self).deactivate()
 
     def canvasReleaseEvent(self, e: QgsMapMouseEvent) -> None:
         if e.button() == Qt.RightButton:
-            self.clean()
+            self.deactivate()
         elif e.button() == Qt.LeftButton:
             self.show_widgets()
             if self._snap_point:
