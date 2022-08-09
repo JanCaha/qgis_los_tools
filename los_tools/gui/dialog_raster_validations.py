@@ -46,6 +46,7 @@ class RasterValidations(QDialog):
         self.text = QTextBrowser(self)
         self.text.setMaximumHeight(75)
 
+        layout.addRow(QLabel("Validation messages"))
         layout.addRow(self.text)
 
         self._rasters_view.itemChanged.connect(self.validate)
@@ -58,7 +59,6 @@ class RasterValidations(QDialog):
 
         self.point_coordinate = QLineEdit()
         self.point_coordinate.setReadOnly(True)
-        self.point_coordinate.textChanged.connect(self.test_interpolated_value_at_point)
 
         self.sampled_from_raster = QLineEdit()
         self.sampled_from_raster.setReadOnly(True)
@@ -144,6 +144,7 @@ class RasterValidations(QDialog):
         self.point_coordinate.setText(text_point)
         self._point = QgsPointXY(point.x(), point.y())
         self._point_crs = canvas_crs
+        self.test_interpolated_value_at_point()
 
     def restore_canvas_tools(self) -> None:
         self._canvas.setMapTool(self._prev_map_tool)
