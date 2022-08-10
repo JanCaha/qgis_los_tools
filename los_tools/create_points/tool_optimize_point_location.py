@@ -1,11 +1,12 @@
 import math
+from typing import Optional, Union
 
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterDistance,
                        QgsProcessingParameterFeatureSink, QgsRasterDataProvider, QgsRasterLayer,
                        QgsRectangle, QgsRasterBlock, QgsPoint, QgsFeature, QgsPointXY,
                        QgsProcessingFeatureSource, QgsProcessingUtils, QgsProcessingException,
-                       qgsFloatNear)
+                       qgsFloatNear, QgsGeometry)
 
 from los_tools.tools.util_functions import get_doc_file
 
@@ -169,60 +170,17 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
             point: QgsPointXY = input_layer_feature.geometry().asPoint()
 
-            col = round((point.x() - raster_extent.xMinimum()) / cell_size)
-            row = round((raster_extent.yMaximum() - point.y()) / cell_size)
-
-            x_min = raster_extent.xMinimum() + (col - distance_cells)
-            x_max = x_min + 2 * distance_cells
-            y_max = raster_extent.yMaximum() - (row - distance_cells)
-            y_min = y_max - 2 * distance_cells
-
-            pixel_extent: QgsRectangle = QgsRectangle(x_min, y_min, x_max, y_max)
-
-            block_values: QgsRasterBlock = raster.block(1, pixel_extent, distance_cells * 2,
-                                                        distance_cells * 2)
-
-            if mask_raster is not None:
-                mask_block_values: QgsRasterBlock = mask_raster.block(
-                    1, pixel_extent, distance_cells * 2, distance_cells * 2)
-
-            max_value_x = -math.inf
-            max_value_y = -math.inf
-            max_value = -math.inf
-
-            for i in range(0, block_values.width()):
-                for j in range(0, block_values.height()):
-
-                    dist = math.sqrt(
-                        math.pow(distance_cells - i, 2) + math.pow(distance_cells - j, 2))
-
-                    value = block_values.value(i, j)
-
-                    if value != no_data_value and max_value < value and dist < distance_cells:
-
-                        if mask_raster is not None:
-                            mask_value = mask_block_values.value(i, j)
-                            if 0 < mask_value != mask_no_data_value:
-                                max_value = value
-                                max_value_x = j
-                                max_value_y = i
-                        else:
-                            max_value = value
-                            max_value_x = j
-                            max_value_y = i
-
-            if max_value != -math.inf:
-                max_value_x = max_value_x - distance_cells
-                max_value_y = max_value_y - distance_cells
-
-                max_value_x = pixel_extent.center().x() + cell_size / 2 + max_value_x * cell_size
-                max_value_y = pixel_extent.center().y() - cell_size / 2 - max_value_y * cell_size
-            else:
-                max_value_x = point.x()
-                max_value_y = point.y()
+            result_point = self.optimized_point(point=point,
+                                                raster=raster,
+                                                raster_extent=raster_extent,
+                                                cell_size=cell_size,
+                                                no_data_value=no_data_value,
+                                                distance_cells=distance_cells,
+                                                mask_raster=mask_raster,
+                                                mask_no_data_value=mask_no_data_value)
 
             f = QgsFeature(input_layer.fields())
-            f.setGeometry(QgsPoint(max_value_x, max_value_y))
+            f.setGeometry(QgsGeometry.fromPointXY(result_point))
             f.setAttributes(input_layer_feature.attributes())
             sink.addFeature(f)
 
@@ -250,3 +208,67 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
+
+    @staticmethod
+    def optimized_point(point: Union[QgsPointXY, QgsPoint],
+                        raster: QgsRasterLayer,
+                        raster_extent: QgsRectangle,
+                        cell_size: float,
+                        no_data_value: float,
+                        distance_cells: int,
+                        mask_raster: Optional[QgsRasterLayer] = None,
+                        mask_no_data_value: Optional[float] = None) -> QgsPointXY:
+
+        col = round((point.x() - raster_extent.xMinimum()) / cell_size)
+        row = round((raster_extent.yMaximum() - point.y()) / cell_size)
+
+        x_min = raster_extent.xMinimum() + (col - distance_cells)
+        x_max = x_min + 2 * distance_cells
+        y_max = raster_extent.yMaximum() - (row - distance_cells)
+        y_min = y_max - 2 * distance_cells
+
+        pixel_extent: QgsRectangle = QgsRectangle(x_min, y_min, x_max, y_max)
+
+        block_values: QgsRasterBlock = raster.block(1, pixel_extent, distance_cells * 2,
+                                                    distance_cells * 2)
+
+        if mask_raster is not None:
+            mask_block_values: QgsRasterBlock = mask_raster.block(1, pixel_extent,
+                                                                  distance_cells * 2,
+                                                                  distance_cells * 2)
+
+        max_value_x = -math.inf
+        max_value_y = -math.inf
+        max_value = -math.inf
+
+        for i in range(0, block_values.width()):
+            for j in range(0, block_values.height()):
+
+                dist = math.sqrt(math.pow(distance_cells - i, 2) + math.pow(distance_cells - j, 2))
+
+                value = block_values.value(i, j)
+
+                if value != no_data_value and max_value < value and dist < distance_cells:
+
+                    if mask_raster is not None:
+                        mask_value = mask_block_values.value(i, j)
+                        if 0 < mask_value != mask_no_data_value:
+                            max_value = value
+                            max_value_x = j
+                            max_value_y = i
+                    else:
+                        max_value = value
+                        max_value_x = j
+                        max_value_y = i
+
+        if max_value != -math.inf:
+            max_value_x = max_value_x - distance_cells
+            max_value_y = max_value_y - distance_cells
+
+            max_value_x = pixel_extent.center().x() + cell_size / 2 + max_value_x * cell_size
+            max_value_y = pixel_extent.center().y() - cell_size / 2 - max_value_y * cell_size
+        else:
+            max_value_x = point.x()
+            max_value_y = point.y()
+
+        return QgsPointXY(max_value_x, max_value_y)
