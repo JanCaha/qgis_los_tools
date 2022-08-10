@@ -62,6 +62,7 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
     def activate(self) -> None:
         self.floating_widget.show()
         self.user_input_widget.show()
+        self.messageDiscarded.emit()
         if self.currentVectorLayer() is None:
             self.messageEmitted.emit(
                 "Tool only works with vector layers. Current layer is not vector layer.",
