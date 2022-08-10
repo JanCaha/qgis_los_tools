@@ -9,6 +9,7 @@ from qgis.gui import (QgisInterface, QgsMapToolEdit, QgsUserInputWidget, QgsDoub
                       QgsFloatingWidget, QgsMapMouseEvent, QgsRubberBand, QgsSnapIndicator)
 
 from ..tools.util_functions import get_max_decimal_numbers, round_all_values
+from .utils import prepare_user_input_widget
 
 
 class LosNoTargetMapTool(QgsMapToolEdit):
@@ -30,20 +31,14 @@ class LosNoTargetMapTool(QgsMapToolEdit):
         self.floating_widget.hide()
         self.floating_widget.valuesChanged.connect(self.draw_los)
 
-        self.userInputWidget = QgsUserInputWidget(self._canvas)
-        self.userInputWidget.setObjectName('UserInputDockWidget')
-        self.userInputWidget.setAnchorWidget(self._canvas)
-        self.userInputWidget.setAnchorWidgetPoint(QgsFloatingWidget.TopRight)
-        self.userInputWidget.setAnchorPoint(QgsFloatingWidget.TopRight)
-        self.userInputWidget.addUserInputWidget(self.floating_widget)
-        self.userInputWidget.hide()
+        self.user_input_widget = prepare_user_input_widget(self._canvas, self.floating_widget)
 
     def show_widgets(self) -> None:
-        self.userInputWidget.show()
+        self.user_input_widget.show()
         self.floating_widget.show()
 
     def hide_widgets(self) -> None:
-        self.userInputWidget.hide()
+        self.user_input_widget.hide()
         self.floating_widget.hide()
 
     def activate(self) -> None:
@@ -127,6 +122,7 @@ class LoSNoTargetInputWidget(QWidget):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         layout = QFormLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
         self._min_angle = QgsDoubleSpinBox(self)
