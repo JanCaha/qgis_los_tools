@@ -158,6 +158,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
         if mask_raster is not None:
             mask_no_data_value = mask_raster.sourceNoDataValue(1)
+        else:
+            mask_no_data_value = None
 
         feature_count = input_layer.featureCount()
 
