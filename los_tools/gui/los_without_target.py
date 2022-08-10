@@ -4,10 +4,9 @@ import numpy as np
 from qgis.PyQt.QtWidgets import (QWidget, QFormLayout)
 from qgis.PyQt.QtCore import (Qt, pyqtSignal)
 from qgis.PyQt.QtGui import (QColor, QKeyEvent)
-from qgis.core import (QgsPointXY, QgsWkbTypes, QgsGeometry, QgsPoint, QgsSettings,
-                       QgsPointLocator, Qgis)
+from qgis.core import (QgsWkbTypes, QgsGeometry, QgsPoint, QgsPointLocator, Qgis)
 from qgis.gui import (QgisInterface, QgsMapToolEdit, QgsUserInputWidget, QgsDoubleSpinBox,
-                      QgsFloatingWidget, QgsMapMouseEvent, QgsRubberBand, QgsVertexMarker)
+                      QgsFloatingWidget, QgsMapMouseEvent, QgsRubberBand, QgsSnapIndicator)
 
 from ..tools.util_functions import get_max_decimal_numbers, round_all_values
 
@@ -22,8 +21,7 @@ class LosNoTargetMapTool(QgsMapToolEdit):
         self._point = None
 
         self._snapper = self._canvas.snappingUtils()
-        self._snap_color = QgsSettings().value("/qgis/digitizing/snap_color", QColor("#ff00ff"))
-        self._snap_marker = QgsVertexMarker(self._canvas)
+        self.snap_marker = QgsSnapIndicator(self._canvas)
 
         self._rubberBand = QgsRubberBand(self._canvas, QgsWkbTypes.LineGeometry)
         self._rubberBand.setColor(QColor.fromRgb(255, 64, 64))
@@ -55,8 +53,8 @@ class LosNoTargetMapTool(QgsMapToolEdit):
 
     def clean(self) -> None:
         self.hide_widgets()
-        vlayer = self.currentVectorLayer()
-        self._rubberBand.setToGeometry(QgsGeometry(), vlayer)
+        self.snap_marker.setVisible(False)
+        self._rubberBand.setToGeometry(QgsGeometry(), self.currentVectorLayer())
 
     def deactivate(self) -> None:
         self.clean()
@@ -76,11 +74,10 @@ class LosNoTargetMapTool(QgsMapToolEdit):
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
         result = self._snapper.snapToMap(event.pos())
+        self.snap_marker.setMatch(result)
         if result.type() == QgsPointLocator.Vertex:
-            self.update_snap_marker(result.point())
             self._snap_point = result.point()
         else:
-            self.update_snap_marker()
             self._snap_point = None
 
     def keyPressEvent(self, e: QKeyEvent) -> None:
@@ -88,20 +85,6 @@ class LosNoTargetMapTool(QgsMapToolEdit):
             self.deactivate()
             self._iface.mapCanvas().unsetMapTool(self)
         return super().keyPressEvent(e)
-
-    def update_snap_marker(self, snapped_point: QgsPointXY = None):
-        self._canvas.scene().removeItem(self._snap_marker)
-        if snapped_point is None:
-            return
-        self.create_vertex_marker(snapped_point)
-
-    def create_vertex_marker(self, snapped_point: QgsPointXY):
-        self._snap_marker = QgsVertexMarker(self._canvas)
-        self._snap_marker.setCenter(snapped_point)
-        self._snap_marker.setIconSize(16)
-        self._snap_marker.setIconType(QgsVertexMarker.ICON_BOX)
-        self._snap_marker.setPenWidth(3)
-        self._snap_marker.setColor(self._snap_color)
 
     def draw_los(self):
 
