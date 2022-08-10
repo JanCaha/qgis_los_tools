@@ -16,6 +16,7 @@ from .gui.dialog_raster_validations import RasterValidations
 from .constants.plugin import PluginConstants
 from .utils import get_icon_path
 from .gui.los_without_target import LosNoTargetMapTool
+from .gui.optimize_points_location import OptimizePointsLocationTool
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
@@ -28,6 +29,7 @@ class los_toolsPlugin():
     camera_tool: SetCameraTool = None
 
     los_notarget_action_name = "Visualize LoS No Target Tool"
+    optimize_point_location_action_name = "Optimize Point Location Tool"
 
     def __init__(self, iface):
 
@@ -46,6 +48,11 @@ class los_toolsPlugin():
         self.los_notarget_tool = LosNoTargetMapTool(self.iface)
         self.los_notarget_tool.deactivated.connect(
             partial(self.deactivateTool, self.los_notarget_action_name))
+
+        self.optimize_point_location_tool = OptimizePointsLocationTool(
+            self.iface.mapCanvas(), self.iface)
+        self.optimize_point_location_tool.deactivated.connect(
+            partial(self.deactivateTool, self.optimize_point_location_action_name))
 
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
@@ -74,6 +81,13 @@ class los_toolsPlugin():
         self.add_action(icon_path=get_icon_path("los_no_target_tool.svg"),
                         text=self.los_notarget_action_name,
                         callback=self.run_visualize_los_notarget_tool,
+                        add_to_toolbar=False,
+                        add_to_specific_toolbar=self.toolbar,
+                        checkable=True)
+
+        self.add_action(icon_path=None,
+                        text=self.optimize_point_location_action_name,
+                        callback=self.run_optimize_point_location_tool,
                         add_to_toolbar=False,
                         add_to_specific_toolbar=self.toolbar,
                         checkable=True)
@@ -159,3 +173,7 @@ class los_toolsPlugin():
 
     def deactivateTool(self, action_name: str):
         self.get_action_by_text(action_name).setChecked(False)
+
+    def run_optimize_point_location_tool(self):
+        self.get_action_by_text(self.optimize_point_location_action_name).setChecked(True)
+        self.iface.mapCanvas().setMapTool(self.optimize_point_location_tool)
