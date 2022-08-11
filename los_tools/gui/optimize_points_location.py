@@ -101,8 +101,8 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
         return super().activate()
 
     def clean(self) -> None:
-        self.circle_rubber.reset()
-        self.point_rubber.reset()
+        self.circle_rubber.hide()
+        self.point_rubber.hide()
         self._point = None
         self._pointId = None
         self._candidate_point = None
@@ -124,9 +124,11 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
                 point, self._raster, self._raster_extent, self._cell_size, self._no_data_value,
                 self._distance_cells)
             self.point_rubber.setToGeometry(QgsGeometry.fromPointXY(self._candidate_point))
+            self.circle_rubber.show()
+            self.point_rubber.show()
         else:
-            self.circle_rubber.setToGeometry(QgsGeometry())
-            self.point_rubber.setToGeometry(QgsGeometry())
+            self.circle_rubber.hide()
+            self.point_rubber.hide()
             self._candidate_point = None
 
     def _snap(self, point: QgsPointXY) -> Optional[QgsPointLocator.Match]:
