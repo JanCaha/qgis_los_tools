@@ -41,8 +41,18 @@ class LosNoTargetMapTool(QgsMapToolEdit):
         self.floating_widget.hide()
 
     def activate(self) -> None:
-        self.show_widgets()
+        self.messageDiscarded.emit()
+        self._canvas = self._iface.mapCanvas()
         self._snapper = self._canvas.snappingUtils()
+        if self._canvas.mapSettings().destinationCrs().isGeographic():
+            self.messageEmitted.emit(
+                "Tool only works if canvas is in projected CRS. Currently canvas is in geographic CRS.",
+                Qgis.Critical)
+            self.hide_widgets()
+            self.deactivate()
+            return
+        self.floating_widget.set_units(self._canvas.mapSettings().destinationCrs().mapUnits())
+        self.show_widgets()
         return super(LosNoTargetMapTool, self).activate()
 
     def clean(self) -> None:
