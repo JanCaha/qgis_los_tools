@@ -24,8 +24,7 @@ class LosNoTargetMapTool(QgsMapToolEdit):
         self._snapper = self._canvas.snappingUtils()
         self.snap_marker = QgsSnapIndicator(self._canvas)
 
-        self._rubber_band = QgsRubberBand(self._canvas, QgsWkbTypes.LineGeometry)
-        self._rubber_band.setColor(QColor.fromRgb(255, 64, 64))
+        self._los_rubber_band = self.createRubberBand(QgsWkbTypes.LineGeometry)
 
         self.floating_widget = LoSNoTargetInputWidget()
         self.floating_widget.hide()
