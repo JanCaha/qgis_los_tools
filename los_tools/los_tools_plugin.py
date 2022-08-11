@@ -85,7 +85,7 @@ class los_toolsPlugin():
                         add_to_specific_toolbar=self.toolbar,
                         checkable=True)
 
-        self.add_action(icon_path=None,
+        self.add_action(icon_path=get_icon_path("optimize_point.svg"),
                         text=self.optimize_point_location_action_name,
                         callback=self.run_optimize_point_location_tool,
                         add_to_toolbar=False,
