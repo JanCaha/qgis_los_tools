@@ -24,8 +24,8 @@ class LosNoTargetMapTool(QgsMapToolEdit):
         self._snapper = self._canvas.snappingUtils()
         self.snap_marker = QgsSnapIndicator(self._canvas)
 
-        self._rubberBand = QgsRubberBand(self._canvas, QgsWkbTypes.LineGeometry)
-        self._rubberBand.setColor(QColor.fromRgb(255, 64, 64))
+        self._rubber_band = QgsRubberBand(self._canvas, QgsWkbTypes.LineGeometry)
+        self._rubber_band.setColor(QColor.fromRgb(255, 64, 64))
 
         self.floating_widget = LoSNoTargetInputWidget()
         self.floating_widget.hide()
@@ -49,7 +49,7 @@ class LosNoTargetMapTool(QgsMapToolEdit):
     def clean(self) -> None:
         self.hide_widgets()
         self.snap_marker.setVisible(False)
-        self._rubberBand.setToGeometry(QgsGeometry(), self.currentVectorLayer())
+        self._rubber_band.hide()
 
     def deactivate(self) -> None:
         self.clean()
@@ -95,7 +95,7 @@ class LosNoTargetMapTool(QgsMapToolEdit):
 
         if self._point:
             vlayer = self.currentVectorLayer()
-            self._rubberBand.setToGeometry(QgsGeometry(), vlayer)
+            self._rubber_band.setToGeometry(QgsGeometry(), vlayer)
             angles = np.arange(self.floating_widget.min_angle,
                                self.floating_widget.max_angle +
                                0.000000001 * self.floating_widget.angle_step,
@@ -112,7 +112,8 @@ class LosNoTargetMapTool(QgsMapToolEdit):
                 new_point = click_point.project(1, angle)
                 geom = QgsGeometry.fromPolyline([click_point, new_point
                                                 ]).extendLine(0, self.floating_widget.length - 1)
-                self._rubberBand.addGeometry(geom, vlayer)
+                self._rubber_band.addGeometry(geom, vlayer)
+            self._rubber_band.show()
 
 
 class LoSNoTargetInputWidget(QWidget):
