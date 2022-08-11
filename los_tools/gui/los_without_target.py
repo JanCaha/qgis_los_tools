@@ -3,10 +3,10 @@ import numpy as np
 
 from qgis.PyQt.QtWidgets import (QWidget, QFormLayout)
 from qgis.PyQt.QtCore import (Qt, pyqtSignal)
-from qgis.PyQt.QtGui import (QColor, QKeyEvent)
-from qgis.core import (QgsWkbTypes, QgsGeometry, QgsPoint, QgsPointLocator, Qgis)
-from qgis.gui import (QgisInterface, QgsMapToolEdit, QgsUserInputWidget, QgsDoubleSpinBox,
-                      QgsFloatingWidget, QgsMapMouseEvent, QgsRubberBand, QgsSnapIndicator)
+from qgis.PyQt.QtGui import (QKeyEvent)
+from qgis.core import (QgsWkbTypes, QgsGeometry, QgsUnitTypes, QgsPointLocator, Qgis)
+from qgis.gui import (QgisInterface, QgsMapToolEdit, QgsDoubleSpinBox, QgsMapMouseEvent,
+                      QgsSnapIndicator)
 
 from ..tools.util_functions import get_max_decimal_numbers, round_all_values
 from .utils import prepare_user_input_widget
