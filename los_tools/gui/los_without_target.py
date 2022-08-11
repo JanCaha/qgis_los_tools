@@ -127,17 +127,19 @@ class LoSNoTargetInputWidget(QWidget):
         self.setLayout(layout)
 
         self._min_angle = QgsDoubleSpinBox(self)
-        self._min_angle.setMinimum(-359.99999)
-        self._min_angle.setMaximum(359.999999)
+        self._min_angle.setMinimum(-359.999)
+        self._min_angle.setMaximum(359.999)
         self._min_angle.setValue(0)
         self._min_angle.setClearValue(0)
+        self._min_angle.setDecimals(3)
         self._min_angle.valueChanged.connect(self._on_minimum_changed)
         self._min_angle.valueChanged.connect(self.emit_values_changed)
         self._max_angle = QgsDoubleSpinBox(self)
-        self._max_angle.setMinimum(-359.99999)
-        self._max_angle.setMaximum(359.999999)
-        self._max_angle.setValue(359.999999)
+        self._max_angle.setMinimum(-359.999)
+        self._max_angle.setMaximum(359.999)
+        self._max_angle.setValue(359.999)
         self._max_angle.setClearValue(359)
+        self._max_angle.setDecimals(3)
         self._max_angle.valueChanged.connect(self._on_maximum_changed)
         self._max_angle.valueChanged.connect(self.emit_values_changed)
         self._angle_step = QgsDoubleSpinBox(self)
@@ -159,6 +161,9 @@ class LoSNoTargetInputWidget(QWidget):
         layout.addRow("Maximal Azimuth", self._max_angle)
         layout.addRow("Angle Step", self._angle_step)
         layout.addRow("LoS Length", self._length)
+
+    def set_units(self, unit: QgsUnitTypes) -> None:
+        self._length.setSuffix(" {}".format(QgsUnitTypes.toString(unit)))
 
     def _on_minimum_changed(self) -> None:
         if self._max_angle.value() < self._min_angle.value():
