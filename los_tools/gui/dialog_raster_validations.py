@@ -211,4 +211,7 @@ class RasterValidations(QDialog):
         else:
             all_msgs.append("No raster layers selected, nothing to check.")
 
-        self.text.setText("\n\n".join(all_msgs))
+        if all_msgs:
+            self.text.setText("\n\n".join(all_msgs))
+        else:
+            self.text.setText("Selection is valid and can be used in LoS creation tools.")
