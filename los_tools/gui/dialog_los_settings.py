@@ -26,7 +26,8 @@ class LoSSettings(QDialog):
 
     def init_gui(self) -> None:
 
-        self.setWindowTitle("LoS without Target Settings")
+        self.setWindowTitle("LoS without Target Sampling Settings")
+        self.setMinimumWidth(600)
 
         layout = QFormLayout(self)
         self.setLayout(layout)
