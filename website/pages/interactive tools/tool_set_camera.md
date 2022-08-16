@@ -13,7 +13,6 @@ This tool sets up camera for 3D Map layout item to specific point on a raster lo
 | Choose observer point on the map                | [point]        | Point from the map (if snapping is enabled the tool honors the settings). |
 | Choose target point on the map                  | [point]        | Point from the map (if snapping is enabled the tool honors the settings). |
 
-
 ## Tool screenshot
 
 ![Set Camera](../images/tool_set_camera.png)
