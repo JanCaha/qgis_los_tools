@@ -24,12 +24,12 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
         self.circle_rubber = QgsRubberBand(self._canvas, QgsWkbTypes.PolygonGeometry)
         self.circle_rubber.setColor(QColor.fromRgb(255, 64, 64))
         self.circle_rubber.setWidth(2)
-        self.circle_rubber.setOpacity(0.5)
+        self.circle_rubber.setOpacity(0.3)
 
         self.point_rubber = QgsRubberBand(self._canvas, QgsWkbTypes.PointGeometry)
         self.point_rubber.setColor(QColor.fromRgb(64, 64, 255))
         self.point_rubber.setWidth(2)
-        self.point_rubber.setOpacity(0.5)
+        self.point_rubber.setOpacity(0.75)
         self.point_rubber.setIconSize(10)
 
         self._circle_radius = 10.0
