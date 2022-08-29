@@ -68,7 +68,7 @@ class LoSSettings(QDialog):
         self.default_sampling_size.valueChanged.connect(self.fill_distances)
 
         self.maximal_los_length = DistanceWidget()
-        self.maximal_los_length.setValue(10, QgsUnitTypes.DistanceKilometers)
+        self.maximal_los_length.setValue(100, QgsUnitTypes.DistanceKilometers)
         self.maximal_los_length.valueChanged.connect(self.fill_distances)
         self.maximal_los_length.setDisabled(True)
         self.use_maximal_los_length = QCheckBox()
