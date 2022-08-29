@@ -173,7 +173,7 @@ class LoSSettings(QDialog):
 
             self.treeView.addTopLevelItem(item)
 
-    def add_layer_to_project(self) -> None:
+    def create_data_layer(self) -> QgsVectorLayer:
         size = None
 
         fields = QgsFields()
@@ -213,8 +213,12 @@ class LoSSettings(QDialog):
             f.setAttribute(f.fieldNameIndex(FieldNames.SIZE), size)
             layer.dataProvider().addFeature(f)
 
+        return layer
+
+    def add_layer_to_project(self) -> None:
+
         project = QgsProject.instance()
-        project.addMapLayer(layer)
+        project.addMapLayer(self.create_data_layer())
 
         self.close()
 
