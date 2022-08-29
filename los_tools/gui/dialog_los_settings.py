@@ -2,7 +2,7 @@ from typing import Optional, Union, List
 import math
 
 from qgis.core import (QgsUnitTypes, QgsApplication, QgsMemoryProviderUtils, QgsFields, QgsField,
-                       QgsWkbTypes, QgsFeature, QgsProject)
+                       QgsWkbTypes, QgsFeature, QgsProject, QgsVectorLayer)
 from qgis.PyQt.QtWidgets import (QDialog, QHBoxLayout, QComboBox, QPushButton, QToolButton,
                                  QDoubleSpinBox, QWidget, QFormLayout, QTreeWidget,
                                  QTreeWidgetItem, QGroupBox, QCheckBox, QTextBrowser)
@@ -139,7 +139,7 @@ class LoSSettings(QDialog):
         if self.treeView.currentIndex().row() == 0:
             return
 
-        index = self.treeView.currentIndex().row() + 1
+        index = self.treeView.currentIndex().row() - 1
         self._distances.pop(index)
         self.fill_distances()
 
@@ -156,6 +156,12 @@ class LoSSettings(QDialog):
             item.setText(1, str(self.default_sampling_size.distanceMeters()))
 
             self.treeView.addTopLevelItem(item)
+
+        if self.use_maximal_los_length.isChecked() and self._distances:
+            self._distances = [
+                x for x in self._distances
+                if x.meters() < self.maximal_los_length.distanceMeters()
+            ]
 
         for distance in self._distances:
 
