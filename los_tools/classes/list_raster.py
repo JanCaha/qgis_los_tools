@@ -99,6 +99,17 @@ class ListOfRasters:
 
         return True, ""
 
+    def is_empty(self) -> bool:
+        if self.rasters:
+            return False
+        return True
+
+    def extent_polygon(self) -> QgsGeometry:
+        geoms = []
+        for raster in self.rasters:
+            geoms.append(QgsGeometry.fromRect(raster.extent()))
+        return QgsGeometry.unaryUnion(geoms)
+
     def order_by_pixel_size(self) -> None:
 
         tuples = []
