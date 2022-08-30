@@ -232,6 +232,12 @@ class LoSSettings(QDialog):
 
         self.close()
 
+    def los_maximal_length(self) -> Optional[float]:
+        if self.use_maximal_los_length.isChecked():
+            return self.maximal_los_length.distanceMeters()
+        else:
+            return None
+
 
 class Distance:
 
