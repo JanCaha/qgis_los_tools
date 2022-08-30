@@ -176,7 +176,8 @@ class RasterValidations(QDialog):
                 value = "No value"
 
             self.sampled_from_raster.setText(
-                list_of_rasters.sampling_from_raster_at_point(self._point, self._point_crs))
+                f"{list_of_rasters.sampling_from_raster_at_point(self._point, self._point_crs)} (Raster Layer)"
+            )
             self.sampled_value.setText(value)
 
     @property
