@@ -92,9 +92,14 @@ class RasterValidations(QDialog):
             else:
                 item.setCheckState(0, Qt.CheckState.Unchecked)
 
+            distance_unit = raster.crs().mapUnits()
+            distance_unit = QgsUnitTypes.toAbbreviatedString(distance_unit)
+
             item.setText(
-                1, "{} - {}".format(round(raster.extent().width() / raster.width(), 3),
-                                    round(raster.extent().height() / raster.height(), 3)))
+                1, "{} {} - {} {}".format(round(raster.extent().width() / raster.width(),
+                                                3), distance_unit,
+                                          round(raster.extent().height() / raster.height(), 3),
+                                          distance_unit))
             item.setData(1, Qt.UserRole, raster.extent().width() / raster.width())
 
             self._rasters_view.addTopLevelItem(item)
