@@ -13,17 +13,20 @@ class ListOfRasters:
 
     def __init__(self, rasters: List[QgsMapLayer]):
 
-        first_crs = rasters[0].crs()
+        self.rasters: List[QgsRasterLayer] = []
 
-        for raster in rasters:
-            if not isinstance(raster, QgsRasterLayer):
-                raise ValueError("All inputs must be QgsRasterLayer.")
-            if not first_crs == raster.crs():
-                raise ValueError("All CRS must be equal.")
+        if rasters:
+            first_crs = rasters[0].crs()
 
-        self.rasters: List[QgsRasterLayer] = rasters
+            for raster in rasters:
+                if not isinstance(raster, QgsRasterLayer):
+                    raise ValueError("All inputs must be QgsRasterLayer.")
+                if not first_crs == raster.crs():
+                    raise ValueError("All CRS must be equal.")
 
-        self.order_by_pixel_size()
+            self.rasters = rasters
+
+            self.order_by_pixel_size()
 
     @staticmethod
     def validate_bands(rasters: List[QgsMapLayer]) -> Tuple[bool, str]:
