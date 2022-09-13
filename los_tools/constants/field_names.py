@@ -65,5 +65,8 @@ class FieldNames:
     DISTANCE = "Distance (meters)"
     SIZE = "Size of object (meters)"
 
+    TEMPLATE_DISTANCE = "Distance (?)"
+    TEMPLATE_SIZE = "Size of object (?)"
+
     ANGLE_STEP = "angle_step_between_los"
     ANGLE_STEP_POINTS = "angle_step_between_points"
