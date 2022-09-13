@@ -10,6 +10,7 @@ from qgis.gui import (QgisInterface, QgsMapToolEdit, QgsDoubleSpinBox, QgsMapMou
 
 from ..tools.util_functions import get_max_decimal_numbers, round_all_values
 from .utils import prepare_user_input_widget
+from .custom_classes import DistanceWidget
 
 
 class LosNoTargetMapTool(QgsMapToolEdit):
@@ -51,8 +52,8 @@ class LosNoTargetMapTool(QgsMapToolEdit):
             self.hide_widgets()
             self.deactivate()
             return
-        self.floating_widget.set_units(self._canvas.mapSettings().destinationCrs().mapUnits())
         self.show_widgets()
+        self.floating_widget.setUnit(self._canvas.mapSettings().destinationCrs().mapUnits())
         return super(LosNoTargetMapTool, self).activate()
 
     def clean(self) -> None:
@@ -143,6 +144,7 @@ class LoSNoTargetInputWidget(QWidget):
         self._min_angle.setDecimals(3)
         self._min_angle.valueChanged.connect(self._on_minimum_changed)
         self._min_angle.valueChanged.connect(self.emit_values_changed)
+
         self._max_angle = QgsDoubleSpinBox(self)
         self._max_angle.setMinimum(-359.999)
         self._max_angle.setMaximum(359.999)
@@ -151,6 +153,7 @@ class LoSNoTargetInputWidget(QWidget):
         self._max_angle.setDecimals(3)
         self._max_angle.valueChanged.connect(self._on_maximum_changed)
         self._max_angle.valueChanged.connect(self.emit_values_changed)
+
         self._angle_step = QgsDoubleSpinBox(self)
         self._angle_step.setMinimum(0.001)
         self._angle_step.setMaximum(90)
@@ -158,7 +161,8 @@ class LoSNoTargetInputWidget(QWidget):
         self._angle_step.setClearValue(1)
         self._angle_step.setDecimals(3)
         self._angle_step.valueChanged.connect(self.emit_values_changed)
-        self._length = QgsDoubleSpinBox(self)
+
+        self._length = DistanceWidget(self)
         self._length.setMinimum(1)
         self._length.setMaximum(999999999)
         self._length.setValue(100)
@@ -171,8 +175,7 @@ class LoSNoTargetInputWidget(QWidget):
         layout.addRow("Angle Step", self._angle_step)
         layout.addRow("LoS Length", self._length)
 
-    def set_units(self, unit: QgsUnitTypes) -> None:
-        self._length.setSuffix(" {}".format(QgsUnitTypes.toString(unit)))
+        self._unit = QgsUnitTypes.DistanceUnit.DistanceMeters
 
     def _on_minimum_changed(self) -> None:
         if self._max_angle.value() < self._min_angle.value():
@@ -199,6 +202,9 @@ class LoSNoTargetInputWidget(QWidget):
             return 0.01
         return self._angle_step.value()
 
+    def setUnit(self, unit: QgsUnitTypes.DistanceUnit.DistanceMeters) -> None:
+        self._unit = unit
+
     @property
     def length(self) -> float:
-        return self._length.value()
+        return self._length.distance().inUnits(self._unit)
