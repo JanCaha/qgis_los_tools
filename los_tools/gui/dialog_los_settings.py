@@ -3,12 +3,13 @@ import math
 
 from qgis.core import (QgsUnitTypes, QgsApplication, QgsMemoryProviderUtils, QgsFields, QgsField,
                        QgsWkbTypes, QgsFeature, QgsProject, QgsVectorLayer)
-from qgis.PyQt.QtWidgets import (QDialog, QHBoxLayout, QComboBox, QPushButton, QToolButton,
-                                 QDoubleSpinBox, QWidget, QFormLayout, QTreeWidget,
-                                 QTreeWidgetItem, QGroupBox, QCheckBox, QTextBrowser)
-from qgis.PyQt.QtCore import (Qt, pyqtSignal, QVariant)
+from qgis.PyQt.QtWidgets import (QDialog, QHBoxLayout, QPushButton, QToolButton, QDoubleSpinBox,
+                                 QWidget, QFormLayout, QTreeWidget, QTreeWidgetItem, QGroupBox,
+                                 QCheckBox, QTextBrowser, QComboBox)
+from qgis.PyQt.QtCore import (Qt, QVariant)
 
 from ..constants.field_names import FieldNames
+from .custom_classes import Distance, DistanceWidget
 
 
 class LoSSettings(QDialog):
@@ -38,10 +39,12 @@ class LoSSettings(QDialog):
 
         self.object_size = DistanceWidget()
         self.object_size.setValue(1)
+        self.object_size.setClearValue(1)
         self.object_size.valueChanged.connect(self._calculate_object_angle_size)
 
         self.object_distance = DistanceWidget()
         self.object_distance.setValue(1000)
+        self.object_distance.setClearValue(1000)
         self.object_distance.valueChanged.connect(self._calculate_object_angle_size)
 
         self.object_angle_size = QDoubleSpinBox()
@@ -97,6 +100,19 @@ class LoSSettings(QDialog):
         self.treeView = QTreeWidget(self)
         self.treeView.setHeaderLabels(["Distance", "Sampling Size"])
 
+        self.data_unit = QComboBox(self)
+        self.data_unit.addItem(QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMeters),
+                               QgsUnitTypes.DistanceUnit.DistanceMeters)
+        self.data_unit.addItem(QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceKilometers),
+                               QgsUnitTypes.DistanceUnit.DistanceKilometers)
+        self.data_unit.addItem(QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceFeet),
+                               QgsUnitTypes.DistanceUnit.DistanceFeet)
+        self.data_unit.addItem(QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMiles),
+                               QgsUnitTypes.DistanceUnit.DistanceMiles)
+        self.data_unit.addItem(QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceYards),
+                               QgsUnitTypes.DistanceUnit.DistanceYards)
+        self.data_unit.currentIndexChanged.connect(self.fill_distances)
+
         self.button_add_layer = QPushButton("Add layer to project")
         self.button_add_layer.clicked.connect(self.add_layer_to_project)
 
@@ -106,6 +122,7 @@ class LoSSettings(QDialog):
         layout.addRow("Distance Add", self.distance)
         layout.addRow(lineLayout)
         layout.addRow(self.treeView)
+        layout.addRow("Layer units", self.data_unit)
         layout.addRow(self.button_add_layer)
 
     def description_text(self) -> None:
@@ -149,18 +166,21 @@ class LoSSettings(QDialog):
 
         self.treeView.clear()
 
+        result_unit = self.data_unit.currentData(Qt.UserRole)
+
         if self._distances:
 
             item = QTreeWidgetItem()
             item.setText(0, "Below {}".format(self._distances[0]))
-            item.setText(1, str(self.default_sampling_size.distanceMeters()))
+            item.setText(1,
+                         str(round(self.default_sampling_size.distance().inUnits(result_unit), 3)))
 
             self.treeView.addTopLevelItem(item)
 
         if self.use_maximal_los_length.isChecked() and self._distances:
             self._distances = [
                 x for x in self._distances
-                if x.meters() < self.maximal_los_length.distanceMeters()
+                if x.inUnits(result_unit) < self.maximal_los_length.distance().inUnits(result_unit)
             ]
 
         for distance in self._distances:
@@ -168,8 +188,8 @@ class LoSSettings(QDialog):
             item = QTreeWidgetItem()
             item.setText(0, "Over {}".format(distance))
             item.setData(0, Qt.UserRole, distance)
-            size = round(
-                (math.tan(math.radians(self.object_angle_size.value()))) * distance.meters(), 3)
+            size_units = self.calculate_size(self.object_angle_size.value(), distance)
+            size = round(size_units.inUnits(result_unit), 3)
             item.setText(1, str(size))
 
             self.treeView.addTopLevelItem(item)
@@ -178,18 +198,29 @@ class LoSSettings(QDialog):
 
             item = QTreeWidgetItem()
             item.setText(
-                0, "Over {} to {}".format(self._distances[-1], self.maximal_los_length.distance()))
+                0, "Over {} to {}".format(self._distances[-1],
+                                          self.maximal_los_length.distance().inUnits(result_unit)))
             item.setText(1, str(size))
 
             self.treeView.addTopLevelItem(item)
 
+    def calculate_size(self, angle: float, distance: Distance) -> Distance:
+        size = math.tan(math.radians(angle)) * distance.distance()
+        return Distance(size, distance.unit())
+
     def create_data_layer(self) -> QgsVectorLayer:
         size = None
 
+        unit = self.data_unit.currentData(Qt.UserRole)
+        unit_name = QgsUnitTypes.toString(unit)
+
+        distance_field_name = FieldNames.TEMPLATE_DISTANCE.replace("?", unit_name)
+        size_field_name = FieldNames.TEMPLATE_SIZE.replace("?", unit_name)
+
         fields = QgsFields()
         fields.append(QgsField(FieldNames.SIZE_ANGLE, QVariant.Double))
-        fields.append(QgsField(FieldNames.DISTANCE, QVariant.Double))
-        fields.append(QgsField(FieldNames.SIZE, QVariant.Double))
+        fields.append(QgsField(distance_field_name, QVariant.Double))
+        fields.append(QgsField(size_field_name, QVariant.Double))
 
         layer = QgsMemoryProviderUtils.createMemoryLayer("Sampling Table",
                                                          fields=fields,
@@ -197,30 +228,33 @@ class LoSSettings(QDialog):
 
         angle = self.object_angle_size.value()
 
+        distance_index = fields.indexOf(distance_field_name)
+        size_index = fields.indexOf(size_field_name)
+        angle_index = fields.indexOf(FieldNames.SIZE_ANGLE)
+
         f = QgsFeature(fields)
-        f.setAttribute(f.fieldNameIndex(FieldNames.SIZE_ANGLE), angle)
-        f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE), 0)
-        f.setAttribute(f.fieldNameIndex(FieldNames.SIZE),
-                       self.default_sampling_size.distanceMeters())
+        f.setAttribute(angle_index, angle)
+        f.setAttribute(distance_index, 0)
+        f.setAttribute(size_index, self.default_sampling_size.distance().inUnits(unit))
         layer.dataProvider().addFeature(f)
 
         for distance in self._distances:
             f = QgsFeature(fields)
-            f.setAttribute(f.fieldNameIndex(FieldNames.SIZE_ANGLE), angle)
-            f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE), distance.meters())
-            size = math.tan(math.radians(self.object_angle_size.value())) * distance.meters()
-            f.setAttribute(f.fieldNameIndex(FieldNames.SIZE), size)
+            f.setAttribute(angle_index, angle)
+            f.setAttribute(distance_index, distance.inUnits(unit))
+            size_units = self.calculate_size(self.object_angle_size.value(), distance)
+            size = size_units.inUnits(unit)
+            f.setAttribute(size_index, size)
             layer.dataProvider().addFeature(f)
 
         if size:
             f = QgsFeature(fields)
-            f.setAttribute(f.fieldNameIndex(FieldNames.SIZE_ANGLE), angle)
+            f.setAttribute(angle_index, angle)
             if self.use_maximal_los_length.isChecked():
-                f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE),
-                               self.maximal_los_length.distanceMeters())
+                f.setAttribute(distance_index, self.maximal_los_length.distance().inUnits(unit))
             else:
-                f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE), -1)
-            f.setAttribute(f.fieldNameIndex(FieldNames.SIZE), size)
+                f.setAttribute(distance_index, -1)
+            f.setAttribute(size_index, size)
             layer.dataProvider().addFeature(f)
 
         return layer
