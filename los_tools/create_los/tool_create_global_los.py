@@ -4,7 +4,7 @@ from qgis.core import (QgsField, QgsFeature, QgsWkbTypes, QgsPoint, QgsFields, Q
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.create_los.tool_create_local_los import CreateLocalLosAlgorithm
-from los_tools.tools.util_functions import segmentize_line
+from los_tools.tools.util_functions import segmentize_los_line
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.tools.util_functions import get_doc_file
@@ -83,7 +83,7 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
                     line_temp.endPoint()
                 ])
 
-                line = segmentize_line(line, segment_length=sampling_distance)
+                line = segmentize_los_line(line, segment_length=sampling_distance)
 
                 line = list_rasters.add_z_values(line.points())
 
