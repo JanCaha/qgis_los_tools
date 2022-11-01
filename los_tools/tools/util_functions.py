@@ -7,7 +7,7 @@ from pathlib import Path
 
 from qgis.core import (QgsGeometry, QgsLineString, QgsPoint, QgsPointXY, QgsRasterDataProvider,
                        QgsRectangle, QgsVectorLayer, QgsMessageLog, QgsProcessingException, Qgis,
-                       QgsPolygon)
+                       QgsPolygon, QgsVertexId, QgsWkbTypes)
 
 from los_tools.constants.field_names import FieldNames
 
@@ -100,14 +100,33 @@ def wkt_to_array_points(wkt: str) -> List[List[float]]:
     return array_result
 
 
-def segmentize_line(line: QgsLineString, segment_length: float) -> QgsLineString:
+def segmentize_line(line: QgsGeometry, segment_length: float) -> QgsLineString:
 
-    line_geom = QgsGeometry(line)
+    if not isinstance(line, QgsGeometry):
+        raise TypeError("`line` should be `QgsGeometry`.")
+
+    if line.type() != QgsWkbTypes.GeometryType.LineGeometry:
+        raise TypeError("Can only properly segmentize Lines.")
+
+    if 3 < line.constGet().vertexCount():
+        raise ValueError("Should only segmentize lines with at most 3 vertices.")
+
+    ideal_length_parts = math.ceil(line.length() / segment_length)
+    ideal_length_addition = ideal_length_parts * segment_length - line.length()
+
+    line_extented = QgsLineString(
+        [line.vertexAt(0), line.vertexAt(line.constGet().vertexCount() - 1)])
+    line_extented.extend(0, ideal_length_addition * 0.9)
+
+    line_geom = QgsGeometry(line_extented)
 
     line_geom = line_geom.densifyByDistance(distance=np.nextafter(float(segment_length), np.Inf))
 
-    line_res = QgsLineString()
-    line_res.fromWkt(line_geom.asWkt())
+    line_res = QgsLineString([x for x in line_geom.vertices()])
+
+    line_res.moveVertex(QgsVertexId(0, 0,
+                                    line_geom.constGet().vertexCount() - 1),
+                        line.vertexAt(line.constGet().vertexCount() - 1))
 
     return line_res
 
