@@ -3,7 +3,8 @@ import sys
 import inspect
 from functools import partial
 
-from qgis.core import QgsApplication
+from qgis.core import (QgsApplication, QgsMemoryProviderUtils, QgsWkbTypes,
+                       QgsCoordinateReferenceSystem, QgsProject, QgsVectorLayer)
 from qgis.gui import QgisInterface
 
 from qgis.PyQt.QtGui import (QIcon)
@@ -14,9 +15,11 @@ from .gui.dialog_tool_set_camera import SetCameraTool
 from .gui.dialog_los_settings import LoSSettings
 from .gui.dialog_raster_validations import RasterValidations
 from .constants.plugin import PluginConstants
+from .constants.fields import Fields
 from .utils import get_icon_path
 from .gui.los_without_target import LosNoTargetMapTool
 from .gui.optimize_points_location import OptimizePointsLocationTool
+from .gui.create_los import CreateLoSMapTool
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
@@ -30,8 +33,13 @@ class los_toolsPlugin():
 
     los_notarget_action_name = "Visualize LoS No Target Tool"
     optimize_point_location_action_name = "Optimize Point Location Tool"
+    create_los_action_name = "Create LoS"
 
     def __init__(self, iface):
+
+        self.use_plugin_los_layer_action: QAction = None
+        self.add_plugin_los_layer_action: QAction = None
+        self._layer_LoS: QgsVectorLayer = None
 
         self.iface: QgisInterface = iface
         self.provider = los_toolsProvider()
@@ -49,6 +57,16 @@ class los_toolsPlugin():
         self.los_notarget_tool.deactivated.connect(
             partial(self.deactivateTool, self.los_notarget_action_name))
 
+        self.create_los_tool = CreateLoSMapTool(
+            self.iface,
+            self.raster_validations_dialog,
+            self.los_settings_dialog,
+            self._layer_LoS,
+        )
+
+        self.create_los_tool.deactivated.connect(
+            partial(self.deactivateTool, self.create_los_action_name))
+
         self.optimize_point_location_tool = OptimizePointsLocationTool(
             self.iface.mapCanvas(), self.iface)
         self.optimize_point_location_tool.deactivated.connect(
@@ -59,6 +77,21 @@ class los_toolsPlugin():
 
     def initGui(self):
         self.initProcessing()
+
+        self.use_plugin_los_layer_action = self.add_action(icon_path=None,
+                                                           text="Use Plugin Layer",
+                                                           callback=self.set_use_plugin_los_layer,
+                                                           add_to_toolbar=False,
+                                                           add_to_specific_toolbar=self.toolbar,
+                                                           checkable=True)
+
+        self.add_plugin_los_layer_action = self.add_action(
+            icon_path=None,
+            text="Add Plugin Layer To Project",
+            callback=self.add_plugin_los_layer_to_project,
+            add_to_toolbar=False,
+            add_to_specific_toolbar=self.toolbar)
+        self.add_plugin_los_layer_action.setEnabled(False)
 
         self.add_action(icon_path=get_icon_path("camera.svg"),
                         text="Set Camera",
@@ -88,6 +121,13 @@ class los_toolsPlugin():
         self.add_action(icon_path=get_icon_path("optimize_point.svg"),
                         text=self.optimize_point_location_action_name,
                         callback=self.run_optimize_point_location_tool,
+                        add_to_toolbar=False,
+                        add_to_specific_toolbar=self.toolbar,
+                        checkable=True)
+
+        self.add_action(icon_path=get_icon_path("los_no_target_tool.svg"),
+                        text=self.create_los_action_name,
+                        callback=self.run_create_los_tool,
                         add_to_toolbar=False,
                         add_to_specific_toolbar=self.toolbar,
                         checkable=True)
@@ -177,3 +217,48 @@ class los_toolsPlugin():
     def run_optimize_point_location_tool(self):
         self.get_action_by_text(self.optimize_point_location_action_name).setChecked(True)
         self.iface.mapCanvas().setMapTool(self.optimize_point_location_tool)
+
+    def run_create_los_tool(self):
+        self.get_action_by_text(self.create_los_action_name).setChecked(True)
+        self.iface.mapCanvas().setMapTool(self.create_los_tool)
+
+    def _plugin_los_layer(self) -> QgsVectorLayer:
+
+        if self._layer_LoS is None:
+            selected_crs: QgsCoordinateReferenceSystem = self.iface.mapCanvas().mapSettings(
+            ).destinationCrs()
+
+            if (selected_crs.isGeographic()):
+                selected_crs = QgsCoordinateReferenceSystem.fromEpsgId(3857)
+
+            return QgsMemoryProviderUtils.createMemoryLayer("Manually Created LoS",
+                                                            Fields.los_plugin_layer_fields,
+                                                            QgsWkbTypes.LineString25D,
+                                                            selected_crs)
+
+        else:
+            return self._layer_LoS
+
+    def reset_los_layer(self) -> None:
+        self._layer_LoS = None
+        self._layer_LoS = self._plugin_los_layer()
+
+    def add_plugin_los_layer_to_project(self) -> None:
+        if self._layer_LoS:
+            QgsProject.instance().addMapLayer(self._layer_LoS)
+            self.reset_los_layer()
+            self.create_los_tool.set_los_layer(self._layer_LoS)
+
+    def set_use_plugin_los_layer(self) -> None:
+
+        if self.use_plugin_los_layer:
+            self._layer_LoS = self._plugin_los_layer()
+
+        self.add_plugin_los_layer_action.setEnabled(self.use_plugin_los_layer)
+
+        self.create_los_tool.set_los_layer(self._layer_LoS)
+        self.create_los_tool.set_los_storing(self.use_plugin_los_layer)
+
+    @property
+    def use_plugin_los_layer(self) -> bool:
+        return self.use_plugin_los_layer_action.isChecked()
