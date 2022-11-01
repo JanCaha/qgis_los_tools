@@ -1,7 +1,7 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterMultipleLayers,
                        QgsProcessingParameterFeatureSource, QgsProcessingParameterField,
                        QgsProcessingParameterFeatureSink, QgsProcessingParameterDistance, QgsField,
-                       QgsFeature, QgsWkbTypes, QgsPoint, QgsFields, QgsLineString,
+                       QgsFeature, QgsWkbTypes, QgsPoint, QgsFields, QgsGeometry,
                        QgsProcessingUtils, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
@@ -171,7 +171,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
             for target_count, target_feature in enumerate(targets_iterators):
 
-                line = QgsLineString([
+                line = QgsGeometry.fromPolyline([
                     QgsPoint(observer_feature.geometry().asPoint()),
                     QgsPoint(target_feature.geometry().asPoint())
                 ])

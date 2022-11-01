@@ -1,5 +1,5 @@
 from qgis.core import (QgsField, QgsFeature, QgsWkbTypes, QgsPoint, QgsFields, QgsLineString,
-                       QgsProcessingUtils, QgsProcessingException)
+                       QgsProcessingUtils, QgsProcessingException, QgsGeometry)
 
 from qgis.PyQt.QtCore import QVariant
 
@@ -77,7 +77,7 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
                 line_temp = line.clone()
                 line_temp.extend(0, max_length_extension)
 
-                line = QgsLineString([
+                line = QgsGeometry.fromPolyline([
                     QgsPoint(observer_feature.geometry().asPoint()),
                     QgsPoint(target_feature.geometry().asPoint()),
                     line_temp.endPoint()
