@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Run project",
+            "name": "Python: QGIS Plugin",
             "type": "python",
-            "request": "launch",
-            "program": "pytest tests --cov=los_tools --cov-report=term-missing:skip-covered -rP -vv",
-            "console": "integratedTerminal"
+            "request": "attach",
+            "port": 5678,
+            "host": "localhost"
         }
     ]
 }
