@@ -1,20 +1,15 @@
 import unittest
 import math
 
-from qgis.core import (QgsRasterLayer,
-                       QgsPointXY,
-                       QgsPoint,
-                       QgsVectorLayer,
-                       QgsLineString)
+from qgis.core import (QgsRasterLayer, QgsPointXY, QgsPoint, QgsVectorLayer, QgsLineString,
+                       QgsGeometry)
 
-from los_tools.tools.util_functions import (bilinear_interpolated_value,
-                                            get_diagonal_size,
-                                            calculate_distance,
+from los_tools.tools.util_functions import (bilinear_interpolated_value, get_diagonal_size,
+                                            calculate_distance, segmentize_los_line,
                                             segmentize_line)
 
 from tests.utils_tests import get_qgis_app
-from tests.utils_tests import (get_data_path,
-                               get_data_path_results)
+from tests.utils_tests import (get_data_path, get_data_path_results)
 
 QGIS_APP = get_qgis_app()
 
@@ -31,11 +26,11 @@ class UtilsTest(unittest.TestCase):
         base_x = -336429.64
         base_y = -1189102.12
         p1 = QgsPointXY(base_x, base_y)
-        p2 = QgsPointXY(base_x-0.5, base_y)
-        p3 = QgsPointXY(base_x-0.5, base_y+0.5)
-        p4 = QgsPointXY(base_x, base_y+0.5)
+        p2 = QgsPointXY(base_x - 0.5, base_y)
+        p3 = QgsPointXY(base_x - 0.5, base_y + 0.5)
+        p4 = QgsPointXY(base_x, base_y + 0.5)
         value = (self.raster_dp.sample(p1, 1)[0] + self.raster_dp.sample(p2, 1)[0] +
-                 self.raster_dp.sample(p3, 1)[0] + self.raster_dp.sample(p4, 1)[0])/4
+                 self.raster_dp.sample(p3, 1)[0] + self.raster_dp.sample(p4, 1)[0]) / 4
         bilinear_value = bilinear_interpolated_value(self.raster_dp, QgsPointXY(base_x, base_y))
         self.assertAlmostEqual(value, bilinear_value, places=2)
 
@@ -58,10 +53,9 @@ class UtilsTest(unittest.TestCase):
 
     def test_segmentize_line(self):
 
-        line = QgsLineString([QgsPoint(0, 0),
-                              QgsPoint(1, 0),
-                              QgsPoint(1, 1),
-                              QgsPoint(2, 2)])
+        line = QgsGeometry.fromPolyline(
+            [QgsPoint(0, 0), QgsPoint(1, 0),
+             QgsPoint(1, 1), QgsPoint(2, 2)])
 
         line_seg = segmentize_line(line, 0.1)
 
@@ -72,3 +66,25 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(line_seg.points()[10], QgsPoint(1, 0))
         self.assertEqual(line_seg.points()[20], QgsPoint(1, 1))
         self.assertEqual(line_seg.points()[-1], QgsPoint(2, 2))
+
+    def test_segmentize_los_line(self):
+
+        line = QgsGeometry.fromPolyline(
+            [QgsPoint(0, 0), QgsPoint(1, 0),
+             QgsPoint(1, 1), QgsPoint(2, 2)])
+
+        with self.assertRaisesRegex(ValueError,
+                                    "Should only segmentize lines with at most 3 vertices"):
+            segmentize_los_line(line, 1)
+
+        polygon = QgsGeometry.fromPolygonXY(
+            [[QgsPointXY(0, 0), QgsPointXY(1, 0),
+              QgsPointXY(0.5, 1)]])
+
+        with self.assertRaisesRegex(TypeError, "Can only properly segmentize Lines"):
+            segmentize_los_line(polygon, 1)
+
+        geom = QgsLineString()
+
+        with self.assertRaisesRegex(TypeError, "`line` should be `QgsGeometry`"):
+            segmentize_los_line(geom, 1)
