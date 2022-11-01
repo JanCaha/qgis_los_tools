@@ -209,7 +209,6 @@ class LoSSettings(QDialog):
         return Distance(size, distance.unit())
 
     def create_data_layer(self) -> QgsVectorLayer:
-        size = None
 
         unit = self.data_unit.currentData(Qt.UserRole)
         unit_name = QgsUnitTypes.toString(unit)
@@ -237,6 +236,8 @@ class LoSSettings(QDialog):
         f.setAttribute(distance_index, 0)
         f.setAttribute(size_index, self.default_sampling_size.distance().inUnits(unit))
         layer.dataProvider().addFeature(f)
+
+        size = self.default_sampling_size.distance().inUnits(unit)
 
         for distance in self._distances:
             f = QgsFeature(fields)
@@ -266,8 +267,8 @@ class LoSSettings(QDialog):
 
         self.close()
 
-    def los_maximal_length(self) -> Optional[float]:
+    def los_maximal_length(self) -> Optional[Distance]:
         if self.use_maximal_los_length.isChecked():
-            return self.maximal_los_length.distanceMeters()
+            return self.maximal_los_length.distance()
         else:
             return None
