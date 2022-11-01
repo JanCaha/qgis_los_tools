@@ -122,18 +122,10 @@ class SamplingDistanceMatrix:
 
             if i == 0:
 
-                line = QgsGeometry(
-                    QgsLineString([
-                        origin_point,
-                        origin_point.project(self.get_row_distance(i + 1),
-                                             origin_point.azimuth(direction_point))
-                    ]))
-
-                line = line.densifyByDistance(
-                    distance=np.nextafter(self.get_row_sampling_distance(i), np.Inf))
-
-                line_res = QgsLineString()
-                line_res.fromWkt(line.asWkt())
+                line_res = self.densified_line(
+                    origin_point,
+                    origin_point.project(self.get_row_distance(i + 1),
+                                         origin_point.azimuth(direction_point)), i)
 
                 lines.append(line_res)
 
@@ -143,14 +135,8 @@ class SamplingDistanceMatrix:
 
                     this_line: QgsLineString = lines[-1].clone()
                     this_line.extend(0, self.get_row_distance(i + 1) - self.get_row_distance(i))
-                    this_line = QgsLineString([lines[-1].endPoint(), this_line.endPoint()])
 
-                    line = QgsGeometry(this_line)
-                    line = line.densifyByDistance(
-                        distance=np.nextafter(self.get_row_sampling_distance(i), np.Inf))
-
-                    line_res = QgsLineString()
-                    line_res.fromWkt(line.asWkt())
+                    line_res = self.densified_line(lines[-1].endPoint(), this_line.endPoint(), i)
 
                     lines.append(line_res)
 
@@ -160,3 +146,13 @@ class SamplingDistanceMatrix:
             result_line.append(line_part)
 
         return result_line
+
+    def densified_line(self, start_point: QgsPoint, end_point: QgsPoint,
+                       sampling_row_index: int) -> QgsLineString:
+
+        line = QgsGeometry.fromPolyline([start_point, end_point])
+
+        line = line.densifyByDistance(
+            distance=np.nextafter(self.get_row_sampling_distance(sampling_row_index), np.Inf))
+
+        return QgsLineString([x for x in line.vertices()])
