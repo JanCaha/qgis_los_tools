@@ -100,7 +100,7 @@ def wkt_to_array_points(wkt: str) -> List[List[float]]:
     return array_result
 
 
-def segmentize_line(line: QgsGeometry, segment_length: float) -> QgsLineString:
+def segmentize_los_line(line: QgsGeometry, segment_length: float) -> QgsLineString:
 
     if not isinstance(line, QgsGeometry):
         raise TypeError("`line` should be `QgsGeometry`.")
@@ -111,11 +111,15 @@ def segmentize_line(line: QgsGeometry, segment_length: float) -> QgsLineString:
     if 3 < line.constGet().vertexCount():
         raise ValueError("Should only segmentize lines with at most 3 vertices.")
 
+    return segmentize_line(line, segment_length)
+
+
+def segmentize_line(line: QgsGeometry, segment_length: float) -> QgsLineString:
+
     ideal_length_parts = math.ceil(line.length() / segment_length)
     ideal_length_addition = ideal_length_parts * segment_length - line.length()
 
-    line_extented = QgsLineString(
-        [line.vertexAt(0), line.vertexAt(line.constGet().vertexCount() - 1)])
+    line_extented = QgsLineString([x for x in line.vertices()])
     line_extented.extend(0, ideal_length_addition * 0.9)
 
     line_geom = QgsGeometry(line_extented)
