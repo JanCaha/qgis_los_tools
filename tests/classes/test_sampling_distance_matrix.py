@@ -154,7 +154,7 @@ class SamplingDistanceMatrixTest(QgsProcessingAlgorithmTestCase):
             in line.asWkt())
 
         self.assertTrue(
-            "1994.7643979057593242 0.00000000000011767, 1997.3821989528796621 0.00000000000011782, 2000 0.00000000000011797)"
+            "1994.7643979057593242 0.00000000000012214, 1997.3821989528796621 0.0000000000001223, 2000 0.00000000000012246)"
             in line.asWkt())
 
     def test_values_minus_one(self):
