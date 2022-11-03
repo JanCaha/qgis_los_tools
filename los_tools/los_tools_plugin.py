@@ -50,28 +50,6 @@ class los_toolsPlugin():
         self.toolbar: QToolBar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
         self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
 
-        self.raster_validations_dialog = RasterValidations(iface=self.iface)
-        self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
-
-        self.los_notarget_tool = LosNoTargetMapTool(self.iface)
-        self.los_notarget_tool.deactivated.connect(
-            partial(self.deactivateTool, self.los_notarget_action_name))
-
-        self.create_los_tool = CreateLoSMapTool(
-            self.iface,
-            self.raster_validations_dialog,
-            self.los_settings_dialog,
-            self._layer_LoS,
-        )
-
-        self.create_los_tool.deactivated.connect(
-            partial(self.deactivateTool, self.create_los_action_name))
-
-        self.optimize_point_location_tool = OptimizePointsLocationTool(
-            self.iface.mapCanvas(), self.iface)
-        self.optimize_point_location_tool.deactivated.connect(
-            partial(self.deactivateTool, self.optimize_point_location_action_name))
-
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
 
@@ -131,6 +109,25 @@ class los_toolsPlugin():
                         add_to_toolbar=False,
                         add_to_specific_toolbar=self.toolbar,
                         checkable=True)
+
+        self.raster_validations_dialog = RasterValidations(iface=self.iface)
+        self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
+
+        self.los_notarget_tool = LosNoTargetMapTool(self.iface)
+        self.los_notarget_tool.deactivated.connect(
+            partial(self.deactivateTool, self.los_notarget_action_name))
+
+        self.create_los_tool = CreateLoSMapTool(self.iface, self.raster_validations_dialog,
+                                                self.los_settings_dialog, self._layer_LoS,
+                                                self.add_plugin_los_layer_action)
+
+        self.create_los_tool.deactivated.connect(
+            partial(self.deactivateTool, self.create_los_action_name))
+
+        self.optimize_point_location_tool = OptimizePointsLocationTool(
+            self.iface.mapCanvas(), self.iface)
+        self.optimize_point_location_tool.deactivated.connect(
+            partial(self.deactivateTool, self.optimize_point_location_action_name))
 
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
