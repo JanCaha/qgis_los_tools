@@ -1,15 +1,15 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterMultipleLayers, QgsProcessingParameterDistance,
-                       QgsField, QgsFeature, QgsWkbTypes, QgsPoint, QgsFields, QgsLineString,
-                       QgsProcessingUtils, QgsProcessingException, QgsGeometry)
+                       QgsFeature, QgsWkbTypes, QgsPoint, QgsLineString, QgsProcessingUtils,
+                       QgsProcessingException, QgsGeometry)
 
-from qgis.PyQt.QtCore import QVariant
 from los_tools.tools.util_functions import segmentize_los_line
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.tools.util_functions import get_doc_file
 from los_tools.classes.list_raster import ListOfRasters
+from los_tools.constants.fields import Fields
 
 
 class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
@@ -155,15 +155,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         sampling_distance = self.parameterAsDouble(parameters, self.LINE_DENSITY, context)
         max_los_length = self.parameterAsDouble(parameters, self.MAX_LOS_LENGTH, context)
 
-        fields = QgsFields()
-        fields.append(QgsField(FieldNames.LOS_TYPE, QVariant.String))
-        fields.append(QgsField(FieldNames.ID_OBSERVER, QVariant.Int))
-        fields.append(QgsField(FieldNames.ID_TARGET, QVariant.Int))
-        fields.append(QgsField(FieldNames.OBSERVER_OFFSET, QVariant.Double))
-        fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
-        fields.append(QgsField(FieldNames.OBSERVER_X, QVariant.Double))
-        fields.append(QgsField(FieldNames.OBSERVER_Y, QVariant.Double))
-        fields.append(QgsField(FieldNames.ANGLE_STEP, QVariant.Double))
+        fields = Fields.los_notarget_fields
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context,
                                              fields, QgsWkbTypes.LineString25D,

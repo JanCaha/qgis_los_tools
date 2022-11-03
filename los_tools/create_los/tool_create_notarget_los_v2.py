@@ -1,15 +1,15 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterMultipleLayers, QgsField, QgsFeature, QgsWkbTypes,
-                       QgsPoint, QgsFields, QgsLineString, QgsProcessingFeedback,
-                       QgsFeatureRequest, QgsProcessingUtils, QgsProcessingException)
+                       QgsProcessingParameterMultipleLayers, QgsFeature, QgsWkbTypes, QgsPoint,
+                       QgsProcessingFeedback, QgsFeatureRequest, QgsProcessingUtils,
+                       QgsProcessingException)
 
-from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
 from los_tools.tools.util_functions import get_doc_file
+from los_tools.constants.fields import Fields
 
 
 class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
@@ -154,15 +154,7 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
         distance_matrix = SamplingDistanceMatrix(line_settings_table)
 
-        fields = QgsFields()
-        fields.append(QgsField(FieldNames.LOS_TYPE, QVariant.String))
-        fields.append(QgsField(FieldNames.ID_OBSERVER, QVariant.Int))
-        fields.append(QgsField(FieldNames.ID_TARGET, QVariant.Int))
-        fields.append(QgsField(FieldNames.OBSERVER_OFFSET, QVariant.Double))
-        fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
-        fields.append(QgsField(FieldNames.OBSERVER_X, QVariant.Double))
-        fields.append(QgsField(FieldNames.OBSERVER_Y, QVariant.Double))
-        fields.append(QgsField(FieldNames.ANGLE_STEP, QVariant.Double))
+        fields = Fields.los_notarget_fields
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context,
                                              fields, QgsWkbTypes.LineString25D,
