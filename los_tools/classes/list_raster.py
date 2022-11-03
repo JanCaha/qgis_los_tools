@@ -102,6 +102,21 @@ class ListOfRasters:
 
         return True, ""
 
+    @staticmethod
+    def validate(rasters: List[QgsMapLayer]) -> bool:
+        return (ListOfRasters.validate_crs(rasters)[0] and
+                ListOfRasters.validate_bands(rasters)[0] and
+                ListOfRasters.validate_ordering(rasters)[0] and
+                ListOfRasters.validate_square_cell_size(rasters)[0])
+
+    def crs(self) -> QgsCoordinateReferenceSystem:
+        return self.rasters[0].crs()
+
+    def is_valid(self) -> bool:
+        return (self.validate_crs(self.rasters)[0] and self.validate_bands(self.rasters)[0] and
+                self.validate_ordering(self.rasters)[0] and
+                self.validate_square_cell_size(self.rasters)[0])
+
     def is_empty(self) -> bool:
         if self.rasters:
             return False
