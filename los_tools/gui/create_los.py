@@ -2,12 +2,12 @@ from typing import Optional, Union
 import numpy as np
 from functools import partial
 
-from qgis.PyQt.QtWidgets import (QWidget, QFormLayout, QComboBox, QStackedWidget, QLabel,
-                                 QGroupBox, QStackedLayout, QPushButton)
+from qgis.PyQt.QtWidgets import (QWidget, QFormLayout, QComboBox, QPushButton, QAction)
 from qgis.PyQt.QtCore import (Qt, pyqtSignal)
 from qgis.PyQt.QtGui import (QKeyEvent)
 from qgis.core import (QgsWkbTypes, QgsGeometry, QgsVectorLayer, QgsPointLocator, Qgis, QgsPoint,
-                       QgsPointXY, QgsVertexId, QgsFeature, QgsTask, QgsFields, QgsTaskManager)
+                       QgsPointXY, QgsVertexId, QgsFeature, QgsTask, QgsTaskManager,
+                       QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject)
 from qgis.gui import (QgisInterface, QgsMapToolEdit, QgsDoubleSpinBox, QgsMapMouseEvent,
                       QgsSnapIndicator)
 
@@ -29,7 +29,7 @@ class CreateLoSMapTool(QgsMapToolEdit):
                  raster_validation_dialog: RasterValidations,
                  los_settings_dialog: LoSSettings,
                  los_layer: QgsVectorLayer = None,
-                 store_los_in_plugin_layer: bool = False) -> None:
+                 add_result_action: QAction = None) -> None:
 
         super().__init__(iface.mapCanvas())
         self._iface = iface
@@ -41,6 +41,8 @@ class CreateLoSMapTool(QgsMapToolEdit):
 
         self._raster_validation_dialog = raster_validation_dialog
         self._los_settings_dialog = los_settings_dialog
+
+        self.add_result_action = add_result_action
 
         self._start_point: QgsPointXY = None
 
@@ -83,8 +85,8 @@ class CreateLoSMapTool(QgsMapToolEdit):
             self.hide_widgets()
             self.deactivate()
             return
-        if self._raster_validation_dialog.listOfRasters.is_empty():
-            self.messageEmitted.emit("Tool needs rasters setup in `Raster Validatations` dialog.",
+        if not ListOfRasters.validate(self._raster_validation_dialog.list_of_selected_rasters):
+            self.messageEmitted.emit("Tool needs valid setup in `Raster Validatations` dialog.",
                                      Qgis.Critical)
             self.deactivate()
             return
@@ -222,69 +224,41 @@ class CreateLoSMapTool(QgsMapToolEdit):
         if towards_point:
             self._last_towards_point = QgsPointXY(towards_point.x(), towards_point.y())
 
+    def set_result_action_active(self, active: bool) -> None:
+        if self.add_result_action:
+            self.add_result_action.setEnabled(active)
+
     def add_los_to_layer(self) -> None:
         los_geometry = self._los_rubber_band.asGeometry()
 
         list_of_rasters = self._raster_validation_dialog.listOfRasters
 
-        fields = self._los_layer.fields()
-
-        values = self._los_layer.uniqueValues(fields.indexFromName(FieldNames.ID_OBSERVER))
-        if values:
-            observer_max_id = max(values)
-        else:
-            observer_max_id = 0
-
-        values = self._los_layer.uniqueValues(fields.indexFromName(FieldNames.ID_TARGET))
-        if values:
-            target_max_id = max(values)
-        else:
-            target_max_id = 0
+        # text = self.add_result_action.text()
+        # self.add_result_action.setText("Obtaining data ...")
+        self.set_result_action_active(False)
 
         if los_geometry.get().partCount() == 1:
 
-            line = segmentize_los_line(
+            task = PrepareLoSTask(
                 los_geometry,
-                segment_length=self.floating_widget.sampling_distance.inUnits(
-                    self._los_layer.crs().mapUnits()))
-
-            line = list_of_rasters.add_z_values(line.points())
-
-            f = QgsFeature(fields)
-            f.setGeometry(line)
-            f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL)
-            f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER), int(observer_max_id + 1))
-            f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET), int(target_max_id + 1))
-            f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
-                           float(self.floating_widget.observer_offset))
-            f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_OFFSET),
-                           float(self.floating_widget.target_offset))
-
-            if self.floating_widget.los_global:
-                f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_X),
-                               float(los_geometry.vertexAt(1).x()))
-                f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_Y),
-                               float(los_geometry.vertexAt(1).y()))
-
-            self._los_layer.dataProvider().addFeature(f)
+                self.floating_widget.sampling_distance.inUnits(self._los_layer.crs().mapUnits()),
+                self._los_layer, list_of_rasters, self.floating_widget.observer_offset,
+                self.floating_widget.target_offset, self.floating_widget.los_global,
+                self._iface.mapCanvas().mapSettings().destinationCrs())
 
         else:
 
-            sampling_distance_matrix = SamplingDistanceMatrix(
-                self._los_settings_dialog.create_data_layer())
-            sampling_distance_matrix.replace_minus_one_with_value(
-                list_of_rasters.maximal_diagonal_size())
+            task = PrepareLoSWithoutTargetTask(
+                los_geometry, self._los_layer, list_of_rasters, self._los_settings_dialog,
+                self.floating_widget.observer_offset, self.floating_widget.angle_step,
+                self._iface.mapCanvas().mapSettings().destinationCrs())
 
-            task = PrepareLoSWithoutTargetTask(los_geometry, self._los_layer, list_of_rasters,
-                                               sampling_distance_matrix, fields, observer_max_id,
-                                               target_max_id, self.floating_widget.observer_offset,
-                                               self.floating_widget.angle_step)
+        task.taskCompleted.connect(self.show_finished_message)
 
-            task.taskCompleted.connect(self.show_finished_message)
-
-            self.task_manager.addTask(task)
+        self.task_manager.addTask(task)
 
     def show_finished_message(self) -> None:
+        self.set_result_action_active(True)
         self._iface.messageBar().pushMessage("LoS Without Target Processing Finished",
                                              Qgis.MessageLevel.Info, 2)
 
@@ -443,24 +417,37 @@ class PrepareLoSWithoutTargetTask(QgsTask):
                  lines: QgsGeometry,
                  los_layer: QgsVectorLayer,
                  list_of_rasters: ListOfRasters,
-                 sampling_distance_matrix: SamplingDistanceMatrix,
-                 fields: QgsFields,
-                 observer_max_id: int,
-                 target_max_id: int,
+                 los_settings: LoSSettings,
                  observer_offset: float,
                  angle_step: float,
+                 canvas_crs: QgsCoordinateReferenceSystem,
                  description: str = "Prepare LoS without Target",
                  flags: Union['QgsTask.Flags', 'QgsTask.Flag'] = QgsTask.Flag.CanCancel) -> None:
         super().__init__(description, flags)
         self.lines = lines
         self.list_of_rasters = list_of_rasters
-        self.sampling_distance_matrix = sampling_distance_matrix
-        self.fields = fields
-        self.observer_max_id = observer_max_id
-        self.target_max_id = target_max_id
+
+        self.sampling_distance_matrix = SamplingDistanceMatrix(los_settings.create_data_layer())
+        self.sampling_distance_matrix.replace_minus_one_with_value(
+            list_of_rasters.maximal_diagonal_size())
+
+        self.fields = los_layer.fields()
         self.los_layer = los_layer
         self.observer_offset = observer_offset
         self.angle_step = angle_step
+        self.canvas_crs = canvas_crs
+
+        values = self.los_layer.uniqueValues(self.fields.indexFromName(FieldNames.ID_OBSERVER))
+        if values:
+            self.observer_max_id = max(values)
+        else:
+            self.observer_max_id = 0
+
+        values = self.los_layer.uniqueValues(self.fields.indexFromName(FieldNames.ID_TARGET))
+        if values:
+            self.target_max_id = max(values)
+        else:
+            self.target_max_id = 0
 
         self.setDependentLayers([self.los_layer])
 
@@ -472,6 +459,12 @@ class PrepareLoSWithoutTargetTask(QgsTask):
 
         feature_template = QgsFeature(self.fields)
 
+        ctToRaster = QgsCoordinateTransform(self.canvas_crs, self.list_of_rasters.crs(),
+                                            QgsProject.instance())
+
+        ctToLayer = QgsCoordinateTransform(self.list_of_rasters.crs(), self.los_layer.crs(),
+                                           QgsProject.instance())
+
         j = 1
         while (partsIterator.hasNext()):
 
@@ -481,9 +474,14 @@ class PrepareLoSWithoutTargetTask(QgsTask):
             line = self.sampling_distance_matrix.build_line(observer_point,
                                                             geom.vertexAt(QgsVertexId(0, 0, 1)))
 
+            line.transform(ctToRaster)
+
             line = self.list_of_rasters.add_z_values(line.points())
 
             f = QgsFeature(feature_template)
+
+            line.transform(ctToLayer)
+
             f.setGeometry(line)
 
             azimuth = observer_point.azimuth(geom.vertexAt(QgsVertexId(0, 0, 1)))
@@ -502,5 +500,84 @@ class PrepareLoSWithoutTargetTask(QgsTask):
             self.los_layer.dataProvider().addFeature(f)
             self.setProgress((j / number_of_lines) * 100)
             j += 1
+
+        return True
+
+
+class PrepareLoSTask(QgsTask):
+
+    def __init__(self,
+                 los_geometry: QgsGeometry,
+                 segment_length: float,
+                 los_layer: QgsVectorLayer,
+                 list_of_rasters: ListOfRasters,
+                 observer_offset: float,
+                 target_offset: float,
+                 los_global: bool,
+                 canvas_crs: QgsCoordinateReferenceSystem,
+                 description: str = "Prepare LoS without Target",
+                 flags: Union['QgsTask.Flags', 'QgsTask.Flag'] = QgsTask.Flag.CanCancel) -> None:
+        super().__init__(description, flags)
+        self.los_geometry = los_geometry
+        self.segment_lenght = segment_length
+        self.list_of_rasters = list_of_rasters
+
+        self.fields = los_layer.fields()
+        self.los_layer = los_layer
+        self.observer_offset = observer_offset
+        self.target_offset = target_offset
+        self.los_global = los_global
+        self.canvas_crs = canvas_crs
+
+        values = self.los_layer.uniqueValues(self.fields.indexFromName(FieldNames.ID_OBSERVER))
+        if values:
+            self.observer_max_id = max(values)
+        else:
+            self.observer_max_id = 0
+
+        values = self.los_layer.uniqueValues(self.fields.indexFromName(FieldNames.ID_TARGET))
+        if values:
+            self.target_max_id = max(values)
+        else:
+            self.target_max_id = 0
+
+        self.setDependentLayers([self.los_layer])
+
+    def run(self):
+
+        ct = QgsCoordinateTransform(self.canvas_crs, self.list_of_rasters.crs(),
+                                    QgsProject.instance())
+
+        line = segmentize_los_line(self.los_geometry, self.segment_lenght)
+
+        line.transform(ct)
+
+        line = self.list_of_rasters.add_z_values(line.points())
+
+        f = QgsFeature(self.fields)
+
+        ct = QgsCoordinateTransform(self.list_of_rasters.crs(), self.los_layer.crs(),
+                                    QgsProject.instance())
+
+        line.transform(ct)
+
+        f.setGeometry(line)
+        f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER), int(self.observer_max_id + 1))
+        f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET), int(self.target_max_id + 1))
+        f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
+                       float(self.floating_widget.observer_offset))
+        f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_OFFSET),
+                       float(self.floating_widget.target_offset))
+
+        if self.los_global:
+            f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_X),
+                           float(self.los_geometry.vertexAt(1).x()))
+            f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_Y),
+                           float(self.los_geometry.vertexAt(1).y()))
+            f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_GLOBAL)
+        else:
+            f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL)
+
+        self.los_layer.dataProvider().addFeature(f)
 
         return True
