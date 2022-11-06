@@ -24,6 +24,8 @@ from ..classes.list_raster import ListOfRasters
 
 class CreateLoSMapTool(QgsMapToolEdit):
 
+    featuresAdded = pyqtSignal()
+
     def __init__(self,
                  iface: QgisInterface,
                  raster_validation_dialog: RasterValidations,
@@ -62,9 +64,6 @@ class CreateLoSMapTool(QgsMapToolEdit):
 
     def set_los_layer(self, layer: QgsVectorLayer) -> None:
         self._los_layer = layer
-
-    def set_los_storing(self, allow_storing: bool = False) -> None:
-        self.floating_widget._support_storing = allow_storing
 
     def show_widgets(self) -> None:
         self.user_input_widget.show()
@@ -253,11 +252,12 @@ class CreateLoSMapTool(QgsMapToolEdit):
                 self.floating_widget.observer_offset, self.floating_widget.angle_step,
                 self._iface.mapCanvas().mapSettings().destinationCrs())
 
-        task.taskCompleted.connect(self.show_finished_message)
+        task.taskCompleted.connect(self.task_finished)
 
         self.task_manager.addTask(task)
 
-    def show_finished_message(self) -> None:
+    def task_finished(self) -> None:
+        self.featuresAdded.emit()
         self.set_result_action_active(True)
         self._iface.messageBar().pushMessage("LoS Without Target Processing Finished",
                                              Qgis.MessageLevel.Info, 2)
