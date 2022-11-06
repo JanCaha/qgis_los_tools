@@ -84,7 +84,7 @@ class los_toolsPlugin():
                         add_to_toolbar=False,
                         add_to_specific_toolbar=self.toolbar)
 
-        self.add_action(icon_path=get_icon_path("los_tools_icon.svg"),
+        self.add_action(icon_path=get_icon_path("los_settings.svg"),
                         text="Calculate Notarget Los Settings",
                         callback=self.open_dialog_los_settings,
                         add_to_toolbar=False,
@@ -110,7 +110,7 @@ class los_toolsPlugin():
                         add_to_specific_toolbar=self.toolbar,
                         checkable=True)
 
-        self.add_action(icon_path=get_icon_path("los_no_target_tool.svg"),
+        self.add_action(icon_path=get_icon_path("los_tools_icon.svg"),
                         text=self.create_los_action_name,
                         callback=self.run_create_los_tool,
                         add_to_toolbar=False,
