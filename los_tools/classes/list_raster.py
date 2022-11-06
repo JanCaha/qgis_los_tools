@@ -104,6 +104,9 @@ class ListOfRasters:
 
     @staticmethod
     def validate(rasters: List[QgsMapLayer]) -> bool:
+        if not rasters:
+            return False
+
         return (ListOfRasters.validate_crs(rasters)[0] and
                 ListOfRasters.validate_bands(rasters)[0] and
                 ListOfRasters.validate_ordering(rasters)[0] and
