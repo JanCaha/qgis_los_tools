@@ -271,8 +271,6 @@ class LoSNoTargetInputWidget(QWidget):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
-        self._support_storing: bool = False
-
         self.form_layout = QFormLayout()
         self.form_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.form_layout)
@@ -397,18 +395,10 @@ class LoSNoTargetInputWidget(QWidget):
         self.disableAddLos()
 
     def enableAddLos(self) -> None:
-        if self._support_storing:
-            self._add_los_to_layer.setEnabled(True)
+        self._add_los_to_layer.setEnabled(True)
 
     def disableAddLos(self) -> None:
         self._add_los_to_layer.setEnabled(False)
-
-    def set_support_storing(self, support_storing: bool) -> None:
-        self._support_storing = support_storing
-
-    @property
-    def support_storing(self) -> bool:
-        return self._support_storing
 
 
 class PrepareLoSWithoutTargetTask(QgsTask):
