@@ -564,10 +564,8 @@ class PrepareLoSTask(QgsTask):
         f.setGeometry(line)
         f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER), int(self.observer_max_id + 1))
         f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET), int(self.target_max_id + 1))
-        f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
-                       float(self.floating_widget.observer_offset))
-        f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_OFFSET),
-                       float(self.floating_widget.target_offset))
+        f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET), float(self.observer_offset))
+        f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_OFFSET), float(self.target_offset))
 
         if self.los_global:
             f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_X),
