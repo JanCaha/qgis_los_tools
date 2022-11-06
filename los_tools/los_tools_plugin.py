@@ -2,13 +2,14 @@ import os
 import sys
 import inspect
 from functools import partial
+import re
 
 from qgis.core import (QgsApplication, QgsMemoryProviderUtils, QgsWkbTypes,
                        QgsCoordinateReferenceSystem, QgsProject, QgsVectorLayer)
 from qgis.gui import QgisInterface
 
 from qgis.PyQt.QtGui import (QIcon)
-from qgis.PyQt.QtWidgets import (QAction, QToolBar)
+from qgis.PyQt.QtWidgets import (QAction, QToolBar, QToolButton, QMenu)
 
 from .los_tools_provider import los_toolsProvider
 from .gui.dialog_tool_set_camera import SetCameraTool
@@ -37,8 +38,7 @@ class los_toolsPlugin():
 
     def __init__(self, iface):
 
-        self.use_plugin_los_layer_action: QAction = None
-        self.add_plugin_los_layer_action: QAction = None
+        self.add_los_layer_action: QAction = None
         self._layer_LoS: QgsVectorLayer = None
 
         self.iface: QgisInterface = iface
@@ -56,20 +56,27 @@ class los_toolsPlugin():
     def initGui(self):
         self.initProcessing()
 
-        self.use_plugin_los_layer_action = self.add_action(icon_path=None,
-                                                           text="Use Plugin Layer",
-                                                           callback=self.set_use_plugin_los_layer,
-                                                           add_to_toolbar=False,
-                                                           add_to_specific_toolbar=self.toolbar,
-                                                           checkable=True)
+        self.add_los_layer_action = self.add_action(icon_path=get_icon_path("add_los_layer.svg"),
+                                                    text="Add Plugin Layer To Project",
+                                                    callback=self.add_plugin_los_layer_to_project,
+                                                    add_to_toolbar=False)
+        self.add_los_layer_action.setEnabled(True)
 
-        self.add_plugin_los_layer_action = self.add_action(
-            icon_path=None,
-            text="Add Plugin Layer To Project",
-            callback=self.add_plugin_los_layer_to_project,
-            add_to_toolbar=False,
-            add_to_specific_toolbar=self.toolbar)
-        self.add_plugin_los_layer_action.setEnabled(False)
+        self.empty_los_layer_action = self.add_action(
+            icon_path=get_icon_path("remove_los_layer.svg"),
+            text="Empty LoS Layer Features",
+            callback=self.reset_los_layer,
+            add_to_toolbar=False)
+
+        toolButton = QToolButton()
+        toolButton.setText("LoS Layer")
+        toolButton.setIcon(QIcon(get_icon_path("los_layer_menu.svg")))
+        menu = QMenu()
+        toolButton.setMenu(menu)
+        toolButton.setPopupMode(QToolButton.MenuButtonPopup)
+        menu.addAction(self.add_los_layer_action)
+        menu.addAction(self.empty_los_layer_action)
+        self.toolbar.addWidget(toolButton)
 
         self.add_action(icon_path=get_icon_path("camera.svg"),
                         text="Set Camera",
@@ -117,17 +124,20 @@ class los_toolsPlugin():
         self.los_notarget_tool.deactivated.connect(
             partial(self.deactivateTool, self.los_notarget_action_name))
 
-        self.create_los_tool = CreateLoSMapTool(self.iface, self.raster_validations_dialog,
-                                                self.los_settings_dialog, self._layer_LoS,
-                                                self.add_plugin_los_layer_action)
-
-        self.create_los_tool.deactivated.connect(
-            partial(self.deactivateTool, self.create_los_action_name))
-
         self.optimize_point_location_tool = OptimizePointsLocationTool(
             self.iface.mapCanvas(), self.iface)
         self.optimize_point_location_tool.deactivated.connect(
             partial(self.deactivateTool, self.optimize_point_location_action_name))
+
+        self.reset_los_layer()
+
+        self.create_los_tool = CreateLoSMapTool(self.iface, self.raster_validations_dialog,
+                                                self.los_settings_dialog, self._layer_LoS,
+                                                self.add_los_layer_action)
+
+        self.create_los_tool.deactivated.connect(
+            partial(self.deactivateTool, self.create_los_action_name))
+        self.create_los_tool.featuresAdded.connect(self.update_actions_layer_text)
 
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
@@ -137,6 +147,8 @@ class los_toolsPlugin():
             self.iface.removeToolBarIcon(action)
 
         del self.toolbar
+
+        self._layer_LoS = None
 
     def add_action(self,
                    icon_path,
@@ -239,6 +251,7 @@ class los_toolsPlugin():
     def reset_los_layer(self) -> None:
         self._layer_LoS = None
         self._layer_LoS = self._plugin_los_layer()
+        self.update_actions_layer_text()
 
     def add_plugin_los_layer_to_project(self) -> None:
         if self._layer_LoS:
@@ -246,16 +259,17 @@ class los_toolsPlugin():
             self.reset_los_layer()
             self.create_los_tool.set_los_layer(self._layer_LoS)
 
-    def set_use_plugin_los_layer(self) -> None:
+    def update_actions_layer_text(self) -> None:
+        self.update_action_number_features_text(self.empty_los_layer_action)
+        self.update_action_number_features_text(self.add_los_layer_action)
 
-        if self.use_plugin_los_layer:
-            self._layer_LoS = self._plugin_los_layer()
-
-        self.add_plugin_los_layer_action.setEnabled(self.use_plugin_los_layer)
-
-        self.create_los_tool.set_los_layer(self._layer_LoS)
-        self.create_los_tool.set_los_storing(self.use_plugin_los_layer)
-
-    @property
-    def use_plugin_los_layer(self) -> bool:
-        return self.use_plugin_los_layer_action.isChecked()
+    def update_action_number_features_text(self, action: QAction) -> None:
+        text = action.text()
+        pattern = r"\([0-9]+ feature/s\)"
+        text_part = f"({self._layer_LoS.dataProvider().featureCount()} feature/s)"
+        match = re.search(pattern, text)
+        if match:
+            text = re.sub(pattern, text_part, text)
+        else:
+            text = f"{text} {text_part}"
+        action.setText(text)
