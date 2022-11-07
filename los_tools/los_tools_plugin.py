@@ -78,11 +78,14 @@ class los_toolsPlugin():
         menu.addAction(self.empty_los_layer_action)
         self.toolbar.addWidget(toolButton)
 
-        self.add_action(icon_path=get_icon_path("camera.svg"),
-                        text="Set Camera",
-                        callback=self.run_tool_set_camera,
+        self.add_action(icon_path=get_icon_path("los_tools_icon.svg"),
+                        text=self.create_los_action_name,
+                        callback=self.run_create_los_tool,
                         add_to_toolbar=False,
-                        add_to_specific_toolbar=self.toolbar)
+                        add_to_specific_toolbar=self.toolbar,
+                        checkable=True)
+
+        self.toolbar.addSeparator()
 
         self.add_action(icon_path=get_icon_path("los_settings.svg"),
                         text="Calculate Notarget Los Settings",
@@ -95,6 +98,8 @@ class los_toolsPlugin():
                         callback=self.open_dialog_raster_validations,
                         add_to_toolbar=False,
                         add_to_specific_toolbar=self.toolbar)
+
+        self.toolbar.addSeparator()
 
         self.add_action(icon_path=get_icon_path("los_no_target_tool.svg"),
                         text=self.los_notarget_action_name,
@@ -110,12 +115,13 @@ class los_toolsPlugin():
                         add_to_specific_toolbar=self.toolbar,
                         checkable=True)
 
-        self.add_action(icon_path=get_icon_path("los_tools_icon.svg"),
-                        text=self.create_los_action_name,
-                        callback=self.run_create_los_tool,
+        self.toolbar.addSeparator()
+
+        self.add_action(icon_path=get_icon_path("camera.svg"),
+                        text="Set Camera",
+                        callback=self.run_tool_set_camera,
                         add_to_toolbar=False,
-                        add_to_specific_toolbar=self.toolbar,
-                        checkable=True)
+                        add_to_specific_toolbar=self.toolbar)
 
         self.raster_validations_dialog = RasterValidations(iface=self.iface)
         self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
