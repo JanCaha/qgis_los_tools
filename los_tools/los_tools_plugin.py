@@ -18,8 +18,8 @@ from .gui.dialog_raster_validations import RasterValidations
 from .constants.plugin import PluginConstants
 from .constants.fields import Fields
 from .utils import get_icon_path
-from .gui.los_without_target import LosNoTargetMapTool
-from .gui.optimize_points_location import OptimizePointsLocationTool
+from .gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
+from .gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
 from .gui.create_los_tool import CreateLoSMapTool
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
