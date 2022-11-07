@@ -131,9 +131,11 @@ class LoSSettings(QDialog):
             format(self.object_size.distance(), self.object_distance.distance(),
                    self.object_angle_size.value()),
             "With this angular sampling of lines-of-sight, it is guaranteed to hit the object at least once.\n",
-            "The approach can be done, to simplify sampling on each LoS. With growing distance from observer, it is possible to sample less frequently.\n",
+            "The approach can be done, to simplify sampling on each LoS. With growing distance from observer, ",
+            "it is possible to sample less frequently.\n",
             "Below the calculation of sampling distances for various distances can be performed.\n",
-            "Default sampling size is used for distances below the first specified distance. Then after each specified distance the calculated sampling distance is used."
+            "Default sampling size is used for distances below the first specified distance. ",
+            "Then after each specified distance the calculated sampling distance is used."
         ]
         self.text.setText("".join(text))
 
