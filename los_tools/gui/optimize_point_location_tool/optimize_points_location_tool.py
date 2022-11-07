@@ -1,23 +1,24 @@
 from typing import Optional
 
-from qgis.PyQt.QtWidgets import (QWidget, QFormLayout)
-from qgis.PyQt.QtCore import (Qt, pyqtSignal)
+from qgis.PyQt.QtCore import (Qt)
 from qgis.PyQt.QtGui import (QColor)
+from qgis.PyQt.QtWidgets import (QWidget)
 from qgis.core import (QgsPointXY, QgsWkbTypes, QgsGeometry, QgsPoint, QgsPointLocator, Qgis,
                        QgsVectorDataProvider, QgsSnappingConfig, QgsTolerance, QgsCircle,
-                       QgsRasterLayer, QgsMapLayerProxyModel, QgsUnitTypes, QgsRectangle)
-from qgis.gui import (QgisInterface, QgsMapToolEdit, QgsDoubleSpinBox, QgsRubberBand,
-                      QgsMapMouseEvent, QgsMapCanvas, QgsMapLayerComboBox, QgsSnapIndicator)
+                       QgsRasterLayer, QgsUnitTypes, QgsRectangle)
+from qgis.gui import (QgisInterface, QgsRubberBand, QgsMapMouseEvent, QgsMapCanvas,
+                      QgsSnapIndicator, QgsMapToolAdvancedDigitizing)
 
-from .utils import prepare_user_input_widget
-from ..create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
+from los_tools.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
+from .optimize_points_location_widget import OptimizePointLocationInputWidget
 
 
-class OptimizePointsLocationTool(QgsMapToolEdit):
+class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
 
     def __init__(self, canvas: QgsMapCanvas, iface: QgisInterface) -> None:
-        super().__init__(canvas)
+        super().__init__(canvas, iface.cadDockWidget())
         self._canvas = canvas
+        self._iface = iface
 
         self.snap_marker = QgsSnapIndicator(self._canvas)
 
@@ -44,24 +45,36 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
         self._pointId: int = None
         self._candidate_point: QgsPointXY = None
 
-        self.floating_widget = OptimizePointLocationInputWidget()
-        self.floating_widget.hide()
-        self.floating_widget.valuesChanged.connect(self.set_values_from_widget)
+        self._widget: QWidget = None
 
-        self.user_input_widget = prepare_user_input_widget(self._canvas, self.floating_widget)
+    def create_widget(self):
+        self.delete_widget()
+
+        self._widget = OptimizePointLocationInputWidget()
+        self._iface.addUserInputWidget(self._widget)
+        self._widget.setFocus(Qt.TabFocusReason)
+
+        self._widget.valuesChanged.connect(self.set_values_from_widget)
+        self.set_values_from_widget()
+
+    def delete_widget(self):
+        if self._widget:
+            self._widget.releaseKeyboard()
+            self._widget.deleteLater()
+            self._widget = None
 
     def set_values_from_widget(self) -> None:
-        self._circle_radius = self.floating_widget.distance
-        if self.floating_widget.raster_layer:
-            self._raster = self.floating_widget.raster_layer.dataProvider()
+        self._circle_radius = self._widget.distance
+        if self._widget.raster_layer:
+            self._raster = self._widget.raster_layer.dataProvider()
             self._raster_extent = self._raster.extent()
             self._cell_size = self._raster_extent.width() / self._raster.xSize()
             self._distance_cells = int(self._circle_radius / self._cell_size)
             self._no_data_value = self._raster.sourceNoDataValue(1)
 
     def activate(self) -> None:
-        self.floating_widget.show()
-        self.user_input_widget.show()
+        super(OptimizePointsLocationTool, self).activate()
+        self.create_widget()
         self.messageDiscarded.emit()
         if self.currentVectorLayer() is None:
             self.messageEmitted.emit(
@@ -97,23 +110,21 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
             self._canvas.unsetMapTool(self)
             return
         self._distance_unit = self.currentVectorLayer().crs().mapUnits()
-        self.floating_widget.set_units(self._distance_unit)
-        return super().activate()
+        self._widget.set_units(self._distance_unit)
 
     def clean(self) -> None:
-        self.circle_rubber.hide()
-        self.point_rubber.hide()
         self._point = None
         self._pointId = None
         self._candidate_point = None
         self.snap_marker.setVisible(False)
+        self.point_rubber.hide()
+        self.circle_rubber.hide()
         return super().clean()
 
     def deactivate(self) -> None:
         self.clean()
-        self.floating_widget.hide()
-        self.user_input_widget.hide()
-        return super().deactivate()
+        self.delete_widget()
+        super(OptimizePointsLocationTool, self).deactivate()
 
     def draw_rubber_bands(self, point: QgsPointXY = None) -> None:
         if point:
@@ -180,47 +191,5 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
                 self._pointId, QgsGeometry.fromPointXY(self._candidate_point))
             self.currentVectorLayer().endEditCommand()
             self.currentVectorLayer().triggerRepaint()
-            # self.currentVectorLayer().reload()
             self.clean()
         return super().canvasReleaseEvent(e)
-
-
-class OptimizePointLocationInputWidget(QWidget):
-
-    valuesChanged = pyqtSignal()
-
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
-        super().__init__(parent)
-        layout = QFormLayout()
-        self.setLayout(layout)
-
-        self._layer = QgsMapLayerComboBox(self)
-        self._layer.setFilters(QgsMapLayerProxyModel.Filter.RasterLayer)
-        self._layer.layerChanged.connect(self.emit_values_changed)
-        self._distance = QgsDoubleSpinBox(self)
-        self._distance.setMinimum(0)
-        self._distance.setMaximum(9999999)
-        self._distance.setValue(10)
-        self._distance.setClearValue(10)
-        self._distance.valueChanged.connect(self.emit_values_changed)
-
-        layout.addRow("Layer", self._layer)
-        layout.addRow("Search Distance", self._distance)
-
-    def emit_values_changed(self) -> None:
-        self.valuesChanged.emit()
-
-    def show(self) -> None:
-        self.valuesChanged.emit()
-        return super().show()
-
-    def set_units(self, unit: QgsUnitTypes) -> None:
-        self._distance.setSuffix(" {}".format(QgsUnitTypes.toString(unit)))
-
-    @property
-    def raster_layer(self) -> QgsRasterLayer:
-        return self._layer.currentLayer()
-
-    @property
-    def distance(self) -> float:
-        return self._distance.value()
