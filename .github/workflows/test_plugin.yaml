@@ -22,12 +22,11 @@ jobs:
 
       - name: Add Python Path
         run: | 
-           echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+           echo "PYTHONPATH=$PYTHONPATH:$PWD" >> $GITHUB_ENV
 
       - name: Print Python Path
         run: echo $PYTHONPATH
 
- 
       - name: Run Tests
         run: |
           pytest tests --cov=los_tools --cov-report=term-missing:skip-covered -rP -s
