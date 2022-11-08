@@ -8,7 +8,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
 from los_tools.classes.classes_los import LoSWithoutTarget
-from los_tools.tools.util_functions import wkt_to_array_points, get_los_type, get_doc_file
+from los_tools.processing.tools.util_functions import wkt_to_array_points, get_los_type, get_doc_file
 from los_tools.constants.names_constants import NamesConstants
 
 

@@ -1,18 +1,18 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterMultipleLayers, QgsFeature, QgsWkbTypes, QgsPoint,
-                       QgsProcessingFeedback, QgsFeatureRequest, QgsProcessingUtils,
-                       QgsProcessingException)
+                       QgsProcessingParameterMultipleLayers, QgsProcessingParameterDistance,
+                       QgsFeature, QgsWkbTypes, QgsPoint, QgsLineString, QgsProcessingUtils,
+                       QgsProcessingException, QgsGeometry)
 
+from los_tools.processing.tools.util_functions import segmentize_los_line
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
+from los_tools.processing.tools.util_functions import get_doc_file
 from los_tools.classes.list_raster import ListOfRasters
-from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
-from los_tools.tools.util_functions import get_doc_file
 from los_tools.constants.fields import Fields
 
 
-class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
+class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
     OBSERVER_POINTS_LAYER = "ObserverPoints"
     OBSERVER_ID_FIELD = "ObserverIdField"
@@ -21,20 +21,15 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
     TARGET_ID_FIELD = "TargetIdField"
     TARGET_DEFINITION_ID_FIELD = "TargetDefinitionIdField"
     OUTPUT_LAYER = "OutputLayer"
-
+    LINE_DENSITY = "LineDensity"
+    MAX_LOS_LENGTH = "MaxLoSLength"
     DEM_RASTERS = "DemRasters"
-    LINE_SETTINGS_TABLE = "LineSettingsTable"
 
     def initAlgorithm(self, config=None):
 
         self.addParameter(
             QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers",
                                                  QgsProcessing.TypeRaster))
-
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(self.LINE_SETTINGS_TABLE,
-                                                "Sampling distance - distance table",
-                                                [QgsProcessing.TypeVector]))
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.OBSERVER_POINTS_LAYER,
@@ -72,6 +67,23 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
                                         parentLayerParameterName=self.TARGET_POINTS_LAYER,
                                         type=QgsProcessingParameterField.Numeric,
                                         optional=False))
+
+        self.addParameter(
+            QgsProcessingParameterDistance(self.LINE_DENSITY,
+                                           "LoS sampling distance",
+                                           parentParameterName=self.OBSERVER_POINTS_LAYER,
+                                           defaultValue=1,
+                                           minValue=0.01,
+                                           maxValue=1000.0,
+                                           optional=False))
+
+        self.addParameter(
+            QgsProcessingParameterDistance(self.MAX_LOS_LENGTH,
+                                           "Maximal length of LoS (0 means unlimited)",
+                                           parentParameterName=self.OBSERVER_POINTS_LAYER,
+                                           defaultValue=0,
+                                           minValue=0,
+                                           optional=False))
 
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
@@ -114,17 +126,12 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         if not correct:
             return correct, msg
 
-        line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE,
-                                                          context)
-
-        validation, msg = SamplingDistanceMatrix.validate_table(line_settings_table)
-
-        if not validation:
-            return validation, msg
-
         return super().checkParameterValues(parameters, context)
 
-    def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
+    def processAlgorithm(self, parameters, context, feedback):
+
+        list_rasters = ListOfRasters(
+            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
 
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
 
@@ -145,14 +152,8 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         target_definition_id_field = self.parameterAsString(parameters,
                                                             self.TARGET_DEFINITION_ID_FIELD,
                                                             context)
-
-        list_rasters = ListOfRasters(
-            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
-
-        line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE,
-                                                          context)
-
-        distance_matrix = SamplingDistanceMatrix(line_settings_table)
+        sampling_distance = self.parameterAsDouble(parameters, self.LINE_DENSITY, context)
+        max_los_length = self.parameterAsDouble(parameters, self.MAX_LOS_LENGTH, context)
 
         fields = Fields.los_notarget_fields
 
@@ -167,60 +168,72 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
         observers_iterator = observers_layer.getFeatures()
 
-        distance_matrix.replace_minus_one_with_value(list_rasters.maximal_diagonal_size())
+        max_length_extension = list_rasters.maximal_diagonal_size()
 
-        i = 0
+        for observer_count, observer_feature in enumerate(observers_iterator):
 
-        for observer_feature in observers_iterator:
+            targets_iterators = targets_layer.getFeatures()
 
-            request = QgsFeatureRequest()
-            request.setFilterExpression("{} = {}".format(target_definition_id_field,
-                                                         observer_feature.attribute(observers_id)))
-
-            targets_iterators = targets_layer.getFeatures(request)
-
-            for target_feature in targets_iterators:
+            for target_count, target_feature in enumerate(targets_iterators):
 
                 if feedback.isCanceled():
                     break
 
-                start_point = QgsPoint(observer_feature.geometry().asPoint())
-                direction_point = QgsPoint(target_feature.geometry().asPoint())
+                if observer_feature.attribute(observers_id) == target_feature.attribute(
+                        target_definition_id_field):
 
-                line = distance_matrix.build_line(start_point, direction_point)
+                    start_point = QgsPoint(observer_feature.geometry().asPoint())
+                    end_point = QgsPoint(target_feature.geometry().asPoint())
+                    line = QgsLineString([start_point, end_point])
 
-                line = list_rasters.add_z_values(line.points())
+                    line_temp = line.clone()
 
-                f = QgsFeature(fields)
-                f.setGeometry(line)
-                f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_NO_TARGET)
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
-                               int(observer_feature.attribute(observers_id)))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
-                               int(target_feature.attribute(targets_id)))
-                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
-                               float(observer_feature.attribute(observers_offset)))
-                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
-                               target_feature.attribute(FieldNames.AZIMUTH))
-                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_X),
-                               observer_feature.geometry().asPoint().x())
-                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_Y),
-                               observer_feature.geometry().asPoint().y())
-                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP),
-                               target_feature.attribute(FieldNames.ANGLE_STEP_POINTS))
+                    if max_los_length != 0:
+                        distance_base = start_point.distance(end_point.x(), end_point.y())
+                        line_temp.extend(0, max_los_length - distance_base)
+                    else:
+                        line_temp.extend(0, max_length_extension)
 
-                sink.addFeature(f)
+                    line = QgsGeometry.fromPolyline([
+                        QgsPoint(observer_feature.geometry().asPoint()),
+                        QgsPoint(target_feature.geometry().asPoint()),
+                        line_temp.endPoint()
+                    ])
 
-                feedback.setProgress((i / feature_count) * 100)
-                i += 1
+                    line = segmentize_los_line(line, segment_length=sampling_distance)
+
+                    line = list_rasters.add_z_values(line.points())
+
+                    f = QgsFeature(fields)
+                    f.setGeometry(line)
+                    f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE),
+                                   NamesConstants.LOS_NO_TARGET)
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
+                                   int(observer_feature.attribute(observers_id)))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
+                                   int(target_feature.attribute(targets_id)))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
+                                   float(observer_feature.attribute(observers_offset)))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
+                                   target_feature.attribute(FieldNames.AZIMUTH))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_X),
+                                   observer_feature.geometry().asPoint().x())
+                    f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_Y),
+                                   observer_feature.geometry().asPoint().y())
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP),
+                                   target_feature.attribute(FieldNames.ANGLE_STEP_POINTS))
+
+                    sink.addFeature(f)
+
+                    feedback.setProgress((target_count / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
     def name(self):
-        return "notargetlos2"
+        return "notargetlos"
 
     def displayName(self):
-        return "Create No Target LoS V2"
+        return "Create No Target LoS"
 
     def group(self):
         return "LoS Creation"
@@ -229,10 +242,10 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
         return "loscreate"
 
     def createInstance(self):
-        return CreateNoTargetLosAlgorithmV2()
+        return CreateNoTargetLosAlgorithm()
 
     def helpUrl(self):
-        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los_v2/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los/"
 
     def shortHelpString(self):
         return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)

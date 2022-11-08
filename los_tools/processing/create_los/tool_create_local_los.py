@@ -1,28 +1,27 @@
-from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterMultipleLayers, QgsProcessingParameterDistance,
-                       QgsFeature, QgsWkbTypes, QgsPoint, QgsLineString, QgsProcessingUtils,
-                       QgsProcessingException, QgsGeometry)
+from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterMultipleLayers,
+                       QgsProcessingParameterFeatureSource, QgsProcessingParameterField,
+                       QgsProcessingParameterFeatureSink, QgsProcessingParameterDistance,
+                       QgsFeature, QgsWkbTypes, QgsPoint, QgsGeometry, QgsProcessingUtils,
+                       QgsProcessingException)
 
-from los_tools.tools.util_functions import segmentize_los_line
+from los_tools.processing.tools.util_functions import segmentize_los_line
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
-from los_tools.tools.util_functions import get_doc_file
+from los_tools.processing.tools.util_functions import get_doc_file
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.constants.fields import Fields
 
 
-class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
+class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
     OBSERVER_POINTS_LAYER = "ObserverPoints"
     OBSERVER_ID_FIELD = "ObserverIdField"
     OBSERVER_OFFSET_FIELD = "ObserverOffset"
     TARGET_POINTS_LAYER = "TargetPoints"
     TARGET_ID_FIELD = "TargetIdField"
-    TARGET_DEFINITION_ID_FIELD = "TargetDefinitionIdField"
+    TARGET_OFFSET_FIELD = "TargetOffset"
     OUTPUT_LAYER = "OutputLayer"
     LINE_DENSITY = "LineDensity"
-    MAX_LOS_LENGTH = "MaxLoSLength"
     DEM_RASTERS = "DemRasters"
 
     def initAlgorithm(self, config=None):
@@ -62,8 +61,8 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                                         optional=False))
 
         self.addParameter(
-            QgsProcessingParameterField(self.TARGET_DEFINITION_ID_FIELD,
-                                        "Target and Observer agreement ID field",
+            QgsProcessingParameterField(self.TARGET_OFFSET_FIELD,
+                                        "Target offset field",
                                         parentLayerParameterName=self.TARGET_POINTS_LAYER,
                                         type=QgsProcessingParameterField.Numeric,
                                         optional=False))
@@ -75,14 +74,6 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                                            defaultValue=1,
                                            minValue=0.01,
                                            maxValue=1000.0,
-                                           optional=False))
-
-        self.addParameter(
-            QgsProcessingParameterDistance(self.MAX_LOS_LENGTH,
-                                           "Maximal length of LoS (0 means unlimited)",
-                                           parentParameterName=self.OBSERVER_POINTS_LAYER,
-                                           defaultValue=0,
-                                           minValue=0,
                                            optional=False))
 
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
@@ -149,13 +140,11 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                 self.invalidSourceError(parameters, self.TARGET_POINTS_LAYER))
 
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
-        target_definition_id_field = self.parameterAsString(parameters,
-                                                            self.TARGET_DEFINITION_ID_FIELD,
-                                                            context)
-        sampling_distance = self.parameterAsDouble(parameters, self.LINE_DENSITY, context)
-        max_los_length = self.parameterAsDouble(parameters, self.MAX_LOS_LENGTH, context)
+        targets_offset = self.parameterAsString(parameters, self.TARGET_OFFSET_FIELD, context)
 
-        fields = Fields.los_notarget_fields
+        sampling_distance = self.parameterAsDouble(parameters, self.LINE_DENSITY, context)
+
+        fields = Fields.los_local_fields
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context,
                                              fields, QgsWkbTypes.LineString25D,
@@ -164,76 +153,52 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
-        feature_count = targets_layer.featureCount()
+        feature_count = observers_layer.featureCount() * targets_layer.featureCount()
 
         observers_iterator = observers_layer.getFeatures()
 
-        max_length_extension = list_rasters.maximal_diagonal_size()
-
         for observer_count, observer_feature in enumerate(observers_iterator):
+
+            if feedback.isCanceled():
+                break
 
             targets_iterators = targets_layer.getFeatures()
 
             for target_count, target_feature in enumerate(targets_iterators):
 
-                if feedback.isCanceled():
-                    break
+                line = QgsGeometry.fromPolyline([
+                    QgsPoint(observer_feature.geometry().asPoint()),
+                    QgsPoint(target_feature.geometry().asPoint())
+                ])
 
-                if observer_feature.attribute(observers_id) == target_feature.attribute(
-                        target_definition_id_field):
+                line = segmentize_los_line(line, segment_length=sampling_distance)
 
-                    start_point = QgsPoint(observer_feature.geometry().asPoint())
-                    end_point = QgsPoint(target_feature.geometry().asPoint())
-                    line = QgsLineString([start_point, end_point])
+                line = list_rasters.add_z_values(line.points())
 
-                    line_temp = line.clone()
+                f = QgsFeature(fields)
+                f.setGeometry(line)
+                f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL)
+                f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
+                               int(observer_feature.attribute(observers_id)))
+                f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
+                               int(target_feature.attribute(targets_id)))
+                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
+                               float(observer_feature.attribute(observers_offset)))
+                f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_OFFSET),
+                               float(target_feature.attribute(targets_offset)))
 
-                    if max_los_length != 0:
-                        distance_base = start_point.distance(end_point.x(), end_point.y())
-                        line_temp.extend(0, max_los_length - distance_base)
-                    else:
-                        line_temp.extend(0, max_length_extension)
+                sink.addFeature(f)
 
-                    line = QgsGeometry.fromPolyline([
-                        QgsPoint(observer_feature.geometry().asPoint()),
-                        QgsPoint(target_feature.geometry().asPoint()),
-                        line_temp.endPoint()
-                    ])
-
-                    line = segmentize_los_line(line, segment_length=sampling_distance)
-
-                    line = list_rasters.add_z_values(line.points())
-
-                    f = QgsFeature(fields)
-                    f.setGeometry(line)
-                    f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE),
-                                   NamesConstants.LOS_NO_TARGET)
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
-                                   int(observer_feature.attribute(observers_id)))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
-                                   int(target_feature.attribute(targets_id)))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
-                                   float(observer_feature.attribute(observers_offset)))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
-                                   target_feature.attribute(FieldNames.AZIMUTH))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_X),
-                                   observer_feature.geometry().asPoint().x())
-                    f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_Y),
-                                   observer_feature.geometry().asPoint().y())
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP),
-                                   target_feature.attribute(FieldNames.ANGLE_STEP_POINTS))
-
-                    sink.addFeature(f)
-
-                    feedback.setProgress((target_count / feature_count) * 100)
+                feedback.setProgress(
+                    ((observer_count + 1 * target_count + 1 + target_count) / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
     def name(self):
-        return "notargetlos"
+        return "locallos"
 
     def displayName(self):
-        return "Create No Target LoS"
+        return "Create Local LoS"
 
     def group(self):
         return "LoS Creation"
@@ -242,10 +207,10 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         return "loscreate"
 
     def createInstance(self):
-        return CreateNoTargetLosAlgorithm()
+        return CreateLocalLosAlgorithm()
 
     def helpUrl(self):
-        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_local_los/"
 
     def shortHelpString(self):
         return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)

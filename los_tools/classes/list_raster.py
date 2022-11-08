@@ -6,7 +6,7 @@ from qgis.core import (QgsMapLayer, QgsRasterLayer, QgsCoordinateReferenceSystem
                        QgsPointXY, QgsCoordinateTransform, QgsCoordinateTransformContext,
                        QgsGeometry)
 
-from los_tools.tools.util_functions import bilinear_interpolated_value
+from los_tools.processing.tools.util_functions import bilinear_interpolated_value
 
 
 class ListOfRasters:

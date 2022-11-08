@@ -7,7 +7,7 @@ from qgis.core import (QgsWkbTypes, QgsGeometry, QgsPointLocator, Qgis)
 from qgis.gui import (QgisInterface, QgsMapToolAdvancedDigitizing, QgsMapMouseEvent,
                       QgsSnapIndicator)
 
-from ...tools.util_functions import get_max_decimal_numbers, round_all_values
+from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
 from .los_without_target_widget import LoSNoTargetInputWidget
 
 

@@ -4,7 +4,7 @@ from qgis.core import (QgsVectorLayer, QgsProcessingParameterFeatureSource,
 
 from qgis._core import QgsWkbTypes
 
-from los_tools.horizons.tool_extract_horizon_lines import ExtractHorizonLinesAlgorithm
+from los_tools.processing.horizons.tool_extract_horizon_lines import ExtractHorizonLinesAlgorithm
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 

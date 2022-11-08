@@ -1,34 +1,40 @@
-from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterMultipleLayers,
-                       QgsProcessingParameterFeatureSource, QgsProcessingParameterField,
-                       QgsProcessingParameterFeatureSink, QgsProcessingParameterDistance,
-                       QgsFeature, QgsWkbTypes, QgsPoint, QgsGeometry, QgsProcessingUtils,
+from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
+                       QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
+                       QgsProcessingParameterMultipleLayers, QgsFeature, QgsWkbTypes, QgsPoint,
+                       QgsProcessingFeedback, QgsFeatureRequest, QgsProcessingUtils,
                        QgsProcessingException)
 
-from los_tools.tools.util_functions import segmentize_los_line
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
-from los_tools.tools.util_functions import get_doc_file
 from los_tools.classes.list_raster import ListOfRasters
+from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
+from los_tools.processing.tools.util_functions import get_doc_file
 from los_tools.constants.fields import Fields
 
 
-class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
+class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
     OBSERVER_POINTS_LAYER = "ObserverPoints"
     OBSERVER_ID_FIELD = "ObserverIdField"
     OBSERVER_OFFSET_FIELD = "ObserverOffset"
     TARGET_POINTS_LAYER = "TargetPoints"
     TARGET_ID_FIELD = "TargetIdField"
-    TARGET_OFFSET_FIELD = "TargetOffset"
+    TARGET_DEFINITION_ID_FIELD = "TargetDefinitionIdField"
     OUTPUT_LAYER = "OutputLayer"
-    LINE_DENSITY = "LineDensity"
+
     DEM_RASTERS = "DemRasters"
+    LINE_SETTINGS_TABLE = "LineSettingsTable"
 
     def initAlgorithm(self, config=None):
 
         self.addParameter(
             QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers",
                                                  QgsProcessing.TypeRaster))
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(self.LINE_SETTINGS_TABLE,
+                                                "Sampling distance - distance table",
+                                                [QgsProcessing.TypeVector]))
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.OBSERVER_POINTS_LAYER,
@@ -61,20 +67,11 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
                                         optional=False))
 
         self.addParameter(
-            QgsProcessingParameterField(self.TARGET_OFFSET_FIELD,
-                                        "Target offset field",
+            QgsProcessingParameterField(self.TARGET_DEFINITION_ID_FIELD,
+                                        "Target and Observer agreement ID field",
                                         parentLayerParameterName=self.TARGET_POINTS_LAYER,
                                         type=QgsProcessingParameterField.Numeric,
                                         optional=False))
-
-        self.addParameter(
-            QgsProcessingParameterDistance(self.LINE_DENSITY,
-                                           "LoS sampling distance",
-                                           parentParameterName=self.OBSERVER_POINTS_LAYER,
-                                           defaultValue=1,
-                                           minValue=0.01,
-                                           maxValue=1000.0,
-                                           optional=False))
 
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
@@ -117,12 +114,17 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         if not correct:
             return correct, msg
 
+        line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE,
+                                                          context)
+
+        validation, msg = SamplingDistanceMatrix.validate_table(line_settings_table)
+
+        if not validation:
+            return validation, msg
+
         return super().checkParameterValues(parameters, context)
 
-    def processAlgorithm(self, parameters, context, feedback):
-
-        list_rasters = ListOfRasters(
-            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
+    def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
 
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
 
@@ -140,11 +142,19 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
                 self.invalidSourceError(parameters, self.TARGET_POINTS_LAYER))
 
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
-        targets_offset = self.parameterAsString(parameters, self.TARGET_OFFSET_FIELD, context)
+        target_definition_id_field = self.parameterAsString(parameters,
+                                                            self.TARGET_DEFINITION_ID_FIELD,
+                                                            context)
 
-        sampling_distance = self.parameterAsDouble(parameters, self.LINE_DENSITY, context)
+        list_rasters = ListOfRasters(
+            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
 
-        fields = Fields.los_local_fields
+        line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE,
+                                                          context)
+
+        distance_matrix = SamplingDistanceMatrix(line_settings_table)
+
+        fields = Fields.los_notarget_fields
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context,
                                              fields, QgsWkbTypes.LineString25D,
@@ -153,52 +163,64 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
-        feature_count = observers_layer.featureCount() * targets_layer.featureCount()
+        feature_count = targets_layer.featureCount()
 
         observers_iterator = observers_layer.getFeatures()
 
-        for observer_count, observer_feature in enumerate(observers_iterator):
+        distance_matrix.replace_minus_one_with_value(list_rasters.maximal_diagonal_size())
 
-            if feedback.isCanceled():
-                break
+        i = 0
 
-            targets_iterators = targets_layer.getFeatures()
+        for observer_feature in observers_iterator:
 
-            for target_count, target_feature in enumerate(targets_iterators):
+            request = QgsFeatureRequest()
+            request.setFilterExpression("{} = {}".format(target_definition_id_field,
+                                                         observer_feature.attribute(observers_id)))
 
-                line = QgsGeometry.fromPolyline([
-                    QgsPoint(observer_feature.geometry().asPoint()),
-                    QgsPoint(target_feature.geometry().asPoint())
-                ])
+            targets_iterators = targets_layer.getFeatures(request)
 
-                line = segmentize_los_line(line, segment_length=sampling_distance)
+            for target_feature in targets_iterators:
+
+                if feedback.isCanceled():
+                    break
+
+                start_point = QgsPoint(observer_feature.geometry().asPoint())
+                direction_point = QgsPoint(target_feature.geometry().asPoint())
+
+                line = distance_matrix.build_line(start_point, direction_point)
 
                 line = list_rasters.add_z_values(line.points())
 
                 f = QgsFeature(fields)
                 f.setGeometry(line)
-                f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL)
+                f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_NO_TARGET)
                 f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER),
                                int(observer_feature.attribute(observers_id)))
                 f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET),
                                int(target_feature.attribute(targets_id)))
                 f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
                                float(observer_feature.attribute(observers_offset)))
-                f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_OFFSET),
-                               float(target_feature.attribute(targets_offset)))
+                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH),
+                               target_feature.attribute(FieldNames.AZIMUTH))
+                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_X),
+                               observer_feature.geometry().asPoint().x())
+                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_Y),
+                               observer_feature.geometry().asPoint().y())
+                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP),
+                               target_feature.attribute(FieldNames.ANGLE_STEP_POINTS))
 
                 sink.addFeature(f)
 
-                feedback.setProgress(
-                    ((observer_count + 1 * target_count + 1 + target_count) / feature_count) * 100)
+                feedback.setProgress((i / feature_count) * 100)
+                i += 1
 
         return {self.OUTPUT_LAYER: dest_id}
 
     def name(self):
-        return "locallos"
+        return "notargetlos2"
 
     def displayName(self):
-        return "Create Local LoS"
+        return "Create No Target LoS V2"
 
     def group(self):
         return "LoS Creation"
@@ -207,10 +229,10 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         return "loscreate"
 
     def createInstance(self):
-        return CreateLocalLosAlgorithm()
+        return CreateNoTargetLosAlgorithmV2()
 
     def helpUrl(self):
-        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_local_los/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los_v2/"
 
     def shortHelpString(self):
         return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)

@@ -26,8 +26,8 @@ from .analyse_los.tool_extract_los_visibility_polygons import ExtractLoSVisibili
 from .parameter_settings.tool_angle_at_distance_for_size import ObjectDetectionAngleAlgorithm
 from .create_points.tool_points_by_azimuths import CreatePointsInAzimuthsAlgorithm
 
-from .constants.plugin import PluginConstants
-from .utils import get_icon_path, get_plugin_version
+from los_tools.constants.plugin import PluginConstants
+from los_tools.utils import get_icon_path, get_plugin_version
 
 
 class los_toolsProvider(QgsProcessingProvider):

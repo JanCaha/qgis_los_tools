@@ -1,28 +1,26 @@
 import numpy as np
 
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
-                       QgsProcessingParameterBoolean, QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterDistance, QgsField, QgsFeature, QgsWkbTypes,
-                       QgsProcessingUtils, QgsGeometry, QgsFields, QgsPointXY,
-                       QgsProcessingException)
+                       QgsProcessingParameterFeatureSource, QgsProcessingParameterField,
+                       QgsProcessingParameterFeatureSink, QgsProcessingParameterDistance, QgsField,
+                       QgsFeature, QgsWkbTypes, QgsGeometry, QgsFields, QgsPointXY,
+                       QgsProcessingUtils, QgsProcessingException)
 
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.tools.util_functions import get_max_decimal_numbers, round_all_values, get_doc_file
+from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values, get_doc_file
 
 
-class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
+class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
 
     INPUT_LAYER = "InputLayer"
+    DIRECTION_LAYER = "DirectionLayer"
     OUTPUT_LAYER = "OutputLayer"
-    ANGLE_START = "AngleStart"
-    ANGLE_END = "AngleEnd"
+    ANGLE_OFFSET = "AngleOffset"
     ANGLE_STEP = "AngleStep"
     ID_FIELD = "IdField"
     DISTANCE = "Distance"
-    OVER_NORTH = "OverNorth"
 
     def initAlgorithm(self, config=None):
 
@@ -38,28 +36,17 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
                                         optional=True))
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.ANGLE_START,
-                                         "Azimuth start",
-                                         QgsProcessingParameterNumber.Double,
-                                         defaultValue=0.0,
-                                         minValue=0.0,
-                                         maxValue=360.0,
-                                         optional=False))
+            QgsProcessingParameterFeatureSource(self.DIRECTION_LAYER, "Main direction point layer",
+                                                [QgsProcessing.TypeVectorPoint]))
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.ANGLE_END,
-                                         "Azimuth end",
+            QgsProcessingParameterNumber(self.ANGLE_OFFSET,
+                                         "Angle offset from the main direction",
                                          QgsProcessingParameterNumber.Double,
-                                         defaultValue=360.0,
+                                         defaultValue=20.0,
                                          minValue=0.0,
-                                         maxValue=360.0,
+                                         maxValue=180.0,
                                          optional=False))
-
-        self.addParameter(
-            QgsProcessingParameterBoolean(self.OVER_NORTH,
-                                          "Goes trough north (0 or 360 degrees)",
-                                          defaultValue=False,
-                                          optional=False))
 
         self.addParameter(
             QgsProcessingParameterNumber(self.ANGLE_STEP,
@@ -82,6 +69,14 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
 
     def checkParameterValues(self, parameters, context):
 
+        main_direction_layer = self.parameterAsSource(parameters, self.DIRECTION_LAYER, context)
+
+        if main_direction_layer.featureCount() != 1:
+            msg = "`Main direction point layer` should only containt one feature. " \
+                  "Currently is has `{}` features.".format(main_direction_layer.featureCount())
+
+            return False, msg
+
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
@@ -93,23 +88,20 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
 
         id_field = self.parameterAsString(parameters, self.ID_FIELD, context)
 
-        angle_min = min(self.parameterAsDouble(parameters, self.ANGLE_START, context),
-                        self.parameterAsDouble(parameters, self.ANGLE_END, context))
+        main_direction_layer = self.parameterAsSource(parameters, self.DIRECTION_LAYER, context)
 
-        angle_max = max(self.parameterAsDouble(parameters, self.ANGLE_START, context),
-                        self.parameterAsDouble(parameters, self.ANGLE_END, context))
+        if main_direction_layer is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.DIRECTION_LAYER))
 
-        over_north = self.parameterAsBoolean(parameters, self.OVER_NORTH, context)
-
+        angle_offset = self.parameterAsDouble(parameters, self.ANGLE_OFFSET, context)
         angle_step = self.parameterAsDouble(parameters, self.ANGLE_STEP, context)
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
-
-        round_digits = get_max_decimal_numbers([angle_min, angle_max, angle_step])
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.ID_ORIGINAL_POINT, QVariant.Int))
         fields.append(QgsField(FieldNames.ID_POINT, QVariant.Int))
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
+        fields.append(QgsField(FieldNames.DIFF_TO_MAIN_AZIMUTH, QVariant.Double))
         fields.append(QgsField(FieldNames.ANGLE_STEP_POINTS, QVariant.Double))
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
@@ -127,50 +119,50 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
             if feedback.isCanceled():
                 break
 
+            iterator_direction = main_direction_layer.getFeatures()
+
             feature_point: QgsPointXY = feature.geometry().asPoint()
 
-            if not over_north:
-                angles = np.arange(angle_min, angle_max + 0.1 * angle_step,
+            for cnt_direction, feature_direction in enumerate(iterator_direction):
+
+                main_angle = feature_point.azimuth(feature_direction.geometry().asPoint())
+
+                angles = np.arange(main_angle - angle_offset,
+                                   main_angle + angle_offset + 0.1 * angle_step,
                                    step=angle_step).tolist()
 
-            else:
+                round_digits = get_max_decimal_numbers([main_angle, angle_offset, angle_step])
 
-                angles2 = np.arange(angle_max, 360 - 0.1 * angle_step, step=angle_step).tolist()
+                angles = round_all_values(angles, round_digits)
 
-                angles1 = np.arange(0 - (360 - max(angles2)) + angle_step,
-                                    angle_min + 0.1 * angle_step,
-                                    step=angle_step).tolist()
+                i = 0
 
-                angles = angles1 + angles2
+                for angle in angles:
 
-            angles = round_all_values(angles, round_digits)
+                    new_point: QgsPointXY = feature_point.project(distance, angle)
 
-            i = 0
+                    f = QgsFeature(fields)
+                    f.setGeometry(QgsGeometry().fromPointXY(new_point))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
+                                   int(feature.attribute(id_field)))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_POINT), int(i))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.DIFF_TO_MAIN_AZIMUTH),
+                                   float(angle) - main_angle)
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), angle_step)
 
-            for angle in angles:
-
-                new_point: QgsPointXY = feature_point.project(distance, angle)
-
-                f = QgsFeature(fields)
-                f.setGeometry(QgsGeometry().fromPointXY(new_point))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
-                               int(feature.attribute(id_field)))
-                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_POINT), int(i))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), angle_step)
-
-                sink.addFeature(f)
-                i += 1
+                    sink.addFeature(f)
+                    i += 1
 
             feedback.setProgress((cnt / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
     def name(self):
-        return "pointsazimuth"
+        return "pointsdirection"
 
     def displayName(self):
-        return "Create Points by Azimuths"
+        return "Create Points in Direction"
 
     def group(self):
         return "Points Creation"
@@ -179,10 +171,10 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
         return "pointscreation"
 
     def createInstance(self):
-        return CreatePointsInAzimuthsAlgorithm()
+        return CreatePointsInDirectionAlgorithm()
 
     def helpUrl(self):
-        return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_by_azimuths/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_in_direction/"
 
     def shortHelpString(self):
         return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)

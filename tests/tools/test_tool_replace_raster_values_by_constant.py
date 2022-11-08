@@ -7,7 +7,7 @@ from qgis.core import (QgsRasterLayer, QgsProcessingFeedback, QgsProcessingConte
 
 from processing.core.Processing import Processing
 
-from los_tools.tools.tool_replace_raster_values_by_constant import ReplaceRasterValuesByConstantValueAlgorithm
+from los_tools.processing.tools.tool_replace_raster_values_by_constant import ReplaceRasterValuesByConstantValueAlgorithm
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,

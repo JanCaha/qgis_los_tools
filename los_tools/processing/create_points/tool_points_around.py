@@ -9,15 +9,15 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.tools.util_functions import get_max_decimal_numbers, round_all_values, get_doc_file
+from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values, get_doc_file
 
 
-class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
+class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
 
     INPUT_LAYER = "InputLayer"
-    DIRECTION_LAYER = "DirectionLayer"
     OUTPUT_LAYER = "OutputLayer"
-    ANGLE_OFFSET = "AngleOffset"
+    ANGLE_START = "AngleStart"
+    ANGLE_END = "AngleEnd"
     ANGLE_STEP = "AngleStep"
     ID_FIELD = "IdField"
     DISTANCE = "Distance"
@@ -36,16 +36,21 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                                         optional=True))
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.DIRECTION_LAYER, "Main direction point layer",
-                                                [QgsProcessing.TypeVectorPoint]))
+            QgsProcessingParameterNumber(self.ANGLE_START,
+                                         "Minimal angle",
+                                         QgsProcessingParameterNumber.Double,
+                                         defaultValue=0.0,
+                                         minValue=0.0,
+                                         maxValue=360.0,
+                                         optional=False))
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.ANGLE_OFFSET,
-                                         "Angle offset from the main direction",
+            QgsProcessingParameterNumber(self.ANGLE_END,
+                                         "Maximal angle",
                                          QgsProcessingParameterNumber.Double,
-                                         defaultValue=20.0,
+                                         defaultValue=359.999,
                                          minValue=0.0,
-                                         maxValue=180.0,
+                                         maxValue=360.0,
                                          optional=False))
 
         self.addParameter(
@@ -54,7 +59,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                                          QgsProcessingParameterNumber.Double,
                                          defaultValue=1.0,
                                          minValue=0.001,
-                                         maxValue=180.0,
+                                         maxValue=360.0,
                                          optional=False))
 
         self.addParameter(
@@ -67,18 +72,6 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
 
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
-    def checkParameterValues(self, parameters, context):
-
-        main_direction_layer = self.parameterAsSource(parameters, self.DIRECTION_LAYER, context)
-
-        if main_direction_layer.featureCount() != 1:
-            msg = "`Main direction point layer` should only containt one feature. " \
-                  "Currently is has `{}` features.".format(main_direction_layer.featureCount())
-
-            return False, msg
-
-        return super().checkParameterValues(parameters, context)
-
     def processAlgorithm(self, parameters, context, feedback):
 
         input_layer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
@@ -87,21 +80,22 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LAYER))
 
         id_field = self.parameterAsString(parameters, self.ID_FIELD, context)
-
-        main_direction_layer = self.parameterAsSource(parameters, self.DIRECTION_LAYER, context)
-
-        if main_direction_layer is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.DIRECTION_LAYER))
-
-        angle_offset = self.parameterAsDouble(parameters, self.ANGLE_OFFSET, context)
+        angle_min = self.parameterAsDouble(parameters, self.ANGLE_START, context)
+        angle_max = self.parameterAsDouble(parameters, self.ANGLE_END, context)
         angle_step = self.parameterAsDouble(parameters, self.ANGLE_STEP, context)
+
+        angles = np.arange(angle_min, angle_max + 0.000000001 * angle_step,
+                           step=angle_step).tolist()
+
+        round_digits = get_max_decimal_numbers([angle_min, angle_max, angle_step])
+
+        angles = round_all_values(angles, round_digits)
+
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.ID_ORIGINAL_POINT, QVariant.Int))
-        fields.append(QgsField(FieldNames.ID_POINT, QVariant.Int))
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
-        fields.append(QgsField(FieldNames.DIFF_TO_MAIN_AZIMUTH, QVariant.Double))
         fields.append(QgsField(FieldNames.ANGLE_STEP_POINTS, QVariant.Double))
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
@@ -119,50 +113,28 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
             if feedback.isCanceled():
                 break
 
-            iterator_direction = main_direction_layer.getFeatures()
+            for angle in angles:
 
-            feature_point: QgsPointXY = feature.geometry().asPoint()
+                new_point: QgsPointXY = feature.geometry().asPoint().project(distance, angle)
 
-            for cnt_direction, feature_direction in enumerate(iterator_direction):
+                f = QgsFeature(fields)
+                f.setGeometry(QgsGeometry().fromPointXY(new_point))
+                f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
+                               int(feature.attribute(id_field)))
+                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
+                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), float(angle_step))
 
-                main_angle = feature_point.azimuth(feature_direction.geometry().asPoint())
-
-                angles = np.arange(main_angle - angle_offset,
-                                   main_angle + angle_offset + 0.1 * angle_step,
-                                   step=angle_step).tolist()
-
-                round_digits = get_max_decimal_numbers([main_angle, angle_offset, angle_step])
-
-                angles = round_all_values(angles, round_digits)
-
-                i = 0
-
-                for angle in angles:
-
-                    new_point: QgsPointXY = feature_point.project(distance, angle)
-
-                    f = QgsFeature(fields)
-                    f.setGeometry(QgsGeometry().fromPointXY(new_point))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
-                                   int(feature.attribute(id_field)))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_POINT), int(i))
-                    f.setAttribute(f.fieldNameIndex(FieldNames.DIFF_TO_MAIN_AZIMUTH),
-                                   float(angle) - main_angle)
-                    f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), angle_step)
-
-                    sink.addFeature(f)
-                    i += 1
+                sink.addFeature(f)
 
             feedback.setProgress((cnt / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 
     def name(self):
-        return "pointsdirection"
+        return "pointsaround"
 
     def displayName(self):
-        return "Create Points in Direction"
+        return "Create Points Around"
 
     def group(self):
         return "Points Creation"
@@ -171,10 +143,10 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
         return "pointscreation"
 
     def createInstance(self):
-        return CreatePointsInDirectionAlgorithm()
+        return CreatePointsAroundAlgorithm()
 
     def helpUrl(self):
-        return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_in_direction/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_points_around/"
 
     def shortHelpString(self):
         return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)

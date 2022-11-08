@@ -8,7 +8,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
                        QgsProcessingFeatureSource, QgsProcessingUtils, QgsProcessingException,
                        qgsFloatNear, QgsGeometry)
 
-from los_tools.tools.util_functions import get_doc_file
+from los_tools.processing.tools.util_functions import get_doc_file
 
 
 class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):

@@ -1,6 +1,6 @@
 from qgis.core import (QgsVectorLayer, QgsWkbTypes)
 
-from los_tools.analyse_los.tool_extract_los_visibility_parts import ExtractLoSVisibilityPartsAlgorithm
+from los_tools.processing.analyse_los.tool_extract_los_visibility_parts import ExtractLoSVisibilityPartsAlgorithm
 from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase

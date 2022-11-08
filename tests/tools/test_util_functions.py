@@ -4,9 +4,9 @@ import math
 from qgis.core import (QgsRasterLayer, QgsPointXY, QgsPoint, QgsVectorLayer, QgsLineString,
                        QgsGeometry)
 
-from los_tools.tools.util_functions import (bilinear_interpolated_value, get_diagonal_size,
-                                            calculate_distance, segmentize_los_line,
-                                            segmentize_line)
+from los_tools.processing.tools.util_functions import (bilinear_interpolated_value,
+                                                       get_diagonal_size, calculate_distance,
+                                                       segmentize_los_line, segmentize_line)
 
 from tests.utils_tests import get_qgis_app
 from tests.utils_tests import (get_data_path, get_data_path_results)

@@ -6,7 +6,7 @@ import math
 from qgis.core import (QgsVectorLayer, QgsFeatureRequest, QgsProcessingFeedback,
                        QgsProcessingContext)
 
-from los_tools.create_points.tool_points_in_direction import CreatePointsInDirectionAlgorithm
+from los_tools.processing.create_points.tool_points_in_direction import CreatePointsInDirectionAlgorithm
 from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase

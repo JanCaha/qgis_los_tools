@@ -8,7 +8,7 @@ from qgis.core import (QgsRasterLayer, QgsProcessingParameterField, QgsProcessin
 
 from processing.core.Processing import Processing
 
-from los_tools.tools.tool_replace_raster_values_by_field import ReplaceRasterValuesByFieldValuesAlgorithm
+from los_tools.processing.tools.tool_replace_raster_values_by_field import ReplaceRasterValuesByFieldValuesAlgorithm
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,

@@ -2,7 +2,7 @@ import unittest
 
 from qgis.core import (QgsVectorLayer, QgsRasterLayer, QgsProcessingFeedback, QgsProcessingContext)
 
-from los_tools.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
+from los_tools.processing.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,

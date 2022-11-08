@@ -1,7 +1,7 @@
 from qgis.core import (QgsVectorLayer)
 from qgis._core import QgsWkbTypes
 
-from los_tools.horizons.tool_extract_horizons import ExtractHorizonsAlgorithm
+from los_tools.processing.horizons.tool_extract_horizons import ExtractHorizonsAlgorithm
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 

@@ -1,7 +1,7 @@
 from qgis.core import (QgsVectorLayer, QgsRasterLayer, QgsFeatureRequest)
 from qgis._core import QgsWkbTypes
 
-from los_tools.create_los.tool_create_notarget_los import CreateNoTargetLosAlgorithm
+from los_tools.processing.create_los.tool_create_notarget_los import CreateNoTargetLosAlgorithm
 from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase

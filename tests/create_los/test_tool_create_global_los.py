@@ -1,9 +1,9 @@
 from qgis.core import (QgsVectorLayer, QgsRasterLayer, QgsFeatureRequest)
 from qgis._core import QgsWkbTypes
 
-from los_tools.create_los.tool_create_global_los import CreateGlobalLosAlgorithm
+from los_tools.processing.create_los.tool_create_global_los import CreateGlobalLosAlgorithm
 from los_tools.constants.field_names import FieldNames
-from los_tools.tools.util_functions import get_diagonal_size
+from los_tools.processing.tools.util_functions import get_diagonal_size
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from tests.utils_tests import (get_data_path, get_data_path_results)

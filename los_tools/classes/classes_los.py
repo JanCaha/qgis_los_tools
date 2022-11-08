@@ -4,7 +4,7 @@ from typing import List, Optional, Union
 
 from qgis.core import (QgsPoint, QgsFeature)
 
-from los_tools.tools.util_functions import calculate_distance, wkt_to_array_points
+from los_tools.processing.tools.util_functions import calculate_distance, wkt_to_array_points
 from los_tools.constants.field_names import FieldNames
 
 

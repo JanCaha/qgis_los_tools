@@ -6,7 +6,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsFeatureRequest,
 
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
-from los_tools.tools.util_functions import get_los_type, get_doc_file
+from los_tools.processing.tools.util_functions import get_los_type, get_doc_file
 from los_tools.constants.names_constants import NamesConstants
 
 

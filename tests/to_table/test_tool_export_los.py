@@ -7,7 +7,7 @@ from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
-from los_tools.to_table.tool_export_los import ExportLoSAlgorithm
+from los_tools.processing.to_table.tool_export_los import ExportLoSAlgorithm
 
 from tests.utils_tests import (get_data_path, get_data_path_results)
 

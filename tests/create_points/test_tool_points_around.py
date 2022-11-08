@@ -2,7 +2,7 @@ import unittest
 
 from qgis.core import (QgsVectorLayer, QgsProcessingFeedback, QgsProcessingContext)
 
-from los_tools.create_points.tool_points_around import CreatePointsAroundAlgorithm
+from los_tools.processing.create_points.tool_points_around import CreatePointsAroundAlgorithm
 from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase

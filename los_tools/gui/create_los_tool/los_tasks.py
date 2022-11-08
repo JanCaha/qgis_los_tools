@@ -7,7 +7,7 @@ from qgis.core import (QgsTask, QgsTaskManager, QgsGeometry, QgsVectorLayer,
 from los_tools.constants import FieldNames, NamesConstants
 from los_tools.gui.dialog_los_settings import LoSSettings
 from los_tools.classes import ListOfRasters, SamplingDistanceMatrix
-from los_tools.tools.util_functions import segmentize_los_line
+from los_tools.processing.tools.util_functions import segmentize_los_line
 
 
 class PrepareLoSWithoutTargetTask(QgsTask):

@@ -7,7 +7,7 @@ from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
-from los_tools.to_table.tool_export_horizon_lines import ExportHorizonLinesAlgorithm
+from los_tools.processing.to_table.tool_export_horizon_lines import ExportHorizonLinesAlgorithm
 
 from tests.utils_tests import (get_data_path, get_data_path_results)
 

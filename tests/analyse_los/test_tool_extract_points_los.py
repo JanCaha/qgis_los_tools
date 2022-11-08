@@ -1,7 +1,7 @@
 from qgis.core import (QgsVectorLayer)
 from qgis._core import QgsWkbTypes
 
-from los_tools.analyse_los.tool_extract_points_los import ExtractPointsLoSAlgorithm
+from los_tools.processing.analyse_los.tool_extract_points_los import ExtractPointsLoSAlgorithm
 from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase

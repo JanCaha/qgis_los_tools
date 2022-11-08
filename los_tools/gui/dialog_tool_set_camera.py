@@ -11,7 +11,7 @@ from qgis.PyQt.QtWidgets import (QDialog, QLabel, QVBoxLayout, QHBoxLayout, QCom
 from qgis.PyQt.QtCore import (pyqtSignal, Qt, QPoint)
 from qgis.PyQt.QtGui import (QColor)
 
-from ..tools.util_functions import log, bilinear_interpolated_value
+from los_tools.processing.tools.util_functions import bilinear_interpolated_value
 
 
 class SetCameraTool(QDialog):

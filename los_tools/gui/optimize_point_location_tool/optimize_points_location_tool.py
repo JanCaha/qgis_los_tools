@@ -9,7 +9,7 @@ from qgis.core import (QgsPointXY, QgsWkbTypes, QgsGeometry, QgsPoint, QgsPointL
 from qgis.gui import (QgisInterface, QgsRubberBand, QgsMapMouseEvent, QgsMapCanvas,
                       QgsSnapIndicator, QgsMapToolAdvancedDigitizing)
 
-from los_tools.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
+from los_tools.processing.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
 from .optimize_points_location_widget import OptimizePointLocationInputWidget
 
 

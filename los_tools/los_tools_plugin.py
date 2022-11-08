@@ -11,7 +11,7 @@ from qgis.gui import QgisInterface
 from qgis.PyQt.QtGui import (QIcon)
 from qgis.PyQt.QtWidgets import (QAction, QToolBar, QToolButton, QMenu)
 
-from .los_tools_provider import los_toolsProvider
+from .processing.los_tools_provider import los_toolsProvider
 from .gui.dialog_tool_set_camera import SetCameraTool
 from .gui.dialog_los_settings import LoSSettings
 from .gui.dialog_raster_validations import RasterValidations

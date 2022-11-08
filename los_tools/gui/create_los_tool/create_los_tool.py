@@ -12,7 +12,7 @@ from qgis.gui import (QgisInterface, QgsMapMouseEvent, QgsSnapIndicator,
 from los_tools.classes import ListOfRasters
 from los_tools.gui import LoSSettings
 from los_tools.gui import RasterValidations
-from los_tools.tools.util_functions import get_max_decimal_numbers, round_all_values
+from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
 
 from .create_los_widget import LoSNoTargetInputWidget
 from .los_tasks import LoSExtractionTaskManager, PrepareLoSWithoutTargetTask, PrepareLoSTask

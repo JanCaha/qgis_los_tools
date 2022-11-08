@@ -1,6 +1,6 @@
 from qgis.core import QgsVectorLayer, QgsWkbTypes
 
-from los_tools.parameter_settings.tool_sizes_at_distances import ObjectSizesAlgorithm
+from los_tools.processing.parameter_settings.tool_sizes_at_distances import ObjectSizesAlgorithm
 from los_tools.constants.field_names import FieldNames
 
 from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
