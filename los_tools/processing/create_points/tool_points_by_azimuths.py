@@ -10,7 +10,8 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values, get_doc_file
+from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
+from los_tools.utils import get_doc_file
 
 
 class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):

@@ -1,9 +1,7 @@
 import numpy as np
 import math
-import json
 from typing import List, Optional, Union
 import re
-from pathlib import Path
 
 from qgis.core import (QgsGeometry, QgsLineString, QgsPoint, QgsPointXY, QgsRasterDataProvider,
                        QgsRectangle, QgsVectorLayer, QgsMessageLog, QgsProcessingException, Qgis,
@@ -191,28 +189,6 @@ def bilinear_interpolated_value(raster: QgsRasterDataProvider,
 def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
 
     return math.sqrt(math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
-
-
-def get_doc_file(file_path: str):
-
-    path = Path(file_path)
-
-    file = "{}.help".format(path.stem)
-
-    help_file = path.parent.parent / "doc" / file
-
-    if help_file.exists():
-        with open(help_file) as f:
-            descriptions = json.load(f)
-
-        return descriptions
-
-    return ""
-
-
-def log(text):
-
-    QgsMessageLog.logMessage(str(text), "los_tools", Qgis.Info)
 
 
 def get_max_decimal_numbers(values: List[Union[int, float]]) -> int:

@@ -10,7 +10,7 @@ from processing.algs.gdal.GdalUtils import GdalUtils
 import tempfile
 import uuid
 
-from los_tools.processing.tools.util_functions import get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class ReplaceRasterValuesByConstantValueAlgorithm(QgsProcessingAlgorithm):

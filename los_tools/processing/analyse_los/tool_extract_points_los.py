@@ -9,7 +9,8 @@ from qgis.PyQt.QtCore import QVariant, Qt
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.textlabels import TextLabels
 from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
-from los_tools.processing.tools.util_functions import get_los_type, get_doc_file
+from los_tools.processing.tools.util_functions import get_los_type
+from los_tools.utils import get_doc_file
 from los_tools.constants.names_constants import NamesConstants
 
 

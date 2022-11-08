@@ -9,7 +9,7 @@ from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterMatrix,
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from ..tools.util_functions import get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class ObjectSizesAlgorithm(QgsProcessingAlgorithm):

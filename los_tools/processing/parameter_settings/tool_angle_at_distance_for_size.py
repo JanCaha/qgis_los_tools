@@ -2,7 +2,7 @@ import math
 
 from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterNumber, QgsProcessingFeedback,
                        QgsProcessingOutputNumber, QgsProcessingUtils)
-from los_tools.processing.tools.util_functions import get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
