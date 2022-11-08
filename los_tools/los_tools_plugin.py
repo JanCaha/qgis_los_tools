@@ -11,16 +11,16 @@ from qgis.gui import QgisInterface
 from qgis.PyQt.QtGui import (QIcon)
 from qgis.PyQt.QtWidgets import (QAction, QToolBar, QToolButton, QMenu)
 
-from .processing.los_tools_provider import los_toolsProvider
+from los_tools.processing.los_tools_provider import LoSToolsProvider
 from .gui.dialog_tool_set_camera import SetCameraTool
 from .gui.dialog_los_settings import LoSSettings
 from .gui.dialog_raster_validations import RasterValidations
 from .constants.plugin import PluginConstants
 from .constants.fields import Fields
-from .utils import get_icon_path
 from .gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
 from .gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
 from .gui.create_los_tool import CreateLoSMapTool
+from .utils import get_icon_path
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
@@ -28,7 +28,7 @@ if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
 
 
-class los_toolsPlugin():
+class LoSToolsPlugin():
 
     camera_tool: SetCameraTool = None
 
@@ -42,7 +42,7 @@ class los_toolsPlugin():
         self._layer_LoS: QgsVectorLayer = None
 
         self.iface: QgisInterface = iface
-        self.provider = los_toolsProvider()
+        self.provider = LoSToolsProvider()
 
         self.actions = []
         self.menu = PluginConstants.plugin_name

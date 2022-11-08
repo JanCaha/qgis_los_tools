@@ -30,7 +30,7 @@ from los_tools.constants.plugin import PluginConstants
 from los_tools.utils import get_icon_path, get_plugin_version
 
 
-class los_toolsProvider(QgsProcessingProvider):
+class LoSToolsProvider(QgsProcessingProvider):
 
     def __init__(self):
         super().__init__()
