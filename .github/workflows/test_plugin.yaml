@@ -20,6 +20,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Add Python Path
+        run: | 
+           echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+
       - name: Print Python Path
         run: echo $PYTHONPATH
 
