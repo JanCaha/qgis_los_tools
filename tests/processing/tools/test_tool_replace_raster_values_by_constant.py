@@ -109,6 +109,6 @@ class ReplaceRasterValuesAlgorithmTest(QgsProcessingAlgorithmTestCase):
         ]
 
         for point in points:
-            new_value = raster_new.dataProvider().sample(point, 1)
+            new_value, _ = raster_new.dataProvider().sample(point, 1)
             assert raster_original.dataProvider().sample(point, 1) != new_value
-            assert new_value == -100
+            assert new_value == -100.0
