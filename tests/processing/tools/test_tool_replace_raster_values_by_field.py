@@ -4,7 +4,7 @@ from osgeo import gdal
 import numpy as np
 
 from qgis.core import (QgsRasterLayer, QgsProcessingParameterField, QgsProcessingFeedback,
-                       QgsProcessingContext)
+                       QgsProcessingContext, QgsPointXY)
 
 from processing.core.Processing import Processing
 
@@ -81,4 +81,39 @@ class ReplaceRasterValuesAlgorithmTest(QgsProcessingAlgorithmTestCase):
         self.assertIn(1100, unique_values)
         self.assertIn(1050, unique_values)
 
+        self.assert_same_raster_values(self.raster,
+                                       QgsRasterLayer(self.output_path, "new raster", "gdal"))
+        self.assert_not_same_raster_values(self.raster,
+                                           QgsRasterLayer(self.output_path, "new raster", "gdal"))
+
         ds = None
+
+    def assert_same_raster_values(self, raster_original: QgsRasterLayer,
+                                  raster_new: QgsRasterLayer):
+        points = [
+            QgsPointXY(-336484.00, -1189103.24),
+            QgsPointXY(-336378.35, -1189152.49),
+            QgsPointXY(-336510.77, -1189168.83),
+            QgsPointXY(-336391.02, -1189095.07),
+            QgsPointXY(-336352.81, -1189095.48),
+        ]
+
+        for point in points:
+            assert raster_original.dataProvider().sample(point,
+                                                         1) == raster_new.dataProvider().sample(
+                                                             point, 1)
+
+    def assert_not_same_raster_values(self, raster_original: QgsRasterLayer,
+                                      raster_new: QgsRasterLayer):
+        points = [
+            QgsPointXY(-336478.89, -1189048.48),
+            QgsPointXY(-336421.47, -1189091.80),
+            QgsPointXY(-336324.40, -1189098.54),
+            QgsPointXY(-336340.34, -1189116.73),
+            QgsPointXY(-336469.297, -1189033.700),
+        ]
+
+        for point in points:
+            new_value = raster_new.dataProvider().sample(point, 1)
+            assert raster_original.dataProvider().sample(point, 1) != new_value
+            assert new_value in [1200, 1100, 1050]
