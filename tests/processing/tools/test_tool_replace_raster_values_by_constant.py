@@ -78,6 +78,8 @@ class ReplaceRasterValuesAlgorithmTest(QgsProcessingAlgorithmTestCase):
 
         self.assert_same_raster_values(self.raster,
                                        QgsRasterLayer(self.output_path, "new raster", "gdal"))
+        self.assert_not_same_raster_values(self.raster,
+                                           QgsRasterLayer(self.output_path, "new raster", "gdal"))
 
         ds = None
 
