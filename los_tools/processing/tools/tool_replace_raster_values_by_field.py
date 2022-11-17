@@ -1,14 +1,7 @@
 from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterRasterDestination, QgsProcessingParameterField,
-                       QgsProcessingUtils, QgsProcessingParameterRasterLayer, QgsRasterLayer,
+                       QgsProcessingUtils, QgsProcessingParameterRasterLayer,
                        QgsProcessingException, QgsApplication)
-
-from qgis.analysis import (QgsRasterCalculatorEntry, QgsRasterCalculator)
-import processing
-from processing.algs.gdal.GdalUtils import GdalUtils
-
-import tempfile
-import uuid
 
 from los_tools.utils import get_doc_file
 
