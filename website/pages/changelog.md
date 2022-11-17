@@ -6,6 +6,8 @@
 
 - fixes for tools that work with angles, now round angles to sensible values
 
+- fix both raster editing tools, previously those sometimes shifted the cells of raster, causing it not exactly match the input data
+
 - text updates and changes to tools
 
 - minor fixes all around
