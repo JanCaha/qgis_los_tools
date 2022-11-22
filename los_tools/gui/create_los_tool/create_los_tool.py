@@ -249,6 +249,7 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
                 self._iface.mapCanvas().mapSettings().destinationCrs())
 
         task.taskCompleted.connect(self.task_finished)
+        task.taskFinishedTime.connect(self.task_finished_message)
 
         self.task_manager.addTask(task)
 
@@ -256,5 +257,8 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
         self.featuresAdded.emit()
         if self.task_manager.all_los_tasks_finished():
             self.set_result_action_active(True)
-        self._iface.messageBar().pushMessage("LoS Without Target Processing Finished",
-                                             Qgis.MessageLevel.Info, 2)
+
+    def task_finished_message(self, miliseconds: int) -> None:
+        self._iface.messageBar().pushMessage(
+            "LoS Processing Finished. Lasted {} seconds.".format(miliseconds / 1000),
+            Qgis.MessageLevel.Info, 2)

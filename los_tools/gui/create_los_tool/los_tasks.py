@@ -3,6 +3,7 @@ from typing import Union
 from qgis.core import (QgsTask, QgsTaskManager, QgsGeometry, QgsVectorLayer,
                        QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject,
                        QgsFeature, QgsVertexId)
+from qgis.PyQt.QtCore import pyqtSignal
 
 from los_tools.constants import FieldNames, NamesConstants
 from los_tools.gui.dialog_los_settings import LoSSettings
@@ -11,6 +12,8 @@ from los_tools.processing.tools.util_functions import segmentize_los_line
 
 
 class PrepareLoSWithoutTargetTask(QgsTask):
+
+    taskFinishedTime = pyqtSignal(int)
 
     def __init__(self,
                  lines: QgsGeometry,
@@ -101,10 +104,14 @@ class PrepareLoSWithoutTargetTask(QgsTask):
             self.setProgress((j / number_of_lines) * 100)
             j += 1
 
+        self.taskFinishedTime.emit(self.elapsedTime())
+
         return True
 
 
 class PrepareLoSTask(QgsTask):
+
+    taskFinishedTime = pyqtSignal(int)
 
     def __init__(self,
                  los_geometry: QgsGeometry,
@@ -178,6 +185,8 @@ class PrepareLoSTask(QgsTask):
             f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL)
 
         self.los_layer.dataProvider().addFeature(f)
+
+        self.taskFinishedTime.emit(self.elapsedTime())
 
         return True
 
