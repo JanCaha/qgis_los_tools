@@ -82,6 +82,8 @@ class RasterValidations(QDialog):
     def _populate_raster_view(self) -> None:
         self._rasters_view.clear()
         for raster in self.rasters:
+            if raster.providerType() == "wms":
+                break
             item = QTreeWidgetItem()
             item.setText(0, raster.name())
             item.setData(0, Qt.UserRole, raster)
