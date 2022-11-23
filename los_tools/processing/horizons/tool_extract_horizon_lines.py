@@ -8,7 +8,7 @@ from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParam
 from qgis.PyQt.QtCore import QVariant
 from los_tools.constants.field_names import FieldNames
 from los_tools.classes.classes_los import LoSWithoutTarget
-from los_tools.processing.tools.util_functions import wkt_to_array_points, get_los_type
+from los_tools.processing.tools.util_functions import get_los_type
 from los_tools.utils import get_doc_file
 from los_tools.constants.names_constants import NamesConstants
 
@@ -120,7 +120,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
                 if feedback.isCanceled():
                     break
 
-                los = LoSWithoutTarget(wkt_to_array_points(los_feature.geometry().asWkt()),
+                los = LoSWithoutTarget(los_feature.geometry(),
                                        observer_offset=los_feature.attribute(
                                            FieldNames.OBSERVER_OFFSET),
                                        use_curvature_corrections=curvature_corrections,
