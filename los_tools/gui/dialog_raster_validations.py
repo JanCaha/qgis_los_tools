@@ -2,7 +2,7 @@ from typing import List, Dict
 
 from qgis.core import (QgsProject, QgsRasterLayer, QgsPointXY, QgsUnitTypes)
 from qgis.PyQt.QtWidgets import (QDialog, QPushButton, QFormLayout, QTreeWidget, QLabel,
-                                 QTreeWidgetItem, QGroupBox, QTextBrowser, QLineEdit)
+                                 QTreeWidgetItem, QGroupBox, QTextBrowser, QLineEdit, QHeaderView)
 from qgis.PyQt.QtCore import (Qt)
 
 from ..classes.list_raster import ListOfRasters
@@ -30,7 +30,7 @@ class RasterValidations(QDialog):
 
     def init_gui(self):
 
-        self.setMinimumWidth(350)
+        self.setMinimumWidth(600)
         self.setWindowTitle("Rasters Validation and Sampling")
 
         layout = QFormLayout(self)
@@ -39,9 +39,10 @@ class RasterValidations(QDialog):
         layout.addRow(QLabel("Select RasterLayers to use"))
 
         self._rasters_view = QTreeWidget(self)
-        self._rasters_view.setColumnCount(1)
+        self._rasters_view.setColumnCount(2)
         self._rasters_view.setHeaderLabels(["Rasters", "Cell size (x - y)"])
         self._rasters_view.setMaximumHeight(150)
+        self._rasters_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
         layout.addRow(self._rasters_view)
 
         self.text = QTextBrowser(self)
