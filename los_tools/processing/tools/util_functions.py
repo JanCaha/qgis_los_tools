@@ -100,11 +100,13 @@ def wkt_to_array_points(wkt: str) -> List[List[float]]:
 
 def line_geometry_to_coords(geom: QgsGeometry) -> List[List[float]]:
 
-    if geom.wkbType() in [
+    if geom.wkbType() not in [
             QgsWkbTypes.Type.LineString,
             QgsWkbTypes.Type.LineString25D,
+            QgsWkbTypes.Type.LineStringZ,
             QgsWkbTypes.Type.MultiLineString,
             QgsWkbTypes.Type.MultiLineString25D,
+            QgsWkbTypes.Type.MultiLineStringZ,
     ]:
         raise TypeError(
             "Geometry has to be LineString or MultiLineString optionally with Z coordinate.")
