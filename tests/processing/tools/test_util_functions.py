@@ -6,7 +6,9 @@ from qgis.core import (QgsRasterLayer, QgsPointXY, QgsPoint, QgsVectorLayer, Qgs
 
 from los_tools.processing.tools.util_functions import (bilinear_interpolated_value,
                                                        get_diagonal_size, calculate_distance,
-                                                       segmentize_los_line, segmentize_line)
+                                                       segmentize_los_line, segmentize_line,
+                                                       wkt_to_array_points,
+                                                       line_geometry_to_coords)
 
 from tests.utils_tests import get_qgis_app
 from tests.utils_tests import (get_data_path, get_data_path_results)
@@ -20,6 +22,13 @@ class UtilsTest(unittest.TestCase):
         self.raster = QgsRasterLayer(get_data_path(file="dsm.tif"))
         self.raster_dp = self.raster.dataProvider()
         self.points = QgsVectorLayer(get_data_path(file="points.gpkg"))
+
+        self.points_count = 10_000
+        p = []
+        for i in range(self.points_count):
+            p.append(QgsPoint(i, i, i))
+
+        self.line_geometry = QgsGeometry.fromPolyline(p)
 
     def test_bilinear_interpolated_value(self):
 
@@ -88,3 +97,30 @@ class UtilsTest(unittest.TestCase):
 
         with self.assertRaisesRegex(TypeError, "`line` should be `QgsGeometry`"):
             segmentize_los_line(geom, 1)
+
+    def test_wkt_to_array(self):
+
+        wkt = self.line_geometry.asWkt()
+        points = wkt_to_array_points(wkt)
+
+        assert len(points) == self.points_count
+
+        for i in range(len(points)):
+            assert isinstance(points[i], list)
+            assert len(points[i]) == 3
+
+            for j in range(len(points[i])):
+                assert isinstance(points[i][j], float)
+
+    def test_geom_to_wkt(self):
+
+        points = line_geometry_to_coords(self.line_geometry)
+
+        assert len(points) == self.points_count
+
+        for i in range(len(points)):
+            assert isinstance(points[i], list)
+            assert len(points[i]) == 3
+
+            for j in range(len(points[i])):
+                assert isinstance(points[i][j], float)
