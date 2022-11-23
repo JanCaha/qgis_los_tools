@@ -98,6 +98,39 @@ def wkt_to_array_points(wkt: str) -> List[List[float]]:
     return array_result
 
 
+def line_geometry_to_coords(geom: QgsGeometry) -> List[List[float]]:
+
+    if geom.wkbType() in [
+            QgsWkbTypes.Type.LineString,
+            QgsWkbTypes.Type.LineString25D,
+            QgsWkbTypes.Type.MultiLineString,
+            QgsWkbTypes.Type.MultiLineString25D,
+    ]:
+        raise TypeError(
+            "Geometry has to be LineString or MultiLineString optionally with Z coordinate.")
+
+    geom_const = geom.constGet()
+
+    vertex_count = 0
+
+    for i in range(geom_const.partCount()):
+        vertex_count += geom_const.vertexCount(i)
+
+    coords = [[0.0 for y in range(3)] for x in range(vertex_count)]
+
+    itv: QgsVertexIterator = geom.vertices()
+
+    i = 0
+    while (itv.hasNext()):
+        vertex: QgsPoint = itv.next()
+        coords[i][0] = vertex.x()
+        coords[i][1] = vertex.y()
+        coords[i][2] = vertex.z()
+        i += 1
+
+    return coords
+
+
 def segmentize_los_line(line: QgsGeometry, segment_length: float) -> QgsLineString:
 
     if not isinstance(line, QgsGeometry):
