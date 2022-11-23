@@ -2,9 +2,9 @@ from __future__ import annotations
 import math
 from typing import List, Optional, Union
 
-from qgis.core import (QgsPoint, QgsFeature)
+from qgis.core import (QgsPoint, QgsFeature, QgsGeometry)
 
-from los_tools.processing.tools.util_functions import calculate_distance, wkt_to_array_points
+from los_tools.processing.tools.util_functions import calculate_distance, line_geometry_to_coords
 from los_tools.constants.field_names import FieldNames
 
 
@@ -17,7 +17,7 @@ class LoS:
     VERTICAL_ANGLE = 4
 
     def __init__(self,
-                 points: List[List[float]],
+                 line: QgsGeometry,
                  is_global: bool = False,
                  is_without_target: bool = False,
                  observer_offset: float = 0,
@@ -28,6 +28,7 @@ class LoS:
                  use_curvature_corrections: bool = True,
                  refraction_coefficient: float = 0.13):
 
+        points = line_geometry_to_coords(line)
         self.is_global: bool = is_global
         self.is_without_target: bool = is_without_target
         self.use_curvature_corrections: bool = use_curvature_corrections
@@ -39,16 +40,12 @@ class LoS:
         self.target_index: int = None
         self.global_horizon_index = None
 
-        if sampling_distance is None:
-            sampling_distance = calculate_distance(points[0][0], points[0][1], points[1][0],
-                                                   points[1][1])
-
-        self.points: List = []
+        self.points: List = [None for x in range(len(points))]
         self.previous_max_angle: List = []
         self.visible: List = []
         self.horizon: List = []
 
-        self.__parse_points(points, sampling_distance=sampling_distance)
+        self.__parse_points(points)
 
         self.__identify_horizons()
 
@@ -64,7 +61,7 @@ class LoS:
             else:
                 self.horizon.append((self.visible[i] is True) and (self.visible[i + 1] is False))
 
-    def __parse_points(self, points: List[List[float]], sampling_distance: float) -> None:
+    def __parse_points(self, points: List[List[float]]) -> None:
 
         max_angle_temp = -180
 
@@ -72,9 +69,13 @@ class LoS:
         first_point_y = points[0][1]
         first_point_z = points[0][2] + self.observer_offset
 
+        sampling_distance: float = None
+
         if self.is_global:
             target_distance = calculate_distance(first_point_x, first_point_y, self.target_x,
                                                  self.target_y)
+            sampling_distance = calculate_distance(points[0][0], points[0][1], points[1][0],
+                                                   points[1][1])
 
         for i in range(0, len(points)):
             point_x = points[i][0]
@@ -91,40 +92,41 @@ class LoS:
 
             if i == 0:
 
-                self.points.append([point_x, point_y, 0, first_point_z, -90])
+                self.points[i] = [point_x, point_y, 0, first_point_z, -90]
 
             elif self.is_global and math.fabs(target_distance - distance) < sampling_distance / 2:
 
-                self.points.append([
+                self.points[i] = [
                     point_x, point_y, distance, point_z + target_offset,
                     self._angle_vertical(distance, point_z + target_offset - first_point_z)
-                ])
+                ]
 
                 self.target_index = i
 
             elif not self.is_global and not self.is_without_target and i == len(points) - 1:
 
-                self.points.append([
+                self.points[i] = [
                     point_x, point_y, distance, point_z + target_offset,
                     self._angle_vertical(distance, point_z + target_offset - first_point_z)
-                ])
+                ]
 
             else:
 
-                self.points.append([
+                self.points[i] = [
                     point_x, point_y, distance, point_z,
                     self._angle_vertical(distance, point_z - first_point_z)
-                ])
+                ]
 
             # first store max angle before this point and then add new max angle
             self.previous_max_angle.append(max_angle_temp)
 
-            if max_angle_temp < self.points[-1][self.VERTICAL_ANGLE]:
-                if self.is_global:
-                    if i != self.target_index:
-                        max_angle_temp = self.points[-1][self.VERTICAL_ANGLE]
-                else:
-                    max_angle_temp = self.points[-1][self.VERTICAL_ANGLE]
+            if i != 0:
+                if max_angle_temp < self.points[i - 1][self.VERTICAL_ANGLE]:
+                    if self.is_global:
+                        if i != self.target_index:
+                            max_angle_temp = self.points[i - 1][self.VERTICAL_ANGLE]
+                    else:
+                        max_angle_temp = self.points[i - 1][self.VERTICAL_ANGLE]
 
             # is visible is only valid if previous_max_angle is smaller then current angle
             if i == 0:
@@ -132,7 +134,7 @@ class LoS:
             else:
                 # [i] and [-1] actually points to the same point, no idea why I wrote this way
                 self.visible.append(
-                    self.previous_max_angle[i] < self.points[-1][self.VERTICAL_ANGLE])
+                    self.previous_max_angle[i] < self.points[i - 1][self.VERTICAL_ANGLE])
 
     def __str__(self):
 
@@ -282,14 +284,14 @@ class LoS:
 class LoSLocal(LoS):
 
     def __init__(self,
-                 points: list,
+                 line: QgsGeometry,
                  observer_offset: float = 0,
                  target_offset: float = 0,
                  sampling_distance: float = None,
                  use_curvature_corrections: bool = True,
                  refraction_coefficient: float = 0.13):
 
-        super().__init__(points,
+        super().__init__(line,
                          observer_offset=observer_offset,
                          target_offset=target_offset,
                          sampling_distance=sampling_distance,
@@ -306,7 +308,7 @@ class LoSLocal(LoS):
                      curvature_corrections: bool = True,
                      refraction_coefficient: float = 0.13) -> LoSLocal:
 
-        return cls(points=wkt_to_array_points(feature.geometry().asWkt()),
+        return cls(feature.geometry(),
                    observer_offset=feature.attribute(FieldNames.OBSERVER_OFFSET),
                    target_offset=feature.attribute(FieldNames.TARGET_OFFSET),
                    use_curvature_corrections=curvature_corrections,
@@ -391,7 +393,7 @@ class LoSLocal(LoS):
 class LoSGlobal(LoS):
 
     def __init__(self,
-                 points: list,
+                 line: QgsGeometry,
                  observer_offset: float = 0,
                  target_offset: float = 0,
                  target_x: float = 0,
@@ -400,7 +402,7 @@ class LoSGlobal(LoS):
                  use_curvature_corrections: bool = True,
                  refraction_coefficient: float = 0.13):
 
-        super().__init__(points,
+        super().__init__(line,
                          is_global=True,
                          observer_offset=observer_offset,
                          target_offset=target_offset,
@@ -419,7 +421,7 @@ class LoSGlobal(LoS):
                      refraction_coefficient: float = 0.13,
                      sampling_distance: float = None) -> LoSGlobal:
 
-        return cls(wkt_to_array_points(feature.geometry().asWkt()),
+        return cls(feature.geometry(),
                    observer_offset=feature.attribute(FieldNames.OBSERVER_OFFSET),
                    target_offset=feature.attribute(FieldNames.TARGET_OFFSET),
                    target_x=feature.attribute(FieldNames.TARGET_X),
@@ -493,13 +495,13 @@ class LoSGlobal(LoS):
 class LoSWithoutTarget(LoS):
 
     def __init__(self,
-                 points: list,
+                 line: QgsGeometry,
                  observer_offset: float = 0,
                  sampling_distance: float = None,
                  use_curvature_corrections: bool = True,
                  refraction_coefficient: float = 0.13):
 
-        super().__init__(points=points,
+        super().__init__(line,
                          is_without_target=True,
                          observer_offset=observer_offset,
                          sampling_distance=sampling_distance,
@@ -513,7 +515,7 @@ class LoSWithoutTarget(LoS):
                      refraction_coefficient: float = 0.13,
                      sampling_distance: float = None) -> LoSWithoutTarget:
 
-        return cls(points=wkt_to_array_points(feature.geometry().asWkt()),
+        return cls(feature.geometry(),
                    observer_offset=feature.attribute(FieldNames.OBSERVER_OFFSET),
                    use_curvature_corrections=curvature_corrections,
                    refraction_coefficient=refraction_coefficient,
