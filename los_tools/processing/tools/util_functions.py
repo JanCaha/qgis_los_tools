@@ -5,7 +5,7 @@ import re
 
 from qgis.core import (QgsGeometry, QgsLineString, QgsPoint, QgsPointXY, QgsRasterDataProvider,
                        QgsRectangle, QgsVectorLayer, QgsMessageLog, QgsProcessingException, Qgis,
-                       QgsPolygon, QgsVertexId, QgsWkbTypes)
+                       QgsPolygon, QgsVertexId, QgsWkbTypes, QgsVertexIterator)
 
 from los_tools.constants.field_names import FieldNames
 
