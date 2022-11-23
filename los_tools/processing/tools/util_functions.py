@@ -83,7 +83,7 @@ def check_existence_los_fields(field_names: List[str]) -> None:
 
 def wkt_to_array_points(wkt: str) -> List[List[float]]:
 
-    reg = re.compile("(LINESTRING |LineStringZ )")
+    reg = re.compile("(LINESTRING |LineStringZ |MULTILINESTRING |MultiLineStringZ )")
 
     wkt = reg.sub("", wkt)
 
