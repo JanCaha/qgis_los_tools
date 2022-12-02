@@ -4,6 +4,9 @@ import math
 from qgis.core import (QgsRasterLayer, QgsPointXY, QgsPoint, QgsVectorLayer, QgsLineString,
                        QgsGeometry)
 
+from osgeo import gdal, osr
+import numpy as np
+
 from los_tools.processing.tools.util_functions import (bilinear_interpolated_value,
                                                        get_diagonal_size, calculate_distance,
                                                        segmentize_los_line, segmentize_line,
@@ -11,7 +14,7 @@ from los_tools.processing.tools.util_functions import (bilinear_interpolated_val
                                                        line_geometry_to_coords)
 
 from tests.utils_tests import get_qgis_app
-from tests.utils_tests import (get_data_path, get_data_path_results)
+from tests.utils_tests import (get_data_path)
 
 QGIS_APP = get_qgis_app()
 
@@ -29,6 +32,55 @@ class UtilsTest(unittest.TestCase):
             p.append(QgsPoint(i, i, i))
 
         self.line_geometry = QgsGeometry.fromPolyline(p)
+
+        small_raster_file = "/vsimem/small.tif"
+        array = np.array([[1, 2], [3, 4]])
+
+        self.create_small_raster(small_raster_file, (0, 2), 1, -1, array)
+
+        self.small_raster = QgsRasterLayer(small_raster_file, "test_raster", "gdal")
+        self.small_raster_dp = self.small_raster.dataProvider()
+
+    def create_small_raster(self, newRasterfn, rasterOrigin, pixelWidth, pixelHeight, array):
+
+        array = array[::-1]
+
+        cols = array.shape[1]
+        rows = array.shape[0]
+        originX = rasterOrigin[0]
+        originY = rasterOrigin[1]
+
+        driver = gdal.GetDriverByName('GTiff')
+        outRaster: gdal.Dataset = driver.Create(newRasterfn, cols, rows, 1, gdal.GDT_Float32)
+        outRaster.SetGeoTransform((originX, pixelWidth, 0, originY, 0, pixelHeight))
+        outband: gdal.Band = outRaster.GetRasterBand(1)
+        outband.WriteArray(array)
+        outband.SetNoDataValue(-9999)
+        outRasterSRS = osr.SpatialReference()
+        outRasterSRS.ImportFromEPSG(5514)
+        outRaster.SetProjection(outRasterSRS.ExportToWkt())
+        outband.FlushCache()
+
+    def test_bilinear_interpolated_value_small_raster(self):
+
+        bilinear_value = bilinear_interpolated_value(self.small_raster_dp, QgsPointXY(1, 1))
+        self.assertAlmostEqual(2.5, bilinear_value, places=8)
+
+        bilinear_value = bilinear_interpolated_value(self.small_raster_dp,
+                                                     QgsPointXY(0.500000001, 1))
+        self.assertAlmostEqual(2, bilinear_value, places=8)
+
+        bilinear_value = bilinear_interpolated_value(self.small_raster_dp,
+                                                     QgsPointXY(1, 1.499999999))
+        self.assertAlmostEqual(3.5, bilinear_value, places=8)
+
+        bilinear_value = bilinear_interpolated_value(self.small_raster_dp,
+                                                     QgsPointXY(1.499999999, 1))
+        self.assertAlmostEqual(3, bilinear_value, places=8)
+
+        bilinear_value = bilinear_interpolated_value(self.small_raster_dp,
+                                                     QgsPointXY(1, 0.500000001))
+        self.assertAlmostEqual(1.5, bilinear_value, places=8)
 
     def test_bilinear_interpolated_value(self):
 
