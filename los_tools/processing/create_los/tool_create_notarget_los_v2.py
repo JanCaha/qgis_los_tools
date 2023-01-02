@@ -9,7 +9,8 @@ from los_tools.constants.names_constants import NamesConstants
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
 from los_tools.utils import get_doc_file
-from los_tools.constants.fields import Fields
+from los_tools.constants import Fields
+from los_tools.processing.utils import LoSToolsSettings
 
 
 class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
@@ -169,7 +170,11 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
         distance_matrix.replace_minus_one_with_value(list_rasters.maximal_diagonal_size())
 
+        feedback.pushCommandInfo(f"Sample Z: {LoSToolsSettings.sample_Z_using_plugin()}.")
+
         i = 0
+
+        sampleZ = LoSToolsSettings.sample_Z_using_plugin()
 
         for observer_feature in observers_iterator:
 
@@ -189,7 +194,8 @@ class CreateNoTargetLosAlgorithmV2(QgsProcessingAlgorithm):
 
                 line = distance_matrix.build_line(start_point, direction_point)
 
-                line = list_rasters.add_z_values(line.points())
+                if sampleZ:
+                    line = list_rasters.add_z_values(line.points())
 
                 f = QgsFeature(fields)
                 f.setGeometry(line)
