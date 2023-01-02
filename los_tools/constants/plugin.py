@@ -5,3 +5,4 @@ class PluginConstants:
 
     provider_name = "LoS Tools"
     provider_id = 'lostools'
+    provider_name_short = "LoSTools"
