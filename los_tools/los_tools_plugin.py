@@ -50,6 +50,9 @@ class LoSToolsPlugin():
         self.toolbar: QToolBar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
         self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
 
+        self.iface.newProjectCreated.connect(self.reset_los_layer)
+        self.iface.projectRead.connect(self.reset_los_layer)
+
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
 
@@ -135,8 +138,6 @@ class LoSToolsPlugin():
         self.optimize_point_location_tool.deactivated.connect(
             partial(self.deactivateTool, self.optimize_point_location_action_name))
 
-        self.reset_los_layer()
-
         self.create_los_tool = CreateLoSMapTool(self.iface, self.raster_validations_dialog,
                                                 self.los_settings_dialog, self._layer_LoS,
                                                 self.add_los_layer_action)
@@ -144,6 +145,8 @@ class LoSToolsPlugin():
         self.create_los_tool.deactivated.connect(
             partial(self.deactivateTool, self.create_los_action_name))
         self.create_los_tool.featuresAdded.connect(self.update_actions_layer_text)
+
+        self.reset_los_layer()
 
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
@@ -257,6 +260,7 @@ class LoSToolsPlugin():
     def reset_los_layer(self) -> None:
         self._layer_LoS = None
         self._layer_LoS = self._plugin_los_layer()
+        self.create_los_tool.set_los_layer(self._layer_LoS)
         self.update_actions_layer_text()
 
     def add_plugin_los_layer_to_project(self) -> None:
