@@ -1,6 +1,6 @@
 from qgis.PyQt.QtGui import QIcon
-
 from qgis.core import QgsProcessingProvider
+from processing.core.ProcessingConfig import ProcessingConfig, Setting
 
 from .create_points.tool_points_around import CreatePointsAroundAlgorithm
 from .create_points.tool_points_in_direction import CreatePointsInDirectionAlgorithm
@@ -26,7 +26,7 @@ from .analyse_los.tool_extract_los_visibility_polygons import ExtractLoSVisibili
 from .parameter_settings.tool_angle_at_distance_for_size import ObjectDetectionAngleAlgorithm
 from .create_points.tool_points_by_azimuths import CreatePointsInAzimuthsAlgorithm
 
-from los_tools.constants.plugin import PluginConstants
+from los_tools.constants import PluginConstants, Settings
 from los_tools.utils import get_icon_path, get_plugin_version
 
 
@@ -37,6 +37,20 @@ class LoSToolsProvider(QgsProcessingProvider):
 
     def versionInfo(self):
         return get_plugin_version()
+
+    def load(self) -> bool:
+
+        ProcessingConfig.settingIcons[PluginConstants.provider_name_short] = self.icon()
+
+        ProcessingConfig.addSetting(
+            Setting(
+                PluginConstants.provider_name_short, Settings.name_sample_z,
+                "Use sampler in the Python code? If unchecked (set to `False`) the Z value is not extracted in tools that create LoS.",
+                True))
+
+        ProcessingConfig.readSettings()
+
+        return super().load()
 
     def loadAlgorithms(self):
         self.addAlgorithm(CreatePointsAroundAlgorithm())
