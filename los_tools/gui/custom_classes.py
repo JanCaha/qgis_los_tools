@@ -99,3 +99,7 @@ class DistanceWidget(QWidget):
 
     def setClearValue(self, customValue: float) -> None:
         self.distance_value.setClearValue(customValue)
+
+    def setEnabled(self, value: bool) -> None:
+        self.distance_value.setEnabled(value)
+        self.units.setEnabled(value)
