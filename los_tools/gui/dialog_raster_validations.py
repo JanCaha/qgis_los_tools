@@ -58,6 +58,7 @@ class RasterValidations(QDialog):
         self.select_point = QPushButton()
         self.select_point.setText("Choose sample point on the map")
         self.select_point.clicked.connect(self.select_sample_point)
+        self.select_point.setEnabled(False)
 
         self.point_coordinate = QLineEdit()
         self.point_coordinate.setReadOnly(True)
@@ -162,27 +163,32 @@ class RasterValidations(QDialog):
     def update_selected_rasters(self, item: QTreeWidgetItem, column: int) -> None:
         raster: QgsRasterLayer = item.data(0, Qt.UserRole)
         self.rasters_selected[raster.id()] = item.checkState(0) == Qt.CheckState.Checked
+        self.select_point.setEnabled(not self.listOfRasters.is_empty())
 
     @property
     def listOfRasters(self) -> ListOfRasters:
-        return ListOfRasters(self.list_of_selected_rasters)
+        try:
+            return ListOfRasters(self.list_of_selected_rasters)
+        except ValueError:
+            return ListOfRasters([])
 
     def test_interpolated_value_at_point(self):
 
         if self.list_of_selected_rasters and self._point and self._point_crs:
 
             list_of_rasters = self.listOfRasters
-            value = list_of_rasters.extract_interpolated_value_at_point(
-                self._point, self._point_crs)
-            if value:
-                value = str(round(value, 6))
-            else:
-                value = "No value"
+            if not list_of_rasters.is_empty():
+                value = list_of_rasters.extract_interpolated_value_at_point(
+                    self._point, self._point_crs)
+                if value:
+                    value = str(round(value, 6))
+                else:
+                    value = "No value"
 
-            self.sampled_from_raster.setText(
-                f"{list_of_rasters.sampling_from_raster_at_point(self._point, self._point_crs)} (Raster Layer)"
-            )
-            self.sampled_value.setText(value)
+                self.sampled_from_raster.setText(
+                    f"{list_of_rasters.sampling_from_raster_at_point(self._point, self._point_crs)} (Raster Layer)"
+                )
+                self.sampled_value.setText(value)
 
     @property
     def list_of_selected_rasters(self) -> List[QgsRasterLayer]:
