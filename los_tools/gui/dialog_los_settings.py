@@ -47,19 +47,28 @@ class LoSSettings(QDialog):
         self.object_distance.setClearValue(1000)
         self.object_distance.valueChanged.connect(self._calculate_object_angle_size)
 
+        self.angle_size_manually = QCheckBox()
+        self.angle_size_manually.stateChanged.connect(self._change_object_size_manual)
+        self.angle_size_manually.stateChanged.connect(self.description_text)
+
         self.object_angle_size = QDoubleSpinBox()
         self.object_angle_size.setDecimals(3)
         self.object_angle_size.setReadOnly(True)
         self.object_angle_size.setSuffix("°")
+        self.object_angle_size.setMinimum(0.001)
+        self.object_angle_size.setSingleStep(0.01)
+
         self.object_angle_size.valueChanged.connect(self.fill_distances)
         self.object_angle_size.valueChanged.connect(self.description_text)
 
         layout_group_box_object.addRow("Object Size", self.object_size)
         layout_group_box_object.addRow("Object Distance", self.object_distance)
+        layout_group_box_object.addRow("Specify Object Size Manually", self.angle_size_manually)
         layout_group_box_object.addRow("Object Angle Size", self.object_angle_size)
 
         self.text = QTextBrowser(self)
         self.text.setReadOnly(True)
+        self.text.setMinimumHeight(200)
         self.description_text()
 
         group_box_los = QGroupBox("LoS settings", self)
@@ -126,14 +135,22 @@ class LoSSettings(QDialog):
         layout.addRow(self.button_add_layer)
 
     def description_text(self) -> None:
-        text = [
-            "To detect object of size {} at distance {}, the angular sampling needs to be {}°. ".
-            format(self.object_size.distance(), self.object_distance.distance(),
-                   self.object_angle_size.value()),
-            "With this angular sampling of lines-of-sight, it is guaranteed to hit the object at least once.\n",
+        if self.angle_size_manually.isChecked():
+            text = [
+                "Angular sampling manually set to {}°.\n\n".format(
+                    round(self.object_angle_size.value(), 3))
+            ]
+        else:
+            text = [
+                "To detect object of size {} at distance {}, the angular sampling needs to be {}°.\n\n"
+                .format(self.object_size.distance(), self.object_distance.distance(),
+                        round(self.object_angle_size.value(), 3)),
+                "With this angular sampling of lines-of-sight, it is guaranteed to hit the object at least once.\n\n"
+            ]
+        text += [
             "The approach can be done, to simplify sampling on each LoS. With growing distance from observer, ",
-            "it is possible to sample less frequently.\n",
-            "Below the calculation of sampling distances for various distances can be performed.\n",
+            "it is possible to sample less frequently.\n\n",
+            "Below the calculation of sampling distances for various distances can be performed.\n\n",
             "Default sampling size is used for distances below the first specified distance. ",
             "Then after each specified distance the calculated sampling distance is used."
         ]
@@ -274,3 +291,9 @@ class LoSSettings(QDialog):
             return self.maximal_los_length.distance()
         else:
             return None
+
+    def _change_object_size_manual(self):
+        manual = self.angle_size_manually.isChecked()
+        self.object_size.setEnabled(not manual)
+        self.object_distance.setEnabled(not manual)
+        self.object_angle_size.setReadOnly(not manual)
