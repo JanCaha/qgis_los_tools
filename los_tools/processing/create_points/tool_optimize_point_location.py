@@ -224,10 +224,10 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         col = round((point.x() - raster_extent.xMinimum()) / cell_size)
         row = round((raster_extent.yMaximum() - point.y()) / cell_size)
 
-        x_min = raster_extent.xMinimum() + (col - distance_cells)
-        x_max = x_min + 2 * distance_cells
-        y_max = raster_extent.yMaximum() - (row - distance_cells)
-        y_min = y_max - 2 * distance_cells
+        x_min = raster_extent.xMinimum() + ((col - distance_cells) * cell_size)
+        x_max = x_min + 2 * (distance_cells * cell_size)
+        y_max = raster_extent.yMaximum() - ((row - distance_cells) * cell_size)
+        y_min = y_max - 2 * (distance_cells * cell_size)
 
         pixel_extent: QgsRectangle = QgsRectangle(x_min, y_min, x_max, y_max)
 
