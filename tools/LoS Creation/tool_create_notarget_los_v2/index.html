@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="Jan Caha">
-        <link rel="canonical" href="https://jancaha.github.io/qgis_los_tools/tools/Angles/tool_limit_angles_vector/">
+        <link rel="canonical" href="https://jancaha.github.io/qgis_los_tools/tools/LoS%20Creation/tool_create_notarget_los_v2/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
-        <title>Extract Limit Angles - LoS Tools</title>
+        <title>Create No Target LoS V2 - LoS Tools</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../../css/base.css" rel="stylesheet">
@@ -41,34 +41,77 @@
                             <li class="navitem">
                                 <a href="../../../changelog/" class="nav-link">Changelog</a>
                             </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Interactive tools <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_los_without_target/" class="dropdown-item">Visualize LoS No Target Tool</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_los_without_target_sampling_settings/" class="dropdown-item">LoS without Target Sampling Settings</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_optimize_point_location/" class="dropdown-item">Optimize Point Location Tool</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_raster_validations/" class="dropdown-item">Rasters Validation and Sampling</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_set_camera/" class="dropdown-item">Set Camera</a>
+</li>
+                                </ul>
+                            </li>
                             <li class="dropdown active">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Tools <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
   <li class="dropdown-submenu">
-    <a href="#" class="dropdown-item">Angles</a>
+    <a href="#" class="dropdown-item">Azimuths</a>
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../tool_azimuth/" class="dropdown-item">Extract Azimuth between Points and centroids of Polygons/Lines</a>
+    <a href="../../Azimuths/tool_azimuth/" class="dropdown-item">Extract Azimuth between Points and Centroids</a>
 </li>
             
 <li>
-    <a href="./" class="dropdown-item active">Extract Limit Angles</a>
+    <a href="../../Azimuths/tool_limit_angles_vector/" class="dropdown-item">Extract Limit Azimuths</a>
 </li>
     </ul>
   </li>
                                     
   <li class="dropdown-submenu">
-    <a href="#" class="dropdown-item">Export to table</a>
+    <a href="#" class="dropdown-item">Calculate Parameters Settings</a>
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../Export%20to%20table/tool_export_horizon_lines/" class="dropdown-item">Export Horizon Lines Layer to table</a>
+    <a href="../../Calculate%20Parameters%20Settings/tool_angle_at_distance_for_size/" class="dropdown-item">Calculate Object Detection Angle</a>
 </li>
             
 <li>
-    <a href="../../Export%20to%20table/tool_export_los/" class="dropdown-item">Export LoS Layer to table</a>
+    <a href="../../Calculate%20Parameters%20Settings/tool_distances_for_sizes/" class="dropdown-item">Calculate Object Distances</a>
+</li>
+            
+<li>
+    <a href="../../Calculate%20Parameters%20Settings/tool_sizes_at_distances/" class="dropdown-item">Calculate Object Sizes</a>
+</li>
+    </ul>
+  </li>
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">Export to Table</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="../../Export%20to%20Table/tool_export_horizon_lines/" class="dropdown-item">Export Horizon Lines Layer to table</a>
+</li>
+            
+<li>
+    <a href="../../Export%20to%20Table/tool_export_los/" class="dropdown-item">Export LoS Layer to table</a>
 </li>
     </ul>
   </li>
@@ -94,6 +137,18 @@
 <li>
     <a href="../../LoS%20Analysis/tool_analyse_los/" class="dropdown-item">Analyse LoS</a>
 </li>
+            
+<li>
+    <a href="../../LoS%20Analysis/tool_extract_points_los/" class="dropdown-item">Extract Visible/Invisible Points from LoS</a>
+</li>
+            
+<li>
+    <a href="../../LoS%20Analysis/tool_extract_visibility_parts/" class="dropdown-item">Extract Visible/Invisible Lines from LoS</a>
+</li>
+            
+<li>
+    <a href="../../LoS%20Analysis/tool_extract_visibility_polygons/" class="dropdown-item">Extract Visible/Invisible Polygons from LoS</a>
+</li>
     </ul>
   </li>
                                     
@@ -102,25 +157,19 @@
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../LoS%20Creation/tool_create_global_los/" class="dropdown-item">Create global LoS</a>
+    <a href="../tool_create_global_los/" class="dropdown-item">Create Global LoS</a>
 </li>
             
 <li>
-    <a href="../../LoS%20Creation/tool_create_local_los/" class="dropdown-item">Create local LoS</a>
+    <a href="../tool_create_local_los/" class="dropdown-item">Create Local LoS</a>
 </li>
             
 <li>
-    <a href="../../LoS%20Creation/tool_create_notarget_los/" class="dropdown-item">Create no target LoS</a>
+    <a href="../tool_create_notarget_los/" class="dropdown-item">Create No Target LoS</a>
 </li>
-    </ul>
-  </li>
-                                    
-  <li class="dropdown-submenu">
-    <a href="#" class="dropdown-item">LoS Points</a>
-    <ul class="dropdown-menu">
             
 <li>
-    <a href="../../LoS%20Points/tool_extract_points_los/" class="dropdown-item">Extract Points from LoS</a>
+    <a href="./" class="dropdown-item active">Create No Target LoS V2</a>
 </li>
     </ul>
   </li>
@@ -130,15 +179,19 @@
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../Points%20Creation/tool_optimize_point_location/" class="dropdown-item">Optimize point location</a>
+    <a href="../../Points%20Creation/tool_optimize_point_location/" class="dropdown-item">Optimize Point Location</a>
 </li>
             
 <li>
-    <a href="../../Points%20Creation/tool_points_around/" class="dropdown-item">Create points around</a>
+    <a href="../../Points%20Creation/tool_points_around/" class="dropdown-item">Create Points Around</a>
 </li>
             
 <li>
-    <a href="../../Points%20Creation/tool_points_in_direction/" class="dropdown-item">Create points in direction</a>
+    <a href="../../Points%20Creation/tool_points_by_azimuths/" class="dropdown-item">Create Points by Azimuths</a>
+</li>
+            
+<li>
+    <a href="../../Points%20Creation/tool_points_in_direction/" class="dropdown-item">Create Points in Direction</a>
 </li>
     </ul>
   </li>
@@ -148,7 +201,11 @@
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../Raster%20Editing/tool_replace_raster_values/" class="dropdown-item">Replace Raster Values</a>
+    <a href="../../Raster%20Editing/tool_replace_raster_values_by_constant/" class="dropdown-item">Replace Raster Values by Constant Value</a>
+</li>
+            
+<li>
+    <a href="../../Raster%20Editing/tool_replace_raster_values_by_field/" class="dropdown-item">Replace Raster Values by Field Values</a>
 </li>
     </ul>
   </li>
@@ -184,7 +241,7 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#extract-limit-angles" class="nav-link">Extract Limit Angles</a>
+            <li class="nav-item" data-level="1"><a href="#create-no-target-los-v2" class="nav-link">Create No Target LoS V2</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#parameters" class="nav-link">Parameters</a>
               <ul class="nav flex-column">
@@ -205,8 +262,11 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="extract-limit-angles">Extract Limit Angles</h1>
-<p>Calculates minimal and maximal azimuth for set of LoS without target that passes through specified layer (either polygon or line).</p>
+<h1 id="create-no-target-los-v2">Create No Target LoS V2</h1>
+<p>Create line-of-sight between each point from observer’s layer and targets layer, where <code>Observer ID field</code> value from observer is equal to <code>Target and Observer agreement ID field</code> of target. This ensures that each point from target’s layer is linked to one point from observers layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.</p>
+<p>The target points can be and usually should be created by tools <a href="../../Points%20Creation/tool_points_around/">Create points around</a> and <a href="../../Points%20Creation/tool_points_in_direction/">Create points in direction</a>.</p>
+<p>This variant of the algorithm allows elevation extraction from multiple rasters. The rasters are ordered from smallest cell size to the biggest. Elevation is always obtained from raster with smallest cell size that has valid elevation value (no data is not considered as valid value). This allows utilization of DEM with large cells as addition to DEM with smaller cells. For example DEM with cell size 1 meter can be used within city for areas close to observers and SRTM data (30 meter cell size) in areas around the city, far from the observer.  </p>
+<p>This variant of the tool specifies sampling and length of LoS by table <code>Sampling distance - distance table</code>. This a special kind of table, which can be output of tools <a href="../../Calculate%20Parameters%20Settings/tool_distances_for_sizes/">Calculate Object Distances</a> and <a href="../../Calculate%20Parameters%20Settings/tool_sizes_at_distances/">Calculate Object Sizes</a>, that specifies sampling distance and distance limits. Each row in the table specifies sampling distance (size) on LoS for distances lower then distance. Two rows with values of sizes 1 and 5 and distance 1000 and 3000 mean that LoS will be sampled every 1 meter for distance lower then 1000 meters and then each 5 meters for distances lower then 3000 meter from observer. The length of LoS will be limited to 3000 meters. To specify unlimited LoS length a row with distance value -1 and sampling distance must be present (this is interpreted as maximal possible length with respect to raster data).</p>
 <h2 id="parameters">Parameters</h2>
 <table>
 <thead>
@@ -219,22 +279,58 @@
 </thead>
 <tbody>
 <tr>
-<td>LoS layer</td>
-<td><code>LoSLayer</code></td>
+<td>Raster Layer DEM</td>
+<td><code>DemRasters</code></td>
+<td>[raster][list]</td>
+<td>Raster DEMs on which the LoS is calculated.</td>
+</tr>
+<tr>
+<td>Sampling distance - distance table</td>
+<td><code>LineSettingsTable</code></td>
+<td>[vector: nogeometry]</td>
+<td>Distance table, specify sampling size on LoS by distance.</td>
+</tr>
+<tr>
+<td>Observers point layer</td>
+<td><code>ObserverPoints</code></td>
+<td>[vector: point]</td>
+<td>Point layer representing the observers.</td>
+</tr>
+<tr>
+<td>Observer ID field</td>
+<td><code>ObserverIdField</code></td>
+<td>[tablefield: numeric]</td>
+<td>Field containing ID for observer points.</td>
+</tr>
+<tr>
+<td>Observer offset field</td>
+<td><code>ObserverOffset</code></td>
+<td>[tablefield: numeric]</td>
+<td>Field containing offset above DEM for observer points.</td>
+</tr>
+<tr>
+<td>Targets point layer</td>
+<td><code>TargetPoints</code></td>
+<td>[vector: point]</td>
+<td>Point layer representing the targets.</td>
+</tr>
+<tr>
+<td>Target ID field</td>
+<td><code>TargetIdField</code></td>
+<td>[tablefield: numeric]</td>
+<td>Field containing ID for target points.</td>
+</tr>
+<tr>
+<td>Target and Observer agreement ID field</td>
+<td><code>TargetDefinitionIdField</code></td>
+<td>[tablefield: numeric]</td>
+<td>Field that specifies which target point is linked to which observer point. Values in this field are compared to <code>ObserverIdField</code>.</td>
+</tr>
+<tr>
+<td>Output layer</td>
+<td><code>OutputLayer</code></td>
 <td>[vector: line]</td>
-<td>LoS layer for calculation.</td>
-</tr>
-<tr>
-<td>Object layer</td>
-<td><code>ObjectLayer</code></td>
-<td>[vector: line, polygon]</td>
-<td>The main object which determines the direction.</td>
-</tr>
-<tr>
-<td>Output table</td>
-<td><code>OutputTable</code></td>
-<td>[table]</td>
-<td>Table containing the result (without geometry).</td>
+<td>Output layer containing LoS.</td>
 </tr>
 </tbody>
 </table>
@@ -250,21 +346,26 @@
 </thead>
 <tbody>
 <tr>
-<td>Output table</td>
-<td><code>OutputTable</code></td>
-<td>[table]</td>
-<td>Table containing the result (without geometry).</td>
+<td>Output layer</td>
+<td><code>OutputLayer</code></td>
+<td>[vector: line]</td>
+<td>Output layer containing LoS.</td>
 </tr>
 </tbody>
 </table>
 <h3 id="fields-in-the-output-layer">Fields in the output layer</h3>
 <ul>
-<li><strong>id_observer</strong> - integer - value from expected field (<code>id_observer</code>) in <code>LoSLayer</code></li>
-<li><strong>minimal_azimuth</strong> - double - minimal azimuth LoS for given observer that passes by geometry in <code>ObjectLayer</code></li>
-<li><strong>maximal_azimuth</strong> - double - maximal azimuth LoS for given observer that passes by geometry in <code>ObjectLayer</code></li>
+<li><strong>los_type</strong> - string - for this tool the values is always <code>without target</code></li>
+<li><strong>id_observer</strong> - integer - value from field specified in <code>Observer ID field</code></li>
+<li><strong>id_target</strong> - integer - value from field specified in <code>Target ID field</code></li>
+<li><strong>observer_offset</strong> - double - value from the field specified in <code>Observer offset field</code></li>
+<li><strong>azimuth</strong> - double - value from the field specified in <code>Target offset field</code></li>
+<li><strong>target_x</strong> - double - X coordinate of point in <code>Targets point layer</code>, used later in analyses</li>
+<li><strong>target_y</strong> - double - Y coordinate of point in <code>Targets point layer</code>, used later in analyses</li>
+<li><strong>angle_step_between_los</strong> - double - difference between LoS from one viewpoint as angle (degrees)</li>
 </ul>
 <h2 id="tool-screenshot">Tool screenshot</h2>
-<p><a data-featherlight="../../../images/tool_limit_angles_vector.png" href="#"><img alt="Extract Limit Angles" src="../../../images/tool_limit_angles_vector.png" /></a></p></div>
+<p><a data-featherlight="../../../images/tool_create_notarget_los_v2.png" href="#"><img alt="Create no target LoS V2" src="../../../images/tool_create_notarget_los_v2.png" /></a></p></div>
             </div>
         </div>
 

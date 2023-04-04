@@ -41,34 +41,77 @@
                             <li class="navitem">
                                 <a href="../../../changelog/" class="nav-link">Changelog</a>
                             </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Interactive tools <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_los_without_target/" class="dropdown-item">Visualize LoS No Target Tool</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_los_without_target_sampling_settings/" class="dropdown-item">LoS without Target Sampling Settings</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_optimize_point_location/" class="dropdown-item">Optimize Point Location Tool</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_raster_validations/" class="dropdown-item">Rasters Validation and Sampling</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_set_camera/" class="dropdown-item">Set Camera</a>
+</li>
+                                </ul>
+                            </li>
                             <li class="dropdown active">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Tools <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
   <li class="dropdown-submenu">
-    <a href="#" class="dropdown-item">Angles</a>
+    <a href="#" class="dropdown-item">Azimuths</a>
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../Angles/tool_azimuth/" class="dropdown-item">Extract Azimuth between Points and centroids of Polygons/Lines</a>
+    <a href="../../Azimuths/tool_azimuth/" class="dropdown-item">Extract Azimuth between Points and Centroids</a>
 </li>
             
 <li>
-    <a href="../../Angles/tool_limit_angles_vector/" class="dropdown-item">Extract Limit Angles</a>
+    <a href="../../Azimuths/tool_limit_angles_vector/" class="dropdown-item">Extract Limit Azimuths</a>
 </li>
     </ul>
   </li>
                                     
   <li class="dropdown-submenu">
-    <a href="#" class="dropdown-item">Export to table</a>
+    <a href="#" class="dropdown-item">Calculate Parameters Settings</a>
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../Export%20to%20table/tool_export_horizon_lines/" class="dropdown-item">Export Horizon Lines Layer to table</a>
+    <a href="../../Calculate%20Parameters%20Settings/tool_angle_at_distance_for_size/" class="dropdown-item">Calculate Object Detection Angle</a>
 </li>
             
 <li>
-    <a href="../../Export%20to%20table/tool_export_los/" class="dropdown-item">Export LoS Layer to table</a>
+    <a href="../../Calculate%20Parameters%20Settings/tool_distances_for_sizes/" class="dropdown-item">Calculate Object Distances</a>
+</li>
+            
+<li>
+    <a href="../../Calculate%20Parameters%20Settings/tool_sizes_at_distances/" class="dropdown-item">Calculate Object Sizes</a>
+</li>
+    </ul>
+  </li>
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">Export to Table</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="../../Export%20to%20Table/tool_export_horizon_lines/" class="dropdown-item">Export Horizon Lines Layer to table</a>
+</li>
+            
+<li>
+    <a href="../../Export%20to%20Table/tool_export_los/" class="dropdown-item">Export LoS Layer to table</a>
 </li>
     </ul>
   </li>
@@ -94,6 +137,18 @@
 <li>
     <a href="../../LoS%20Analysis/tool_analyse_los/" class="dropdown-item">Analyse LoS</a>
 </li>
+            
+<li>
+    <a href="../../LoS%20Analysis/tool_extract_points_los/" class="dropdown-item">Extract Visible/Invisible Points from LoS</a>
+</li>
+            
+<li>
+    <a href="../../LoS%20Analysis/tool_extract_visibility_parts/" class="dropdown-item">Extract Visible/Invisible Lines from LoS</a>
+</li>
+            
+<li>
+    <a href="../../LoS%20Analysis/tool_extract_visibility_polygons/" class="dropdown-item">Extract Visible/Invisible Polygons from LoS</a>
+</li>
     </ul>
   </li>
                                     
@@ -102,25 +157,19 @@
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../LoS%20Creation/tool_create_global_los/" class="dropdown-item">Create global LoS</a>
+    <a href="../../LoS%20Creation/tool_create_global_los/" class="dropdown-item">Create Global LoS</a>
 </li>
             
 <li>
-    <a href="../../LoS%20Creation/tool_create_local_los/" class="dropdown-item">Create local LoS</a>
+    <a href="../../LoS%20Creation/tool_create_local_los/" class="dropdown-item">Create Local LoS</a>
 </li>
             
 <li>
-    <a href="../../LoS%20Creation/tool_create_notarget_los/" class="dropdown-item">Create no target LoS</a>
+    <a href="../../LoS%20Creation/tool_create_notarget_los/" class="dropdown-item">Create No Target LoS</a>
 </li>
-    </ul>
-  </li>
-                                    
-  <li class="dropdown-submenu">
-    <a href="#" class="dropdown-item">LoS Points</a>
-    <ul class="dropdown-menu">
             
 <li>
-    <a href="../../LoS%20Points/tool_extract_points_los/" class="dropdown-item">Extract Points from LoS</a>
+    <a href="../../LoS%20Creation/tool_create_notarget_los_v2/" class="dropdown-item">Create No Target LoS V2</a>
 </li>
     </ul>
   </li>
@@ -130,15 +179,19 @@
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../Points%20Creation/tool_optimize_point_location/" class="dropdown-item">Optimize point location</a>
+    <a href="../../Points%20Creation/tool_optimize_point_location/" class="dropdown-item">Optimize Point Location</a>
 </li>
             
 <li>
-    <a href="../../Points%20Creation/tool_points_around/" class="dropdown-item">Create points around</a>
+    <a href="../../Points%20Creation/tool_points_around/" class="dropdown-item">Create Points Around</a>
 </li>
             
 <li>
-    <a href="../../Points%20Creation/tool_points_in_direction/" class="dropdown-item">Create points in direction</a>
+    <a href="../../Points%20Creation/tool_points_by_azimuths/" class="dropdown-item">Create Points by Azimuths</a>
+</li>
+            
+<li>
+    <a href="../../Points%20Creation/tool_points_in_direction/" class="dropdown-item">Create Points in Direction</a>
 </li>
     </ul>
   </li>
@@ -148,7 +201,11 @@
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../Raster%20Editing/tool_replace_raster_values/" class="dropdown-item">Replace Raster Values</a>
+    <a href="../../Raster%20Editing/tool_replace_raster_values_by_constant/" class="dropdown-item">Replace Raster Values by Constant Value</a>
+</li>
+            
+<li>
+    <a href="../../Raster%20Editing/tool_replace_raster_values_by_field/" class="dropdown-item">Replace Raster Values by Field Values</a>
 </li>
     </ul>
   </li>
@@ -248,12 +305,6 @@
 <td><code>RefractionCoefficient</code></td>
 <td>[number] <br/><br/> Default: <br/> <code>0.13</code></td>
 <td>Value of refraction coefficient.</td>
-</tr>
-<tr>
-<td>Extract value as M dimension <br/>(for global horizon)</td>
-<td><code>ExtractAsM</code></td>
-<td>[enumeration] <br/><br/> Default: <br/> <code>0</code></td>
-<td>Type of values to extract as M dimension. <br/><br/> <strong>Values</strong>: <br/> <strong>0</strong> - view angles <br/> <strong>1</strong> - angle difference global to local horizon <br/> <strong>2</strong> - elevation difference global to local horizon <br/> <strong>3</strong> - horizon distance</td>
 </tr>
 </tbody>
 </table>

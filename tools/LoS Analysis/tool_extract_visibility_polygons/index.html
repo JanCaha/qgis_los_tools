@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="Jan Caha">
+        <link rel="canonical" href="https://jancaha.github.io/qgis_los_tools/tools/LoS%20Analysis/tool_extract_visibility_polygons/">
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Extract Visible/Invisible Polygons from LoS - LoS Tools</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/color-brewer.min.css">
+        <link href="../../../css/additions.css" rel="stylesheet">
+        <link href="//cdnjs.cloudflare.com/ajax/libs/featherlight/v.1.7.14/featherlight.min.css" rel="stylesheet">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">LoS Tools</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href="../../.." class="nav-link">LoS Tools</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Interactive tools <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_los_without_target/" class="dropdown-item">Visualize LoS No Target Tool</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_los_without_target_sampling_settings/" class="dropdown-item">LoS without Target Sampling Settings</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_optimize_point_location/" class="dropdown-item">Optimize Point Location Tool</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_raster_validations/" class="dropdown-item">Rasters Validation and Sampling</a>
+</li>
+                                    
+<li>
+    <a href="../../../interactive%20tools/tool_set_camera/" class="dropdown-item">Set Camera</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Tools <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">Azimuths</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="../../Azimuths/tool_azimuth/" class="dropdown-item">Extract Azimuth between Points and Centroids</a>
+</li>
+            
+<li>
+    <a href="../../Azimuths/tool_limit_angles_vector/" class="dropdown-item">Extract Limit Azimuths</a>
+</li>
+    </ul>
+  </li>
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">Calculate Parameters Settings</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="../../Calculate%20Parameters%20Settings/tool_angle_at_distance_for_size/" class="dropdown-item">Calculate Object Detection Angle</a>
+</li>
+            
+<li>
+    <a href="../../Calculate%20Parameters%20Settings/tool_distances_for_sizes/" class="dropdown-item">Calculate Object Distances</a>
+</li>
+            
+<li>
+    <a href="../../Calculate%20Parameters%20Settings/tool_sizes_at_distances/" class="dropdown-item">Calculate Object Sizes</a>
+</li>
+    </ul>
+  </li>
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">Export to Table</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="../../Export%20to%20Table/tool_export_horizon_lines/" class="dropdown-item">Export Horizon Lines Layer to table</a>
+</li>
+            
+<li>
+    <a href="../../Export%20to%20Table/tool_export_los/" class="dropdown-item">Export LoS Layer to table</a>
+</li>
+    </ul>
+  </li>
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">Horizons</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="../../Horizons/tool_extract_horizon_lines/" class="dropdown-item">Extract Horizon Lines</a>
+</li>
+            
+<li>
+    <a href="../../Horizons/tool_extract_horizons/" class="dropdown-item">Extract Horizons</a>
+</li>
+    </ul>
+  </li>
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">LoS Analysis</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="../tool_analyse_los/" class="dropdown-item">Analyse LoS</a>
+</li>
+            
+<li>
+    <a href="../tool_extract_points_los/" class="dropdown-item">Extract Visible/Invisible Points from LoS</a>
+</li>
+            
+<li>
+    <a href="../tool_extract_visibility_parts/" class="dropdown-item">Extract Visible/Invisible Lines from LoS</a>
+</li>
+            
+<li>
+    <a href="./" class="dropdown-item active">Extract Visible/Invisible Polygons from LoS</a>
+</li>
+    </ul>
+  </li>
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">LoS Creation</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="../../LoS%20Creation/tool_create_global_los/" class="dropdown-item">Create Global LoS</a>
+</li>
+            
+<li>
+    <a href="../../LoS%20Creation/tool_create_local_los/" class="dropdown-item">Create Local LoS</a>
+</li>
+            
+<li>
+    <a href="../../LoS%20Creation/tool_create_notarget_los/" class="dropdown-item">Create No Target LoS</a>
+</li>
+            
+<li>
+    <a href="../../LoS%20Creation/tool_create_notarget_los_v2/" class="dropdown-item">Create No Target LoS V2</a>
+</li>
+    </ul>
+  </li>
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">Points Creation</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="../../Points%20Creation/tool_optimize_point_location/" class="dropdown-item">Optimize Point Location</a>
+</li>
+            
+<li>
+    <a href="../../Points%20Creation/tool_points_around/" class="dropdown-item">Create Points Around</a>
+</li>
+            
+<li>
+    <a href="../../Points%20Creation/tool_points_by_azimuths/" class="dropdown-item">Create Points by Azimuths</a>
+</li>
+            
+<li>
+    <a href="../../Points%20Creation/tool_points_in_direction/" class="dropdown-item">Create Points in Direction</a>
+</li>
+    </ul>
+  </li>
+                                    
+  <li class="dropdown-submenu">
+    <a href="#" class="dropdown-item">Raster Editing</a>
+    <ul class="dropdown-menu">
+            
+<li>
+    <a href="../../Raster%20Editing/tool_replace_raster_values_by_constant/" class="dropdown-item">Replace Raster Values by Constant Value</a>
+</li>
+            
+<li>
+    <a href="../../Raster%20Editing/tool_replace_raster_values_by_field/" class="dropdown-item">Replace Raster Values by Field Values</a>
+</li>
+    </ul>
+  </li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+
+                            <li class="nav-item">
+                                <a href="https://github.com/JanCaha/qgis_los_tools" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#extract-visibleinvisible-polygons-from-los" class="nav-link">Extract Visible/Invisible Polygons from LoS</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#parameters" class="nav-link">Parameters</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#outputs" class="nav-link">Outputs</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#tool-screenshot" class="nav-link">Tool screenshot</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="extract-visibleinvisible-polygons-from-los">Extract Visible/Invisible Polygons from LoS</h1>
+<p>Extract individual parts from lines-of-sight as polygons. Works for LoS without target. The line is divided into visible and invisible segments and extended to polygon by knowing angle step between individual LoS.</p>
+<h2 id="parameters">Parameters</h2>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LoS layer</td>
+<td><code>LoSLayer</code></td>
+<td>[vector: line]</td>
+<td>LoS layer to extract polygons from.</td>
+</tr>
+<tr>
+<td>Use curvature corrections?</td>
+<td><code>CurvatureCorrections</code></td>
+<td>[boolean]<br/><br/>Default: <code>True</code></td>
+<td>Should the curvature and refraction corrections be used?</td>
+</tr>
+<tr>
+<td>Refraction coefficient value</td>
+<td><code>RefractionCoefficient</code></td>
+<td>[number] <br/><br/> Default: <br/> <code>0.13</code></td>
+<td>Value of refraction coefficient.</td>
+</tr>
+<tr>
+<td>Output layer</td>
+<td><code>OutputLayer</code></td>
+<td>[vector: point]</td>
+<td>Output layer containing points.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="outputs">Outputs</h2>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Output layer</td>
+<td><code>OutputLayer</code></td>
+<td>[vector: point]</td>
+<td>Output layer containing points.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fields-in-the-output-layer">Fields in the output layer</h3>
+<ul>
+<li><strong>id_observer</strong> - integer - value from expected field (<code>id_observer</code>) in <code>LoSLayer</code></li>
+<li><strong>id_target</strong> - integer - value from expected field (<code>id_target</code>) in <code>LoSLayer</code></li>
+<li><strong>visible</strong> - boolean - is the point visible</li>
+</ul>
+<h2 id="tool-screenshot">Tool screenshot</h2>
+<p><a data-featherlight="../../../images/tool_extract_visibility_polygons.png" href="#"><img alt="Extract Visible/Invisible Polygons from LoS" src="../../../images/tool_extract_visibility_polygons.png" /></a></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2020 <a href="https://twitter.com/cahik13">Jan Caha</a>.</p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="//code.jquery.com/jquery-3.6.0.min.js" defer></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/featherlight/v.1.7.14/featherlight.min.js" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
