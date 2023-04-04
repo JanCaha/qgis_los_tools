@@ -1,0 +1,7 @@
+{
+	"ALG_DESC": "The tool calculates object angle size based on object size and object distance from observer.<br/><br/> I.e. angular size of 10 meter object that is located 1000 meters away is 0.573 degree.",
+	"ALG_CREATOR": "Jan Caha", 
+    "Size": "Size of the object in meters.",
+    "Distance": "Distance of the object from observer in meters.",
+    "OutputAngle": "Object size in degrees for object of given size at the given distance."
+}

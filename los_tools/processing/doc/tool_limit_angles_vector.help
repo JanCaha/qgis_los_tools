@@ -1,0 +1,8 @@
+{
+	"ALG_DESC": "Calculates minimal and maximal azimuth for set of LoS without target that passes through specified layer (either polygon or line).",
+	"ALG_CREATOR": "Jan Caha", 
+	"LoSLayer": "LoS layer for calculation.", 
+	"ObjectLayer": "The main object which determines the direction.",
+	"ObjectLayerID": "The field to identify objects from Object layer.",
+	"OutputTable": "Table containing the result (without geometry)."
+}

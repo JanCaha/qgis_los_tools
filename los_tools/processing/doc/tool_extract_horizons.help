@@ -1,0 +1,9 @@
+{
+	"ALG_DESC": "Tool that extracts horizons as points from LoS. Some combinations of LoS type and horizon to extract might not make a sense. E.g. extracting global horizon from local LoS raises an error.",
+	"ALG_CREATOR": "Jan Caha", 
+	"LoSLayer": "LoS layer to analyse.", 
+	"HorizonType": "Type of horizon line to extract. Values: local or global.",
+	"CurvatureCorrections": "Should the curvature and refraction corrections be used? Default value: True.",
+	"RefractionCoefficient": "Value of refraction coefficient. Default value: 0.13.",
+	"OutputLayer": "Output point layer of horizon points."
+}

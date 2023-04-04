@@ -60,3 +60,13 @@ class FieldNames:
     POINTS_DISTANCE_GH = "distance_global_horizon"
 
     ID_OBJECT = "id_object"
+
+    SIZE_ANGLE = "Object size (angle)"
+    DISTANCE = "Distance (meters)"
+    SIZE = "Size of object (meters)"
+
+    TEMPLATE_DISTANCE = "Distance (?)"
+    TEMPLATE_SIZE = "Size of object (?)"
+
+    ANGLE_STEP = "angle_step_between_los"
+    ANGLE_STEP_POINTS = "angle_step_between_points"

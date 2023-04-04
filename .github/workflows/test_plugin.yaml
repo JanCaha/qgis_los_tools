@@ -18,12 +18,15 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Add Python Path
+        run: | 
+           echo "PYTHONPATH=$PYTHONPATH:$PWD" >> $GITHUB_ENV
 
       - name: Print Python Path
         run: echo $PYTHONPATH
 
- 
       - name: Run Tests
         run: |
           pytest tests --cov=los_tools --cov-report=term-missing:skip-covered -rP -s

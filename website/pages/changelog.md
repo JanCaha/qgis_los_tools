@@ -1,5 +1,21 @@
 # Changelog
 
+## version 0.7
+
+- add tools: Create no Target LoS V2, Calculate Object Distances, Calculate Object Sizes, Calculate Parameters Settings, Extract Visible/Invisible Lines from LoS, Extract Visible/Invisible Polygons from LoS
+
+- fixes for tools that work with angles, now round angles to sensible values
+
+- fix both raster editing tools, previously those sometimes shifted the cells of raster, causing it not exactly match the input data
+
+- text updates and changes to tools
+
+- minor fixes all around
+
+- fixes to website (zoomable images)
+
+- internal changes to handling tests  
+
 ## version 0.5
 
 - add plugin icon

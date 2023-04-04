@@ -1,0 +1,9 @@
+{
+	"ALG_DESC": "The tool calculates distances at which objects of specified size (specified in the table) have given horizontal angular size.<br/><br/> I.e. at which distances have objects of size 1, 5 and 10 meters angular size of 0.1 degree.",
+	"ALG_CREATOR": "Jan Caha", 
+    "Angle": "Horizontal angular size that the objects should have (in degrees).",
+    "Size": "Sizes of the objects in meters (table).",
+    "MaximalDistance": "Add special row to the output used in other tools. The row has size of the object equal to maximum size in the input table and distance -1. This is used to indicate maximal possible legth of LoS.",
+    "Distance": "Distance of the object from observer in meters.",
+    "OutputTable": "Output table containing information about angle size, size of objects and relevant distances."
+}

@@ -1,8 +1,0 @@
-{
-	"ALG_DESC": "Analyse line-of-sight layer. Calculate the attributes of LoS according to type of line-of-sight.",
-	"ALG_CREATOR": "Jan Caha", 
-	"LoSLayer": "LoS layer to analyse.", 
-	"CurvatureCorrections": "Should the curvarture and refraction corrections be used?",
-	"RefractionCoefficient": "Value of refraction coefficient. Default value: 0.13.",
-	"OutputLayer": "Output layer containing LoS with new attributes."
-}
