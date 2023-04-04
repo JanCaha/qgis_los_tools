@@ -14,3 +14,20 @@ The plugin page is: [https://plugins.qgis.org/plugins/los_tools/](https://plugin
 # Packages with similar focus
 
 QGIS plugin with focus on other aspects of visibility and its analyses is [Visibility Analysis](https://www.zoran-cuckovic.from.hr/QGIS-visibility-analysis/). This package focuses on aspects of classic viewshed analyses.
+
+## Citation
+
+The citation for the plugin should be:
+
+```
+Jan Caha (2023). LoS Tools. QGIS Plugin version 1.0. https://jancaha.github.io/qgis_los_tools/
+```
+
+```
+@Manual{,
+  title = {LoS Tools}. QGIS Plugin version 1.0,
+  author = {Jan Caha},
+  year = {2023},
+  url = {https://jancaha.github.io/qgis_los_tools/}
+}
+```
