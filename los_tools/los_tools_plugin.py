@@ -1,26 +1,34 @@
-import os
-import sys
 import inspect
-from functools import partial
+import os
 import re
+import sys
+from functools import partial
 
-from qgis.core import (QgsApplication, QgsMemoryProviderUtils, QgsWkbTypes,
-                       QgsCoordinateReferenceSystem, QgsProject, QgsVectorLayer)
+from qgis.core import (
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsMemoryProviderUtils,
+    QgsProject,
+    QgsVectorLayer,
+    QgsWkbTypes,
+)
 from qgis.gui import QgisInterface
-
-from qgis.PyQt.QtGui import (QIcon)
-from qgis.PyQt.QtWidgets import (QAction, QToolBar, QToolButton, QMenu)
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QMenu, QToolBar, QToolButton
 
 from los_tools.processing.los_tools_provider import LoSToolsProvider
-from .gui.dialog_tool_set_camera import SetCameraTool
-from .gui.dialog_los_settings import LoSSettings
-from .gui.dialog_raster_validations import RasterValidations
-from .gui.dialog_object_parameters import ObjectParameters
-from .constants.plugin import PluginConstants
+
 from .constants.fields import Fields
-from .gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
-from .gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
+from .constants.plugin import PluginConstants
 from .gui.create_los_tool import CreateLoSMapTool
+from .gui.dialog_los_settings import LoSSettings
+from .gui.dialog_object_parameters import ObjectParameters
+from .gui.dialog_raster_validations import RasterValidations
+from .gui.dialog_tool_set_camera import SetCameraTool
+from .gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
+from .gui.optimize_point_location_tool.optimize_points_location_tool import (
+    OptimizePointsLocationTool,
+)
 from .utils import get_icon_path
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
@@ -29,16 +37,14 @@ if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
 
 
-class LoSToolsPlugin():
-
+class LoSToolsPlugin:
     camera_tool: SetCameraTool = None
 
     los_notarget_action_name = "Visualize LoS No Target Tool"
     optimize_point_location_action_name = "Optimize Point Location Tool"
     create_los_action_name = "Create LoS"
 
-    def __init__(self, iface):
-
+    def __init__(self, iface: QgisInterface):
         self.add_los_layer_action: QAction = None
         self._layer_LoS: QgsVectorLayer = None
 
@@ -62,17 +68,20 @@ class LoSToolsPlugin():
         self.initProcessing()
 
         if self.iface is not None:
-            self.add_los_layer_action = self.add_action(icon_path=get_icon_path("add_los_layer.svg"),
-                                                        text="Add Plugin Layer To Project",
-                                                        callback=self.add_plugin_los_layer_to_project,
-                                                        add_to_toolbar=False)
+            self.add_los_layer_action = self.add_action(
+                icon_path=get_icon_path("add_los_layer.svg"),
+                text="Add Plugin Layer To Project",
+                callback=self.add_plugin_los_layer_to_project,
+                add_to_toolbar=False,
+            )
             self.add_los_layer_action.setEnabled(True)
 
             self.empty_los_layer_action = self.add_action(
                 icon_path=get_icon_path("remove_los_layer.svg"),
                 text="Empty LoS Layer Features",
                 callback=self.reset_los_layer,
-                add_to_toolbar=False)
+                add_to_toolbar=False,
+            )
 
             toolButton = QToolButton()
             toolButton.setText("LoS Layer")
@@ -84,77 +93,93 @@ class LoSToolsPlugin():
             menu.addAction(self.empty_los_layer_action)
             self.toolbar.addWidget(toolButton)
 
-            self.add_action(icon_path=get_icon_path("los_tools_icon.svg"),
-                            text=self.create_los_action_name,
-                            callback=self.run_create_los_tool,
-                            add_to_toolbar=False,
-                            add_to_specific_toolbar=self.toolbar,
-                            checkable=True)
+            self.add_action(
+                icon_path=get_icon_path("los_tools_icon.svg"),
+                text=self.create_los_action_name,
+                callback=self.run_create_los_tool,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
+                checkable=True,
+            )
 
             self.toolbar.addSeparator()
 
-            self.add_action(icon_path=get_icon_path("calculator.svg"),
-                            text="Object Visibility Parameters",
-                            callback=self.open_dialog_object_visiblity_parameters,
-                            add_to_toolbar=False,
-                            add_to_specific_toolbar=self.toolbar,
-                            checkable=True)
+            self.add_action(
+                icon_path=get_icon_path("calculator.svg"),
+                text="Object Visibility Parameters",
+                callback=self.open_dialog_object_visiblity_parameters,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
+                checkable=True,
+            )
 
-            self.add_action(icon_path=get_icon_path("los_settings.svg"),
-                            text="Calculate Notarget Los Settings",
-                            callback=self.open_dialog_los_settings,
-                            add_to_toolbar=False,
-                            add_to_specific_toolbar=self.toolbar)
+            self.add_action(
+                icon_path=get_icon_path("los_settings.svg"),
+                text="Calculate Notarget Los Settings",
+                callback=self.open_dialog_los_settings,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
+            )
 
-            self.add_action(icon_path=get_icon_path("rasters_list.svg"),
-                            text="Raster Validatations",
-                            callback=self.open_dialog_raster_validations,
-                            add_to_toolbar=False,
-                            add_to_specific_toolbar=self.toolbar)
-
-            self.toolbar.addSeparator()
-
-            self.add_action(icon_path=get_icon_path("los_no_target_tool.svg"),
-                            text=self.los_notarget_action_name,
-                            callback=self.run_visualize_los_notarget_tool,
-                            add_to_toolbar=False,
-                            add_to_specific_toolbar=self.toolbar,
-                            checkable=True)
-
-            self.add_action(icon_path=get_icon_path("optimize_point.svg"),
-                            text=self.optimize_point_location_action_name,
-                            callback=self.run_optimize_point_location_tool,
-                            add_to_toolbar=False,
-                            add_to_specific_toolbar=self.toolbar,
-                            checkable=True)
+            self.add_action(
+                icon_path=get_icon_path("rasters_list.svg"),
+                text="Raster Validatations",
+                callback=self.open_dialog_raster_validations,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
+            )
 
             self.toolbar.addSeparator()
 
-            self.add_action(icon_path=get_icon_path("camera.svg"),
-                            text="Set Camera",
-                            callback=self.run_tool_set_camera,
-                            add_to_toolbar=False,
-                            add_to_specific_toolbar=self.toolbar)
+            self.add_action(
+                icon_path=get_icon_path("los_no_target_tool.svg"),
+                text=self.los_notarget_action_name,
+                callback=self.run_visualize_los_notarget_tool,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
+                checkable=True,
+            )
+
+            self.add_action(
+                icon_path=get_icon_path("optimize_point.svg"),
+                text=self.optimize_point_location_action_name,
+                callback=self.run_optimize_point_location_tool,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
+                checkable=True,
+            )
+
+            self.toolbar.addSeparator()
+
+            self.add_action(
+                icon_path=get_icon_path("camera.svg"),
+                text="Set Camera",
+                callback=self.run_tool_set_camera,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
+            )
 
             self.raster_validations_dialog = RasterValidations(iface=self.iface)
             self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
             self.object_parameters_dialog = ObjectParameters(self.iface.mainWindow())
 
             self.los_notarget_tool = LosNoTargetMapTool(self.iface)
-            self.los_notarget_tool.deactivated.connect(
-                partial(self.deactivateTool, self.los_notarget_action_name))
+            self.los_notarget_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
 
-            self.optimize_point_location_tool = OptimizePointsLocationTool(
-                self.iface.mapCanvas(), self.iface)
+            self.optimize_point_location_tool = OptimizePointsLocationTool(self.iface.mapCanvas(), self.iface)
             self.optimize_point_location_tool.deactivated.connect(
-                partial(self.deactivateTool, self.optimize_point_location_action_name))
+                partial(self.deactivateTool, self.optimize_point_location_action_name)
+            )
 
-            self.create_los_tool = CreateLoSMapTool(self.iface, self.raster_validations_dialog,
-                                                    self.los_settings_dialog, self._layer_LoS,
-                                                    self.add_los_layer_action)
+            self.create_los_tool = CreateLoSMapTool(
+                self.iface,
+                self.raster_validations_dialog,
+                self.los_settings_dialog,
+                self._layer_LoS,
+                self.add_los_layer_action,
+            )
 
-            self.create_los_tool.deactivated.connect(
-                partial(self.deactivateTool, self.create_los_action_name))
+            self.create_los_tool.deactivated.connect(partial(self.deactivateTool, self.create_los_action_name))
             self.create_los_tool.featuresAdded.connect(self.update_actions_layer_text)
 
             self.reset_los_layer()
@@ -171,19 +196,20 @@ class LoSToolsPlugin():
 
             self._layer_LoS = None
 
-    def add_action(self,
-                   icon_path,
-                   text,
-                   callback,
-                   enabled_flag=True,
-                   add_to_menu=True,
-                   add_to_toolbar=True,
-                   status_tip=None,
-                   whats_this=None,
-                   parent=None,
-                   add_to_specific_toolbar: QToolBar = None,
-                   checkable: bool = False):
-
+    def add_action(
+        self,
+        icon_path,
+        text,
+        callback,
+        enabled_flag=True,
+        add_to_menu=True,
+        add_to_toolbar=True,
+        status_tip=None,
+        whats_this=None,
+        parent=None,
+        add_to_specific_toolbar: QToolBar = None,
+        checkable: bool = False,
+    ):
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -213,9 +239,9 @@ class LoSToolsPlugin():
 
     def run_tool_set_camera(self):
         if self.camera_tool is None:
-            self.camera_tool = SetCameraTool(parent=self.iface.mainWindow(),
-                                             canvas=self.iface.mapCanvas(),
-                                             iface=self.iface)
+            self.camera_tool = SetCameraTool(
+                parent=self.iface.mainWindow(), canvas=self.iface.mapCanvas(), iface=self.iface
+            )
 
         self.camera_tool.show()
         result = self.camera_tool.exec()
@@ -253,18 +279,15 @@ class LoSToolsPlugin():
         self.iface.mapCanvas().setMapTool(self.create_los_tool)
 
     def _plugin_los_layer(self) -> QgsVectorLayer:
-
         if self._layer_LoS is None:
-            selected_crs: QgsCoordinateReferenceSystem = self.iface.mapCanvas().mapSettings(
-            ).destinationCrs()
+            selected_crs: QgsCoordinateReferenceSystem = self.iface.mapCanvas().mapSettings().destinationCrs()
 
-            if (selected_crs.isGeographic()):
+            if selected_crs.isGeographic():
                 selected_crs = QgsCoordinateReferenceSystem.fromEpsgId(3857)
 
-            return QgsMemoryProviderUtils.createMemoryLayer("Manually Created LoS",
-                                                            Fields.los_plugin_layer_fields,
-                                                            QgsWkbTypes.LineString25D,
-                                                            selected_crs)
+            return QgsMemoryProviderUtils.createMemoryLayer(
+                "Manually Created LoS", Fields.los_plugin_layer_fields, QgsWkbTypes.LineString25D, selected_crs
+            )
 
         else:
             return self._layer_LoS
