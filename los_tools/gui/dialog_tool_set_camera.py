@@ -1,21 +1,45 @@
-from typing import List
 import math
+from typing import List
 
-from qgis.core import (QgsPointXY, QgsProject, QgsMasterLayoutInterface, QgsMapLayerProxyModel,
-                       QgsVector3D, QgsPointLocator, QgsWkbTypes, QgsSettings, QgsRasterLayer)
-from qgis.gui import (QgsMapCanvas, QgsMapLayerComboBox, QgisInterface, QgsMapToolEmitPoint,
-                      QgsMapMouseEvent, QgsRubberBand, QgsVertexMarker)
-from qgis._3d import (QgsLayoutItem3DMap)
-from qgis.PyQt.QtWidgets import (QDialog, QLabel, QVBoxLayout, QHBoxLayout, QComboBox,
-                                 QDialogButtonBox, QToolButton, QLineEdit, QDoubleSpinBox)
-from qgis.PyQt.QtCore import (pyqtSignal, Qt, QPoint)
-from qgis.PyQt.QtGui import (QColor)
+from qgis._3d import QgsLayoutItem3DMap
+from qgis.core import (
+    QgsMapLayerProxyModel,
+    QgsMasterLayoutInterface,
+    QgsPointLocator,
+    QgsPointXY,
+    QgsProject,
+    QgsRasterLayer,
+    QgsSettings,
+    QgsVector3D,
+    QgsWkbTypes,
+)
+from qgis.gui import (
+    QgisInterface,
+    QgsMapCanvas,
+    QgsMapLayerComboBox,
+    QgsMapMouseEvent,
+    QgsMapToolEmitPoint,
+    QgsRubberBand,
+    QgsVertexMarker,
+)
+from qgis.PyQt.QtCore import QPoint, Qt, pyqtSignal
+from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QDoubleSpinBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QToolButton,
+    QVBoxLayout,
+)
 
 from los_tools.processing.tools.util_functions import bilinear_interpolated_value
 
 
 class SetCameraTool(QDialog):
-
     observer: QgsPointXY = None
     target: QgsPointXY = None
 
@@ -27,7 +51,6 @@ class SetCameraTool(QDialog):
     info_update = pyqtSignal()
 
     def __init__(self, parent, canvas: QgsMapCanvas, iface: QgisInterface):
-
         super().__init__()
 
         self.iface = iface
@@ -90,9 +113,8 @@ class SetCameraTool(QDialog):
 
         self.vlayout = QVBoxLayout()
         self.vlayout.addWidget(
-            QLabel(
-                "Layout and layout item (3D Map) along with both observer and target point need to be selected."
-            ))
+            QLabel("Layout and layout item (3D Map) along with both observer and target point need to be selected.")
+        )
         self.vlayout.addWidget(QLabel("Select layout with 3D Map"))
         self.vlayout.addWidget(self.layout_cb)
         self.vlayout.addWidget(QLabel("Select layout item 3D Map to set the camera for"))
@@ -110,20 +132,16 @@ class SetCameraTool(QDialog):
         self.info_update.connect(self.update_ok_button)
 
     def update_ok_button(self) -> None:
-
         if self.is_complete():
             self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
 
     def is_complete(self) -> bool:
-
-        if self.observer and self.target and self.layout and self.layout_item_3d and self.dsm_cb.currentLayer(
-        ):
+        if self.observer and self.target and self.layout and self.layout_item_3d and self.dsm_cb.currentLayer():
             return True
 
         return False
 
     def set_layout(self) -> None:
-
         self.layout = self.layout_manager.layoutByName(self.layout_cb.currentText())
 
         items_3d = [x.displayName() for x in self.get_item_names_of_type_from_layout()]
@@ -133,7 +151,6 @@ class SetCameraTool(QDialog):
         self.info_update.emit()
 
     def set_item_3d(self) -> None:
-
         items_3d = self.get_item_names_of_type_from_layout()
 
         for item in items_3d:
@@ -144,13 +161,11 @@ class SetCameraTool(QDialog):
         self.info_update.emit()
 
     def get_item_names_of_type_from_layout(self) -> List[QgsLayoutItem3DMap]:
-
         items = [x for x in self.layout.items() if isinstance(x, QgsLayoutItem3DMap)]
 
         return items
 
     def active_selection_tool(self) -> None:
-
         if self.observer_btn.isChecked():
             self.active_button = self.observer_btn
 
@@ -158,7 +173,6 @@ class SetCameraTool(QDialog):
             self.active_button = self.target_btn
 
     def btn_map_tool_clicked(self, checked):
-
         self.active_selection_tool()
 
         if checked:
@@ -167,7 +181,6 @@ class SetCameraTool(QDialog):
             self.stop_selecting_point()
 
     def create_map_tool(self):
-
         self.mapTool = PointCaptureMapTool(self.canvas)
 
         self.mapTool.canvasClicked.connect(self.update_point)
@@ -179,14 +192,12 @@ class SetCameraTool(QDialog):
         self.canvas.setMapTool(self.mapTool)
 
     def update_point(self, point, button: QToolButton):
-
         canvas_crs = self.canvas.mapSettings().destinationCrs()
 
         point = self.mapTool.get_point()
 
         if self.mapTool.is_point_snapped():
-            msg = "Snapped to point at {} {} from layer {}.".format(point.x(), point.y(),
-                                                                    self.mapTool.snap_layer())
+            msg = "Snapped to point at {} {} from layer {}.".format(point.x(), point.y(), self.mapTool.snap_layer())
         else:
             msg = "Point at {} {} selected.".format(point.x(), point.y())
 
@@ -209,7 +220,6 @@ class SetCameraTool(QDialog):
         self.canvas.setCursor(self.prev_cursor)
 
     def stop_selecting_point(self):
-
         self.observer_btn.setChecked(False)
         self.target_btn.setChecked(False)
 
@@ -218,21 +228,17 @@ class SetCameraTool(QDialog):
         self.restore_canvas_tools()
 
     def update_camera_position(self) -> None:
-
         settings = self.layout_item_3d.mapSettings()
         camera_pose = self.layout_item_3d.cameraPose()
 
         current_layer: QgsRasterLayer = self.dsm_cb.currentLayer()
 
-        observer_z = bilinear_interpolated_value(current_layer.dataProvider(),
-                                                 self.observer) + self.offset_sb.value()
+        observer_z = bilinear_interpolated_value(current_layer.dataProvider(), self.observer) + self.offset_sb.value()
 
         target_z = bilinear_interpolated_value(current_layer.dataProvider(), self.target)
 
-        look_at_point = settings.mapToWorldCoordinates(
-            QgsVector3D(self.target.x(), self.target.y(), target_z))
-        look_from_point = settings.mapToWorldCoordinates(
-            QgsVector3D(self.observer.x(), self.observer.y(), observer_z))
+        look_at_point = settings.mapToWorldCoordinates(QgsVector3D(self.target.x(), self.target.y(), target_z))
+        look_from_point = settings.mapToWorldCoordinates(QgsVector3D(self.observer.x(), self.observer.y(), observer_z))
 
         start_point = QgsPointXY(look_at_point.x(), look_at_point.z())
         end_point = QgsPointXY(look_from_point.x(), look_from_point.z())
@@ -255,13 +261,13 @@ class SetCameraTool(QDialog):
         self.layout_item_3d.refresh()
 
         msg = "Layout item `{}` in layout `{}` camera settings updated.".format(
-            self.layout_item_3d.displayName(), self.layout.name())
+            self.layout_item_3d.displayName(), self.layout.name()
+        )
 
         self.iface.messageBar().pushMessage("Layout item updated", msg, duration=5)
 
 
 class PointCaptureMapTool(QgsMapToolEmitPoint):
-
     complete = pyqtSignal()
 
     _current_point: QgsPointXY = None
@@ -270,7 +276,6 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
     _canvas: QgsMapCanvas
 
     def __init__(self, canvas: QgsMapCanvas):
-
         QgsMapToolEmitPoint.__init__(self, canvas)
 
         self._canvas = canvas
@@ -296,7 +301,6 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
         self.complete.emit()
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
-
         x = event.pos().x()
         y = event.pos().y()
         point = QPoint(x, y)
@@ -304,7 +308,6 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
         result = self.snapper.snapToMap(point)
 
         if result.type() == QgsPointLocator.Vertex:
-
             self._current_point = result.point()
             self._snapped = True
             self._snap_layer_name = result.layer().name()
@@ -312,7 +315,6 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
             self.update_snap_marker(result.point())
 
         else:
-
             self.update_snap_marker()
 
             self._current_point = self.toMapCoordinates(point)
@@ -329,7 +331,6 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
         return self._snap_layer_name
 
     def update_snap_marker(self, snapped_point: QgsPointXY = None):
-
         self._canvas.scene().removeItem(self.snap_marker)
 
         if snapped_point is None:
@@ -338,7 +339,6 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
         self.create_vertex_marker(snapped_point)
 
     def create_vertex_marker(self, snapped_point: QgsPointXY):
-
         self.snap_marker = QgsVertexMarker(self._canvas)
 
         self.snap_marker.setCenter(snapped_point)
