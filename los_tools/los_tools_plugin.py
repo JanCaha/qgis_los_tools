@@ -47,11 +47,12 @@ class LoSToolsPlugin():
         self.actions = []
         self.menu = PluginConstants.plugin_name
 
-        self.toolbar: QToolBar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
-        self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
+        if self.iface is not None:
+            self.toolbar: QToolBar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
+            self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
 
-        self.iface.newProjectCreated.connect(self.reset_los_layer)
-        self.iface.projectRead.connect(self.reset_los_layer)
+            self.iface.newProjectCreated.connect(self.reset_los_layer)
+            self.iface.projectRead.connect(self.reset_los_layer)
 
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
