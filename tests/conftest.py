@@ -5,26 +5,36 @@ from los_tools.constants.field_names import FieldNames
 from tests.utils import data_file_path
 
 
-class TestData:
+@pytest.fixture
+def raster_small() -> QgsRasterLayer:
     d = data_file_path("dsm.tif")
-    RASTER_SMALL = QgsRasterLayer(d.as_posix(), d.stem, "gdal")
-
-    d = data_file_path("srtm.tif")
-    RASTER_LARGE = QgsRasterLayer(d.as_posix(), d.stem, "gdal")
-
-    d = data_file_path("dsm_epsg_5514.tif")
-    RASTER_WRONG_CRS = QgsRasterLayer(d.as_posix(), d.stem, "gdal")
-
-    d = data_file_path("raster_multiband.tif")
-    RASTER_MULTI_BAND = QgsRasterLayer(d.as_posix(), d.stem, "gdal")
-
-    d = data_file_path("los_local.gpkg")
-    VECTOR_LOS_LOCAL = QgsVectorLayer(d.as_posix(), d.stem, "gdal")
+    r = QgsRasterLayer(d.as_posix(), d.stem, "gdal")
+    assert r.isValid()
+    return r
 
 
 @pytest.fixture
-def test_data_class() -> TestData:
-    return TestData()
+def raster_large() -> QgsRasterLayer:
+    d = data_file_path("srtm.tif")
+    r = QgsRasterLayer(d.as_posix(), d.stem, "gdal")
+    assert r.isValid()
+    return r
+
+
+@pytest.fixture
+def raster_wrong_crs() -> QgsRasterLayer:
+    d = data_file_path("dsm_epsg_5514.tif")
+    r = QgsRasterLayer(d.as_posix(), d.stem, "gdal")
+    assert r.isValid()
+    return r
+
+
+@pytest.fixture
+def raster_multi_band() -> QgsRasterLayer:
+    d = data_file_path("raster_multiband.tif")
+    r = QgsRasterLayer(d.as_posix(), d.stem, "gdal")
+    assert r.isValid()
+    return r
 
 
 @pytest.fixture
@@ -83,4 +93,38 @@ def table_angle_distance_size() -> QgsVectorLayer:
 
     table_dp.addFeature(f)
 
+    assert table.isValid()
+
     return table
+
+
+@pytest.fixture
+def los_global() -> QgsVectorLayer:
+    p = data_file_path("los_global.gpkg")
+    v = QgsVectorLayer(p.as_posix(), p.stem, "ogr")
+    assert v.isValid()
+    return v
+
+
+@pytest.fixture
+def los_local() -> QgsVectorLayer:
+    p = data_file_path("los_local.gpkg")
+    v = QgsVectorLayer(p.as_posix(), p.stem, "ogr")
+    assert v.isValid()
+    return v
+
+
+@pytest.fixture
+def los_no_target() -> QgsVectorLayer:
+    p = data_file_path("no_target_los.gpkg")
+    v = QgsVectorLayer(p.as_posix(), p.stem, "ogr")
+    assert v.isValid()
+    return v
+
+
+@pytest.fixture
+def no_target_los_wrong() -> QgsVectorLayer:
+    p = data_file_path("no_target_los_wrong.gpkg")
+    v = QgsVectorLayer(p.as_posix(), p.stem, "ogr")
+    assert v.isValid()
+    return v

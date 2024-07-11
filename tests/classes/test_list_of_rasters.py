@@ -1,12 +1,16 @@
 import pytest
-from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRasterDataProvider, QgsRasterLayer
+from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRasterDataProvider, QgsRasterLayer, QgsVectorLayer
 
 from los_tools.classes.list_raster import ListOfRasters
-from tests.conftest import TestData
 
 
-def test_create_object(test_data_class: TestData):
-    list_rasters = ListOfRasters([test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE])
+def test_create_object(
+    raster_small: QgsRasterLayer,
+    raster_large: QgsRasterLayer,
+    raster_wrong_crs: QgsRasterLayer,
+    los_local: QgsVectorLayer,
+):
+    list_rasters = ListOfRasters([raster_small, raster_large])
 
     assert isinstance(list_rasters, ListOfRasters)
     assert isinstance(list_rasters.rasters, list)
@@ -15,20 +19,26 @@ def test_create_object(test_data_class: TestData):
     assert isinstance(list_rasters.rasters_dp[0], QgsRasterDataProvider)
 
     with pytest.raises(ValueError, match="All inputs must be QgsRasterLayer"):
-        ListOfRasters([test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE, test_data_class.VECTOR_LOS_LOCAL])
+        ListOfRasters([raster_small, raster_large, los_local])
 
     with pytest.raises(ValueError, match="All CRS must be equal"):
-        ListOfRasters([test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE, test_data_class.RASTER_WRONG_CRS])
+        ListOfRasters([raster_small, raster_large, raster_wrong_crs])
 
 
-def test_maximal_diagonal_size(test_data_class: TestData):
-    list_rasters = ListOfRasters([test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE])
+def test_maximal_diagonal_size(
+    raster_small: QgsRasterLayer,
+    raster_large: QgsRasterLayer,
+):
+    list_rasters = ListOfRasters([raster_small, raster_large])
 
     assert list_rasters.maximal_diagonal_size() == pytest.approx(4954.494401943971)
 
 
-def test_extract_interpolated_value(test_data_class: TestData):
-    list_rasters = ListOfRasters([test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE])
+def test_extract_interpolated_value(
+    raster_small: QgsRasterLayer,
+    raster_large: QgsRasterLayer,
+):
+    list_rasters = ListOfRasters([raster_small, raster_large])
 
     point_1 = QgsPoint(-336332.2, -1189104.8)
     point_2 = QgsPoint(-337045.6, -1188775.2)
@@ -39,23 +49,27 @@ def test_extract_interpolated_value(test_data_class: TestData):
     assert list_rasters.extract_interpolated_value(point_3) is None
 
 
-def test_validate_crs(test_data_class: TestData):
+def test_validate_crs(
+    raster_small: QgsRasterLayer,
+    raster_large: QgsRasterLayer,
+    raster_wrong_crs: QgsRasterLayer,
+):
     status, msg = ListOfRasters.validate_crs(
-        [test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE], crs=QgsCoordinateReferenceSystem("EPSG:8353")
+        [raster_small, raster_large], crs=QgsCoordinateReferenceSystem("EPSG:8353")
     )
 
     assert status
     assert msg == ""
 
     status, msg = ListOfRasters.validate_crs(
-        [test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE], crs=QgsCoordinateReferenceSystem("EPSG:5514")
+        [raster_small, raster_large], crs=QgsCoordinateReferenceSystem("EPSG:5514")
     )
 
     assert status is False
     assert "Provided crs template and raster layers crs must be equal" in msg
 
     status, msg = ListOfRasters.validate_crs(
-        [test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE, test_data_class.RASTER_WRONG_CRS],
+        [raster_small, raster_large, raster_wrong_crs],
         crs=QgsCoordinateReferenceSystem("EPSG:8353"),
     )
 
@@ -63,32 +77,37 @@ def test_validate_crs(test_data_class: TestData):
     assert "All CRS for all rasters must be equal" in msg
 
 
-def test_validate_bands(test_data_class: TestData):
-    status, msg = ListOfRasters.validate_bands([test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE])
+def test_validate_bands(
+    raster_small: QgsRasterLayer,
+    raster_large: QgsRasterLayer,
+    raster_multi_band: QgsRasterLayer,
+):
+    status, msg = ListOfRasters.validate_bands([raster_small, raster_large])
 
     assert status
     assert msg == ""
 
-    status, msg = ListOfRasters.validate_bands(
-        [test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE, test_data_class.RASTER_MULTI_BAND]
-    )
+    status, msg = ListOfRasters.validate_bands([raster_small, raster_large, raster_multi_band])
 
     assert status is False
     assert "Rasters can only have one band" in msg
 
 
-def test_validate_ordering(test_data_class: TestData):
-    status, msg = ListOfRasters.validate_ordering([test_data_class.RASTER_SMALL, test_data_class.RASTER_LARGE])
+def test_validate_ordering(
+    raster_small: QgsRasterLayer,
+    raster_large: QgsRasterLayer,
+):
+    status, msg = ListOfRasters.validate_ordering([raster_small, raster_large])
 
     assert status
     assert msg == ""
 
     status, msg = ListOfRasters.validate_ordering(
         [
-            test_data_class.RASTER_SMALL,
-            test_data_class.RASTER_LARGE,
-            test_data_class.RASTER_SMALL,
-            test_data_class.RASTER_LARGE,
+            raster_small,
+            raster_large,
+            raster_small,
+            raster_large,
         ]
     )
 
