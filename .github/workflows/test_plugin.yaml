@@ -13,12 +13,27 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: cahik/vscode-ubuntu-qgis-testing:v2
-
     steps:
 
+      - name: GIS Sources
+        run: |
+          sudo add-apt-repository ppa:ubuntugis/ppa
+
+      - name: Install QGIS
+        run: |
+          sudo wget -qO /etc/apt/keyrings/qgis-archive-keyring.gpg https://download.qgis.org/downloads/qgis-archive-keyring.gpg
+          sudo sh -c 'echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/qgis-archive-keyring.gpg] https://qgis.org/ubuntu `lsb_release -c -s` main" > /etc/apt/sources.list.d/qgis.list'
+          sudo apt-get update
+          sudo apt-get install -y qgis
+      
+      - name: QGIS Version
+        run: qgis --version
+            
+      - name: Install Python packages
+        run: pip install pytest pytest-qgis pytest-cov pytest-qt 
+
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Add Python Path
         run: | 
