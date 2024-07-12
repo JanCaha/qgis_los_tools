@@ -1,5 +1,5 @@
 import pytest
-from qgis.core import QgsVectorLayer, QgsWkbTypes
+from qgis.core import Qgis, QgsVectorLayer
 
 from los_tools.constants.field_names import FieldNames
 from los_tools.processing.analyse_los.tool_extract_los_visibility_polygons import ExtractLoSVisibilityPolygonsAlgorithm
@@ -31,12 +31,12 @@ def test_alg_settings() -> None:
     assert_algorithm(alg)
 
 
-def test_check_wrong_params(no_target_los_wrong: QgsVectorLayer) -> None:
+def test_check_wrong_params(los_no_target_wrong: QgsVectorLayer) -> None:
     alg = ExtractLoSVisibilityPolygonsAlgorithm()
     alg.initAlgorithm()
 
     # use layer that is not correctly constructed LoS layer
-    params = {"LoSLayer": no_target_los_wrong}
+    params = {"LoSLayer": los_no_target_wrong}
 
     with pytest.raises(AssertionError, match="Fields specific for LoS not found in current layer"):
         assert_check_parameter_values(alg, parameters=params)
@@ -60,7 +60,7 @@ def test_run_alg(los_no_target: QgsVectorLayer) -> None:
 
     los_parts = QgsVectorLayer(output_path)
 
-    assert_layer(los_parts, geom_type=QgsWkbTypes.MultiPolygon, crs=los_no_target.sourceCrs())
+    assert_layer(los_parts, geom_type=Qgis.WkbType.MultiPolygon, crs=los_no_target.sourceCrs())
 
     assert_field_names_exist([FieldNames.ID_OBSERVER, FieldNames.ID_TARGET, FieldNames.VISIBLE], los_parts)
 

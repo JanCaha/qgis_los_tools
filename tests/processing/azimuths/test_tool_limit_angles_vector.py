@@ -1,114 +1,104 @@
+import typing
 import unittest
 
-from qgis.core import (QgsVectorLayer, QgsProcessingFeedback, QgsProcessingContext)
+import pytest
+from qgis.core import QgsProcessingContext, QgsProcessingFeedback, QgsVectorLayer
 
-from los_tools.processing.azimuths.tool_limit_angles_vector import LimitAnglesAlgorithm
 from los_tools.constants.field_names import FieldNames
+from los_tools.processing.azimuths.tool_limit_angles_vector import LimitAnglesAlgorithm
+from tests.custom_assertions import (
+    assert_algorithm,
+    assert_check_parameter_values,
+    assert_field_names_exist,
+    assert_layer,
+    assert_parameter,
+    assert_run,
+)
+from tests.utils import result_filename
 
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
-from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
-                               get_data_path_results)
+
+def test_parameters() -> None:
+    alg = LimitAnglesAlgorithm()
+    alg.initAlgorithm()
+
+    assert_parameter(alg.parameterDefinition("LoSLayer"), parameter_type="source")
+
+    assert_parameter(alg.parameterDefinition("ObjectLayer"), parameter_type="source")
+
+    assert_parameter(alg.parameterDefinition("OutputTable"), parameter_type="sink")
 
 
-class LimitAnglesAlgorithmTest(QgsProcessingAlgorithmTestCase):
+def test_alg_settings() -> None:
 
-    def setUp(self) -> None:
-        self.los_no_target = QgsVectorLayer(get_data_path(file="no_target_los.gpkg"))
-        self.los_no_target_wrong = QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))
-        self.polygon = QgsVectorLayer(get_data_path(file="poly.gpkg"))
-        self.polygons = QgsVectorLayer(get_data_path(file="polys.gpkg"))
+    alg = LimitAnglesAlgorithm()
+    alg.initAlgorithm()
 
-        self.output_path = get_data_path_results(file="table.csv")
+    assert_algorithm(alg)
 
-        self.alg = LimitAnglesAlgorithm()
-        self.alg.initAlgorithm()
 
-        self.feedback = QgsProcessingFeedback()
-        self.context = QgsProcessingContext()
+def test_check_wrong_params(
+    los_no_target_wrong: QgsVectorLayer,
+    layer_polygon: QgsVectorLayer,
+) -> None:
 
-    @unittest.skip("printing not necessary `test_show_params()`")
-    def test_show_params(self) -> None:
-        print("{}".format(self.alg.name()))
-        print("----------------------------------")
-        print_alg_params(self.alg)
-        print("----------------------------------")
-        print_alg_outputs(self.alg)
+    alg = LimitAnglesAlgorithm()
+    alg.initAlgorithm()
 
-    def test_alg_settings(self) -> None:
+    params = {
+        "LoSLayer": los_no_target_wrong,
+        "ObjectLayer": layer_polygon,
+        "OutputTable": result_filename("poly.gpkg"),
+    }
 
-        self.assertAlgSettings()
+    with pytest.raises(AssertionError, match="Fields specific for LoS without target not found in current layer"):
+        assert_check_parameter_values(alg, params)
 
-    def test_parameters(self) -> None:
-        param_los_layer = self.alg.parameterDefinition("LoSLayer")
-        param_object_layer = self.alg.parameterDefinition("ObjectLayer")
-        param_output_table = self.alg.parameterDefinition("OutputTable")
 
-        self.assertEqual("source", param_los_layer.type())
-        self.assertEqual("source", param_object_layer.type())
-        self.assertEqual("sink", param_output_table.type())
+@pytest.mark.parametrize(
+    "los_fixture_name,polygon_fixture_name",
+    [
+        (
+            "los_no_target",
+            "layer_polygon",
+        ),
+        (
+            "los_no_target",
+            "layer_polygon_crs_5514",
+        ),
+    ],
+)
+def test_run_alg(los_fixture_name: str, polygon_fixture_name: str, request) -> None:
+    los: QgsVectorLayer = request.getfixturevalue(los_fixture_name)
+    layer_polygon: QgsVectorLayer = request.getfixturevalue(polygon_fixture_name)
 
-    def test_check_wrong_params(self) -> None:
+    fields = [
+        FieldNames.AZIMUTH_MIN,
+        FieldNames.AZIMUTH_MAX,
+        FieldNames.ID_OBSERVER,
+        FieldNames.ID_OBJECT,
+    ]
 
-        params = {
-            "LoSLayer": self.los_no_target_wrong,
-            "ObjectLayer": self.polygon,
-            "OutputTable": self.output_path,
-        }
+    alg = LimitAnglesAlgorithm()
+    alg.initAlgorithm()
 
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
+    output_path = result_filename("angles.gpkg")
 
-        self.assertFalse(can_run)
-        self.assertIn(
-            "Fields specific for LoS without target not found in current layer (los_type).", msg)
+    params = {
+        "LoSLayer": los,
+        "ObjectLayerID": "fid",
+        "ObjectLayer": layer_polygon,
+        "OutputTable": output_path,
+    }
 
-    def test_run_alg(self) -> None:
+    assert_run(alg, params)
 
-        params = {
-            "LoSLayer": self.los_no_target,
-            "ObjectLayerID": "fid",
-            "ObjectLayer": self.polygon,
-            "OutputTable": self.output_path,
-        }
+    table = QgsVectorLayer(output_path)
 
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
-        self.assertTrue(can_run)
-        self.assertIn("", msg)
+    unique_ids = los.uniqueValues(los.fields().lookupField(FieldNames.ID_OBSERVER))
 
-        self.alg.run(parameters=params, context=self.context, feedback=self.feedback)
+    assert table.featureCount() == len(unique_ids)
 
-        table = QgsVectorLayer(self.output_path)
-
-        self.assertIn(FieldNames.AZIMUTH_MIN, table.fields().names())
-        self.assertIn(FieldNames.AZIMUTH_MAX, table.fields().names())
-        self.assertIn(FieldNames.ID_OBSERVER, table.fields().names())
-        self.assertIn(FieldNames.ID_OBJECT, table.fields().names())
-
-        unique_ids = self.los_no_target.uniqueValues(self.los_no_target.fields().lookupField(
-            FieldNames.ID_OBSERVER))
-
-        self.assertEqual(table.featureCount(), len(unique_ids))
-
-        params = {
-            "LoSLayer": self.los_no_target,
-            "ObjectLayerID": "fid",
-            "ObjectLayer": QgsVectorLayer(get_data_path(file="poly_epsg_5514.gpkg")),
-            "OutputTable": self.output_path,
-        }
-
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
-        self.assertTrue(can_run)
-        self.assertIn("", msg)
-
-        self.alg.run(parameters=params, context=self.context, feedback=self.feedback)
-
-        table = QgsVectorLayer(self.output_path)
-
-        self.assertIn(FieldNames.AZIMUTH_MIN, table.fields().names())
-        self.assertIn(FieldNames.AZIMUTH_MAX, table.fields().names())
-        self.assertIn(FieldNames.ID_OBSERVER, table.fields().names())
-        self.assertIn(FieldNames.ID_OBJECT, table.fields().names())
-
-        unique_ids = self.los_no_target.uniqueValues(self.los_no_target.fields().lookupField(
-            FieldNames.ID_OBSERVER))
-
-        self.assertEqual(table.featureCount(), len(unique_ids))
+    assert_field_names_exist(
+        fields,
+        table,
+    )
