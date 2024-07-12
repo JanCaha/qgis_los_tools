@@ -37,7 +37,7 @@ jobs:
 
       - name: Add Python Path
         run: | 
-           echo "PYTHONPATH=$PYTHONPATH:$PWD" >> $GITHUB_ENV
+           echo "PYTHONPATH=$PYTHONPATH:/usr/share/qgis/python/plugins:/usr/share/qgis/python:$PWD" >> $GITHUB_ENV
            echo "DEBIAN_FRONTEND=noninteractive" >> $GITHUB_ENV
            echo "QT_QPA_PLATFORM=offscreen" >> $GITHUB_ENV
            echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
