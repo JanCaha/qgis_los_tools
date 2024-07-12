@@ -1,89 +1,74 @@
-from qgis.core import (QgsVectorLayer, QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
-
-from qgis._core import QgsWkbTypes
+import pytest
+from qgis.core import Qgis, QgsVectorLayer
 
 from los_tools.constants.field_names import FieldNames
-
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
-
 from los_tools.processing.to_table.tool_export_horizon_lines import ExportHorizonLinesAlgorithm
+from tests.custom_assertions import (
+    assert_algorithm,
+    assert_check_parameter_values,
+    assert_field_names_exist,
+    assert_layer,
+    assert_parameter,
+    assert_run,
+)
+from tests.utils import result_filename
 
-from tests.utils_tests import (get_data_path, get_data_path_results)
+
+def test_parameters() -> None:
+    alg = ExportHorizonLinesAlgorithm()
+    alg.initAlgorithm()
+
+    assert_parameter(alg.parameterDefinition("HorizonLinesLayer"), parameter_type="source")
+    assert_parameter(alg.parameterDefinition("OutputFile"), parameter_type="sink")
 
 
-class ExportHorizonLinesAlgorithmTest(QgsProcessingAlgorithmTestCase):
+def test_alg_settings() -> None:
+    alg = ExportHorizonLinesAlgorithm()
+    alg.initAlgorithm()
 
-    def setUp(self) -> None:
+    assert_algorithm(alg)
 
-        super().setUp()
 
-        self.horizon_lines_global = QgsVectorLayer(get_data_path(file="horizon_line_global.gpkg"))
-        self.horizon_lines_local = QgsVectorLayer(get_data_path(file="horizon_line_local.gpkg"))
+def test_check_wrong_params(los_no_target_wrong: QgsVectorLayer) -> None:
+    alg = ExportHorizonLinesAlgorithm()
+    alg.initAlgorithm()
 
-        self.alg = ExportHorizonLinesAlgorithm()
-        self.alg.initAlgorithm()
+    # use layer that is not correct horizon lines layer
+    params = {"HorizonLinesLayer": los_no_target_wrong}
 
-    def test_parameters(self) -> None:
-        self.assertIsInstance(self.alg.parameterDefinition("HorizonLinesLayer"),
-                              QgsProcessingParameterFeatureSource)
-        self.assertIsInstance(self.alg.parameterDefinition("OutputFile"),
-                              QgsProcessingParameterFeatureSink)
+    with pytest.raises(AssertionError, match="Fields specific for horizon lines not found in current layer"):
+        assert_check_parameter_values(alg, params)
 
-    def test_alg_settings(self) -> None:
 
-        self.assertAlgSettings()
+@pytest.mark.parametrize(
+    "horizon_lines_name",
+    [("horizon_line_local"), ("horizon_line_global")],
+)
+def test_run_alg(horizon_lines_name: str, request) -> None:
+    los: QgsVectorLayer = request.getfixturevalue(horizon_lines_name)
 
-    def test_check_wrong_params(self) -> None:
+    fields = [
+        FieldNames.ID_OBSERVER,
+        FieldNames.HORIZON_TYPE,
+        FieldNames.ANGLE,
+        FieldNames.VIEWING_ANGLE,
+        FieldNames.CSV_HORIZON_DISTANCE,
+    ]
 
-        # use layer that is not correct horizon lines layer
-        params = {
-            "HorizonLinesLayer": QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))
-        }
+    alg = ExportHorizonLinesAlgorithm()
+    alg.initAlgorithm()
 
-        self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="Fields specific for horizon lines not found in current layer")
+    output_path = result_filename("export_horizon_lines.gpkg")
 
-    def test_run_alg(self) -> None:
+    params = {
+        "HorizonLinesLayer": los,
+        "OutputFile": output_path,
+    }
 
-        fields = [
-            FieldNames.ID_OBSERVER, FieldNames.HORIZON_TYPE, FieldNames.ANGLE,
-            FieldNames.VIEWING_ANGLE, FieldNames.CSV_HORIZON_DISTANCE
-        ]
+    assert_run(alg, parameters=params)
 
-        output_path = get_data_path_results(file="export_horizon_lines.gpkg")
+    export_layer = QgsVectorLayer(output_path)
 
-        params = {
-            "HorizonLinesLayer": self.horizon_lines_local,
-            "OutputFile": output_path,
-        }
+    assert_layer(export_layer, geom_type=Qgis.WkbType.NoGeometry)
 
-        self.assertRunAlgorithm(parameters=params)
-
-        export_layer = QgsVectorLayer(output_path)
-
-        self.assertEqual(export_layer.wkbType(), QgsWkbTypes.NoGeometry)
-
-        fields_layer = export_layer.fields().names()
-        del fields_layer[0]
-
-        self.assertListEqual(fields, fields_layer)
-
-        export_layer = None
-
-        params = {
-            "HorizonLinesLayer": self.horizon_lines_global,
-            "OutputFile": output_path,
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        export_layer = QgsVectorLayer(output_path)
-
-        self.assertEqual(export_layer.wkbType(), QgsWkbTypes.NoGeometry)
-
-        fields_layer = export_layer.fields().names()
-        del fields_layer[0]
-
-        self.assertListEqual(fields, fields_layer)
+    assert_field_names_exist(fields, export_layer)
