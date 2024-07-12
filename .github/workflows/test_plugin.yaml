@@ -31,13 +31,16 @@ jobs:
             
       - name: Install Python packages
         run: pip install pytest pytest-qgis pytest-cov
-
+      
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Add Python Path
         run: | 
            echo "PYTHONPATH=$PYTHONPATH:$PWD" >> $GITHUB_ENV
+           echo "DEBIAN_FRONTEND=noninteractive" >> $GITHUB_ENV
+           echo "QT_QPA_PLATFORM=offscreen" >> $GITHUB_ENV
+           echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
 
       - name: Print Python Path
         run: echo $PYTHONPATH
