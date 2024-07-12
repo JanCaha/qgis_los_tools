@@ -93,7 +93,7 @@ def assert_field_names_exist(field_names: List[str], vector_layer: QgsVectorLaye
 def assert_layer(
     layer: QgsVectorLayer,
     geom_type: Optional[QgsWkbTypes] = None,
-    crs: [QgsCoordinateReferenceSystem] = None,
+    crs: QgsCoordinateReferenceSystem = None,
 ) -> None:
     if not isinstance(layer, QgsVectorLayer):
         raise AssertionError(f"Provided `layer` is not `QgsVectorLayer`. It is: `{type(layer).__name__}`.")
