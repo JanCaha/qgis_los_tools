@@ -30,7 +30,7 @@ jobs:
         run: qgis --version
             
       - name: Install Python packages
-        run: pip install pytest pytest-qgis pytest-cov pytest-qt 
+        run: pip install pytest pytest-qgis pytest-cov
 
       - name: Checkout
         uses: actions/checkout@v4
