@@ -158,10 +158,10 @@ def layer_polygon_crs_5514() -> QgsVectorLayer:
     return v
 
 
-# @pytest.fixture
-# @clean_qgis_layer
-# def layer_polygons() -> QgsVectorLayer:
-#     p = data_file_path("polys.gpkg")
-#     v = QgsVectorLayer(p.as_posix(), p.stem, "ogr")
-#     assert v.isValid()
-#     return v
+@pytest.fixture
+@clean_qgis_layer
+def layer_polygons() -> QgsVectorLayer:
+    p = data_file_path("polys.gpkg")
+    v = QgsVectorLayer(p.as_posix(), p.stem, "ogr")
+    assert v.isValid()
+    return v
