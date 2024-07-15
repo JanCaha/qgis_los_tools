@@ -4,7 +4,6 @@ from los_tools.constants.field_names import FieldNames
 from los_tools.processing.parameter_settings.tool_distances_for_sizes import ObjectDistancesAlgorithm
 from tests.custom_assertions import (
     assert_algorithm,
-    assert_check_parameter_values,
     assert_field_names_exist,
     assert_layer,
     assert_parameter,
