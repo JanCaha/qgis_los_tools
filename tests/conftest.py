@@ -156,5 +156,23 @@ def horizon_line_local() -> QgsVectorLayer:
 
 @pytest.fixture
 @clean_qgis_layer
-def horizon_line_global() -> QgsVectorLayer:
-    return _vector_layer(data_file_path("horizon_line_global.gpkg"))
+def layer_point() -> QgsVectorLayer:
+    return _vector_layer(data_file_path("single_point.gpkg"))
+
+
+@pytest.fixture
+@clean_qgis_layer
+def layer_point_wgs84() -> QgsVectorLayer:
+    return _vector_layer(data_file_path("single_point_wgs84.gpkg"))
+
+
+@pytest.fixture
+@clean_qgis_layer
+def layer_points() -> QgsVectorLayer:
+    return _vector_layer(data_file_path("points.gpkg"))
+
+
+@pytest.fixture
+@clean_qgis_layer
+def layer_points_epsg5514() -> QgsVectorLayer:
+    return _vector_layer(data_file_path("points_epsg_5514.gpkg"))
