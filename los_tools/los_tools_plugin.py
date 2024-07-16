@@ -184,6 +184,7 @@ class LoSToolsPlugin:
 
             self.reset_los_layer()
 
+
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
 

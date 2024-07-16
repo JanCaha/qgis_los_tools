@@ -13,16 +13,34 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    container: cahik/vscode-ubuntu-qgis-testing:v2
-
     steps:
 
+      - name: GIS Sources
+        run: |
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+
+      - name: Install QGIS
+        run: |
+          sudo wget -qO /etc/apt/keyrings/qgis-archive-keyring.gpg https://download.qgis.org/downloads/qgis-archive-keyring.gpg
+          sudo sh -c 'echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/qgis-archive-keyring.gpg] https://qgis.org/ubuntugis `lsb_release -c -s` main" > /etc/apt/sources.list.d/qgis.list'
+          sudo apt-get update
+          sudo apt-get install -y qgis
+      
+      - name: QGIS Version
+        run: qgis --version
+            
+      - name: Install Python packages
+        run: pip install pytest pytest-qgis pytest-cov
+      
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Add Python Path
         run: | 
-           echo "PYTHONPATH=$PYTHONPATH:$PWD" >> $GITHUB_ENV
+           echo "PYTHONPATH=$PYTHONPATH:/usr/share/qgis/python/plugins:/usr/share/qgis/python:$PWD" >> $GITHUB_ENV
+           echo "DEBIAN_FRONTEND=noninteractive" >> $GITHUB_ENV
+           echo "QT_QPA_PLATFORM=offscreen" >> $GITHUB_ENV
+           echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
 
       - name: Print Python Path
         run: echo $PYTHONPATH
