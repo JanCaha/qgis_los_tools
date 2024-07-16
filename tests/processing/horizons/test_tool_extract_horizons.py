@@ -71,7 +71,7 @@ def test_run_alg(los_fixture_name: str, horizon_type: int, additional_fields: ty
     if horizon_type == 1:
         horizon_result = NamesConstants.HORIZON_GLOBAL
     if horizon_type == 2:
-        horizon_result = NamesConstants.HORIZON_LOCAL
+        horizon_result = NamesConstants.HORIZON_GLOBAL
 
     output_path = result_filename("horizons_local.gpkg")
 

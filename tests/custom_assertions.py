@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from qgis.core import (
+    Qgis,
     QgsCoordinateReferenceSystem,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
@@ -27,6 +28,7 @@ def assert_parameter(
     default_value: Optional[Any] = None,
     parent_parameter: Optional[str] = None,
     data_type: Optional[int] = None,
+    source_type: Optional[Qgis.ProcessingSourceType] = None,
 ) -> None:
     if parameter_type != parameter.type():
         raise AssertionError(f"QgsProcessingParameter type error: {parameter_type} != {parameter.type()}.")
@@ -46,6 +48,12 @@ def assert_parameter(
     if data_type is not None:
         if data_type != parameter.dataType():
             raise AssertionError(f"QgsProcessingParameter data type error: {data_type} != {parameter.dataType()}.")
+
+    if source_type is not None:
+        if source_type != parameter.sourceType():
+            raise AssertionError(
+                f"QgsProcessingParameter source type error: {source_type} != {parameter.sourceType()}."
+            )
 
 
 def assert_check_parameter_values(alg: QgsProcessingAlgorithm, parameters: Dict) -> None:

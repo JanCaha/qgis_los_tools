@@ -1,16 +1,8 @@
 import pytest
-from qgis.core import (
-    Qgis,
-    QgsFeatureRequest,
-    QgsProcessingContext,
-    QgsProcessingFeedback,
-    QgsRasterLayer,
-    QgsVectorLayer,
-)
+from qgis.core import Qgis, QgsFeatureRequest, QgsRasterLayer, QgsVectorLayer
 
 from los_tools.constants.field_names import FieldNames
 from los_tools.processing.create_los.tool_create_local_los import CreateLocalLosAlgorithm
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 from tests.custom_assertions import (
     assert_algorithm,
     assert_check_parameter_values,

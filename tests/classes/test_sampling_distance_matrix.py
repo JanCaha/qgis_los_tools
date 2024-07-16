@@ -2,7 +2,6 @@ from qgis.core import QgsFeature, QgsLineString, QgsPoint, QgsVectorLayer
 
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
 from los_tools.constants.field_names import FieldNames
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
 
 def test_creation(table_angle_distance_size: QgsVectorLayer):

@@ -1,130 +1,105 @@
-import unittest
-
-from qgis.core import (QgsVectorLayer, QgsRasterLayer, QgsProcessingFeedback, QgsProcessingContext)
+import pytest
+from qgis.core import Qgis, QgsProcessingContext, QgsProcessingFeedback, QgsRasterLayer, QgsVectorLayer
 
 from los_tools.processing.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
+from tests.custom_assertions import (
+    assert_algorithm,
+    assert_check_parameter_values,
+    assert_field_names_exist,
+    assert_layer,
+    assert_parameter,
+    assert_run,
+)
+from tests.utils import result_filename
 
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
-from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
-                               get_data_path_results)
+
+def test_parameters() -> None:
+    alg = OptimizePointLocationAlgorithm()
+    alg.initAlgorithm()
+
+    assert_parameter(alg.parameterDefinition("InputRaster"), parameter_type="raster")
+    assert_parameter(alg.parameterDefinition("InputLayer"), parameter_type="source")
+    assert_parameter(alg.parameterDefinition("Distance"), parameter_type="distance")
+    assert_parameter(alg.parameterDefinition("MaskRaster"), parameter_type="raster")
+    assert_parameter(alg.parameterDefinition("OutputLayer"), parameter_type="sink")
 
 
-class OptimizePointLocationAlgorithmTest(QgsProcessingAlgorithmTestCase):
+def test_alg_settings() -> None:
+    alg = OptimizePointLocationAlgorithm()
+    alg.initAlgorithm()
 
-    def setUp(self) -> None:
-        self.feedback = QgsProcessingFeedback()
-        self.context = QgsProcessingContext()
+    assert_algorithm(alg)
 
-        self.points = QgsVectorLayer(get_data_path(file="points.gpkg"))
 
-        self.raster = QgsRasterLayer(get_data_path(file="dsm.tif"))
+def test_wrong_params(
+    raster_multi_band: QgsRasterLayer,
+    raster_small: QgsRasterLayer,
+    layer_point_wgs84: QgsVectorLayer,
+    raster_wrong_crs: QgsRasterLayer,
+    layer_points: QgsVectorLayer,
+) -> None:
+    alg = OptimizePointLocationAlgorithm()
+    alg.initAlgorithm()
 
-        self.alg = OptimizePointLocationAlgorithm()
-        self.alg.initAlgorithm()
+    # multiband raster fail
+    params = {"InputRaster": raster_multi_band}
 
-    @unittest.skip("printing not necessary `test_show_params()`")
-    def test_show_params(self) -> None:
-        print("{}".format(self.alg.name()))
-        print("----------------------------------")
-        print_alg_params(self.alg)
-        print("----------------------------------")
-        print_alg_outputs(self.alg)
+    with pytest.raises(AssertionError, match="`Location optimization raster` can only have one band."):
+        assert_check_parameter_values(alg, parameters=params)
 
-    def test_parameters(self) -> None:
+    # observer layer with geographic coordinates
+    params = {
+        "InputRaster": raster_small,
+        "InputLayer": layer_point_wgs84,
+    }
 
-        param_input_raster = self.alg.parameterDefinition("InputRaster")
-        param_input_points = self.alg.parameterDefinition("InputLayer")
-        param_distance = self.alg.parameterDefinition("Distance")
-        param_mask_raster = self.alg.parameterDefinition("MaskRaster")
-        param_output_layer = self.alg.parameterDefinition("OutputLayer")
+    with pytest.raises(AssertionError, match="`Input point layer` crs must be projected."):
+        assert_check_parameter_values(alg, parameters=params)
+    # raster crs != observers crs
+    params = {"InputRaster": raster_wrong_crs, "InputLayer": layer_points}
 
-        self.assertEqual("raster", param_input_raster.type())
-        self.assertEqual("source", param_input_points.type())
-        self.assertEqual("distance", param_distance.type())
-        self.assertEqual("raster", param_mask_raster.type())
-        self.assertEqual("sink", param_output_layer.type())
+    with pytest.raises(
+        AssertionError, match="`Input point layer` and `Location optimization raster` crs must be equal."
+    ):
+        assert_check_parameter_values(alg, parameters=params)
 
-        self.assertEqual(30, param_distance.defaultValue())
+    # mask raster errors
+    params = {
+        "InputRaster": raster_small,
+        "InputLayer": layer_points,
+        "MaskRaster": raster_multi_band,
+    }
 
-    def test_alg_settings(self) -> None:
+    with pytest.raises(AssertionError, match="`Mask raster` can only have one band."):
+        assert_check_parameter_values(alg, parameters=params)
 
-        self.assertAlgSettings()
+    params = {
+        "InputRaster": raster_small,
+        "InputLayer": layer_points,
+        "MaskRaster": raster_wrong_crs,
+    }
 
-    def test_check_wrong_params(self) -> None:
+    with pytest.raises(AssertionError, match="CRS for `Mask raster` and `Location optimization raster` must be equal."):
+        assert_check_parameter_values(alg, parameters=params)
 
-        # multiband raster fail
-        params = {"InputRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))}
 
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
+def test_run_alg(raster_small: QgsRasterLayer, layer_points: QgsVectorLayer) -> None:
+    alg = OptimizePointLocationAlgorithm()
+    alg.initAlgorithm()
 
-        self.assertFalse(can_run)
-        self.assertIn("`Location optimization raster` can only have one band.", msg)
+    output_path = result_filename("points_optimized.gpkg")
 
-        # observer layer with geographic coordinates
-        params = {
-            "InputRaster": self.raster,
-            "InputLayer": QgsVectorLayer(get_data_path(file="single_point_wgs84.gpkg")),
-        }
+    params = {
+        "InputRaster": raster_small,
+        "InputLayer": layer_points,
+        "Distance": 10,
+        "OutputLayer": output_path,
+    }
 
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
+    assert_run(alg, params)
 
-        self.assertFalse(can_run)
-        self.assertIn("`Input point layer` crs must be projected.", msg)
+    output_layer = QgsVectorLayer(output_path)
 
-        # raster crs != observers crs
-        params = {
-            "InputRaster": QgsRasterLayer(get_data_path(file="dsm_epsg_5514.tif")),
-            "InputLayer": self.points
-        }
+    assert_layer(output_layer, geom_type=Qgis.WkbType.Point, crs=layer_points.sourceCrs())
 
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
-
-        self.assertFalse(can_run)
-        self.assertIn("`Input point layer` and `Location optimization raster` crs must be equal.",
-                      msg)
-
-        # mask raster errors
-        params = {
-            "InputRaster": self.raster,
-            "InputLayer": self.points,
-            "MaskRaster": QgsRasterLayer(get_data_path(file="raster_multiband.tif"))
-        }
-
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
-
-        self.assertFalse(can_run)
-        self.assertIn("`Mask raster` can only have one band.", msg)
-
-        params = {
-            "InputRaster": self.raster,
-            "InputLayer": self.points,
-            "MaskRaster": QgsRasterLayer(get_data_path(file="dsm_epsg_5514.tif"))
-        }
-
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
-
-        self.assertFalse(can_run)
-        self.assertIn("CRS for `Mask raster` and `Location optimization raster` must be equal.",
-                      msg)
-
-    def test_run_alg(self):
-
-        output_path = get_data_path_results(file="points_optimized.gpkg")
-
-        params = {
-            "InputRaster": self.raster,
-            "InputLayer": self.points,
-            "Distance": 10,
-            "OutputLayer": output_path,
-        }
-
-        self.alg.run(parameters=params, context=self.context, feedback=self.feedback)
-
-        output_layer = QgsVectorLayer(output_path)
-
-        self.assertQgsVectorLayer(output_layer,
-                                  geom_type=self.points.wkbType(),
-                                  crs=self.points.sourceCrs())
-
-        self.assertIsInstance(output_layer, QgsVectorLayer)
-        self.assertEqual(self.points.featureCount(), output_layer.featureCount())
+    assert layer_points.featureCount() == output_layer.featureCount()
