@@ -1,5 +1,11 @@
 # Changelog
 
+## version 1.0
+
+- addition of all the interactive tools - see websize menu **Interactive tools**
+
+- bugfixes of some issues from 0.7
+
 ## version 0.7
 
 - add tools: Create no Target LoS V2, Calculate Object Distances, Calculate Object Sizes, Calculate Parameters Settings, Extract Visible/Invisible Lines from LoS, Extract Visible/Invisible Polygons from LoS
