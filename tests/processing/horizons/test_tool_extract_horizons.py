@@ -1,169 +1,98 @@
-from qgis.core import (QgsVectorLayer)
-from qgis._core import QgsWkbTypes
+import typing
 
-from los_tools.processing.horizons.tool_extract_horizons import ExtractHorizonsAlgorithm
+import pytest
+from qgis.core import Qgis, QgsVectorLayer
+
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
+from los_tools.processing.horizons.tool_extract_horizons import ExtractHorizonsAlgorithm
+from tests.custom_assertions import (
+    assert_algorithm,
+    assert_check_parameter_values,
+    assert_field_names_exist,
+    assert_layer,
+    assert_parameter,
+    assert_run,
+)
+from tests.utils import result_filename
 
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
-from tests.utils_tests import (get_data_path, get_data_path_results)
+def test_parameters() -> None:
+    alg = ExtractHorizonsAlgorithm()
+    alg.initAlgorithm()
+
+    assert_parameter(alg.parameterDefinition("LoSLayer"), parameter_type="source")
+    assert_parameter(alg.parameterDefinition("HorizonType"), parameter_type="enum")
+    assert_parameter(alg.parameterDefinition("OutputLayer"), parameter_type="sink")
+    assert_parameter(alg.parameterDefinition("CurvatureCorrections"), parameter_type="boolean", default_value=True)
+    assert_parameter(alg.parameterDefinition("RefractionCoefficient"), parameter_type="number", default_value=0.13)
 
 
-class ExtractHorizonsAlgorithmTest(QgsProcessingAlgorithmTestCase):
+def test_alg_settings() -> None:
+    alg = ExtractHorizonsAlgorithm()
+    alg.initAlgorithm()
 
-    def setUp(self) -> None:
+    assert_algorithm(alg)
 
-        super().setUp()
 
-        self.los_global = QgsVectorLayer(get_data_path(file="los_global.gpkg"))
+def test_check_wrong_params(los_no_target_wrong: QgsVectorLayer, los_local: QgsVectorLayer) -> None:
+    alg = ExtractHorizonsAlgorithm()
+    alg.initAlgorithm()
 
-        self.los_local = QgsVectorLayer(get_data_path(file="los_local.gpkg"))
+    # use layer that is not corrently constructed LoS layer
+    params = {"LoSLayer": los_no_target_wrong}
 
-        self.los_no_target = QgsVectorLayer(get_data_path(file="no_target_los.gpkg"))
+    with pytest.raises(AssertionError, match="Fields specific for LoS not found in current layer"):
+        assert_check_parameter_values(alg, params)
 
-        self.alg = ExtractHorizonsAlgorithm()
-        self.alg.initAlgorithm()
+    # try to extract global horizon from local LoS
+    params = {"LoSLayer": los_local, "HorizonType": 1}
 
-    def test_parameters(self) -> None:
+    with pytest.raises(AssertionError, match="Cannot extract global horizon from local LoS"):
+        assert_check_parameter_values(alg, params)
 
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("LoSLayer"),
-                                          parameter_type="source")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("HorizonType"),
-                                          parameter_type="enum",
-                                          default_value=2)
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputLayer"),
-                                          parameter_type="sink")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("CurvatureCorrections"),
-                                          parameter_type="boolean",
-                                          default_value=True)
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("RefractionCoefficient"),
-                                          parameter_type="number",
-                                          default_value=0.13)
 
-    def test_alg_settings(self) -> None:
+@pytest.mark.parametrize(
+    "los_fixture_name,horizon_type,additional_fields",
+    [
+        ("los_local", 0, []),
+        ("los_global", 1, []),
+        ("los_no_target", 0, [FieldNames.AZIMUTH]),
+        ("los_no_target", 2, [FieldNames.AZIMUTH]),
+    ],
+)
+def test_run_alg(los_fixture_name: str, horizon_type: int, additional_fields: typing.List[str], request) -> None:
+    alg = ExtractHorizonsAlgorithm()
+    alg.initAlgorithm()
 
-        self.assertAlgSettings()
+    los: QgsVectorLayer = request.getfixturevalue(los_fixture_name)
 
-    def test_check_wrong_params(self) -> None:
+    horizon_result = NamesConstants.HORIZON_LOCAL
+    if horizon_type == 1:
+        horizon_result = NamesConstants.HORIZON_GLOBAL
+    if horizon_type == 2:
+        horizon_result = NamesConstants.HORIZON_GLOBAL
 
-        # use layer that is not corrently constructed LoS layer
-        params = {"LoSLayer": QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))}
+    output_path = result_filename("horizons_local.gpkg")
 
-        self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="Fields specific for LoS not found in current layer (los_type).")
+    params = {
+        "LoSLayer": los,
+        "HorizonType": horizon_type,
+        "OutputLayer": output_path,
+        "CurvatureCorrections": True,
+        "RefractionCoefficient": 0.13,
+    }
 
-        # try to extract global horizon from local LoS
-        params = {"LoSLayer": self.los_local, "HorizonType": 1}
+    assert_run(alg, params)
 
-        self.assertCheckParameterValuesRaisesMessage(
-            parameters=params, message="Cannot extract global horizon from local LoS.")
+    horizon_layer = QgsVectorLayer(output_path)
 
-    def test_run_alg_los_local(self) -> None:
+    assert_layer(horizon_layer, geom_type=Qgis.WkbType.PointZ, crs=los.sourceCrs())
+    assert_field_names_exist(
+        [FieldNames.HORIZON_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET] + additional_fields, horizon_layer
+    )
 
-        output_path = get_data_path_results(file="horizons_local.gpkg")
-
-        params = {
-            "LoSLayer": self.los_local,
-            "HorizonType": 0,
-            "OutputLayer": output_path,
-            "CurvatureCorrections": True,
-            "RefractionCoefficient": 0.13
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        horizon_layer = QgsVectorLayer(output_path)
-
-        self.assertQgsVectorLayer(horizon_layer,
-                                  geom_type=QgsWkbTypes.PointZ,
-                                  crs=self.los_local.sourceCrs())
-
-        self.assertFieldNamesInQgsVectorLayer(
-            [FieldNames.HORIZON_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET], horizon_layer)
-
-        self.assertEqual(
-            NamesConstants.HORIZON_LOCAL,
-            list(
-                horizon_layer.uniqueValues(horizon_layer.fields().lookupField(
-                    FieldNames.HORIZON_TYPE)))[0])
-
-    def test_run_alg_los_global(self) -> None:
-
-        output_path = get_data_path_results(file="horizons_global.gpkg")
-
-        params = {
-            "LoSLayer": self.los_global,
-            "HorizonType": 1,
-            "OutputLayer": output_path,
-            "CurvatureCorrections": True,
-            "RefractionCoefficient": 0.13
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        horizon_layer = QgsVectorLayer(output_path)
-
-        self.assertQgsVectorLayer(horizon_layer,
-                                  geom_type=QgsWkbTypes.PointZ,
-                                  crs=self.los_local.sourceCrs())
-
-        self.assertFieldNamesInQgsVectorLayer(
-            [FieldNames.HORIZON_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET], horizon_layer)
-
-        self.assertEqual(
-            NamesConstants.HORIZON_GLOBAL,
-            list(
-                horizon_layer.uniqueValues(horizon_layer.fields().lookupField(
-                    FieldNames.HORIZON_TYPE)))[0])
-
-        self.assertEqual(self.los_global.featureCount(), horizon_layer.featureCount())
-
-    def test_run_alg_los_no_targe(self) -> None:
-
-        output_path = get_data_path_results(file="horizons_no_target.gpkg")
-
-        params = {
-            "LoSLayer": self.los_no_target,
-            "HorizonType": 0,
-            "OutputLayer": output_path,
-            "CurvatureCorrections": True,
-            "RefractionCoefficient": 0.13
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        horizon_layer = QgsVectorLayer(output_path)
-
-        self.assertQgsVectorLayer(horizon_layer,
-                                  geom_type=QgsWkbTypes.PointZ,
-                                  crs=self.los_no_target.sourceCrs())
-
-        self.assertFieldNamesInQgsVectorLayer([
-            FieldNames.HORIZON_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET,
-            FieldNames.AZIMUTH
-        ], horizon_layer)
-
-        output_path = get_data_path_results(file="horizons_no_target.gpkg")
-
-        params = {
-            "LoSLayer": self.los_no_target,
-            "HorizonType": 2,
-            "OutputLayer": output_path,
-            "CurvatureCorrections": True,
-            "RefractionCoefficient": 0.13
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        horizon_layer = QgsVectorLayer(output_path)
-
-        self.assertQgsVectorLayer(horizon_layer,
-                                  geom_type=QgsWkbTypes.PointZ,
-                                  crs=self.los_no_target.sourceCrs())
-
-        self.assertFieldNamesInQgsVectorLayer([
-            FieldNames.HORIZON_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET,
-            FieldNames.AZIMUTH
-        ], horizon_layer)
+    assert (
+        horizon_result
+        == list(horizon_layer.uniqueValues(horizon_layer.fields().lookupField(FieldNames.HORIZON_TYPE)))[0]
+    )

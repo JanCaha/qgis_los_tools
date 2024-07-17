@@ -31,6 +31,7 @@ class Fields:
     los_notarget_fields.append(_field_angle_step)
 
     los_local_fields = QgsFields(_base_fields)
+
     los_local_fields.append(QgsField(FieldNames.TARGET_OFFSET, source_type.Double))
 
     los_global_fields = QgsFields(los_local_fields)

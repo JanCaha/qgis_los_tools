@@ -1,74 +1,67 @@
-from qgis.core import (QgsVectorLayer, QgsWkbTypes)
+import pytest
+from qgis.core import Qgis, QgsVectorLayer
 
-from los_tools.processing.analyse_los.tool_extract_los_visibility_polygons import ExtractLoSVisibilityPolygonsAlgorithm
 from los_tools.constants.field_names import FieldNames
+from los_tools.processing.analyse_los.tool_extract_los_visibility_polygons import ExtractLoSVisibilityPolygonsAlgorithm
+from tests.custom_assertions import (
+    assert_algorithm,
+    assert_check_parameter_values,
+    assert_field_names_exist,
+    assert_layer,
+    assert_parameter,
+    assert_run,
+)
+from tests.utils import result_filename
 
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
 
-from tests.utils_tests import (get_data_path, get_data_path_results)
+def test_parameters() -> None:
+    alg = ExtractLoSVisibilityPolygonsAlgorithm()
+    alg.initAlgorithm()
+
+    assert_parameter(alg.parameterDefinition("LoSLayer"), parameter_type="source")
+    assert_parameter(alg.parameterDefinition("OutputLayer"), parameter_type="sink")
+    assert_parameter(alg.parameterDefinition("CurvatureCorrections"), parameter_type="boolean", default_value=True)
+    assert_parameter(alg.parameterDefinition("RefractionCoefficient"), parameter_type="number", default_value=0.13)
 
 
-class ExtractPointsLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
+def test_alg_settings() -> None:
+    alg = ExtractLoSVisibilityPolygonsAlgorithm()
+    alg.initAlgorithm()
 
-    def setUp(self) -> None:
+    assert_algorithm(alg)
 
-        super().setUp()
 
-        self.los_global = QgsVectorLayer(get_data_path(file="los_global.gpkg"))
+def test_check_wrong_params(los_no_target_wrong: QgsVectorLayer) -> None:
+    alg = ExtractLoSVisibilityPolygonsAlgorithm()
+    alg.initAlgorithm()
 
-        self.los_local = QgsVectorLayer(get_data_path(file="los_local.gpkg"))
+    # use layer that is not correctly constructed LoS layer
+    params = {"LoSLayer": los_no_target_wrong}
 
-        self.los_no_target = QgsVectorLayer(get_data_path(file="no_target_los.gpkg"))
+    with pytest.raises(AssertionError, match="Fields specific for LoS not found in current layer"):
+        assert_check_parameter_values(alg, parameters=params)
 
-        self.alg = ExtractLoSVisibilityPolygonsAlgorithm()
-        self.alg.initAlgorithm()
 
-    def test_parameters(self) -> None:
+def test_run_alg(los_no_target: QgsVectorLayer) -> None:
 
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("LoSLayer"),
-                                          parameter_type="source")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputLayer"),
-                                          parameter_type="sink")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("CurvatureCorrections"),
-                                          parameter_type="boolean",
-                                          default_value=True)
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("RefractionCoefficient"),
-                                          parameter_type="number",
-                                          default_value=0.13)
+    alg = ExtractLoSVisibilityPolygonsAlgorithm()
+    alg.initAlgorithm()
 
-    def test_alg_settings(self) -> None:
+    output_path = result_filename("los_parts.gpkg")
 
-        self.assertAlgSettings()
+    params = {
+        "LoSLayer": los_no_target,
+        "OutputLayer": output_path,
+        "CurvatureCorrections": True,
+        "RefractionCoefficient": 0.13,
+    }
 
-    def test_check_wrong_params(self) -> None:
+    assert_run(alg, parameters=params)
 
-        # use layer that is not correctly constructed LoS layer
-        params = {"LoSLayer": QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))}
+    los_parts = QgsVectorLayer(output_path)
 
-        self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="Fields specific for LoS not found in current layer (los_type).")
+    assert_layer(los_parts, geom_type=Qgis.WkbType.MultiPolygon, crs=los_no_target.sourceCrs())
 
-    def test_run_alg(self) -> None:
+    assert_field_names_exist([FieldNames.ID_OBSERVER, FieldNames.ID_TARGET, FieldNames.VISIBLE], los_parts)
 
-        output_path = get_data_path_results(file="los_parts.gpkg")
-
-        params = {
-            "LoSLayer": self.los_no_target,
-            "OutputLayer": output_path,
-            "CurvatureCorrections": True,
-            "RefractionCoefficient": 0.13
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        los_parts = QgsVectorLayer(output_path)
-
-        self.assertQgsVectorLayer(los_parts,
-                                  geom_type=QgsWkbTypes.MultiPolygon,
-                                  crs=self.los_local.sourceCrs())
-
-        self.assertFieldNamesInQgsVectorLayer(
-            [FieldNames.ID_OBSERVER, FieldNames.ID_TARGET, FieldNames.VISIBLE], los_parts)
-
-        self.assertEqual(los_parts.featureCount(), self.los_no_target.featureCount() * 2)
+    assert los_parts.featureCount() == los_no_target.featureCount() * 2

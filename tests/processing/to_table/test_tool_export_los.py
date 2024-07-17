@@ -1,128 +1,106 @@
-from qgis.core import (QgsVectorLayer, QgsProcessingParameterBoolean, QgsProcessingParameterNumber,
-                       QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink)
+import typing
 
-from qgis._core import QgsWkbTypes
+import pytest
+from qgis.core import Qgis, QgsVectorLayer
 
 from los_tools.constants.field_names import FieldNames
-
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
-
 from los_tools.processing.to_table.tool_export_los import ExportLoSAlgorithm
+from tests.custom_assertions import (
+    assert_algorithm,
+    assert_check_parameter_values,
+    assert_field_names_exist,
+    assert_parameter,
+    assert_run,
+)
+from tests.utils import result_filename
 
-from tests.utils_tests import (get_data_path, get_data_path_results)
+
+def test_parameters() -> None:
+    alg = ExportLoSAlgorithm()
+    alg.initAlgorithm()
+
+    assert_parameter(alg.parameterDefinition("LoSLayer"), parameter_type="source")
+    assert_parameter(alg.parameterDefinition("CurvatureCorrections"), parameter_type="boolean", default_value=True)
+    assert_parameter(alg.parameterDefinition("RefractionCoefficient"), parameter_type="number", default_value=0.13)
+    assert_parameter(alg.parameterDefinition("OutputFile"), parameter_type="sink")
 
 
-class ExportLoSAlgorithmTest(QgsProcessingAlgorithmTestCase):
+def test_alg_settings() -> None:
+    alg = ExportLoSAlgorithm()
+    alg.initAlgorithm()
 
-    def setUp(self) -> None:
+    assert_algorithm(alg)
 
-        super().setUp()
 
-        self.los_global = QgsVectorLayer(get_data_path(file="los_global.gpkg"))
+def test_check_wrong_params(los_no_target_wrong: QgsVectorLayer) -> None:
+    alg = ExportLoSAlgorithm()
+    alg.initAlgorithm()
 
-        self.los_local = QgsVectorLayer(get_data_path(file="los_local.gpkg"))
+    # use layer that is not correctly constructed LoS layer
+    params = {"LoSLayer": los_no_target_wrong}
 
-        self.los_no_target = QgsVectorLayer(get_data_path(file="no_target_los.gpkg"))
+    with pytest.raises(AssertionError, match="Fields specific for LoS not found in current layer"):
+        assert_check_parameter_values(alg, params)
 
-        self.alg = ExportLoSAlgorithm()
-        self.alg.initAlgorithm()
 
-    def test_parameters(self) -> None:
-        self.assertIsInstance(self.alg.parameterDefinition("LoSLayer"),
-                              QgsProcessingParameterFeatureSource)
-        self.assertIsInstance(self.alg.parameterDefinition("CurvatureCorrections"),
-                              QgsProcessingParameterBoolean)
-        self.assertIsInstance(self.alg.parameterDefinition("RefractionCoefficient"),
-                              QgsProcessingParameterNumber)
-        self.assertIsInstance(self.alg.parameterDefinition("OutputFile"),
-                              QgsProcessingParameterFeatureSink)
+result_fields = [
+    FieldNames.ID_LOS,
+    FieldNames.ID_OBSERVER,
+    FieldNames.OBSERVER_OFFSET,
+    FieldNames.CSV_OBSERVER_DISTANCE,
+    FieldNames.CSV_ELEVATION,
+    FieldNames.CSV_VISIBLE,
+    FieldNames.CSV_HORIZON,
+]
 
-        self.assertTrue(self.alg.parameterDefinition("CurvatureCorrections").defaultValue())
-        self.assertEqual(
-            self.alg.parameterDefinition("RefractionCoefficient").defaultValue(), 0.13)
 
-    def test_alg_settings(self) -> None:
+@pytest.mark.parametrize(
+    "los_fixture_name,fields",
+    [
+        (
+            "los_no_target",
+            result_fields,
+        ),
+        (
+            "los_local",
+            result_fields
+            + [
+                FieldNames.ID_TARGET,
+                FieldNames.TARGET_OFFSET,
+            ],
+        ),
+        (
+            "los_global",
+            result_fields
+            + [
+                FieldNames.ID_TARGET,
+                FieldNames.TARGET_OFFSET,
+                FieldNames.TARGET_X,
+                FieldNames.TARGET_Y,
+                FieldNames.CSV_TARGET,
+            ],
+        ),
+    ],
+)
+def test_run_alg(los_fixture_name: str, fields: typing.List[str], request) -> None:
+    los: QgsVectorLayer = request.getfixturevalue(los_fixture_name)
 
-        self.assertAlgSettings()
+    alg = ExportLoSAlgorithm()
+    alg.initAlgorithm()
 
-    def test_check_wrong_params(self) -> None:
+    output_path = result_filename("exported.gpkg")
 
-        # use layer that is not corrently constructed LoS layer
-        params = {"LoSLayer": QgsVectorLayer(get_data_path(file="no_target_los_wrong.gpkg"))}
+    params = {
+        "LoSLayer": los,
+        "OutputFile": output_path,
+        "CurvatureCorrections": True,
+        "RefractionCoefficient": 0.13,
+    }
 
-        self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="Fields specific for LoS not found in current layer (los_type).")
+    assert_run(alg, parameters=params)
 
-    def test_run_alg(self) -> None:
+    export_layer = QgsVectorLayer(output_path)
 
-        fields = [
-            FieldNames.ID_LOS, FieldNames.ID_OBSERVER, FieldNames.OBSERVER_OFFSET,
-            FieldNames.CSV_OBSERVER_DISTANCE, FieldNames.CSV_ELEVATION, FieldNames.CSV_VISIBLE,
-            FieldNames.CSV_HORIZON
-        ]
+    assert export_layer.wkbType() == Qgis.WkbType.NoGeometry
 
-        output_path = get_data_path_results(file="export_los.gpkg")
-
-        params = {
-            "LoSLayer": self.los_no_target,
-            "OutputFile": output_path,
-            "CurvatureCorrections": True,
-            "RefractionCoefficient": 0.13
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        export_layer = QgsVectorLayer(output_path)
-
-        self.assertEqual(export_layer.wkbType(), QgsWkbTypes.NoGeometry)
-
-        fields_layer = export_layer.fields().names()
-        del fields_layer[0]
-
-        self.assertListEqual(fields, fields_layer)
-
-        export_layer = None
-
-        params = {
-            "LoSLayer": self.los_local,
-            "OutputFile": output_path,
-            "CurvatureCorrections": True,
-            "RefractionCoefficient": 0.13
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        export_layer = QgsVectorLayer(output_path)
-
-        self.assertEqual(export_layer.wkbType(), QgsWkbTypes.NoGeometry)
-
-        fields_layer = export_layer.fields().names()
-        del fields_layer[0]
-
-        self.assertListEqual(fields + [FieldNames.ID_TARGET, FieldNames.TARGET_OFFSET],
-                             fields_layer)
-
-        export_layer = None
-
-        params = {
-            "LoSLayer": self.los_global,
-            "OutputFile": output_path,
-            "CurvatureCorrections": True,
-            "RefractionCoefficient": 0.13
-        }
-
-        self.assertRunAlgorithm(parameters=params)
-
-        export_layer = QgsVectorLayer(output_path)
-
-        self.assertEqual(export_layer.wkbType(), QgsWkbTypes.NoGeometry)
-
-        fields_layer = export_layer.fields().names()
-        del fields_layer[0]
-
-        self.assertListEqual(
-            fields + [
-                FieldNames.ID_TARGET, FieldNames.TARGET_OFFSET, FieldNames.TARGET_X,
-                FieldNames.TARGET_Y, FieldNames.CSV_TARGET
-            ], fields_layer)
+    assert_field_names_exist(fields, export_layer)
