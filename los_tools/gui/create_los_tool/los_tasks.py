@@ -1,38 +1,48 @@
 from typing import Union
 
-from qgis.core import (QgsTask, QgsTaskManager, QgsGeometry, QgsVectorLayer,
-                       QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject,
-                       QgsFeature, QgsVertexId)
+from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsGeometry,
+    QgsProject,
+    QgsTask,
+    QgsTaskManager,
+    QgsVectorLayer,
+    QgsVertexId,
+)
 from qgis.PyQt.QtCore import pyqtSignal
 
-from los_tools.constants import FieldNames, NamesConstants
+from los_tools.classes.list_raster import ListOfRasters
+from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
+from los_tools.constants.field_names import FieldNames
+from los_tools.constants.names_constants import NamesConstants
 from los_tools.gui.dialog_los_settings import LoSSettings
-from los_tools.classes import ListOfRasters, SamplingDistanceMatrix
 from los_tools.processing.tools.util_functions import segmentize_los_line
 
 
 class PrepareLoSWithoutTargetTask(QgsTask):
-
     taskFinishedTime = pyqtSignal(int)
 
-    def __init__(self,
-                 lines: QgsGeometry,
-                 los_layer: QgsVectorLayer,
-                 list_of_rasters: ListOfRasters,
-                 los_settings: LoSSettings,
-                 observer_offset: float,
-                 angle_step: float,
-                 canvas_crs: QgsCoordinateReferenceSystem,
-                 description: str = "Prepare LoS without Target",
-                 flags: Union['QgsTask.Flags', 'QgsTask.Flag'] = QgsTask.Flag.CanCancel) -> None:
+    def __init__(
+        self,
+        lines: QgsGeometry,
+        los_layer: QgsVectorLayer,
+        list_of_rasters: ListOfRasters,
+        los_settings: LoSSettings,
+        observer_offset: float,
+        angle_step: float,
+        canvas_crs: QgsCoordinateReferenceSystem,
+        description: str = "Prepare LoS without Target",
+        flags: Union["QgsTask.Flags", "QgsTask.Flag"] = QgsTask.Flag.CanCancel,
+    ) -> None:
         super().__init__(description, flags)
 
         self.lines = lines
         self.list_of_rasters = list_of_rasters
 
         self.sampling_distance_matrix = SamplingDistanceMatrix(los_settings.create_data_layer())
-        self.sampling_distance_matrix.replace_minus_one_with_value(
-            list_of_rasters.maximal_diagonal_size())
+        self.sampling_distance_matrix.replace_minus_one_with_value(list_of_rasters.maximal_diagonal_size())
 
         self.fields = los_layer.fields()
         self.los_layer = los_layer
@@ -55,27 +65,22 @@ class PrepareLoSWithoutTargetTask(QgsTask):
         self.setDependentLayers([self.los_layer])
 
     def run(self):
-
         number_of_lines = self.lines.get().partCount()
 
         partsIterator = self.lines.get().parts()
 
         feature_template = QgsFeature(self.fields)
 
-        ctToRaster = QgsCoordinateTransform(self.canvas_crs, self.list_of_rasters.crs(),
-                                            QgsProject.instance())
+        ctToRaster = QgsCoordinateTransform(self.canvas_crs, self.list_of_rasters.crs(), QgsProject.instance())
 
-        ctToLayer = QgsCoordinateTransform(self.list_of_rasters.crs(), self.los_layer.crs(),
-                                           QgsProject.instance())
+        ctToLayer = QgsCoordinateTransform(self.list_of_rasters.crs(), self.los_layer.crs(), QgsProject.instance())
 
         j = 1
-        while (partsIterator.hasNext()):
-
+        while partsIterator.hasNext():
             geom = partsIterator.next()
 
             observer_point = geom.vertexAt(QgsVertexId(0, 0, 0))
-            line = self.sampling_distance_matrix.build_line(observer_point,
-                                                            geom.vertexAt(QgsVertexId(0, 0, 1)))
+            line = self.sampling_distance_matrix.build_line(observer_point, geom.vertexAt(QgsVertexId(0, 0, 1)))
 
             line.transform(ctToRaster)
 
@@ -110,20 +115,21 @@ class PrepareLoSWithoutTargetTask(QgsTask):
 
 
 class PrepareLoSTask(QgsTask):
-
     taskFinishedTime = pyqtSignal(int)
 
-    def __init__(self,
-                 los_geometry: QgsGeometry,
-                 segment_length: float,
-                 los_layer: QgsVectorLayer,
-                 list_of_rasters: ListOfRasters,
-                 observer_offset: float,
-                 target_offset: float,
-                 los_global: bool,
-                 canvas_crs: QgsCoordinateReferenceSystem,
-                 description: str = "Prepare LoS without Target",
-                 flags: Union['QgsTask.Flags', 'QgsTask.Flag'] = QgsTask.Flag.CanCancel) -> None:
+    def __init__(
+        self,
+        los_geometry: QgsGeometry,
+        segment_length: float,
+        los_layer: QgsVectorLayer,
+        list_of_rasters: ListOfRasters,
+        observer_offset: float,
+        target_offset: float,
+        los_global: bool,
+        canvas_crs: QgsCoordinateReferenceSystem,
+        description: str = "Prepare LoS without Target",
+        flags: Union["QgsTask.Flags", "QgsTask.Flag"] = QgsTask.Flag.CanCancel,
+    ) -> None:
         super().__init__(description, flags)
 
         self.los_geometry = los_geometry
@@ -152,9 +158,7 @@ class PrepareLoSTask(QgsTask):
         self.setDependentLayers([self.los_layer])
 
     def run(self):
-
-        ct = QgsCoordinateTransform(self.canvas_crs, self.list_of_rasters.crs(),
-                                    QgsProject.instance())
+        ct = QgsCoordinateTransform(self.canvas_crs, self.list_of_rasters.crs(), QgsProject.instance())
 
         line = segmentize_los_line(self.los_geometry, self.segment_lenght)
 
@@ -164,8 +168,7 @@ class PrepareLoSTask(QgsTask):
 
         f = QgsFeature(self.fields)
 
-        ct = QgsCoordinateTransform(self.list_of_rasters.crs(), self.los_layer.crs(),
-                                    QgsProject.instance())
+        ct = QgsCoordinateTransform(self.list_of_rasters.crs(), self.los_layer.crs(), QgsProject.instance())
 
         line.transform(ct)
 
@@ -176,10 +179,14 @@ class PrepareLoSTask(QgsTask):
         f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_OFFSET), float(self.target_offset))
 
         if self.los_global:
-            f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_X),
-                           float(self.los_geometry.vertexAt(1).x()))
-            f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_Y),
-                           float(self.los_geometry.vertexAt(1).y()))
+            f.setAttribute(
+                f.fieldNameIndex(FieldNames.TARGET_X),
+                float(self.los_geometry.vertexAt(1).x()),
+            )
+            f.setAttribute(
+                f.fieldNameIndex(FieldNames.TARGET_Y),
+                float(self.los_geometry.vertexAt(1).y()),
+            )
             f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_GLOBAL)
         else:
             f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL)
@@ -192,7 +199,6 @@ class PrepareLoSTask(QgsTask):
 
 
 class LoSExtractionTaskManager(QgsTaskManager):
-
     def active_los_tasks(self) -> int:
         count = 0
         for task in self.tasks():

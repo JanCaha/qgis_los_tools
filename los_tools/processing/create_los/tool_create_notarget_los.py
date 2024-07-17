@@ -18,15 +18,14 @@ from qgis.core import (
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
-from los_tools.constants import Fields
 from los_tools.constants.field_names import FieldNames
+from los_tools.constants.fields import Fields
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.processing.utils import LoSToolsSettings
 from los_tools.utils import get_doc_file
 
 
 class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
-
     OBSERVER_POINTS_LAYER = "ObserverPoints"
     OBSERVER_ID_FIELD = "ObserverIdField"
     OBSERVER_OFFSET_FIELD = "ObserverOffset"
@@ -39,20 +38,23 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
     LINE_SETTINGS_TABLE = "LineSettingsTable"
 
     def initAlgorithm(self, config=None):
-
         self.addParameter(
             QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers", QgsProcessing.TypeRaster)
         )
 
         self.addParameter(
             QgsProcessingParameterVectorLayer(
-                self.LINE_SETTINGS_TABLE, "Sampling distance - distance table", [Qgis.WkbType.NoGeometry]
+                self.LINE_SETTINGS_TABLE,
+                "Sampling distance - distance table",
+                [Qgis.WkbType.NoGeometry],
             )
         )
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                self.OBSERVER_POINTS_LAYER, "Observers point layer", [QgsProcessing.TypeVectorPoint]
+                self.OBSERVER_POINTS_LAYER,
+                "Observers point layer",
+                [QgsProcessing.TypeVectorPoint],
             )
         )
 
@@ -78,7 +80,9 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                self.TARGET_POINTS_LAYER, "Targets point layer", [QgsProcessing.TypeVectorPoint]
+                self.TARGET_POINTS_LAYER,
+                "Targets point layer",
+                [QgsProcessing.TypeVectorPoint],
             )
         )
 
@@ -105,7 +109,6 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
     def checkParameterValues(self, parameters, context):
-
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
         targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
 
@@ -151,7 +154,6 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
-
         observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
 
         if observers_layer is None:
@@ -177,7 +179,12 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         fields = Fields.los_notarget_fields
 
         sink, dest_id = self.parameterAsSink(
-            parameters, self.OUTPUT_LAYER, context, fields, QgsWkbTypes.LineString25D, observers_layer.sourceCrs()
+            parameters,
+            self.OUTPUT_LAYER,
+            context,
+            fields,
+            QgsWkbTypes.LineString25D,
+            observers_layer.sourceCrs(),
         )
 
         if sink is None:
@@ -196,7 +203,6 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         sampleZ = LoSToolsSettings.sample_Z_using_plugin()
 
         for observer_feature in observers_iterator:
-
             request = QgsFeatureRequest()
             request.setFilterExpression(
                 "{} = {}".format(target_definition_id_field, observer_feature.attribute(observers_id))
@@ -205,7 +211,6 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
             targets_iterators = targets_layer.getFeatures(request)
 
             for target_feature in targets_iterators:
-
                 if feedback.isCanceled():
                     break
 
@@ -220,16 +225,33 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                 f = QgsFeature(fields)
                 f.setGeometry(line)
                 f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_NO_TARGET)
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER), int(observer_feature.attribute(observers_id)))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET), int(target_feature.attribute(targets_id)))
                 f.setAttribute(
-                    f.fieldNameIndex(FieldNames.OBSERVER_OFFSET), float(observer_feature.attribute(observers_offset))
+                    f.fieldNameIndex(FieldNames.ID_OBSERVER),
+                    int(observer_feature.attribute(observers_id)),
                 )
-                f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), target_feature.attribute(FieldNames.AZIMUTH))
-                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_X), observer_feature.geometry().asPoint().x())
-                f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_Y), observer_feature.geometry().asPoint().y())
                 f.setAttribute(
-                    f.fieldNameIndex(FieldNames.ANGLE_STEP), target_feature.attribute(FieldNames.ANGLE_STEP_POINTS)
+                    f.fieldNameIndex(FieldNames.ID_TARGET),
+                    int(target_feature.attribute(targets_id)),
+                )
+                f.setAttribute(
+                    f.fieldNameIndex(FieldNames.OBSERVER_OFFSET),
+                    float(observer_feature.attribute(observers_offset)),
+                )
+                f.setAttribute(
+                    f.fieldNameIndex(FieldNames.AZIMUTH),
+                    target_feature.attribute(FieldNames.AZIMUTH),
+                )
+                f.setAttribute(
+                    f.fieldNameIndex(FieldNames.OBSERVER_X),
+                    observer_feature.geometry().asPoint().x(),
+                )
+                f.setAttribute(
+                    f.fieldNameIndex(FieldNames.OBSERVER_Y),
+                    observer_feature.geometry().asPoint().y(),
+                )
+                f.setAttribute(
+                    f.fieldNameIndex(FieldNames.ANGLE_STEP),
+                    target_feature.attribute(FieldNames.ANGLE_STEP_POINTS),
                 )
 
                 sink.addFeature(f)

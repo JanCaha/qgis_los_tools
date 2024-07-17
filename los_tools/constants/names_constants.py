@@ -1,5 +1,4 @@
 class NamesConstants:
-
     LOS_LOCAL = "local"
     LOS_GLOBAL = "global"
     LOS_NO_TARGET = "without target"

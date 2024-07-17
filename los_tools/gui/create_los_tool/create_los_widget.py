@@ -1,14 +1,13 @@
 from typing import Optional
 
-from qgis.PyQt.QtWidgets import (QWidget, QFormLayout, QComboBox, QPushButton)
-from qgis.PyQt.QtCore import (pyqtSignal)
-from qgis.gui import (QgsDoubleSpinBox)
+from qgis.gui import QgsDoubleSpinBox
+from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtWidgets import QComboBox, QFormLayout, QPushButton, QWidget
 
-from los_tools.gui import Distance, DistanceWidget
+from los_tools.gui.custom_classes import Distance, DistanceWidget
 
 
 class LoSNoTargetInputWidget(QWidget):
-
     valuesChanged = pyqtSignal()
     saveToLayerClicked = pyqtSignal()
 
