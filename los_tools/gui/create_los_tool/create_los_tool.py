@@ -7,8 +7,9 @@ from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QKeyEvent
 from qgis.PyQt.QtWidgets import QAction, QWidget
 
-from los_tools.classes import ListOfRasters
-from los_tools.gui import LoSSettings, RasterValidations
+from los_tools.classes.list_raster import ListOfRasters
+from los_tools.gui.dialog_los_settings import LoSSettings
+from los_tools.gui.dialog_raster_validations import RasterValidations
 from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
 
 from .create_los_widget import LoSNoTargetInputWidget

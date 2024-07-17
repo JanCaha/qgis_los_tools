@@ -1,6 +1,6 @@
 from processing.core.ProcessingConfig import ProcessingConfig
 
-from los_tools.constants import Settings
+from los_tools.constants.settings import Settings
 
 
 class LoSToolsSettings:

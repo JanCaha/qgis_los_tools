@@ -20,7 +20,7 @@ from los_tools.processing.los_tools_provider import LoSToolsProvider
 
 from .constants.fields import Fields
 from .constants.plugin import PluginConstants
-from .gui.create_los_tool import CreateLoSMapTool
+from .gui.create_los_tool.create_los_tool import CreateLoSMapTool
 from .gui.dialog_los_settings import LoSSettings
 from .gui.dialog_object_parameters import ObjectParameters
 from .gui.dialog_raster_validations import RasterValidations

@@ -4,7 +4,7 @@ from qgis.gui import QgsDoubleSpinBox
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QComboBox, QFormLayout, QPushButton, QWidget
 
-from los_tools.gui import Distance, DistanceWidget
+from los_tools.gui.custom_classes import Distance, DistanceWidget
 
 
 class LoSNoTargetInputWidget(QWidget):

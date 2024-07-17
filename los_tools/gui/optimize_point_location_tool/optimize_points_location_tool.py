@@ -27,9 +27,8 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QWidget
 
+from los_tools.gui.optimize_point_location_tool.optimize_points_location_widget import OptimizePointLocationInputWidget
 from los_tools.processing.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
-
-from .optimize_points_location_widget import OptimizePointLocationInputWidget
 
 
 class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):

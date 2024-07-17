@@ -18,8 +18,8 @@ from qgis.core import (
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
-from los_tools.constants import Fields
 from los_tools.constants.field_names import FieldNames
+from los_tools.constants.fields import Fields
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.processing.utils import LoSToolsSettings
 from los_tools.utils import get_doc_file

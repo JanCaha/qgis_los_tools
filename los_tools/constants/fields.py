@@ -1,7 +1,7 @@
 from qgis.core import Qgis, QgsField, QgsFields
 from qgis.PyQt.QtCore import QMetaType, QVariant
 
-from .field_names import FieldNames
+from los_tools.constants.field_names import FieldNames
 
 
 class Fields:
