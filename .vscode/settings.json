@@ -12,10 +12,13 @@
         "/usr/share/qgis/python"
     ],
     "pylint.args": [
-        "--ignore=W293,W504"
+        "--ignore=W293,W504",
+        "--max-line-length=160"
     ],
     "flake8.args": [
-        "--ignore=W293,W504"
+        "--ignore=W293,W504",
+        "--max-line-length",
+        "160"
     ],
     "mypy-type-checker.args": [
         "--follow-imports=silent",
