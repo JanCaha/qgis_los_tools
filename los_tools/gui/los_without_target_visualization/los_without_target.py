@@ -1,18 +1,24 @@
 import numpy as np
 
-from qgis.PyQt.QtCore import (Qt)
-from qgis.PyQt.QtGui import (QKeyEvent)
-from qgis.PyQt.QtWidgets import (QWidget)
-from qgis.core import (QgsWkbTypes, QgsGeometry, QgsPointLocator, Qgis)
-from qgis.gui import (QgisInterface, QgsMapToolAdvancedDigitizing, QgsMapMouseEvent,
-                      QgsSnapIndicator)
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QKeyEvent
+from qgis.PyQt.QtWidgets import QWidget
+from qgis.core import QgsWkbTypes, QgsGeometry, QgsPointLocator, Qgis
+from qgis.gui import (
+    QgisInterface,
+    QgsMapToolAdvancedDigitizing,
+    QgsMapMouseEvent,
+    QgsSnapIndicator,
+)
 
-from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
+from los_tools.processing.tools.util_functions import (
+    get_max_decimal_numbers,
+    round_all_values,
+)
 from .los_without_target_widget import LoSNoTargetInputWidget
 
 
 class LosNoTargetMapTool(QgsMapToolAdvancedDigitizing):
-
     def __init__(self, iface: QgisInterface) -> None:
         super().__init__(iface.mapCanvas(), iface.cadDockWidget())
         self._iface = iface
@@ -51,7 +57,8 @@ class LosNoTargetMapTool(QgsMapToolAdvancedDigitizing):
         if self._canvas.mapSettings().destinationCrs().isGeographic():
             self.messageEmitted.emit(
                 "Tool only works if canvas is in projected CRS. Currently canvas is in geographic CRS.",
-                Qgis.Critical)
+                Qgis.Critical,
+            )
             self.deactivate()
             return
         self._widget.setUnit(self._canvas.mapSettings().destinationCrs().mapUnits())
@@ -91,31 +98,40 @@ class LosNoTargetMapTool(QgsMapToolAdvancedDigitizing):
         return super().keyPressEvent(e)
 
     def draw_los(self):
-
         canvas_crs = self._canvas.mapSettings().destinationCrs()
 
         if canvas_crs.isGeographic():
             self._iface.messageBar().pushMessage(
                 "LoS can be drawn only for projected CRS. Canvas is currently in geographic CRS.",
                 Qgis.Critical,
-                duration=5)
+                duration=5,
+            )
             return
 
         if self._point:
             self._los_rubber_band.hide()
-            self._los_rubber_band.setToGeometry(QgsGeometry(),
-                                                self._canvas.mapSettings().destinationCrs())
-            angles = np.arange(self._widget.min_angle,
-                               self._widget.max_angle + 0.000000001 * self._widget.angle_step,
-                               step=self._widget.angle_step).tolist()
+            self._los_rubber_band.setToGeometry(
+                QgsGeometry(), self._canvas.mapSettings().destinationCrs()
+            )
+            angles = np.arange(
+                self._widget.min_angle,
+                self._widget.max_angle + 0.000000001 * self._widget.angle_step,
+                step=self._widget.angle_step,
+            ).tolist()
             round_digits = get_max_decimal_numbers(
-                [self._widget.min_angle, self._widget.max_angle, self._widget.angle_step])
+                [
+                    self._widget.min_angle,
+                    self._widget.max_angle,
+                    self._widget.angle_step,
+                ]
+            )
             angles = round_all_values(angles, round_digits)
             size_constant = 1
             for angle in angles:
                 new_point = self._point.project(size_constant, angle)
                 geom = QgsGeometry.fromPolylineXY([self._point, new_point])
                 geom = geom.extendLine(0, self._widget.length - size_constant)
-                self._los_rubber_band.addGeometry(geom,
-                                                  self._canvas.mapSettings().destinationCrs())
+                self._los_rubber_band.addGeometry(
+                    geom, self._canvas.mapSettings().destinationCrs()
+                )
             self._los_rubber_band.show()

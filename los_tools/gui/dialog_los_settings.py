@@ -42,9 +42,10 @@ else:
 
 
 class LoSSettings(QDialog):
-
     def __init__(
-        self, parent: Optional[QWidget] = None, flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Dialog
+        self,
+        parent: Optional[QWidget] = None,
+        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Dialog,
     ) -> None:
         super().__init__(parent, flags)
 
@@ -55,7 +56,6 @@ class LoSSettings(QDialog):
         self._calculate_object_angle_size()
 
     def init_gui(self) -> None:
-
         self.setWindowTitle("LoS without Target Sampling Settings")
         self.setMinimumWidth(600)
 
@@ -92,7 +92,9 @@ class LoSSettings(QDialog):
 
         layout_group_box_object.addRow("Object Size", self.object_size)
         layout_group_box_object.addRow("Object Distance", self.object_distance)
-        layout_group_box_object.addRow("Specify Object Size Manually", self.angle_size_manually)
+        layout_group_box_object.addRow(
+            "Specify Object Size Manually", self.angle_size_manually
+        )
         layout_group_box_object.addRow("Object Angle Size", self.object_angle_size)
 
         self.text = QTextBrowser(self)
@@ -116,7 +118,9 @@ class LoSSettings(QDialog):
         self.use_maximal_los_length.stateChanged.connect(self.fill_distances)
 
         layout_group_box_los.addRow("Default Sampling Size", self.default_sampling_size)
-        layout_group_box_los.addRow("Use Maximal LoS Length", self.use_maximal_los_length)
+        layout_group_box_los.addRow(
+            "Use Maximal LoS Length", self.use_maximal_los_length
+        )
         layout_group_box_los.addRow("Maximal LoS Length", self.maximal_los_length)
 
         self.distance = DistanceWidget()
@@ -127,7 +131,9 @@ class LoSSettings(QDialog):
         self.toolButton_add = QToolButton()
         self.toolButton_remove = QToolButton()
         self.toolButton_add.setIcon(QgsApplication.getThemeIcon("/symbologyAdd.svg"))
-        self.toolButton_remove.setIcon(QgsApplication.getThemeIcon("/symbologyRemove.svg"))
+        self.toolButton_remove.setIcon(
+            QgsApplication.getThemeIcon("/symbologyRemove.svg")
+        )
         self.toolButton_add.clicked.connect(self.add_distance)
         self.toolButton_remove.clicked.connect(self.remove_distance)
 
@@ -140,20 +146,24 @@ class LoSSettings(QDialog):
 
         self.data_unit = QComboBox(self)
         self.data_unit.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMeters), QgsUnitTypes.DistanceUnit.DistanceMeters
+            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMeters),
+            QgsUnitTypes.DistanceUnit.DistanceMeters,
         )
         self.data_unit.addItem(
             QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceKilometers),
             QgsUnitTypes.DistanceUnit.DistanceKilometers,
         )
         self.data_unit.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceFeet), QgsUnitTypes.DistanceUnit.DistanceFeet
+            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceFeet),
+            QgsUnitTypes.DistanceUnit.DistanceFeet,
         )
         self.data_unit.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMiles), QgsUnitTypes.DistanceUnit.DistanceMiles
+            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMiles),
+            QgsUnitTypes.DistanceUnit.DistanceMiles,
         )
         self.data_unit.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceYards), QgsUnitTypes.DistanceUnit.DistanceYards
+            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceYards),
+            QgsUnitTypes.DistanceUnit.DistanceYards,
         )
         self.data_unit.currentIndexChanged.connect(self.fill_distances)
 
@@ -171,7 +181,9 @@ class LoSSettings(QDialog):
 
     def description_text(self) -> None:
         if self.angle_size_manually.isChecked():
-            text = [f"Angular sampling manually set to {round(self.object_angle_size.value(), 3)}°.\n\n"]
+            text = [
+                f"Angular sampling manually set to {round(self.object_angle_size.value(), 3)}°.\n\n"
+            ]
         else:
             text = [
                 f"To detect object of size {self.object_size.distance()} "
@@ -191,7 +203,9 @@ class LoSSettings(QDialog):
     def _calculate_object_angle_size(self) -> None:
         distance = self.object_distance.value()
         if 0 < distance:
-            self.object_angle_size.setValue(math.degrees(math.atan(self.object_size.value() / distance)))
+            self.object_angle_size.setValue(
+                math.degrees(math.atan(self.object_size.value() / distance))
+            )
         else:
             self.object_angle_size.setValue(0)
 
@@ -211,7 +225,6 @@ class LoSSettings(QDialog):
         self.fill_distances()
 
     def fill_distances(self) -> None:
-
         self.maximal_los_length.setEnabled(self.use_maximal_los_length.isChecked())
 
         self.treeView.clear()
@@ -219,10 +232,14 @@ class LoSSettings(QDialog):
         result_unit = self.data_unit.currentData(Qt.UserRole)
 
         if self._distances:
-
             item = QTreeWidgetItem()
             item.setText(0, "Below {}".format(self._distances[0]))
-            item.setText(1, str(round(self.default_sampling_size.distance().inUnits(result_unit), 3)))
+            item.setText(
+                1,
+                str(
+                    round(self.default_sampling_size.distance().inUnits(result_unit), 3)
+                ),
+            )
 
             self.treeView.addTopLevelItem(item)
 
@@ -230,11 +247,11 @@ class LoSSettings(QDialog):
             self._distances = [
                 x
                 for x in self._distances
-                if x.inUnits(result_unit) < self.maximal_los_length.distance().inUnits(result_unit)
+                if x.inUnits(result_unit)
+                < self.maximal_los_length.distance().inUnits(result_unit)
             ]
 
         for distance in self._distances:
-
             item = QTreeWidgetItem()
             item.setText(0, f"Over {distance}")
             item.setData(0, Qt.UserRole, distance)
@@ -245,9 +262,11 @@ class LoSSettings(QDialog):
             self.treeView.addTopLevelItem(item)
 
         if self.use_maximal_los_length.isChecked() and self._distances:
-
             item = QTreeWidgetItem()
-            item.setText(0, f"Over {self._distances[-1]} to {self.maximal_los_length.distance().inUnits(result_unit)}")
+            item.setText(
+                0,
+                f"Over {self._distances[-1]} to {self.maximal_los_length.distance().inUnits(result_unit)}",
+            )
             item.setText(1, str(size))
 
             self.treeView.addTopLevelItem(item)
@@ -257,7 +276,6 @@ class LoSSettings(QDialog):
         return Distance(size, distance.unit())
 
     def create_data_layer(self) -> QgsVectorLayer:
-
         unit = self.data_unit.currentData(Qt.UserRole)
         unit_name = QgsUnitTypes.toString(unit)
 
@@ -300,7 +318,9 @@ class LoSSettings(QDialog):
             f = QgsFeature(fields)
             f.setAttribute(angle_index, angle)
             if self.use_maximal_los_length.isChecked():
-                f.setAttribute(distance_index, self.maximal_los_length.distance().inUnits(unit))
+                f.setAttribute(
+                    distance_index, self.maximal_los_length.distance().inUnits(unit)
+                )
             else:
                 f.setAttribute(distance_index, -1)
             f.setAttribute(size_index, size)
@@ -309,7 +329,6 @@ class LoSSettings(QDialog):
         return layer
 
     def add_layer_to_project(self) -> None:
-
         project = QgsProject.instance()
         project.addMapLayer(self.create_data_layer())
 

@@ -1,14 +1,13 @@
 from typing import Optional
 
-from qgis.PyQt.QtCore import (pyqtSignal)
-from qgis.PyQt.QtWidgets import (QWidget, QFormLayout)
-from qgis.gui import (QgsDoubleSpinBox)
-from qgis.core import (QgsUnitTypes)
+from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtWidgets import QWidget, QFormLayout
+from qgis.gui import QgsDoubleSpinBox
+from qgis.core import QgsUnitTypes
 from los_tools.gui import DistanceWidget
 
 
 class LoSNoTargetInputWidget(QWidget):
-
     valuesChanged = pyqtSignal()
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:

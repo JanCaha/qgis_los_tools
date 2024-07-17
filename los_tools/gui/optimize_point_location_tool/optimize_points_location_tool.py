@@ -1,20 +1,39 @@
 from typing import Optional
 
-from qgis.PyQt.QtCore import (Qt)
-from qgis.PyQt.QtGui import (QColor)
-from qgis.PyQt.QtWidgets import (QWidget)
-from qgis.core import (QgsPointXY, QgsWkbTypes, QgsGeometry, QgsPoint, QgsPointLocator, Qgis,
-                       QgsVectorDataProvider, QgsSnappingConfig, QgsTolerance, QgsCircle,
-                       QgsRasterLayer, QgsUnitTypes, QgsRectangle)
-from qgis.gui import (QgisInterface, QgsRubberBand, QgsMapMouseEvent, QgsMapCanvas,
-                      QgsSnapIndicator, QgsMapToolAdvancedDigitizing)
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtWidgets import QWidget
+from qgis.core import (
+    QgsPointXY,
+    QgsWkbTypes,
+    QgsGeometry,
+    QgsPoint,
+    QgsPointLocator,
+    Qgis,
+    QgsVectorDataProvider,
+    QgsSnappingConfig,
+    QgsTolerance,
+    QgsCircle,
+    QgsRasterLayer,
+    QgsUnitTypes,
+    QgsRectangle,
+)
+from qgis.gui import (
+    QgisInterface,
+    QgsRubberBand,
+    QgsMapMouseEvent,
+    QgsMapCanvas,
+    QgsSnapIndicator,
+    QgsMapToolAdvancedDigitizing,
+)
 
-from los_tools.processing.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
+from los_tools.processing.create_points.tool_optimize_point_location import (
+    OptimizePointLocationAlgorithm,
+)
 from .optimize_points_location_widget import OptimizePointLocationInputWidget
 
 
 class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
-
     def __init__(self, canvas: QgsMapCanvas, iface: QgisInterface) -> None:
         super().__init__(canvas, iface.cadDockWidget())
         self._canvas = canvas
@@ -79,30 +98,43 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
         if self.currentVectorLayer() is None:
             self.messageEmitted.emit(
                 "Tool only works with vector layers. Current layer is not vector layer.",
-                Qgis.Critical)
+                Qgis.Critical,
+            )
             self._canvas.unsetMapTool(self)
             return
         if self.currentVectorLayer().crs().isGeographic():
             self.messageEmitted.emit(
                 "Tool only works for layers with projected CRS. Current layer has geographic crs",
-                Qgis.Critical)
+                Qgis.Critical,
+            )
             self._canvas.unsetMapTool(self)
             return
-        if self.currentVectorLayer().dataProvider().capabilities(
-        ) & QgsVectorDataProvider.ChangeFeatures:
+        if (
+            self.currentVectorLayer().dataProvider().capabilities()
+            & QgsVectorDataProvider.ChangeFeatures
+        ):
             self.messageEmitted.emit(
                 "Tool only works for layers where features can be edited. Current layer features cannot be edited.",
-                Qgis.Critical)
+                Qgis.Critical,
+            )
             self._canvas.unsetMapTool(self)
             return
         if self.currentVectorLayer().geometryType() not in [
-                QgsWkbTypes.Point, QgsWkbTypes.Point25D, QgsWkbTypes.PointM, QgsWkbTypes.PointZ,
-                QgsWkbTypes.PointZM, QgsWkbTypes.PointGeometry
+            QgsWkbTypes.Point,
+            QgsWkbTypes.Point25D,
+            QgsWkbTypes.PointM,
+            QgsWkbTypes.PointZ,
+            QgsWkbTypes.PointZM,
+            QgsWkbTypes.PointGeometry,
         ]:
             self.messageEmitted.emit(
                 "Tool only works for point layers. Current layer is {}.".format(
-                    QgsWkbTypes.geometryDisplayString(self.currentVectorLayer().geometryType())),
-                Qgis.Critical)
+                    QgsWkbTypes.geometryDisplayString(
+                        self.currentVectorLayer().geometryType()
+                    )
+                ),
+                Qgis.Critical,
+            )
             self._canvas.unsetMapTool(self)
             return
         if not self.currentVectorLayer().isEditable():
@@ -129,12 +161,21 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
     def draw_rubber_bands(self, point: QgsPointXY = None) -> None:
         if point:
             circle = QgsCircle(QgsPoint(point.x(), point.y()), self._circle_radius)
-            self.circle_rubber.setToGeometry(QgsGeometry(circle.toPolygon(segments=36 * 2)),
-                                             self.currentVectorLayer())
+            self.circle_rubber.setToGeometry(
+                QgsGeometry(circle.toPolygon(segments=36 * 2)),
+                self.currentVectorLayer(),
+            )
             self._candidate_point = OptimizePointLocationAlgorithm.optimized_point(
-                point, self._raster, self._raster_extent, self._cell_size, self._no_data_value,
-                self._distance_cells)
-            self.point_rubber.setToGeometry(QgsGeometry.fromPointXY(self._candidate_point))
+                point,
+                self._raster,
+                self._raster_extent,
+                self._cell_size,
+                self._no_data_value,
+                self._distance_cells,
+            )
+            self.point_rubber.setToGeometry(
+                QgsGeometry.fromPointXY(self._candidate_point)
+            )
             self.circle_rubber.show()
             self.point_rubber.show()
         else:
@@ -143,7 +184,6 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
             self._candidate_point = None
 
     def _snap(self, point: QgsPointXY) -> Optional[QgsPointLocator.Match]:
-
         utils = self._canvas.snappingUtils()
         oldConfig = utils.config()
 
@@ -188,7 +228,8 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
         if self._point and self._pointId and self._candidate_point:
             self.currentVectorLayer().beginEditCommand("Optimize Point Location")
             self.currentVectorLayer().changeGeometry(
-                self._pointId, QgsGeometry.fromPointXY(self._candidate_point))
+                self._pointId, QgsGeometry.fromPointXY(self._candidate_point)
+            )
             self.currentVectorLayer().endEditCommand()
             self.currentVectorLayer().triggerRepaint()
             self.clean()

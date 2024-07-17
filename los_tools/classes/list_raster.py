@@ -49,7 +49,9 @@ class ListOfRasters:
         return True, ""
 
     @staticmethod
-    def validate_crs(rasters: List[QgsMapLayer], crs: QgsCoordinateReferenceSystem = None) -> Tuple[bool, str]:
+    def validate_crs(
+        rasters: List[QgsMapLayer], crs: QgsCoordinateReferenceSystem = None
+    ) -> Tuple[bool, str]:
         if crs is None:
             crs = rasters[0].crs()
 
@@ -57,12 +59,17 @@ class ListOfRasters:
 
         for raster in rasters:
             if not first_raster_crs == raster.crs():
-                msg = "All CRS for all rasters must be equal. " "Right now they are not."
+                msg = (
+                    "All CRS for all rasters must be equal. " "Right now they are not."
+                )
 
                 return False, msg
 
             if not raster.crs() == crs:
-                msg = "Provided crs template and raster layers crs must be equal. " "Right now they are not."
+                msg = (
+                    "Provided crs template and raster layers crs must be equal. "
+                    "Right now they are not."
+                )
 
                 return False, msg
 
@@ -169,20 +176,30 @@ class ListOfRasters:
 
         return None
 
-    def _convert_point_to_crs_of_raster(self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem) -> QgsPoint:
+    def _convert_point_to_crs_of_raster(
+        self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem
+    ) -> QgsPoint:
         if crs.toWkt() == self.rasters[0].crs().toWkt():
             return QgsPoint(point.x(), point.y())
 
-        transformer = QgsCoordinateTransform(crs, self.rasters[0].crs(), QgsCoordinateTransformContext())
+        transformer = QgsCoordinateTransform(
+            crs, self.rasters[0].crs(), QgsCoordinateTransformContext()
+        )
         geom = QgsGeometry.fromPointXY(point)
         geom.transform(transformer)
         transformed_point = geom.asPoint()
         return QgsPoint(transformed_point.x(), transformed_point.y())
 
-    def extract_interpolated_value_at_point(self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem) -> float:
-        return self.extract_interpolated_value(self._convert_point_to_crs_of_raster(point, crs))
+    def extract_interpolated_value_at_point(
+        self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem
+    ) -> float:
+        return self.extract_interpolated_value(
+            self._convert_point_to_crs_of_raster(point, crs)
+        )
 
-    def sampling_from_raster_at_point(self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem) -> str:
+    def sampling_from_raster_at_point(
+        self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem
+    ) -> str:
         point = self._convert_point_to_crs_of_raster(point, crs)
         for i, raster_dp in enumerate(self.rasters_dp):
             value = bilinear_interpolated_value(raster_dp, point)

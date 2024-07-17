@@ -6,8 +6,12 @@ from los_tools.constants import PluginConstants, Settings
 from los_tools.utils import get_icon_path, get_plugin_version
 
 from .analyse_los.tool_analyse_los import AnalyseLosAlgorithm
-from .analyse_los.tool_extract_los_visibility_parts import ExtractLoSVisibilityPartsAlgorithm
-from .analyse_los.tool_extract_los_visibility_polygons import ExtractLoSVisibilityPolygonsAlgorithm
+from .analyse_los.tool_extract_los_visibility_parts import (
+    ExtractLoSVisibilityPartsAlgorithm,
+)
+from .analyse_los.tool_extract_los_visibility_polygons import (
+    ExtractLoSVisibilityPolygonsAlgorithm,
+)
 from .analyse_los.tool_extract_points_los import ExtractPointsLoSAlgorithm
 from .azimuths.tool_azimuth import AzimuthPointPolygonAlgorithm
 from .azimuths.tool_limit_angles_vector import LimitAnglesAlgorithm
@@ -20,17 +24,22 @@ from .create_points.tool_points_by_azimuths import CreatePointsInAzimuthsAlgorit
 from .create_points.tool_points_in_direction import CreatePointsInDirectionAlgorithm
 from .horizons.tool_extract_horizon_lines import ExtractHorizonLinesAlgorithm
 from .horizons.tool_extract_horizons import ExtractHorizonsAlgorithm
-from .parameter_settings.tool_angle_at_distance_for_size import ObjectDetectionAngleAlgorithm
+from .parameter_settings.tool_angle_at_distance_for_size import (
+    ObjectDetectionAngleAlgorithm,
+)
 from .parameter_settings.tool_distances_for_sizes import ObjectDistancesAlgorithm
 from .parameter_settings.tool_sizes_at_distances import ObjectSizesAlgorithm
 from .to_table.tool_export_horizon_lines import ExportHorizonLinesAlgorithm
 from .to_table.tool_export_los import ExportLoSAlgorithm
-from .tools.tool_replace_raster_values_by_constant import ReplaceRasterValuesByConstantValueAlgorithm
-from .tools.tool_replace_raster_values_by_field import ReplaceRasterValuesByFieldValuesAlgorithm
+from .tools.tool_replace_raster_values_by_constant import (
+    ReplaceRasterValuesByConstantValueAlgorithm,
+)
+from .tools.tool_replace_raster_values_by_field import (
+    ReplaceRasterValuesByFieldValuesAlgorithm,
+)
 
 
 class LoSToolsProvider(QgsProcessingProvider):
-
     def __init__(self):
         super().__init__()
 
@@ -38,7 +47,6 @@ class LoSToolsProvider(QgsProcessingProvider):
         return get_plugin_version()
 
     def load(self) -> bool:
-
         ProcessingConfig.settingIcons[PluginConstants.provider_name_short] = self.icon()
 
         ProcessingConfig.addSetting(

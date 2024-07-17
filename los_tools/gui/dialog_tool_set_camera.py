@@ -105,7 +105,9 @@ class SetCameraTool(QDialog):
         self.hlayout2.addWidget(self.target_btn)
         self.hlayout2.addWidget(self.target_coordinate)
 
-        self.button_box = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Ok, self)
+        self.button_box = QDialogButtonBox(
+            QDialogButtonBox.Cancel | QDialogButtonBox.Ok, self
+        )
         self.button_box.button(QDialogButtonBox.Ok).setEnabled(False)
 
         self.button_box.accepted.connect(self.accept)
@@ -113,11 +115,15 @@ class SetCameraTool(QDialog):
 
         self.vlayout = QVBoxLayout()
         self.vlayout.addWidget(
-            QLabel("Layout and layout item (3D Map) along with both observer and target point need to be selected.")
+            QLabel(
+                "Layout and layout item (3D Map) along with both observer and target point need to be selected."
+            )
         )
         self.vlayout.addWidget(QLabel("Select layout with 3D Map"))
         self.vlayout.addWidget(self.layout_cb)
-        self.vlayout.addWidget(QLabel("Select layout item 3D Map to set the camera for"))
+        self.vlayout.addWidget(
+            QLabel("Select layout item 3D Map to set the camera for")
+        )
         self.vlayout.addWidget(self.item_cb)
         self.vlayout.addWidget(QLabel("Select raster with elevations to use"))
         self.vlayout.addWidget(self.dsm_cb)
@@ -136,7 +142,13 @@ class SetCameraTool(QDialog):
             self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
 
     def is_complete(self) -> bool:
-        if self.observer and self.target and self.layout and self.layout_item_3d and self.dsm_cb.currentLayer():
+        if (
+            self.observer
+            and self.target
+            and self.layout
+            and self.layout_item_3d
+            and self.dsm_cb.currentLayer()
+        ):
             return True
 
         return False
@@ -197,13 +209,17 @@ class SetCameraTool(QDialog):
         point = self.mapTool.get_point()
 
         if self.mapTool.is_point_snapped():
-            msg = "Snapped to point at {} {} from layer {}.".format(point.x(), point.y(), self.mapTool.snap_layer())
+            msg = "Snapped to point at {} {} from layer {}.".format(
+                point.x(), point.y(), self.mapTool.snap_layer()
+            )
         else:
             msg = "Point at {} {} selected.".format(point.x(), point.y())
 
         self.iface.messageBar().pushMessage("Point defined", msg, duration=5)
 
-        text_point = "{:.3f};{:.3f}[{}]".format(point.x(), point.y(), canvas_crs.authid())
+        text_point = "{:.3f};{:.3f}[{}]".format(
+            point.x(), point.y(), canvas_crs.authid()
+        )
 
         if "observer" in self.active_button.text():
             self.observer = point
@@ -233,12 +249,21 @@ class SetCameraTool(QDialog):
 
         current_layer: QgsRasterLayer = self.dsm_cb.currentLayer()
 
-        observer_z = bilinear_interpolated_value(current_layer.dataProvider(), self.observer) + self.offset_sb.value()
+        observer_z = (
+            bilinear_interpolated_value(current_layer.dataProvider(), self.observer)
+            + self.offset_sb.value()
+        )
 
-        target_z = bilinear_interpolated_value(current_layer.dataProvider(), self.target)
+        target_z = bilinear_interpolated_value(
+            current_layer.dataProvider(), self.target
+        )
 
-        look_at_point = settings.mapToWorldCoordinates(QgsVector3D(self.target.x(), self.target.y(), target_z))
-        look_from_point = settings.mapToWorldCoordinates(QgsVector3D(self.observer.x(), self.observer.y(), observer_z))
+        look_at_point = settings.mapToWorldCoordinates(
+            QgsVector3D(self.target.x(), self.target.y(), target_z)
+        )
+        look_from_point = settings.mapToWorldCoordinates(
+            QgsVector3D(self.observer.x(), self.observer.y(), observer_z)
+        )
 
         start_point = QgsPointXY(look_at_point.x(), look_at_point.z())
         end_point = QgsPointXY(look_from_point.x(), look_from_point.z())
@@ -248,7 +273,9 @@ class SetCameraTool(QDialog):
 
         distance = look_at_point.distance(look_from_point)
 
-        vert_angle = math.degrees(math.atan((look_from_point.y() - look_at_point.y()) / distance))
+        vert_angle = math.degrees(
+            math.atan((look_from_point.y() - look_at_point.y()) / distance)
+        )
 
         vert_angle = 90 - (vert_angle)
 
@@ -286,7 +313,9 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
         self.rubber = QgsRubberBand(self._canvas, QgsWkbTypes.PointGeometry)
 
         settings = QgsSettings()
-        self.snap_color = settings.value("/qgis/digitizing/snap_color", QColor("#ff00ff"))
+        self.snap_color = settings.value(
+            "/qgis/digitizing/snap_color", QColor("#ff00ff")
+        )
 
         self.snap_marker = QgsVertexMarker(self._canvas)
 

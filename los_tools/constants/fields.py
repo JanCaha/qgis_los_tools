@@ -5,7 +5,6 @@ from .field_names import FieldNames
 
 
 class Fields:
-
     if Qgis.versionInt() >= 33800:
         source_type = QMetaType.Type
         source_type_string = source_type.QString

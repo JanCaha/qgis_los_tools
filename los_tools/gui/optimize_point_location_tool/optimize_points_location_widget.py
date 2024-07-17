@@ -1,13 +1,12 @@
 from typing import Optional
 
-from qgis.PyQt.QtWidgets import (QWidget, QFormLayout)
-from qgis.PyQt.QtCore import (pyqtSignal)
-from qgis.gui import (QgsMapLayerComboBox, QgsDoubleSpinBox)
-from qgis.core import (QgsMapLayerProxyModel, QgsUnitTypes, QgsRasterLayer)
+from qgis.PyQt.QtWidgets import QWidget, QFormLayout
+from qgis.PyQt.QtCore import pyqtSignal
+from qgis.gui import QgsMapLayerComboBox, QgsDoubleSpinBox
+from qgis.core import QgsMapLayerProxyModel, QgsUnitTypes, QgsRasterLayer
 
 
 class OptimizePointLocationInputWidget(QWidget):
-
     valuesChanged = pyqtSignal()
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:

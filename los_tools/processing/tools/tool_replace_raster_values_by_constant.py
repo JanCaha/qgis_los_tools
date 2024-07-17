@@ -1,74 +1,101 @@
-from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterRasterDestination, QgsProcessingUtils,
-                       QgsProcessingParameterRasterLayer, QgsProcessingException, QgsApplication)
+from qgis.core import (
+    QgsProcessing,
+    QgsProcessingAlgorithm,
+    QgsProcessingParameterNumber,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterRasterDestination,
+    QgsProcessingUtils,
+    QgsProcessingParameterRasterLayer,
+    QgsProcessingException,
+    QgsApplication,
+)
 
 from los_tools.utils import get_doc_file
 
 
 class ReplaceRasterValuesByConstantValueAlgorithm(QgsProcessingAlgorithm):
-
     RASTER_LAYER = "RasterLayer"
     VECTOR_LAYER = "VectorLayer"
     OUTPUT_RASTER = "OutputRaster"
     RASTER_VALUE = "RasterValue"
 
     def initAlgorithm(self, config=None):
+        self.addParameter(
+            QgsProcessingParameterRasterLayer(
+                self.RASTER_LAYER, "Raster Layer", [QgsProcessing.TypeRaster]
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterRasterLayer(self.RASTER_LAYER, "Raster Layer",
-                                              [QgsProcessing.TypeRaster]))
+            QgsProcessingParameterFeatureSource(
+                self.VECTOR_LAYER, "Vector Layer", [QgsProcessing.TypeVectorPolygon]
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.VECTOR_LAYER, "Vector Layer",
-                                                [QgsProcessing.TypeVectorPolygon]))
+            QgsProcessingParameterNumber(
+                self.RASTER_VALUE, "Replacement value", defaultValue=1
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.RASTER_VALUE, "Replacement value", defaultValue=1))
-
-        self.addParameter(
-            QgsProcessingParameterRasterDestination(self.OUTPUT_RASTER, "Output Raster"))
+            QgsProcessingParameterRasterDestination(self.OUTPUT_RASTER, "Output Raster")
+        )
 
     def processAlgorithm(self, parameters, context, feedback):
-
-        raster_layer = self.parameterAsRasterLayer(parameters, self.RASTER_LAYER, context)
+        raster_layer = self.parameterAsRasterLayer(
+            parameters, self.RASTER_LAYER, context
+        )
 
         if raster_layer is None:
-            raise QgsProcessingException(self.invalidRasterError(parameters, self.RASTER_LAYER))
+            raise QgsProcessingException(
+                self.invalidRasterError(parameters, self.RASTER_LAYER)
+            )
 
-        raster_new_value = self.parameterAsDouble(parameters, self.RASTER_VALUE, context)
+        raster_new_value = self.parameterAsDouble(
+            parameters, self.RASTER_VALUE, context
+        )
 
-        vector_layer = self.parameterAsVectorLayer(parameters, self.VECTOR_LAYER, context)
+        vector_layer = self.parameterAsVectorLayer(
+            parameters, self.VECTOR_LAYER, context
+        )
 
         if vector_layer is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.VECTOR_LAYER))
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.VECTOR_LAYER)
+            )
 
-        output_raster = self.parameterAsOutputLayer(parameters, self.OUTPUT_RASTER, context)
+        output_raster = self.parameterAsOutputLayer(
+            parameters, self.OUTPUT_RASTER, context
+        )
 
-        alg_gdal_translate = QgsApplication.processingRegistry().algorithmById("gdal:translate")
+        alg_gdal_translate = QgsApplication.processingRegistry().algorithmById(
+            "gdal:translate"
+        )
 
         params = {
-            'INPUT': raster_layer,
-            'TARGET_CRS': None,
-            'NODATA': None,
-            'COPY_SUBDATASETS': False,
-            'OPTIONS': '',
-            'EXTRA': '',
-            'DATA_TYPE': 0,
-            'OUTPUT': output_raster
+            "INPUT": raster_layer,
+            "TARGET_CRS": None,
+            "NODATA": None,
+            "COPY_SUBDATASETS": False,
+            "OPTIONS": "",
+            "EXTRA": "",
+            "DATA_TYPE": 0,
+            "OUTPUT": output_raster,
         }
 
         alg_gdal_translate.run(params, context, feedback)
 
         alg_gdal_rasterize = QgsApplication.processingRegistry().algorithmById(
-            "gdal:rasterize_over_fixed_value")
+            "gdal:rasterize_over_fixed_value"
+        )
 
         params = {
-            'INPUT': vector_layer,
-            'INPUT_RASTER': output_raster,
-            'BURN': raster_new_value,
-            'ADD': False,
-            'EXTRA': ''
+            "INPUT": vector_layer,
+            "INPUT_RASTER": output_raster,
+            "BURN": raster_new_value,
+            "ADD": False,
+            "EXTRA": "",
         }
 
         alg_gdal_rasterize.run(params, context, feedback)

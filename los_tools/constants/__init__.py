@@ -5,4 +5,11 @@ from .plugin import PluginConstants
 from .textlabels import TextLabels
 from .settings import Settings
 
-__all__ = ("FieldNames", "Fields", "NamesConstants", "PluginConstants", "TextLabels", "Settings")
+__all__ = (
+    "FieldNames",
+    "Fields",
+    "NamesConstants",
+    "PluginConstants",
+    "TextLabels",
+    "Settings",
+)

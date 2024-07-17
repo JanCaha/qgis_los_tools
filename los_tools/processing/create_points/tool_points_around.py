@@ -1,20 +1,34 @@
 import numpy as np
 
-from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
-                       QgsProcessingParameterFeatureSource, QgsProcessingParameterField,
-                       QgsProcessingParameterFeatureSink, QgsProcessingParameterDistance, QgsField,
-                       QgsFeature, QgsWkbTypes, QgsGeometry, QgsFields, QgsPointXY,
-                       QgsProcessingUtils, QgsProcessingException)
+from qgis.core import (
+    QgsProcessing,
+    QgsProcessingAlgorithm,
+    QgsProcessingParameterNumber,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterDistance,
+    QgsField,
+    QgsFeature,
+    QgsWkbTypes,
+    QgsGeometry,
+    QgsFields,
+    QgsPointXY,
+    QgsProcessingUtils,
+    QgsProcessingException,
+)
 
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
+from los_tools.processing.tools.util_functions import (
+    get_max_decimal_numbers,
+    round_all_values,
+)
 from los_tools.utils import get_doc_file
 
 
 class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
-
     INPUT_LAYER = "InputLayer"
     OUTPUT_LAYER = "OutputLayer"
     ANGLE_START = "AngleStart"
@@ -24,69 +38,89 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
     DISTANCE = "Distance"
 
     def initAlgorithm(self, config=None):
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint]
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer",
-                                                [QgsProcessing.TypeVectorPoint]))
+            QgsProcessingParameterField(
+                self.ID_FIELD,
+                "ID field to assign to output",
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=QgsProcessingParameterField.Numeric,
+                optional=True,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterField(self.ID_FIELD,
-                                        "ID field to assign to output",
-                                        parentLayerParameterName=self.INPUT_LAYER,
-                                        type=QgsProcessingParameterField.Numeric,
-                                        optional=True))
+            QgsProcessingParameterNumber(
+                self.ANGLE_START,
+                "Minimal angle",
+                QgsProcessingParameterNumber.Double,
+                defaultValue=0.0,
+                minValue=0.0,
+                maxValue=360.0,
+                optional=False,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.ANGLE_START,
-                                         "Minimal angle",
-                                         QgsProcessingParameterNumber.Double,
-                                         defaultValue=0.0,
-                                         minValue=0.0,
-                                         maxValue=360.0,
-                                         optional=False))
+            QgsProcessingParameterNumber(
+                self.ANGLE_END,
+                "Maximal angle",
+                QgsProcessingParameterNumber.Double,
+                defaultValue=359.999,
+                minValue=0.0,
+                maxValue=360.0,
+                optional=False,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.ANGLE_END,
-                                         "Maximal angle",
-                                         QgsProcessingParameterNumber.Double,
-                                         defaultValue=359.999,
-                                         minValue=0.0,
-                                         maxValue=360.0,
-                                         optional=False))
+            QgsProcessingParameterNumber(
+                self.ANGLE_STEP,
+                "Angle step",
+                QgsProcessingParameterNumber.Double,
+                defaultValue=1.0,
+                minValue=0.001,
+                maxValue=360.0,
+                optional=False,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.ANGLE_STEP,
-                                         "Angle step",
-                                         QgsProcessingParameterNumber.Double,
-                                         defaultValue=1.0,
-                                         minValue=0.001,
-                                         maxValue=360.0,
-                                         optional=False))
+            QgsProcessingParameterDistance(
+                self.DISTANCE,
+                "Distance",
+                parentParameterName=self.INPUT_LAYER,
+                defaultValue=10.0,
+                minValue=0.001,
+                optional=False,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterDistance(self.DISTANCE,
-                                           "Distance",
-                                           parentParameterName=self.INPUT_LAYER,
-                                           defaultValue=10.0,
-                                           minValue=0.001,
-                                           optional=False))
-
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
+            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer")
+        )
 
     def processAlgorithm(self, parameters, context, feedback):
-
         input_layer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
 
         if input_layer is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LAYER))
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.INPUT_LAYER)
+            )
 
         id_field = self.parameterAsString(parameters, self.ID_FIELD, context)
         angle_min = self.parameterAsDouble(parameters, self.ANGLE_START, context)
         angle_max = self.parameterAsDouble(parameters, self.ANGLE_END, context)
         angle_step = self.parameterAsDouble(parameters, self.ANGLE_STEP, context)
 
-        angles = np.arange(angle_min, angle_max + 0.000000001 * angle_step,
-                           step=angle_step).tolist()
+        angles = np.arange(
+            angle_min, angle_max + 0.000000001 * angle_step, step=angle_step
+        ).tolist()
 
         round_digits = get_max_decimal_numbers([angle_min, angle_max, angle_step])
 
@@ -99,31 +133,43 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
         fields.append(QgsField(FieldNames.ANGLE_STEP_POINTS, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
-                                             QgsWkbTypes.Point, input_layer.sourceCrs())
+        sink, dest_id = self.parameterAsSink(
+            parameters,
+            self.OUTPUT_LAYER,
+            context,
+            fields,
+            QgsWkbTypes.Point,
+            input_layer.sourceCrs(),
+        )
 
         if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
+            raise QgsProcessingException(
+                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
+            )
 
         feature_count = input_layer.featureCount()
 
         iterator = input_layer.getFeatures()
 
         for cnt, feature in enumerate(iterator):
-
             if feedback.isCanceled():
                 break
 
             for angle in angles:
-
-                new_point: QgsPointXY = feature.geometry().asPoint().project(distance, angle)
+                new_point: QgsPointXY = (
+                    feature.geometry().asPoint().project(distance, angle)
+                )
 
                 f = QgsFeature(fields)
                 f.setGeometry(QgsGeometry().fromPointXY(new_point))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
-                               int(feature.attribute(id_field)))
+                f.setAttribute(
+                    f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
+                    int(feature.attribute(id_field)),
+                )
                 f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), float(angle_step))
+                f.setAttribute(
+                    f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), float(angle_step)
+                )
 
                 sink.addFeature(f)
 

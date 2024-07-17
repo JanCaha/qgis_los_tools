@@ -1,21 +1,35 @@
 import numpy as np
 
-from qgis.core import (QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterNumber,
-                       QgsProcessingParameterBoolean, QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterField, QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterDistance, QgsField, QgsFeature, QgsWkbTypes,
-                       QgsProcessingUtils, QgsGeometry, QgsFields, QgsPointXY,
-                       QgsProcessingException)
+from qgis.core import (
+    QgsProcessing,
+    QgsProcessingAlgorithm,
+    QgsProcessingParameterNumber,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterDistance,
+    QgsField,
+    QgsFeature,
+    QgsWkbTypes,
+    QgsProcessingUtils,
+    QgsGeometry,
+    QgsFields,
+    QgsPointXY,
+    QgsProcessingException,
+)
 
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
+from los_tools.processing.tools.util_functions import (
+    get_max_decimal_numbers,
+    round_all_values,
+)
 from los_tools.utils import get_doc_file
 
 
 class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
-
     INPUT_LAYER = "InputLayer"
     OUTPUT_LAYER = "OutputLayer"
     ANGLE_START = "AngleStart"
@@ -26,79 +40,104 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
     OVER_NORTH = "OverNorth"
 
     def initAlgorithm(self, config=None):
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint]
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer",
-                                                [QgsProcessing.TypeVectorPoint]))
+            QgsProcessingParameterField(
+                self.ID_FIELD,
+                "ID field to assign to output",
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=QgsProcessingParameterField.Numeric,
+                optional=True,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterField(self.ID_FIELD,
-                                        "ID field to assign to output",
-                                        parentLayerParameterName=self.INPUT_LAYER,
-                                        type=QgsProcessingParameterField.Numeric,
-                                        optional=True))
+            QgsProcessingParameterNumber(
+                self.ANGLE_START,
+                "Azimuth start",
+                QgsProcessingParameterNumber.Double,
+                defaultValue=0.0,
+                minValue=0.0,
+                maxValue=360.0,
+                optional=False,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.ANGLE_START,
-                                         "Azimuth start",
-                                         QgsProcessingParameterNumber.Double,
-                                         defaultValue=0.0,
-                                         minValue=0.0,
-                                         maxValue=360.0,
-                                         optional=False))
+            QgsProcessingParameterNumber(
+                self.ANGLE_END,
+                "Azimuth end",
+                QgsProcessingParameterNumber.Double,
+                defaultValue=360.0,
+                minValue=0.0,
+                maxValue=360.0,
+                optional=False,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.ANGLE_END,
-                                         "Azimuth end",
-                                         QgsProcessingParameterNumber.Double,
-                                         defaultValue=360.0,
-                                         minValue=0.0,
-                                         maxValue=360.0,
-                                         optional=False))
+            QgsProcessingParameterBoolean(
+                self.OVER_NORTH,
+                "Goes trough north (0 or 360 degrees)",
+                defaultValue=False,
+                optional=False,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterBoolean(self.OVER_NORTH,
-                                          "Goes trough north (0 or 360 degrees)",
-                                          defaultValue=False,
-                                          optional=False))
+            QgsProcessingParameterNumber(
+                self.ANGLE_STEP,
+                "Angle step",
+                QgsProcessingParameterNumber.Double,
+                defaultValue=1.0,
+                minValue=0.001,
+                maxValue=180.0,
+                optional=False,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.ANGLE_STEP,
-                                         "Angle step",
-                                         QgsProcessingParameterNumber.Double,
-                                         defaultValue=1.0,
-                                         minValue=0.001,
-                                         maxValue=180.0,
-                                         optional=False))
+            QgsProcessingParameterDistance(
+                self.DISTANCE,
+                "Distance",
+                parentParameterName=self.INPUT_LAYER,
+                defaultValue=10.0,
+                minValue=0.001,
+                optional=False,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterDistance(self.DISTANCE,
-                                           "Distance",
-                                           parentParameterName=self.INPUT_LAYER,
-                                           defaultValue=10.0,
-                                           minValue=0.001,
-                                           optional=False))
-
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
+            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer")
+        )
 
     def checkParameterValues(self, parameters, context):
-
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
-
         input_layer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
 
         if input_layer is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LAYER))
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.INPUT_LAYER)
+            )
 
         id_field = self.parameterAsString(parameters, self.ID_FIELD, context)
 
-        angle_min = min(self.parameterAsDouble(parameters, self.ANGLE_START, context),
-                        self.parameterAsDouble(parameters, self.ANGLE_END, context))
+        angle_min = min(
+            self.parameterAsDouble(parameters, self.ANGLE_START, context),
+            self.parameterAsDouble(parameters, self.ANGLE_END, context),
+        )
 
-        angle_max = max(self.parameterAsDouble(parameters, self.ANGLE_START, context),
-                        self.parameterAsDouble(parameters, self.ANGLE_END, context))
+        angle_max = max(
+            self.parameterAsDouble(parameters, self.ANGLE_START, context),
+            self.parameterAsDouble(parameters, self.ANGLE_END, context),
+        )
 
         over_north = self.parameterAsBoolean(parameters, self.OVER_NORTH, context)
 
@@ -113,34 +152,45 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
         fields.append(QgsField(FieldNames.ANGLE_STEP_POINTS, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_LAYER, context, fields,
-                                             QgsWkbTypes.Point, input_layer.sourceCrs())
+        sink, dest_id = self.parameterAsSink(
+            parameters,
+            self.OUTPUT_LAYER,
+            context,
+            fields,
+            QgsWkbTypes.Point,
+            input_layer.sourceCrs(),
+        )
 
         if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
+            raise QgsProcessingException(
+                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
+            )
 
         feature_count = input_layer.featureCount()
 
         iterator = input_layer.getFeatures()
 
         for cnt, feature in enumerate(iterator):
-
             if feedback.isCanceled():
                 break
 
             feature_point: QgsPointXY = feature.geometry().asPoint()
 
             if not over_north:
-                angles = np.arange(angle_min, angle_max + 0.1 * angle_step,
-                                   step=angle_step).tolist()
+                angles = np.arange(
+                    angle_min, angle_max + 0.1 * angle_step, step=angle_step
+                ).tolist()
 
             else:
+                angles2 = np.arange(
+                    angle_max, 360 - 0.1 * angle_step, step=angle_step
+                ).tolist()
 
-                angles2 = np.arange(angle_max, 360 - 0.1 * angle_step, step=angle_step).tolist()
-
-                angles1 = np.arange(0 - (360 - max(angles2)) + angle_step,
-                                    angle_min + 0.1 * angle_step,
-                                    step=angle_step).tolist()
+                angles1 = np.arange(
+                    0 - (360 - max(angles2)) + angle_step,
+                    angle_min + 0.1 * angle_step,
+                    step=angle_step,
+                ).tolist()
 
                 angles = angles1 + angles2
 
@@ -149,16 +199,19 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
             i = 0
 
             for angle in angles:
-
                 new_point: QgsPointXY = feature_point.project(distance, angle)
 
                 f = QgsFeature(fields)
                 f.setGeometry(QgsGeometry().fromPointXY(new_point))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
-                               int(feature.attribute(id_field)))
+                f.setAttribute(
+                    f.fieldNameIndex(FieldNames.ID_ORIGINAL_POINT),
+                    int(feature.attribute(id_field)),
+                )
                 f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
                 f.setAttribute(f.fieldNameIndex(FieldNames.ID_POINT), int(i))
-                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), angle_step)
+                f.setAttribute(
+                    f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), angle_step
+                )
 
                 sink.addFeature(f)
                 i += 1
