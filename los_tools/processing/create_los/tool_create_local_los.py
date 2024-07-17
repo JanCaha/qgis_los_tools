@@ -1,25 +1,25 @@
 from qgis.core import (
+    QgsFeature,
+    QgsGeometry,
+    QgsPoint,
     QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsProcessingParameterMultipleLayers,
+    QgsProcessingException,
+    QgsProcessingParameterDistance,
+    QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterDistance,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsPoint,
-    QgsGeometry,
+    QgsProcessingParameterMultipleLayers,
     QgsProcessingUtils,
-    QgsProcessingException,
+    QgsWkbTypes,
 )
 
-from los_tools.processing.tools.util_functions import segmentize_los_line
-from los_tools.constants.field_names import FieldNames
-from los_tools.constants.names_constants import NamesConstants
-from los_tools.utils import get_doc_file
 from los_tools.classes.list_raster import ListOfRasters
+from los_tools.constants.field_names import FieldNames
 from los_tools.constants.fields import Fields
+from los_tools.constants.names_constants import NamesConstants
+from los_tools.processing.tools.util_functions import segmentize_los_line
+from los_tools.utils import get_doc_file
 
 
 class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
@@ -35,9 +35,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterMultipleLayers(
-                self.DEM_RASTERS, "Raster DEM Layers", QgsProcessing.TypeRaster
-            )
+            QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers", QgsProcessing.TypeRaster)
         )
 
         self.addParameter(
@@ -108,31 +106,19 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
     def checkParameterValues(self, parameters, context):
-        observers_layer = self.parameterAsSource(
-            parameters, self.OBSERVER_POINTS_LAYER, context
-        )
-        targets_layer = self.parameterAsSource(
-            parameters, self.TARGET_POINTS_LAYER, context
-        )
+        observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
+        targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
 
         if observers_layer.sourceCrs().isGeographic():
-            msg = (
-                "`Observers point layer` crs must be projected. "
-                "Right now it is `geographic`."
-            )
+            msg = "`Observers point layer` crs must be projected. " "Right now it is `geographic`."
 
             return False, msg
 
         if not observers_layer.sourceCrs() == targets_layer.sourceCrs():
-            msg = (
-                "`Observers point layer` and `Targets point layer` crs must be equal. "
-                "Right now they are not."
-            )
+            msg = "`Observers point layer` and `Targets point layer` crs must be equal. " "Right now they are not."
 
             return False, msg
 
@@ -143,9 +129,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         if not correct:
             return correct, msg
 
-        correct, msg = ListOfRasters.validate_crs(
-            rasters, crs=observers_layer.sourceCrs()
-        )
+        correct, msg = ListOfRasters.validate_crs(rasters, crs=observers_layer.sourceCrs())
 
         if not correct:
             return correct, msg
@@ -163,43 +147,25 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
-        list_rasters = ListOfRasters(
-            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context)
-        )
+        list_rasters = ListOfRasters(self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
 
-        observers_layer = self.parameterAsSource(
-            parameters, self.OBSERVER_POINTS_LAYER, context
-        )
+        observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
 
         if observers_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.OBSERVER_POINTS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.OBSERVER_POINTS_LAYER))
 
-        observers_id = self.parameterAsString(
-            parameters, self.OBSERVER_ID_FIELD, context
-        )
-        observers_offset = self.parameterAsString(
-            parameters, self.OBSERVER_OFFSET_FIELD, context
-        )
+        observers_id = self.parameterAsString(parameters, self.OBSERVER_ID_FIELD, context)
+        observers_offset = self.parameterAsString(parameters, self.OBSERVER_OFFSET_FIELD, context)
 
-        targets_layer = self.parameterAsSource(
-            parameters, self.TARGET_POINTS_LAYER, context
-        )
+        targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
 
         if targets_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.TARGET_POINTS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.TARGET_POINTS_LAYER))
 
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
-        targets_offset = self.parameterAsString(
-            parameters, self.TARGET_OFFSET_FIELD, context
-        )
+        targets_offset = self.parameterAsString(parameters, self.TARGET_OFFSET_FIELD, context)
 
-        sampling_distance = self.parameterAsDouble(
-            parameters, self.LINE_DENSITY, context
-        )
+        sampling_distance = self.parameterAsDouble(parameters, self.LINE_DENSITY, context)
 
         fields = Fields.los_local_fields
 
@@ -213,9 +179,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = observers_layer.featureCount() * targets_layer.featureCount()
 
@@ -241,9 +205,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
                 f = QgsFeature(fields)
                 f.setGeometry(line)
-                f.setAttribute(
-                    f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL
-                )
+                f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL)
                 f.setAttribute(
                     f.fieldNameIndex(FieldNames.ID_OBSERVER),
                     int(observer_feature.attribute(observers_id)),
@@ -263,13 +225,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
 
                 sink.addFeature(f)
 
-                feedback.setProgress(
-                    (
-                        (observer_count + 1 * target_count + 1 + target_count)
-                        / feature_count
-                    )
-                    * 100
-                )
+                feedback.setProgress(((observer_count + 1 * target_count + 1 + target_count) / feature_count) * 100)
 
         return {self.OUTPUT_LAYER: dest_id}
 

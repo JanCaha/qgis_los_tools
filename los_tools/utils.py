@@ -1,6 +1,6 @@
-from pathlib import Path
 import configparser
 import json
+from pathlib import Path
 
 
 def get_icon_path(icon_name: str) -> str:

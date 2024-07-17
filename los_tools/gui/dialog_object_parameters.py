@@ -1,9 +1,9 @@
-from typing import Optional, Union
 import math
 from enum import Enum, auto
+from typing import Optional, Union
 
-from qgis.PyQt.QtWidgets import QDialog, QDoubleSpinBox, QWidget, QFormLayout, QComboBox
 from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtWidgets import QComboBox, QDialog, QDoubleSpinBox, QFormLayout, QWidget
 
 from .custom_classes import DistanceWidget
 
@@ -90,8 +90,7 @@ class ObjectParameters(QDialog):
         if self.calculation_type == CalculationType.DISTANCE:
             self.object_distance.setValue(
                 round(
-                    self.object_size.value()
-                    / math.tan(math.radians(self.object_angle_size.value())),
+                    self.object_size.value() / math.tan(math.radians(self.object_angle_size.value())),
                     3,
                 )
             )
@@ -99,24 +98,20 @@ class ObjectParameters(QDialog):
         elif self.calculation_type == CalculationType.SIZE:
             self.object_size.setValue(
                 round(
-                    (math.tan(math.radians(self.object_angle_size.value())))
-                    * self.object_distance.value(),
+                    (math.tan(math.radians(self.object_angle_size.value()))) * self.object_distance.value(),
                     3,
                 )
             )
 
         elif self.calculation_type == CalculationType.ANGLE:
             self.object_angle_size.setValue(
-                math.degrees(
-                    math.atan(self.object_size.value() / self.object_distance.value())
-                )
+                math.degrees(math.atan(self.object_size.value() / self.object_distance.value()))
             )
 
         else:
             self.object_distance.setValue(
                 round(
-                    self.object_size.value()
-                    / math.tan(math.radians(self.object_angle_size.value())),
+                    self.object_size.value() / math.tan(math.radians(self.object_angle_size.value())),
                     3,
                 )
             )

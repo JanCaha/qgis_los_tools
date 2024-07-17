@@ -1,21 +1,21 @@
 from typing import Union
 
 from qgis.core import (
-    QgsTask,
-    QgsTaskManager,
-    QgsGeometry,
-    QgsVectorLayer,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
-    QgsProject,
     QgsFeature,
+    QgsGeometry,
+    QgsProject,
+    QgsTask,
+    QgsTaskManager,
+    QgsVectorLayer,
     QgsVertexId,
 )
 from qgis.PyQt.QtCore import pyqtSignal
 
+from los_tools.classes import ListOfRasters, SamplingDistanceMatrix
 from los_tools.constants import FieldNames, NamesConstants
 from los_tools.gui.dialog_los_settings import LoSSettings
-from los_tools.classes import ListOfRasters, SamplingDistanceMatrix
 from los_tools.processing.tools.util_functions import segmentize_los_line
 
 
@@ -39,12 +39,8 @@ class PrepareLoSWithoutTargetTask(QgsTask):
         self.lines = lines
         self.list_of_rasters = list_of_rasters
 
-        self.sampling_distance_matrix = SamplingDistanceMatrix(
-            los_settings.create_data_layer()
-        )
-        self.sampling_distance_matrix.replace_minus_one_with_value(
-            list_of_rasters.maximal_diagonal_size()
-        )
+        self.sampling_distance_matrix = SamplingDistanceMatrix(los_settings.create_data_layer())
+        self.sampling_distance_matrix.replace_minus_one_with_value(list_of_rasters.maximal_diagonal_size())
 
         self.fields = los_layer.fields()
         self.los_layer = los_layer
@@ -52,17 +48,13 @@ class PrepareLoSWithoutTargetTask(QgsTask):
         self.angle_step = angle_step
         self.canvas_crs = canvas_crs
 
-        values = self.los_layer.uniqueValues(
-            self.fields.indexFromName(FieldNames.ID_OBSERVER)
-        )
+        values = self.los_layer.uniqueValues(self.fields.indexFromName(FieldNames.ID_OBSERVER))
         if values:
             self.observer_max_id = max(values)
         else:
             self.observer_max_id = 0
 
-        values = self.los_layer.uniqueValues(
-            self.fields.indexFromName(FieldNames.ID_TARGET)
-        )
+        values = self.los_layer.uniqueValues(self.fields.indexFromName(FieldNames.ID_TARGET))
         if values:
             self.target_max_id = max(values)
         else:
@@ -77,22 +69,16 @@ class PrepareLoSWithoutTargetTask(QgsTask):
 
         feature_template = QgsFeature(self.fields)
 
-        ctToRaster = QgsCoordinateTransform(
-            self.canvas_crs, self.list_of_rasters.crs(), QgsProject.instance()
-        )
+        ctToRaster = QgsCoordinateTransform(self.canvas_crs, self.list_of_rasters.crs(), QgsProject.instance())
 
-        ctToLayer = QgsCoordinateTransform(
-            self.list_of_rasters.crs(), self.los_layer.crs(), QgsProject.instance()
-        )
+        ctToLayer = QgsCoordinateTransform(self.list_of_rasters.crs(), self.los_layer.crs(), QgsProject.instance())
 
         j = 1
         while partsIterator.hasNext():
             geom = partsIterator.next()
 
             observer_point = geom.vertexAt(QgsVertexId(0, 0, 0))
-            line = self.sampling_distance_matrix.build_line(
-                observer_point, geom.vertexAt(QgsVertexId(0, 0, 1))
-            )
+            line = self.sampling_distance_matrix.build_line(observer_point, geom.vertexAt(QgsVertexId(0, 0, 1)))
 
             line.transform(ctToRaster)
 
@@ -108,18 +94,10 @@ class PrepareLoSWithoutTargetTask(QgsTask):
             if azimuth < 0:
                 azimuth = azimuth + 360
 
-            f.setAttribute(
-                f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_NO_TARGET
-            )
-            f.setAttribute(
-                f.fieldNameIndex(FieldNames.ID_OBSERVER), int(self.observer_max_id + 1)
-            )
-            f.setAttribute(
-                f.fieldNameIndex(FieldNames.ID_TARGET), int(self.target_max_id + j)
-            )
-            f.setAttribute(
-                f.fieldNameIndex(FieldNames.OBSERVER_OFFSET), self.observer_offset
-            )
+            f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_NO_TARGET)
+            f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER), int(self.observer_max_id + 1))
+            f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET), int(self.target_max_id + j))
+            f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET), self.observer_offset)
             f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), azimuth)
             f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_X), observer_point.x())
             f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_Y), observer_point.y())
@@ -163,17 +141,13 @@ class PrepareLoSTask(QgsTask):
         self.los_global = los_global
         self.canvas_crs = canvas_crs
 
-        values = self.los_layer.uniqueValues(
-            self.fields.indexFromName(FieldNames.ID_OBSERVER)
-        )
+        values = self.los_layer.uniqueValues(self.fields.indexFromName(FieldNames.ID_OBSERVER))
         if values:
             self.observer_max_id = max(values)
         else:
             self.observer_max_id = 0
 
-        values = self.los_layer.uniqueValues(
-            self.fields.indexFromName(FieldNames.ID_TARGET)
-        )
+        values = self.los_layer.uniqueValues(self.fields.indexFromName(FieldNames.ID_TARGET))
         if values:
             self.target_max_id = max(values)
         else:
@@ -182,9 +156,7 @@ class PrepareLoSTask(QgsTask):
         self.setDependentLayers([self.los_layer])
 
     def run(self):
-        ct = QgsCoordinateTransform(
-            self.canvas_crs, self.list_of_rasters.crs(), QgsProject.instance()
-        )
+        ct = QgsCoordinateTransform(self.canvas_crs, self.list_of_rasters.crs(), QgsProject.instance())
 
         line = segmentize_los_line(self.los_geometry, self.segment_lenght)
 
@@ -194,25 +166,15 @@ class PrepareLoSTask(QgsTask):
 
         f = QgsFeature(self.fields)
 
-        ct = QgsCoordinateTransform(
-            self.list_of_rasters.crs(), self.los_layer.crs(), QgsProject.instance()
-        )
+        ct = QgsCoordinateTransform(self.list_of_rasters.crs(), self.los_layer.crs(), QgsProject.instance())
 
         line.transform(ct)
 
         f.setGeometry(line)
-        f.setAttribute(
-            f.fieldNameIndex(FieldNames.ID_OBSERVER), int(self.observer_max_id + 1)
-        )
-        f.setAttribute(
-            f.fieldNameIndex(FieldNames.ID_TARGET), int(self.target_max_id + 1)
-        )
-        f.setAttribute(
-            f.fieldNameIndex(FieldNames.OBSERVER_OFFSET), float(self.observer_offset)
-        )
-        f.setAttribute(
-            f.fieldNameIndex(FieldNames.TARGET_OFFSET), float(self.target_offset)
-        )
+        f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER), int(self.observer_max_id + 1))
+        f.setAttribute(f.fieldNameIndex(FieldNames.ID_TARGET), int(self.target_max_id + 1))
+        f.setAttribute(f.fieldNameIndex(FieldNames.OBSERVER_OFFSET), float(self.observer_offset))
+        f.setAttribute(f.fieldNameIndex(FieldNames.TARGET_OFFSET), float(self.target_offset))
 
         if self.los_global:
             f.setAttribute(
@@ -223,13 +185,9 @@ class PrepareLoSTask(QgsTask):
                 f.fieldNameIndex(FieldNames.TARGET_Y),
                 float(self.los_geometry.vertexAt(1).y()),
             )
-            f.setAttribute(
-                f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_GLOBAL
-            )
+            f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_GLOBAL)
         else:
-            f.setAttribute(
-                f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL
-            )
+            f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL)
 
         self.los_layer.dataProvider().addFeature(f)
 

@@ -1,14 +1,12 @@
 from __future__ import annotations
+
 import math
 from typing import List, Optional, Union
 
-from qgis.core import QgsPoint, QgsFeature, QgsGeometry
+from qgis.core import QgsFeature, QgsGeometry, QgsPoint
 
-from los_tools.processing.tools.util_functions import (
-    calculate_distance,
-    line_geometry_to_coords,
-)
 from los_tools.constants.field_names import FieldNames
+from los_tools.processing.tools.util_functions import calculate_distance, line_geometry_to_coords
 
 
 class LoS:
@@ -61,9 +59,7 @@ class LoS:
             if i == len(self.points) - 1:
                 self.horizon.append(False)
             else:
-                self.horizon.append(
-                    (self.visible[i] is True) and (self.visible[i + 1] is False)
-                )
+                self.horizon.append((self.visible[i] is True) and (self.visible[i + 1] is False))
 
     def __parse_points(self, points: List[List[float]]) -> None:
         max_angle_temp = -180
@@ -75,62 +71,41 @@ class LoS:
         sampling_distance: float = None
 
         if self.is_global:
-            target_distance = calculate_distance(
-                first_point_x, first_point_y, self.target_x, self.target_y
-            )
-            sampling_distance = calculate_distance(
-                points[0][0], points[0][1], points[1][0], points[1][1]
-            )
+            target_distance = calculate_distance(first_point_x, first_point_y, self.target_x, self.target_y)
+            sampling_distance = calculate_distance(points[0][0], points[0][1], points[1][0], points[1][1])
 
         for i in range(0, len(points)):
             point_x = points[i][0]
             point_y = points[i][1]
             point_z = points[i][2]
 
-            distance = calculate_distance(
-                first_point_x, first_point_y, point_x, point_y
-            )
+            distance = calculate_distance(first_point_x, first_point_y, point_x, point_y)
 
             if self.use_curvature_corrections:
-                point_z = self._curvature_corrections(
-                    point_z, distance, self.refraction_coefficient
-                )
-                target_offset = self._curvature_corrections(
-                    self.target_offset, distance, self.refraction_coefficient
-                )
+                point_z = self._curvature_corrections(point_z, distance, self.refraction_coefficient)
+                target_offset = self._curvature_corrections(self.target_offset, distance, self.refraction_coefficient)
 
             if i == 0:
                 self.points[i] = [point_x, point_y, 0, first_point_z, -90]
 
-            elif (
-                self.is_global
-                and math.fabs(target_distance - distance) < sampling_distance / 2
-            ):
+            elif self.is_global and math.fabs(target_distance - distance) < sampling_distance / 2:
                 self.points[i] = [
                     point_x,
                     point_y,
                     distance,
                     point_z + target_offset,
-                    self._angle_vertical(
-                        distance, point_z + target_offset - first_point_z
-                    ),
+                    self._angle_vertical(distance, point_z + target_offset - first_point_z),
                 ]
 
                 self.target_index = i
 
-            elif (
-                not self.is_global
-                and not self.is_without_target
-                and i == len(points) - 1
-            ):
+            elif not self.is_global and not self.is_without_target and i == len(points) - 1:
                 self.points[i] = [
                     point_x,
                     point_y,
                     distance,
                     point_z + target_offset,
-                    self._angle_vertical(
-                        distance, point_z + target_offset - first_point_z
-                    ),
+                    self._angle_vertical(distance, point_z + target_offset - first_point_z),
                 ]
 
             else:
@@ -158,9 +133,7 @@ class LoS:
                 self.visible.append(True)
             else:
                 # [i] and [-1] actually points to the same point, no idea why I wrote this way
-                self.visible.append(
-                    self.previous_max_angle[i] < self.points[i - 1][self.VERTICAL_ANGLE]
-                )
+                self.visible.append(self.previous_max_angle[i] < self.points[i - 1][self.VERTICAL_ANGLE])
 
     def __str__(self):
         string = ""
@@ -181,18 +154,10 @@ class LoS:
         return 90 if distance == 0 else math.degrees(math.atan(elev_diff / distance))
 
     @staticmethod
-    def _curvature_corrections(
-        elev: float, dist: float, ref_coeff: float, earth_diameter: float = 12740000
-    ) -> float:
-        return (
-            elev
-            - (math.pow(dist, 2) / earth_diameter)
-            + ref_coeff * (math.pow(dist, 2) / earth_diameter)
-        )
+    def _curvature_corrections(elev: float, dist: float, ref_coeff: float, earth_diameter: float = 12740000) -> float:
+        return elev - (math.pow(dist, 2) / earth_diameter) + ref_coeff * (math.pow(dist, 2) / earth_diameter)
 
-    def is_visible_at_index(
-        self, index: int, return_integer: bool = False
-    ) -> Union[bool, int]:
+    def is_visible_at_index(self, index: int, return_integer: bool = False) -> Union[bool, int]:
         return int(self.visible[index]) if return_integer else self.visible[index]
 
     def get_geom_at_index(self, index: int) -> QgsPoint:
@@ -248,21 +213,13 @@ class LoS:
     def get_angle_difference_global_horizon_at_point(self, index_point: int) -> float:
         horizon_angle = -90
         if self._get_global_horizon_index() != 0:
-            horizon_angle = self.points[self._get_global_horizon_index()][
-                self.VERTICAL_ANGLE
-            ]
+            horizon_angle = self.points[self._get_global_horizon_index()][self.VERTICAL_ANGLE]
         return self.points[index_point][self.VERTICAL_ANGLE] - horizon_angle
 
-    def get_elevation_difference_global_horizon_at_point(
-        self, index_point: int
-    ) -> float:
+    def get_elevation_difference_global_horizon_at_point(self, index_point: int) -> float:
         elev_difference_horizon = self.points[index_point][self.Z] - (
             self.points[0][self.Z]
-            + math.tan(
-                math.radians(
-                    self.points[self._get_global_horizon_index()][self.VERTICAL_ANGLE]
-                )
-            )
+            + math.tan(math.radians(self.points[self._get_global_horizon_index()][self.VERTICAL_ANGLE]))
             * self.points[index_point][self.DISTANCE]
         )
         return elev_difference_horizon
@@ -283,8 +240,7 @@ class LoS:
 
             if horizon_index is not None:
                 horizon_angle = (
-                    self.points[index_point][self.VERTICAL_ANGLE]
-                    - self.points[horizon_index][self.VERTICAL_ANGLE]
+                    self.points[index_point][self.VERTICAL_ANGLE] - self.points[horizon_index][self.VERTICAL_ANGLE]
                 )
             else:
                 horizon_angle = None
@@ -300,9 +256,7 @@ class LoS:
             if horizon_index is not None:
                 elev_difference_horizon = self.points[index_point][self.Z] - (
                     self.points[0][self.Z]
-                    + math.tan(
-                        math.radians(self.points[horizon_index][self.VERTICAL_ANGLE])
-                    )
+                    + math.tan(math.radians(self.points[horizon_index][self.VERTICAL_ANGLE]))
                     * self.points[index_point][self.DISTANCE]
                 )
             else:
@@ -362,22 +316,13 @@ class LoSLocal(LoS):
         return self.points[0][self.Z] - self.points[-1][self.Z]
 
     def get_angle_difference_local_horizon(self) -> float:
-        return (
-            self.target_angle
-            - self.points[self._get_max_local_horizon_index()][self.VERTICAL_ANGLE]
-        )
+        return self.target_angle - self.points[self._get_max_local_horizon_index()][self.VERTICAL_ANGLE]
 
     def get_elevation_difference_local_horizon(self) -> float:
         return (
             self.points[-1][self.Z]
             - self.points[0][self.Z]
-            - math.tan(
-                math.radians(
-                    self.points[self._get_max_local_horizon_index()][
-                        self.VERTICAL_ANGLE
-                    ]
-                )
-            )
+            - math.tan(math.radians(self.points[self._get_max_local_horizon_index()][self.VERTICAL_ANGLE]))
             * self.points[-1][self.DISTANCE]
         )
 
@@ -478,9 +423,7 @@ class LoSGlobal(LoS):
         )
 
     def is_target_visible(self, return_integer: bool = False) -> Union[bool, int]:
-        return self.is_visible_at_index(
-            index=self.target_index, return_integer=return_integer
-        )
+        return self.is_visible_at_index(index=self.target_index, return_integer=return_integer)
 
     def _get_global_horizon_index(self) -> int:
         if self.global_horizon_index is not None:
@@ -496,19 +439,13 @@ class LoSGlobal(LoS):
     def get_angle_difference_global_horizon(self) -> float:
         horizon_angle = -90
         if self._get_global_horizon_index() != 0:
-            horizon_angle = self.points[self._get_global_horizon_index()][
-                self.VERTICAL_ANGLE
-            ]
+            horizon_angle = self.points[self._get_global_horizon_index()][self.VERTICAL_ANGLE]
         return self.points[self.target_index][self.VERTICAL_ANGLE] - horizon_angle
 
     def get_elevation_difference_global_horizon(self) -> float:
         elev_difference_horizon = self.points[self.target_index][self.Z] - (
             self.points[0][self.Z]
-            + math.tan(
-                math.radians(
-                    self.points[self._get_global_horizon_index()][self.VERTICAL_ANGLE]
-                )
-            )
+            + math.tan(math.radians(self.points[self._get_global_horizon_index()][self.VERTICAL_ANGLE]))
             * self.points[self.target_index][self.DISTANCE]
         )
 
@@ -641,9 +578,7 @@ class LoSWithoutTarget(LoS):
         if global_horizon_index is not None and local_horizon_index is not None:
             return (
                 self.points[global_horizon_index][self.Z]
-                - math.tan(
-                    math.radians(self.points[local_horizon_index][self.VERTICAL_ANGLE])
-                )
+                - math.tan(math.radians(self.points[local_horizon_index][self.VERTICAL_ANGLE]))
                 * self.points[global_horizon_index][self.DISTANCE]
             )
 

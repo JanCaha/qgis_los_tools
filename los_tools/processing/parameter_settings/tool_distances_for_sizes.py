@@ -1,20 +1,19 @@
 import math
 
 from qgis.core import (
+    QgsFeature,
+    QgsField,
+    QgsFields,
     QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingFeedback,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterFeatureSink,
     QgsProcessingParameterMatrix,
     QgsProcessingParameterNumber,
-    QgsProcessingParameterBoolean,
-    QgsProcessingFeedback,
-    QgsFields,
-    QgsField,
-    QgsWkbTypes,
-    QgsProcessingParameterFeatureSink,
-    QgsFeature,
-    QgsProcessingException,
     QgsProcessingUtils,
+    QgsWkbTypes,
 )
-
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
@@ -58,30 +57,22 @@ class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table"))
 
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
         angle = self.parameterAsDouble(parameters, self.ANGLE, context)
         sizes = self.parameterAsMatrix(parameters, self.SIZES, context)
-        maximal_distance = self.parameterAsBoolean(
-            parameters, self.MAXIMALDISTANCE, context
-        )
+        maximal_distance = self.parameterAsBoolean(parameters, self.MAXIMALDISTANCE, context)
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.SIZE_ANGLE, QVariant.Double))
         fields.append(QgsField(FieldNames.DISTANCE, QVariant.Double))
         fields.append(QgsField(FieldNames.SIZE, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(
-            parameters, self.OUTPUT_TABLE, context, fields, QgsWkbTypes.NoGeometry
-        )
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields, QgsWkbTypes.NoGeometry)
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_TABLE)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_TABLE))
 
         result_string_print = "Sizes at distances:\n" "Size - Distance\n"
 

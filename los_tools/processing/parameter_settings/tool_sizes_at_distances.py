@@ -1,20 +1,19 @@
 import math
 
 from qgis.core import (
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterMatrix,
-    QgsProcessingParameterBoolean,
-    QgsProcessingParameterNumber,
-    QgsProcessingFeedback,
-    QgsFields,
-    QgsField,
-    QgsWkbTypes,
-    QgsProcessingParameterFeatureSink,
     QgsFeature,
+    QgsField,
+    QgsFields,
+    QgsProcessingAlgorithm,
     QgsProcessingException,
+    QgsProcessingFeedback,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterMatrix,
+    QgsProcessingParameterNumber,
     QgsProcessingUtils,
+    QgsWkbTypes,
 )
-
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
@@ -69,9 +68,7 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table"))
 
     def checkParameterValues(self, parameters, context):
         distances = self.parameterAsMatrix(parameters, self.DISTANCES, context)
@@ -95,26 +92,18 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
         angle = self.parameterAsDouble(parameters, self.ANGLE, context)
         distances = self.parameterAsMatrix(parameters, self.DISTANCES, context)
-        maximal_distance = self.parameterAsBoolean(
-            parameters, self.MAXIMALDISTANCE, context
-        )
-        default_sampling_size = self.parameterAsDouble(
-            parameters, self.DEFAULT_SAMPLING_DISTANCE, context
-        )
+        maximal_distance = self.parameterAsBoolean(parameters, self.MAXIMALDISTANCE, context)
+        default_sampling_size = self.parameterAsDouble(parameters, self.DEFAULT_SAMPLING_DISTANCE, context)
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.SIZE_ANGLE, QVariant.Double))
         fields.append(QgsField(FieldNames.DISTANCE, QVariant.Double))
         fields.append(QgsField(FieldNames.SIZE, QVariant.Double))
 
-        sink, dest_id = self.parameterAsSink(
-            parameters, self.OUTPUT_TABLE, context, fields, QgsWkbTypes.NoGeometry
-        )
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields, QgsWkbTypes.NoGeometry)
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_TABLE)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_TABLE))
 
         result_string_print = "Sizes at distances:\n" "Distance - Size\n"
 
@@ -179,7 +168,9 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
 
     def helpUrl(self):
         pass
-        return "https://jancaha.github.io/qgis_los_tools/tools/Calculate%20Parameters%20Settings/tool_sizes_at_distances/"
+        return (
+            "https://jancaha.github.io/qgis_los_tools/tools/Calculate%20Parameters%20Settings/tool_sizes_at_distances/"
+        )
 
     def shortHelpString(self):
         return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)

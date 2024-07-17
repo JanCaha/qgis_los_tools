@@ -26,9 +26,7 @@ from .gui.dialog_object_parameters import ObjectParameters
 from .gui.dialog_raster_validations import RasterValidations
 from .gui.dialog_tool_set_camera import SetCameraTool
 from .gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
-from .gui.optimize_point_location_tool.optimize_points_location_tool import (
-    OptimizePointsLocationTool,
-)
+from .gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
 from .utils import get_icon_path
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
@@ -55,9 +53,7 @@ class LoSToolsPlugin:
         self.menu = PluginConstants.plugin_name
 
         if self.iface is not None:
-            self.toolbar: QToolBar = self.iface.addToolBar(
-                PluginConstants.plugin_toolbar_name
-            )
+            self.toolbar: QToolBar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
             self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
 
             self.iface.newProjectCreated.connect(self.reset_los_layer)
@@ -166,13 +162,9 @@ class LoSToolsPlugin:
             self.object_parameters_dialog = ObjectParameters(self.iface.mainWindow())
 
             self.los_notarget_tool = LosNoTargetMapTool(self.iface)
-            self.los_notarget_tool.deactivated.connect(
-                partial(self.deactivateTool, self.los_notarget_action_name)
-            )
+            self.los_notarget_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
 
-            self.optimize_point_location_tool = OptimizePointsLocationTool(
-                self.iface.mapCanvas(), self.iface
-            )
+            self.optimize_point_location_tool = OptimizePointsLocationTool(self.iface.mapCanvas(), self.iface)
             self.optimize_point_location_tool.deactivated.connect(
                 partial(self.deactivateTool, self.optimize_point_location_action_name)
             )
@@ -185,9 +177,7 @@ class LoSToolsPlugin:
                 self.add_los_layer_action,
             )
 
-            self.create_los_tool.deactivated.connect(
-                partial(self.deactivateTool, self.create_los_action_name)
-            )
+            self.create_los_tool.deactivated.connect(partial(self.deactivateTool, self.create_los_action_name))
             self.create_los_tool.featuresAdded.connect(self.update_actions_layer_text)
 
             self.reset_los_layer()
@@ -281,9 +271,7 @@ class LoSToolsPlugin:
         self.get_action_by_text(action_name).setChecked(False)
 
     def run_optimize_point_location_tool(self):
-        self.get_action_by_text(self.optimize_point_location_action_name).setChecked(
-            True
-        )
+        self.get_action_by_text(self.optimize_point_location_action_name).setChecked(True)
         self.iface.mapCanvas().setMapTool(self.optimize_point_location_tool)
 
     def run_create_los_tool(self):
@@ -292,9 +280,7 @@ class LoSToolsPlugin:
 
     def _plugin_los_layer(self) -> QgsVectorLayer:
         if self._layer_LoS is None:
-            selected_crs: QgsCoordinateReferenceSystem = (
-                self.iface.mapCanvas().mapSettings().destinationCrs()
-            )
+            selected_crs: QgsCoordinateReferenceSystem = self.iface.mapCanvas().mapSettings().destinationCrs()
 
             if selected_crs.isGeographic():
                 selected_crs = QgsCoordinateReferenceSystem.fromEpsgId(3857)

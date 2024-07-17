@@ -1,31 +1,31 @@
 from typing import Union
 
 from qgis.core import (
-    QgsProcessing,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterEnum,
-    QgsProcessingParameterNumber,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterBoolean,
+    QgsCategorizedSymbolRenderer,
+    QgsFeature,
     QgsFeatureSink,
     QgsField,
-    QgsFeature,
-    QgsWkbTypes,
     QgsFields,
     QgsMapLayer,
-    QgsProcessingUtils,
-    QgsSymbol,
-    QgsRendererCategory,
-    QgsCategorizedSymbolRenderer,
+    QgsProcessing,
+    QgsProcessingAlgorithm,
     QgsProcessingException,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsRendererCategory,
+    QgsSymbol,
+    QgsWkbTypes,
 )
+from qgis.PyQt.QtCore import Qt, QVariant
 
-from qgis.PyQt.QtCore import QVariant, Qt
+from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.constants.textlabels import TextLabels
-from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
 from los_tools.processing.tools.util_functions import get_los_type
 from los_tools.utils import get_doc_file
 
@@ -50,9 +50,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine]
-            )
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
 
         self.addParameter(
@@ -64,9 +62,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
         self.addParameter(
             QgsProcessingParameterBoolean(
@@ -87,9 +83,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
     def checkParameterValues(self, parameters, context):
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
-        horizon_type = self.horizons_types[
-            self.parameterAsEnum(parameters, self.HORIZON_TYPE, context)
-        ]
+        horizon_type = self.horizons_types[self.parameterAsEnum(parameters, self.HORIZON_TYPE, context)]
 
         field_names = los_layer.fields().names()
 
@@ -103,10 +97,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
         los_type = get_los_type(los_layer, field_names)
 
-        if (
-            horizon_type == NamesConstants.HORIZON_GLOBAL
-            and los_type == NamesConstants.LOS_LOCAL
-        ):
+        if horizon_type == NamesConstants.HORIZON_GLOBAL and los_type == NamesConstants.LOS_LOCAL:
             msg = "Cannot extract global horizon from local LoS."
 
             return False, msg
@@ -115,9 +106,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
     def postProcessAlgorithm(self, context, feedback):
         if self.horizon_type == self.horizons_types[2]:
-            output_layer: QgsMapLayer = QgsProcessingUtils.mapLayerFromString(
-                self.dest_id, context
-            )
+            output_layer: QgsMapLayer = QgsProcessingUtils.mapLayerFromString(self.dest_id, context)
 
             symbols = []
 
@@ -135,11 +124,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
             symbol_horizon_local = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
             symbol_horizon_local.setColor(Qt.gray)
 
-            symbols.append(
-                QgsRendererCategory(
-                    NamesConstants.HORIZON_LOCAL, symbol_horizon_local, TextLabels.LOCAL
-                )
-            )
+            symbols.append(QgsRendererCategory(NamesConstants.HORIZON_LOCAL, symbol_horizon_local, TextLabels.LOCAL))
 
             renderer = QgsCategorizedSymbolRenderer(FieldNames.HORIZON_TYPE, symbols)
 
@@ -151,19 +136,11 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
 
         if los_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.LOS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
 
-        horizon_type = self.horizons_types[
-            self.parameterAsEnum(parameters, self.HORIZON_TYPE, context)
-        ]
-        curvature_corrections = self.parameterAsBool(
-            parameters, self.CURVATURE_CORRECTIONS, context
-        )
-        ref_coeff = self.parameterAsDouble(
-            parameters, self.REFRACTION_COEFFICIENT, context
-        )
+        horizon_type = self.horizons_types[self.parameterAsEnum(parameters, self.HORIZON_TYPE, context)]
+        curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
+        ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
         self.horizon_type = horizon_type
 
@@ -189,9 +166,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = los_layer.featureCount()
 
@@ -303,9 +278,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
     ):
         f = QgsFeature(fields)
         f.setGeometry(los.get_global_horizon())
-        f.setAttribute(
-            f.fieldNameIndex(FieldNames.HORIZON_TYPE), NamesConstants.HORIZON_GLOBAL
-        )
+        f.setAttribute(f.fieldNameIndex(FieldNames.HORIZON_TYPE), NamesConstants.HORIZON_GLOBAL)
         f.setAttribute(
             f.fieldNameIndex(FieldNames.ID_OBSERVER),
             int(los_feature.attribute(FieldNames.ID_OBSERVER)),

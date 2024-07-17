@@ -1,22 +1,21 @@
 from qgis.core import (
-    QgsProcessing,
-    QgsFields,
-    QgsField,
+    Qgis,
     QgsFeature,
     QgsFeatureSink,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsWkbTypes,
+    QgsFeatureSource,
+    QgsField,
+    QgsFields,
     QgsMessageLog,
     QgsPointXY,
-    Qgis,
-    QgsFeatureSource,
-    QgsProcessingUtils,
+    QgsProcessing,
+    QgsProcessingAlgorithm,
     QgsProcessingException,
+    QgsProcessingFeatureSource,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingUtils,
+    QgsWkbTypes,
 )
-
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
@@ -48,9 +47,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         if FieldNames.HORIZON_TYPE not in field_names:
             msg = (
                 "Fields specific for horizon lines not found in current layer ({0}). "
-                "Cannot to_table the layer as horizon lines.".format(
-                    FieldNames.HORIZON_TYPE
-                )
+                "Cannot to_table the layer as horizon lines.".format(FieldNames.HORIZON_TYPE)
             )
 
             QgsMessageLog.logMessage(msg, "los_tools", Qgis.MessageLevel.Critical)
@@ -64,9 +61,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         )
 
         if input_horizon_lines_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.INPUT_HORIZON_LINES_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_HORIZON_LINES_LAYER))
 
         feature_count = input_horizon_lines_layer.featureCount()
 
@@ -88,9 +83,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         iterator = input_horizon_lines_layer.getFeatures()
 
@@ -116,9 +109,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
                 feature.setAttribute(FieldNames.ID_OBSERVER, observer_id)
                 feature.setAttribute(FieldNames.HORIZON_TYPE, horizon_type)
-                feature.setAttribute(
-                    FieldNames.ANGLE, observer_point.azimuth(horizon_point)
-                )
+                feature.setAttribute(FieldNames.ANGLE, observer_point.azimuth(horizon_point))
                 feature.setAttribute(FieldNames.VIEWING_ANGLE, v.m())
                 feature.setAttribute(
                     FieldNames.CSV_HORIZON_DISTANCE,

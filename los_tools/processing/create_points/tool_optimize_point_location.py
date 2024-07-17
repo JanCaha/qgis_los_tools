@@ -2,24 +2,24 @@ import math
 from typing import Optional, Union
 
 from qgis.core import (
+    QgsFeature,
+    QgsGeometry,
+    QgsPoint,
+    QgsPointXY,
     QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsProcessingParameterRasterLayer,
-    QgsProcessingParameterFeatureSource,
+    QgsProcessingException,
+    QgsProcessingFeatureSource,
     QgsProcessingParameterDistance,
     QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterRasterLayer,
+    QgsProcessingUtils,
+    QgsRasterBlock,
     QgsRasterDataProvider,
     QgsRasterLayer,
     QgsRectangle,
-    QgsRasterBlock,
-    QgsPoint,
-    QgsFeature,
-    QgsPointXY,
-    QgsProcessingFeatureSource,
-    QgsProcessingUtils,
-    QgsProcessingException,
     qgsFloatNear,
-    QgsGeometry,
 )
 
 from los_tools.utils import get_doc_file
@@ -69,11 +69,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT_LAYER, "Output layer (optimized points)"
-            )
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer (optimized points)"))
 
     def checkParameterValues(self, parameters, context):
         raster = self.parameterAsRasterLayer(parameters, self.INPUT_RASTER, context)
@@ -81,9 +77,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         raster_band_count = raster.bandCount()
 
         if raster_band_count != 1:
-            msg = (
-                "`Location optimization raster` can only have one band."
-                " Currently there are `{0}` bands.".format(raster_band_count)
+            msg = "`Location optimization raster` can only have one band." " Currently there are `{0}` bands.".format(
+                raster_band_count
             )
 
             return False, msg
@@ -91,18 +86,12 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         input_layer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
 
         if input_layer.sourceCrs().isGeographic():
-            msg = (
-                "`Input point layer` crs must be projected. "
-                "Right now it is `geographic`."
-            )
+            msg = "`Input point layer` crs must be projected. " "Right now it is `geographic`."
 
             return False, msg
 
         if not raster_crs == input_layer.sourceCrs():
-            msg = (
-                "`Input point layer` and `Location optimization raster` crs must be equal. "
-                "Right now they are not."
-            )
+            msg = "`Input point layer` and `Location optimization raster` crs must be equal. " "Right now they are not."
 
             return False, msg
 
@@ -120,9 +109,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
         if mask_raster is not None:
             if mask_raster.bandCount() != 1:
-                msg = "`Mask raster` can only have one band. Currently there are `{0}` bands.".format(
-                    raster_band_count
-                )
+                msg = "`Mask raster` can only have one band. Currently there are `{0}` bands.".format(raster_band_count)
 
                 return False, msg
 
@@ -131,10 +118,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
                 return False, msg
 
-            if (
-                not raster.dataProvider().extent()
-                == mask_raster.dataProvider().extent()
-            ):
+            if not raster.dataProvider().extent() == mask_raster.dataProvider().extent():
                 msg = "`Mask raster` extent must be the same as `Location optimization raster`."
 
                 return False, msg
@@ -147,25 +131,17 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
-        input_layer: QgsProcessingFeatureSource = self.parameterAsSource(
-            parameters, self.INPUT_LAYER, context
-        )
+        input_layer: QgsProcessingFeatureSource = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
 
         if input_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.INPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LAYER))
 
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 
-        raster: QgsRasterLayer = self.parameterAsRasterLayer(
-            parameters, self.INPUT_RASTER, context
-        )
+        raster: QgsRasterLayer = self.parameterAsRasterLayer(parameters, self.INPUT_RASTER, context)
 
         if raster is None:
-            raise QgsProcessingException(
-                self.invalidRasterError(parameters, self.INPUT_RASTER)
-            )
+            raise QgsProcessingException(self.invalidRasterError(parameters, self.INPUT_RASTER))
 
         raster: QgsRasterDataProvider = raster.dataProvider()
 
@@ -184,15 +160,11 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         raster_extent: QgsRectangle = raster.extent()
 
-        max_size = math.sqrt(
-            math.pow(raster_extent.width(), 2) + math.pow(raster_extent.height(), 2)
-        )
+        max_size = math.sqrt(math.pow(raster_extent.width(), 2) + math.pow(raster_extent.height(), 2))
 
         if max_size < distance:
             distance = max_size
@@ -279,9 +251,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
         pixel_extent: QgsRectangle = QgsRectangle(x_min, y_min, x_max, y_max)
 
-        block_values: QgsRasterBlock = raster.block(
-            1, pixel_extent, distance_cells * 2, distance_cells * 2
-        )
+        block_values: QgsRasterBlock = raster.block(1, pixel_extent, distance_cells * 2, distance_cells * 2)
 
         if mask_raster is not None:
             mask_block_values: QgsRasterBlock = mask_raster.block(
@@ -294,17 +264,11 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
         for i in range(0, block_values.width()):
             for j in range(0, block_values.height()):
-                dist = math.sqrt(
-                    math.pow(distance_cells - i, 2) + math.pow(distance_cells - j, 2)
-                )
+                dist = math.sqrt(math.pow(distance_cells - i, 2) + math.pow(distance_cells - j, 2))
 
                 value = block_values.value(i, j)
 
-                if (
-                    value != no_data_value
-                    and max_value < value
-                    and dist < distance_cells
-                ):
+                if value != no_data_value and max_value < value and dist < distance_cells:
                     if mask_raster is not None:
                         mask_value = mask_block_values.value(i, j)
                         if 0 < mask_value != mask_no_data_value:
@@ -320,12 +284,8 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
             max_value_x = max_value_x - distance_cells
             max_value_y = max_value_y - distance_cells
 
-            max_value_x = (
-                pixel_extent.center().x() + cell_size / 2 + max_value_x * cell_size
-            )
-            max_value_y = (
-                pixel_extent.center().y() - cell_size / 2 - max_value_y * cell_size
-            )
+            max_value_x = pixel_extent.center().x() + cell_size / 2 + max_value_x * cell_size
+            max_value_y = pixel_extent.center().y() - cell_size / 2 - max_value_y * cell_size
         else:
             max_value_x = point.x()
             max_value_y = point.y()

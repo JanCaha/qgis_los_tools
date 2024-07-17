@@ -1,26 +1,26 @@
 from qgis.core import (
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureRequest,
+    QgsField,
+    QgsFields,
+    QgsGeometry,
     QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsFeatureRequest,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterField,
-    QgsGeometry,
-    QgsCoordinateTransform,
-    QgsProject,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsFields,
-    QgsProcessingUtils,
     QgsProcessingException,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingUtils,
+    QgsProject,
+    QgsWkbTypes,
 )
-
 from qgis.PyQt.QtCore import QVariant
+
 from los_tools.constants.field_names import FieldNames
+from los_tools.constants.names_constants import NamesConstants
 from los_tools.processing.tools.util_functions import get_los_type
 from los_tools.utils import get_doc_file
-from los_tools.constants.names_constants import NamesConstants
 
 
 class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
@@ -31,9 +31,7 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine]
-            )
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
 
         self.addParameter(
@@ -54,9 +52,7 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table"))
 
     def checkParameterValues(self, parameters, context):
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
@@ -66,9 +62,7 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
         if FieldNames.LOS_TYPE not in field_names:
             msg = (
                 "Fields specific for LoS without target not found in current layer ({0}). "
-                "Cannot extract use this layer ot calculate limit angles.".format(
-                    FieldNames.LOS_TYPE
-                )
+                "Cannot extract use this layer ot calculate limit angles.".format(FieldNames.LOS_TYPE)
             )
 
             return False, msg
@@ -88,27 +82,17 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
 
         if los_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.LOS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
 
-        object_layer = self.parameterAsVectorLayer(
-            parameters, self.OBJECT_LAYER, context
-        )
+        object_layer = self.parameterAsVectorLayer(parameters, self.OBJECT_LAYER, context)
 
         if object_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.OBJECT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.OBJECT_LAYER))
 
-        field_id = self.parameterAsString(
-            parameters, self.OBJECT_LAYER_FIELD_ID, context
-        )
+        field_id = self.parameterAsString(parameters, self.OBJECT_LAYER_FIELD_ID, context)
 
         if object_layer.crs() != los_layer.crs():
-            coord_transform = QgsCoordinateTransform(
-                object_layer.crs(), los_layer.crs(), QgsProject.instance()
-            )
+            coord_transform = QgsCoordinateTransform(object_layer.crs(), los_layer.crs(), QgsProject.instance())
         else:
             coord_transform = None
 
@@ -128,27 +112,16 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_TABLE)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_TABLE))
 
-        id_values = list(
-            los_layer.uniqueValues(
-                los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)
-            )
-        )
+        id_values = list(los_layer.uniqueValues(los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)))
 
-        total = (
-            los_layer.dataProvider().featureCount()
-            * object_layer.dataProvider().featureCount()
-        )
+        total = los_layer.dataProvider().featureCount() * object_layer.dataProvider().featureCount()
         i = 0
 
         object_layer_features = object_layer.getFeatures()
 
-        for object_layer_feature_count, object_layer_feature in enumerate(
-            object_layer_features
-        ):
+        for object_layer_feature_count, object_layer_feature in enumerate(object_layer_features):
             object_layer_feature_geom = object_layer_feature.geometry()
             object_id = object_layer_feature.attribute(field_id)
 
@@ -163,12 +136,8 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
                 request = QgsFeatureRequest()
                 request.setFilterRect(geom_transform.boundingBox())
-                request.setFilterExpression(
-                    "{} = '{}'".format(FieldNames.ID_OBSERVER, id_value)
-                )
-                order_by_clause = QgsFeatureRequest.OrderByClause(
-                    FieldNames.AZIMUTH, ascending=True
-                )
+                request.setFilterExpression("{} = '{}'".format(FieldNames.ID_OBSERVER, id_value))
+                order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
                 request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
 
                 features = los_layer.getFeatures(request)
@@ -182,25 +151,13 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
                 if 1 < len(azimuths):
                     az_step = azimuths[1] - azimuths[0]
 
-                    if (
-                        abs(
-                            (max(azimuths) - min(azimuths))
-                            - (az_step * (len(azimuths) - 1))
-                        )
-                        > 0.0001
-                    ):
+                    if abs((max(azimuths) - min(azimuths)) - (az_step * (len(azimuths) - 1))) > 0.0001:
                         azimuths = [x - 360 if x > 180 else x for x in azimuths]
 
                     f = QgsFeature(fields)
-                    f.setAttribute(
-                        f.fieldNameIndex(FieldNames.ID_OBSERVER), int(id_value)
-                    )
-                    f.setAttribute(
-                        f.fieldNameIndex(FieldNames.AZIMUTH_MIN), min(azimuths)
-                    )
-                    f.setAttribute(
-                        f.fieldNameIndex(FieldNames.AZIMUTH_MAX), max(azimuths)
-                    )
+                    f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBSERVER), int(id_value))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MIN), min(azimuths))
+                    f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH_MAX), max(azimuths))
                     f.setAttribute(f.fieldNameIndex(FieldNames.ID_OBJECT), object_id)
 
                     sink.addFeature(f)

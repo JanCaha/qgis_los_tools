@@ -99,9 +99,7 @@ class DistanceWidget(QWidget):
         return self.distance().inUnits(QgsUnitTypes.DistanceUnit.DistanceMeters)
 
     def distance(self) -> Distance:
-        return Distance(
-            self.distance_value.value(), self.units.currentData(Qt.UserRole)
-        )
+        return Distance(self.distance_value.value(), self.units.currentData(Qt.UserRole))
 
     def setMinimum(self, value: float) -> None:
         self.distance_value.setMinimum(value)

@@ -1,31 +1,26 @@
 import numpy as np
-
 from qgis.core import (
+    QgsFeature,
+    QgsField,
+    QgsFields,
+    QgsGeometry,
+    QgsPointXY,
     QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
+    QgsProcessingException,
     QgsProcessingParameterBoolean,
+    QgsProcessingParameterDistance,
+    QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterDistance,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
+    QgsProcessingParameterNumber,
     QgsProcessingUtils,
-    QgsGeometry,
-    QgsFields,
-    QgsPointXY,
-    QgsProcessingException,
+    QgsWkbTypes,
 )
-
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.processing.tools.util_functions import (
-    get_max_decimal_numbers,
-    round_all_values,
-)
+from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
 from los_tools.utils import get_doc_file
 
 
@@ -41,9 +36,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint]
-            )
+            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint])
         )
 
         self.addParameter(
@@ -112,9 +105,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
     def checkParameterValues(self, parameters, context):
         return super().checkParameterValues(parameters, context)
@@ -123,9 +114,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
         input_layer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
 
         if input_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.INPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LAYER))
 
         id_field = self.parameterAsString(parameters, self.ID_FIELD, context)
 
@@ -162,9 +151,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = input_layer.featureCount()
 
@@ -177,14 +164,10 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
             feature_point: QgsPointXY = feature.geometry().asPoint()
 
             if not over_north:
-                angles = np.arange(
-                    angle_min, angle_max + 0.1 * angle_step, step=angle_step
-                ).tolist()
+                angles = np.arange(angle_min, angle_max + 0.1 * angle_step, step=angle_step).tolist()
 
             else:
-                angles2 = np.arange(
-                    angle_max, 360 - 0.1 * angle_step, step=angle_step
-                ).tolist()
+                angles2 = np.arange(angle_max, 360 - 0.1 * angle_step, step=angle_step).tolist()
 
                 angles1 = np.arange(
                     0 - (360 - max(angles2)) + angle_step,
@@ -209,9 +192,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
                 )
                 f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
                 f.setAttribute(f.fieldNameIndex(FieldNames.ID_POINT), int(i))
-                f.setAttribute(
-                    f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), angle_step
-                )
+                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), angle_step)
 
                 sink.addFeature(f)
                 i += 1

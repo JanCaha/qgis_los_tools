@@ -1,35 +1,34 @@
 from typing import Optional
 
-from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtWidgets import QWidget
 from qgis.core import (
-    QgsPointXY,
-    QgsWkbTypes,
+    Qgis,
+    QgsCircle,
     QgsGeometry,
     QgsPoint,
     QgsPointLocator,
-    Qgis,
-    QgsVectorDataProvider,
+    QgsPointXY,
+    QgsRasterLayer,
+    QgsRectangle,
     QgsSnappingConfig,
     QgsTolerance,
-    QgsCircle,
-    QgsRasterLayer,
     QgsUnitTypes,
-    QgsRectangle,
+    QgsVectorDataProvider,
+    QgsWkbTypes,
 )
 from qgis.gui import (
     QgisInterface,
-    QgsRubberBand,
-    QgsMapMouseEvent,
     QgsMapCanvas,
-    QgsSnapIndicator,
+    QgsMapMouseEvent,
     QgsMapToolAdvancedDigitizing,
+    QgsRubberBand,
+    QgsSnapIndicator,
 )
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtWidgets import QWidget
 
-from los_tools.processing.create_points.tool_optimize_point_location import (
-    OptimizePointLocationAlgorithm,
-)
+from los_tools.processing.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
+
 from .optimize_points_location_widget import OptimizePointLocationInputWidget
 
 
@@ -109,10 +108,7 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
             )
             self._canvas.unsetMapTool(self)
             return
-        if (
-            self.currentVectorLayer().dataProvider().capabilities()
-            & QgsVectorDataProvider.ChangeFeatures
-        ):
+        if self.currentVectorLayer().dataProvider().capabilities() & QgsVectorDataProvider.ChangeFeatures:
             self.messageEmitted.emit(
                 "Tool only works for layers where features can be edited. Current layer features cannot be edited.",
                 Qgis.Critical,
@@ -129,9 +125,7 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
         ]:
             self.messageEmitted.emit(
                 "Tool only works for point layers. Current layer is {}.".format(
-                    QgsWkbTypes.geometryDisplayString(
-                        self.currentVectorLayer().geometryType()
-                    )
+                    QgsWkbTypes.geometryDisplayString(self.currentVectorLayer().geometryType())
                 ),
                 Qgis.Critical,
             )
@@ -173,9 +167,7 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
                 self._no_data_value,
                 self._distance_cells,
             )
-            self.point_rubber.setToGeometry(
-                QgsGeometry.fromPointXY(self._candidate_point)
-            )
+            self.point_rubber.setToGeometry(QgsGeometry.fromPointXY(self._candidate_point))
             self.circle_rubber.show()
             self.point_rubber.show()
         else:
@@ -227,9 +219,7 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
             self.deactivate()
         if self._point and self._pointId and self._candidate_point:
             self.currentVectorLayer().beginEditCommand("Optimize Point Location")
-            self.currentVectorLayer().changeGeometry(
-                self._pointId, QgsGeometry.fromPointXY(self._candidate_point)
-            )
+            self.currentVectorLayer().changeGeometry(self._pointId, QgsGeometry.fromPointXY(self._candidate_point))
             self.currentVectorLayer().endEditCommand()
             self.currentVectorLayer().triggerRepaint()
             self.clean()

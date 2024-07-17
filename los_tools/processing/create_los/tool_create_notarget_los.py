@@ -39,9 +39,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterMultipleLayers(
-                self.DEM_RASTERS, "Raster DEM Layers", QgsProcessing.TypeRaster
-            )
+            QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers", QgsProcessing.TypeRaster)
         )
 
         self.addParameter(
@@ -108,31 +106,19 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
     def checkParameterValues(self, parameters, context):
-        observers_layer = self.parameterAsSource(
-            parameters, self.OBSERVER_POINTS_LAYER, context
-        )
-        targets_layer = self.parameterAsSource(
-            parameters, self.TARGET_POINTS_LAYER, context
-        )
+        observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
+        targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
 
         if observers_layer.sourceCrs().isGeographic():
-            msg = (
-                "`Observers point layer` crs must be projected. "
-                "Right now it is `geographic`."
-            )
+            msg = "`Observers point layer` crs must be projected. " "Right now it is `geographic`."
 
             return False, msg
 
         if not observers_layer.sourceCrs() == targets_layer.sourceCrs():
-            msg = (
-                "`Observers point layer` and `Targets point layer` crs must be equal. "
-                "Right now they are not."
-            )
+            msg = "`Observers point layer` and `Targets point layer` crs must be equal. " "Right now they are not."
 
             return False, msg
 
@@ -143,9 +129,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         if not correct:
             return correct, msg
 
-        correct, msg = ListOfRasters.validate_crs(
-            rasters, crs=observers_layer.sourceCrs()
-        )
+        correct, msg = ListOfRasters.validate_crs(rasters, crs=observers_layer.sourceCrs())
 
         if not correct:
             return correct, msg
@@ -160,9 +144,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         if not correct:
             return correct, msg
 
-        line_settings_table = self.parameterAsVectorLayer(
-            parameters, self.LINE_SETTINGS_TABLE, context
-        )
+        line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE, context)
 
         validation, msg = SamplingDistanceMatrix.validate_table(line_settings_table)
 
@@ -172,43 +154,25 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
-        observers_layer = self.parameterAsSource(
-            parameters, self.OBSERVER_POINTS_LAYER, context
-        )
+        observers_layer = self.parameterAsSource(parameters, self.OBSERVER_POINTS_LAYER, context)
 
         if observers_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.OBSERVER_POINTS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.OBSERVER_POINTS_LAYER))
 
-        observers_id = self.parameterAsString(
-            parameters, self.OBSERVER_ID_FIELD, context
-        )
-        observers_offset = self.parameterAsString(
-            parameters, self.OBSERVER_OFFSET_FIELD, context
-        )
+        observers_id = self.parameterAsString(parameters, self.OBSERVER_ID_FIELD, context)
+        observers_offset = self.parameterAsString(parameters, self.OBSERVER_OFFSET_FIELD, context)
 
-        targets_layer = self.parameterAsSource(
-            parameters, self.TARGET_POINTS_LAYER, context
-        )
+        targets_layer = self.parameterAsSource(parameters, self.TARGET_POINTS_LAYER, context)
 
         if targets_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.TARGET_POINTS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.TARGET_POINTS_LAYER))
 
         targets_id = self.parameterAsString(parameters, self.TARGET_ID_FIELD, context)
-        target_definition_id_field = self.parameterAsString(
-            parameters, self.TARGET_DEFINITION_ID_FIELD, context
-        )
+        target_definition_id_field = self.parameterAsString(parameters, self.TARGET_DEFINITION_ID_FIELD, context)
 
-        list_rasters = ListOfRasters(
-            self.parameterAsLayerList(parameters, self.DEM_RASTERS, context)
-        )
+        list_rasters = ListOfRasters(self.parameterAsLayerList(parameters, self.DEM_RASTERS, context))
 
-        line_settings_table = self.parameterAsVectorLayer(
-            parameters, self.LINE_SETTINGS_TABLE, context
-        )
+        line_settings_table = self.parameterAsVectorLayer(parameters, self.LINE_SETTINGS_TABLE, context)
 
         distance_matrix = SamplingDistanceMatrix(line_settings_table)
 
@@ -224,21 +188,15 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = targets_layer.featureCount()
 
         observers_iterator = observers_layer.getFeatures()
 
-        distance_matrix.replace_minus_one_with_value(
-            list_rasters.maximal_diagonal_size()
-        )
+        distance_matrix.replace_minus_one_with_value(list_rasters.maximal_diagonal_size())
 
-        feedback.pushCommandInfo(
-            f"Sample Z: {LoSToolsSettings.sample_Z_using_plugin()}."
-        )
+        feedback.pushCommandInfo(f"Sample Z: {LoSToolsSettings.sample_Z_using_plugin()}.")
 
         i = 0
 
@@ -247,9 +205,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         for observer_feature in observers_iterator:
             request = QgsFeatureRequest()
             request.setFilterExpression(
-                "{} = {}".format(
-                    target_definition_id_field, observer_feature.attribute(observers_id)
-                )
+                "{} = {}".format(target_definition_id_field, observer_feature.attribute(observers_id))
             )
 
             targets_iterators = targets_layer.getFeatures(request)
@@ -268,9 +224,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
                 f = QgsFeature(fields)
                 f.setGeometry(line)
-                f.setAttribute(
-                    f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_NO_TARGET
-                )
+                f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_NO_TARGET)
                 f.setAttribute(
                     f.fieldNameIndex(FieldNames.ID_OBSERVER),
                     int(observer_feature.attribute(observers_id)),

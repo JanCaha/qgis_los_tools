@@ -1,29 +1,29 @@
 from qgis.core import (
-    QgsProcessing,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterEnum,
-    QgsProcessingParameterNumber,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterBoolean,
-    QgsField,
     QgsFeature,
-    QgsWkbTypes,
     QgsFeatureRequest,
+    QgsField,
     QgsFields,
     QgsLineString,
-    QgsVectorLayer,
-    QgsProcessingFeedback,
-    QgsProcessingUtils,
+    QgsProcessing,
+    QgsProcessingAlgorithm,
     QgsProcessingException,
+    QgsProcessingFeedback,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsVectorLayer,
+    QgsWkbTypes,
 )
-
 from qgis.PyQt.QtCore import QVariant
-from los_tools.constants.field_names import FieldNames
+
 from los_tools.classes.classes_los import LoSWithoutTarget
+from los_tools.constants.field_names import FieldNames
+from los_tools.constants.names_constants import NamesConstants
 from los_tools.processing.tools.util_functions import get_los_type
 from los_tools.utils import get_doc_file
-from los_tools.constants.names_constants import NamesConstants
 
 
 class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
@@ -37,9 +37,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine]
-            )
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
 
         self.addParameter(
@@ -51,9 +49,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
         self.addParameter(
             QgsProcessingParameterBoolean(
@@ -80,9 +76,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         if FieldNames.LOS_TYPE not in field_names:
             msg = (
                 "Fields specific for LoS not found in current layer ({0}). "
-                "Cannot extract horizon lines from this layer.".format(
-                    FieldNames.LOS_TYPE
-                )
+                "Cannot extract horizon lines from this layer.".format(FieldNames.LOS_TYPE)
             )
 
             return False, msg
@@ -99,24 +93,14 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
-        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(
-            parameters, self.LOS_LAYER, context
-        )
+        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
 
         if los_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.LOS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
 
-        horizon_type = self.horizons_types[
-            self.parameterAsEnum(parameters, self.HORIZON_TYPE, context)
-        ]
-        curvature_corrections = self.parameterAsBool(
-            parameters, self.CURVATURE_CORRECTIONS, context
-        )
-        ref_coeff = self.parameterAsDouble(
-            parameters, self.REFRACTION_COEFFICIENT, context
-        )
+        horizon_type = self.horizons_types[self.parameterAsEnum(parameters, self.HORIZON_TYPE, context)]
+        curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
+        ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.HORIZON_TYPE, QVariant.String))
@@ -134,15 +118,9 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
-        id_values = list(
-            los_layer.uniqueValues(
-                los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)
-            )
-        )
+        id_values = list(los_layer.uniqueValues(los_layer.fields().indexFromName(FieldNames.ID_OBSERVER)))
 
         total = 100 / los_layer.featureCount() if los_layer.featureCount() else 0
 
@@ -150,12 +128,8 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
         for id_value in id_values:
             request = QgsFeatureRequest()
-            request.setFilterExpression(
-                "{} = '{}'".format(FieldNames.ID_OBSERVER, id_value)
-            )
-            order_by_clause = QgsFeatureRequest.OrderByClause(
-                FieldNames.AZIMUTH, ascending=True
-            )
+            request.setFilterExpression("{} = '{}'".format(FieldNames.ID_OBSERVER, id_value))
+            order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
             request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
 
             features = los_layer.getFeatures(request)

@@ -1,27 +1,27 @@
 from typing import Union
+
 from qgis.core import (
-    QgsProcessing,
-    QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterBoolean,
-    QgsVectorLayer,
-    QgsField,
-    QgsProcessingParameterFeatureSink,
-    QgsFields,
     QgsFeature,
     QgsFeatureIterator,
-    QgsProcessingUtils,
-    QgsProcessingFeedback,
+    QgsField,
+    QgsFields,
+    QgsProcessing,
+    QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingException,
+    QgsProcessingFeedback,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsVectorLayer,
 )
-
 from qgis.PyQt.QtCore import QVariant
 
+from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
-from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
 from los_tools.processing.tools.util_functions import get_los_type
 from los_tools.utils import get_doc_file
 
@@ -34,9 +34,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine]
-            )
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
 
         self.addParameter(
@@ -56,9 +54,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
     def checkParameterValues(self, parameters, context):
         los_layer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
@@ -81,24 +77,14 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
 
         return super().checkParameterValues(parameters, context)
 
-    def processAlgorithm(
-        self, parameters, context: QgsProcessingContext, feedback: QgsProcessingFeedback
-    ):
-        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(
-            parameters, self.LOS_LAYER, context
-        )
+    def processAlgorithm(self, parameters, context: QgsProcessingContext, feedback: QgsProcessingFeedback):
+        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
 
         if los_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.LOS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
 
-        curvature_corrections = self.parameterAsBool(
-            parameters, self.CURVATURE_CORRECTIONS, context
-        )
-        ref_coeff = self.parameterAsDouble(
-            parameters, self.REFRACTION_COEFFICIENT, context
-        )
+        curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
+        ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
         field_names = los_layer.fields().names()
 
@@ -145,9 +131,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = los_layer.dataProvider().featureCount()
 
@@ -178,12 +162,8 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
                     refraction_coefficient=ref_coeff,
                 )
 
-                f.setAttribute(
-                    f.fieldNameIndex(FieldNames.VISIBLE), los.is_target_visible()
-                )
-                f.setAttribute(
-                    f.fieldNameIndex(FieldNames.VIEWING_ANGLE), los.get_view_angle()
-                )
+                f.setAttribute(f.fieldNameIndex(FieldNames.VISIBLE), los.is_target_visible())
+                f.setAttribute(f.fieldNameIndex(FieldNames.VIEWING_ANGLE), los.get_view_angle())
                 f.setAttribute(
                     f.fieldNameIndex(FieldNames.ELEVATION_DIFF),
                     los.get_elevation_difference(),
@@ -216,9 +196,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
                     refraction_coefficient=ref_coeff,
                 )
 
-                f.setAttribute(
-                    f.fieldNameIndex(FieldNames.VISIBLE), los.is_target_visible()
-                )
+                f.setAttribute(f.fieldNameIndex(FieldNames.VISIBLE), los.is_target_visible())
                 f.setAttribute(
                     f.fieldNameIndex(FieldNames.ANGLE_DIFF_GH),
                     los.get_angle_difference_global_horizon(),
@@ -231,9 +209,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
                     f.fieldNameIndex(FieldNames.HORIZON_COUNT_BEHIND),
                     los.get_horizon_count(),
                 )
-                f.setAttribute(
-                    f.fieldNameIndex(FieldNames.DISTANCE_GH), los.get_horizon_distance()
-                )
+                f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE_GH), los.get_horizon_distance())
 
             elif los_type == NamesConstants.LOS_NO_TARGET:
                 los = LoSWithoutTarget.from_feature(

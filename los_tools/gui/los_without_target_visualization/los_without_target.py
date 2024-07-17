@@ -1,20 +1,12 @@
 import numpy as np
-
+from qgis.core import Qgis, QgsGeometry, QgsPointLocator, QgsWkbTypes
+from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolAdvancedDigitizing, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QKeyEvent
 from qgis.PyQt.QtWidgets import QWidget
-from qgis.core import QgsWkbTypes, QgsGeometry, QgsPointLocator, Qgis
-from qgis.gui import (
-    QgisInterface,
-    QgsMapToolAdvancedDigitizing,
-    QgsMapMouseEvent,
-    QgsSnapIndicator,
-)
 
-from los_tools.processing.tools.util_functions import (
-    get_max_decimal_numbers,
-    round_all_values,
-)
+from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
+
 from .los_without_target_widget import LoSNoTargetInputWidget
 
 
@@ -110,9 +102,7 @@ class LosNoTargetMapTool(QgsMapToolAdvancedDigitizing):
 
         if self._point:
             self._los_rubber_band.hide()
-            self._los_rubber_band.setToGeometry(
-                QgsGeometry(), self._canvas.mapSettings().destinationCrs()
-            )
+            self._los_rubber_band.setToGeometry(QgsGeometry(), self._canvas.mapSettings().destinationCrs())
             angles = np.arange(
                 self._widget.min_angle,
                 self._widget.max_angle + 0.000000001 * self._widget.angle_step,
@@ -131,7 +121,5 @@ class LosNoTargetMapTool(QgsMapToolAdvancedDigitizing):
                 new_point = self._point.project(size_constant, angle)
                 geom = QgsGeometry.fromPolylineXY([self._point, new_point])
                 geom = geom.extendLine(0, self._widget.length - size_constant)
-                self._los_rubber_band.addGeometry(
-                    geom, self._canvas.mapSettings().destinationCrs()
-                )
+                self._los_rubber_band.addGeometry(geom, self._canvas.mapSettings().destinationCrs())
             self._los_rubber_band.show()

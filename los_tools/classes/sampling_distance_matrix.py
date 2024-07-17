@@ -1,8 +1,7 @@
 from typing import List, Union
 
 import numpy as np
-
-from qgis.core import QgsVectorLayer, QgsFeature, QgsPoint, QgsGeometry, QgsLineString
+from qgis.core import QgsFeature, QgsGeometry, QgsLineString, QgsPoint, QgsVectorLayer
 
 from los_tools.constants.field_names import FieldNames
 
@@ -55,10 +54,7 @@ class SamplingDistanceMatrix:
             self.data[0][self.INDEX_SAMPLING_DISTANCE] = sampling_distance_limit
 
             if 1 < len(self.data):
-                while (
-                    self.data[0][self.INDEX_DISTANCE]
-                    < self.data[-1][self.INDEX_DISTANCE]
-                ):
+                while self.data[0][self.INDEX_DISTANCE] < self.data[-1][self.INDEX_DISTANCE]:
                     self.data.remove(self.data[-1])
 
             self.sort_data()
@@ -113,17 +109,12 @@ class SamplingDistanceMatrix:
         row: List[float]
 
         for row in self.data:
-            if (
-                row[self.INDEX_DISTANCE]
-                < current_distance + row[self.INDEX_SAMPLING_DISTANCE]
-            ):
+            if row[self.INDEX_DISTANCE] < current_distance + row[self.INDEX_SAMPLING_DISTANCE]:
                 value_to_add = row[self.INDEX_SAMPLING_DISTANCE]
 
         return current_distance + value_to_add
 
-    def build_line(
-        self, origin_point: QgsPoint, direction_point: QgsPoint
-    ) -> QgsLineString:
+    def build_line(self, origin_point: QgsPoint, direction_point: QgsPoint) -> QgsLineString:
         line: Union[QgsLineString, QgsGeometry]
 
         lines = []
@@ -144,13 +135,9 @@ class SamplingDistanceMatrix:
             else:
                 if i + 1 < len(self):
                     this_line: QgsLineString = lines[-1].clone()
-                    this_line.extend(
-                        0, self.get_row_distance(i + 1) - self.get_row_distance(i)
-                    )
+                    this_line.extend(0, self.get_row_distance(i + 1) - self.get_row_distance(i))
 
-                    line_res = self.densified_line(
-                        lines[-1].endPoint(), this_line.endPoint(), i
-                    )
+                    line_res = self.densified_line(lines[-1].endPoint(), this_line.endPoint(), i)
 
                     lines.append(line_res)
 
@@ -161,15 +148,9 @@ class SamplingDistanceMatrix:
 
         return result_line
 
-    def densified_line(
-        self, start_point: QgsPoint, end_point: QgsPoint, sampling_row_index: int
-    ) -> QgsLineString:
+    def densified_line(self, start_point: QgsPoint, end_point: QgsPoint, sampling_row_index: int) -> QgsLineString:
         line = QgsGeometry.fromPolyline([start_point, end_point])
 
-        line = line.densifyByDistance(
-            distance=np.nextafter(
-                self.get_row_sampling_distance(sampling_row_index), np.Inf
-            )
-        )
+        line = line.densifyByDistance(distance=np.nextafter(self.get_row_sampling_distance(sampling_row_index), np.Inf))
 
         return QgsLineString([x for x in line.vertices()])

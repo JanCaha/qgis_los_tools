@@ -1,30 +1,25 @@
 import numpy as np
-
 from qgis.core import (
+    QgsFeature,
+    QgsField,
+    QgsFields,
+    QgsGeometry,
+    QgsPointXY,
     QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
+    QgsProcessingException,
+    QgsProcessingParameterDistance,
+    QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterDistance,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsGeometry,
-    QgsFields,
-    QgsPointXY,
+    QgsProcessingParameterNumber,
     QgsProcessingUtils,
-    QgsProcessingException,
+    QgsWkbTypes,
 )
-
 from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.processing.tools.util_functions import (
-    get_max_decimal_numbers,
-    round_all_values,
-)
+from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
 from los_tools.utils import get_doc_file
 
 
@@ -39,9 +34,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint]
-            )
+            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint])
         )
 
         self.addParameter(
@@ -101,26 +94,20 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
     def processAlgorithm(self, parameters, context, feedback):
         input_layer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
 
         if input_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.INPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LAYER))
 
         id_field = self.parameterAsString(parameters, self.ID_FIELD, context)
         angle_min = self.parameterAsDouble(parameters, self.ANGLE_START, context)
         angle_max = self.parameterAsDouble(parameters, self.ANGLE_END, context)
         angle_step = self.parameterAsDouble(parameters, self.ANGLE_STEP, context)
 
-        angles = np.arange(
-            angle_min, angle_max + 0.000000001 * angle_step, step=angle_step
-        ).tolist()
+        angles = np.arange(angle_min, angle_max + 0.000000001 * angle_step, step=angle_step).tolist()
 
         round_digits = get_max_decimal_numbers([angle_min, angle_max, angle_step])
 
@@ -143,9 +130,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = input_layer.featureCount()
 
@@ -156,9 +141,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
                 break
 
             for angle in angles:
-                new_point: QgsPointXY = (
-                    feature.geometry().asPoint().project(distance, angle)
-                )
+                new_point: QgsPointXY = feature.geometry().asPoint().project(distance, angle)
 
                 f = QgsFeature(fields)
                 f.setGeometry(QgsGeometry().fromPointXY(new_point))
@@ -167,9 +150,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
                     int(feature.attribute(id_field)),
                 )
                 f.setAttribute(f.fieldNameIndex(FieldNames.AZIMUTH), float(angle))
-                f.setAttribute(
-                    f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), float(angle_step)
-                )
+                f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP_POINTS), float(angle_step))
 
                 sink.addFeature(f)
 

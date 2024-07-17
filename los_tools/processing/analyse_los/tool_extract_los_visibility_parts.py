@@ -1,33 +1,33 @@
 from qgis.core import (
+    QgsCategorizedSymbolRenderer,
+    QgsFeature,
+    QgsFeatureIterator,
+    QgsField,
+    QgsFields,
+    QgsLineString,
+    QgsMapLayer,
+    QgsMultiLineString,
     QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterBoolean,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsFields,
-    QgsVectorLayer,
-    QgsFeatureIterator,
-    QgsProcessingUtils,
-    QgsMapLayer,
-    QgsSymbol,
-    QgsRendererCategory,
-    QgsCategorizedSymbolRenderer,
-    QgsMultiLineString,
-    QgsLineString,
     QgsProcessingException,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsRendererCategory,
+    QgsSymbol,
+    QgsVectorLayer,
+    QgsWkbTypes,
 )
+from qgis.PyQt.QtCore import Qt, QVariant
 
-from qgis.PyQt.QtCore import QVariant, Qt
+from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
+from los_tools.constants.names_constants import NamesConstants
 from los_tools.constants.textlabels import TextLabels
-from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
 from los_tools.processing.tools.util_functions import get_los_type
 from los_tools.utils import get_doc_file
-from los_tools.constants.names_constants import NamesConstants
 
 
 class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
@@ -38,16 +38,10 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine]
-            )
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT_LAYER, "Output LoS parts layer"
-            )
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output LoS parts layer"))
 
         self.addParameter(
             QgsProcessingParameterBoolean(
@@ -82,17 +76,13 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
         return super().checkParameterValues(parameters, context)
 
     def postProcessAlgorithm(self, context, feedback):
-        output_layer: QgsMapLayer = QgsProcessingUtils.mapLayerFromString(
-            self.dest_id, context
-        )
+        output_layer: QgsMapLayer = QgsProcessingUtils.mapLayerFromString(self.dest_id, context)
 
         symbols = []
 
         symbol_invisible = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
         symbol_invisible.setColor(Qt.red)
-        symbols.append(
-            QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE)
-        )
+        symbols.append(QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE))
 
         symbol_visible = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
         symbol_visible.setColor(Qt.green)
@@ -105,21 +95,13 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
         return {self.OUTPUT_LAYER: self.dest_id}
 
     def processAlgorithm(self, parameters, context, feedback):
-        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(
-            parameters, self.LOS_LAYER, context
-        )
+        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
 
         if los_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.LOS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
 
-        curvature_corrections: bool = self.parameterAsBool(
-            parameters, self.CURVATURE_CORRECTIONS, context
-        )
-        ref_coeff: float = self.parameterAsDouble(
-            parameters, self.REFRACTION_COEFFICIENT, context
-        )
+        curvature_corrections: bool = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
+        ref_coeff: float = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
         field_names = los_layer.fields().names()
 
@@ -140,9 +122,7 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = los_layer.featureCount()
 
@@ -202,22 +182,14 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
             feature_visible = QgsFeature(fields)
             feature_visible.setGeometry(line_string_visible)
             feature_visible.setAttribute(FieldNames.VISIBLE, True)
-            feature_visible.setAttribute(
-                FieldNames.ID_OBSERVER, los_feature.attribute(FieldNames.ID_OBSERVER)
-            )
-            feature_visible.setAttribute(
-                FieldNames.ID_TARGET, los_feature.attribute(FieldNames.ID_TARGET)
-            )
+            feature_visible.setAttribute(FieldNames.ID_OBSERVER, los_feature.attribute(FieldNames.ID_OBSERVER))
+            feature_visible.setAttribute(FieldNames.ID_TARGET, los_feature.attribute(FieldNames.ID_TARGET))
 
             feature_invisible = QgsFeature(fields)
             feature_invisible.setGeometry(line_string_invisible)
             feature_invisible.setAttribute(FieldNames.VISIBLE, False)
-            feature_invisible.setAttribute(
-                FieldNames.ID_OBSERVER, los_feature.attribute(FieldNames.ID_OBSERVER)
-            )
-            feature_invisible.setAttribute(
-                FieldNames.ID_TARGET, los_feature.attribute(FieldNames.ID_TARGET)
-            )
+            feature_invisible.setAttribute(FieldNames.ID_OBSERVER, los_feature.attribute(FieldNames.ID_OBSERVER))
+            feature_invisible.setAttribute(FieldNames.ID_TARGET, los_feature.attribute(FieldNames.ID_TARGET))
 
             sink.addFeature(feature_visible)
             sink.addFeature(feature_invisible)

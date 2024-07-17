@@ -1,31 +1,31 @@
 from qgis.core import (
+    QgsCategorizedSymbolRenderer,
+    QgsFeature,
+    QgsFeatureIterator,
+    QgsField,
+    QgsFields,
+    QgsMapLayer,
     QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterBoolean,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsFields,
-    QgsVectorLayer,
-    QgsFeatureIterator,
-    QgsProcessingUtils,
-    QgsMapLayer,
-    QgsSymbol,
-    QgsRendererCategory,
-    QgsCategorizedSymbolRenderer,
     QgsProcessingException,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsRendererCategory,
+    QgsSymbol,
+    QgsVectorLayer,
+    QgsWkbTypes,
 )
+from qgis.PyQt.QtCore import Qt, QVariant
 
-from qgis.PyQt.QtCore import QVariant, Qt
+from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
+from los_tools.constants.names_constants import NamesConstants
 from los_tools.constants.textlabels import TextLabels
-from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
 from los_tools.processing.tools.util_functions import get_los_type
 from los_tools.utils import get_doc_file
-from los_tools.constants.names_constants import NamesConstants
 
 
 class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
@@ -38,14 +38,10 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine]
-            )
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output layer"))
 
         self.addParameter(
             QgsProcessingParameterBoolean(
@@ -65,9 +61,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.ONLY_VISIBLE, "Export only visible points", defaultValue=False
-            )
+            QgsProcessingParameterBoolean(self.ONLY_VISIBLE, "Export only visible points", defaultValue=False)
         )
 
         self.addParameter(
@@ -94,17 +88,13 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         return super().checkParameterValues(parameters, context)
 
     def postProcessAlgorithm(self, context, feedback):
-        output_layer: QgsMapLayer = QgsProcessingUtils.mapLayerFromString(
-            self.dest_id, context
-        )
+        output_layer: QgsMapLayer = QgsProcessingUtils.mapLayerFromString(self.dest_id, context)
 
         symbols = []
 
         symbol_invisible = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
         symbol_invisible.setColor(Qt.red)
-        symbols.append(
-            QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE)
-        )
+        symbols.append(QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE))
 
         symbol_visible = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
         symbol_visible.setColor(Qt.green)
@@ -118,27 +108,15 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         return {self.OUTPUT_LAYER: self.dest_id}
 
     def processAlgorithm(self, parameters, context, feedback):
-        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(
-            parameters, self.LOS_LAYER, context
-        )
+        los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
 
         if los_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.LOS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
 
-        curvature_corrections: bool = self.parameterAsBool(
-            parameters, self.CURVATURE_CORRECTIONS, context
-        )
-        ref_coeff: float = self.parameterAsDouble(
-            parameters, self.REFRACTION_COEFFICIENT, context
-        )
-        only_visible: bool = self.parameterAsBool(
-            parameters, self.ONLY_VISIBLE, context
-        )
-        extended_attributes: bool = self.parameterAsBool(
-            parameters, self.EXTENDED_ATTRIBUTES, context
-        )
+        curvature_corrections: bool = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
+        ref_coeff: float = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
+        only_visible: bool = self.parameterAsBool(parameters, self.ONLY_VISIBLE, context)
+        extended_attributes: bool = self.parameterAsBool(parameters, self.EXTENDED_ATTRIBUTES, context)
 
         field_names = los_layer.fields().names()
 
@@ -153,10 +131,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
             fields.append(QgsField(FieldNames.ELEVATION_DIFF_LH, QVariant.Double))
             fields.append(QgsField(FieldNames.ANGLE_DIFF_LH, QVariant.Double))
 
-            if (
-                los_type == NamesConstants.LOS_GLOBAL
-                or los_type == NamesConstants.LOS_NO_TARGET
-            ):
+            if los_type == NamesConstants.LOS_GLOBAL or los_type == NamesConstants.LOS_NO_TARGET:
                 fields.append(QgsField(FieldNames.ELEVATION_DIFF_GH, QVariant.Double))
                 fields.append(QgsField(FieldNames.ANGLE_DIFF_GH, QVariant.Double))
 
@@ -170,9 +145,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
 
         feature_count = los_layer.featureCount()
 
@@ -235,10 +208,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
                             los.get_angle_difference_horizon_at_point(i),
                         )
 
-                        if (
-                            los_type == NamesConstants.LOS_GLOBAL
-                            or los_type == NamesConstants.LOS_NO_TARGET
-                        ):
+                        if los_type == NamesConstants.LOS_GLOBAL or los_type == NamesConstants.LOS_NO_TARGET:
                             f.setAttribute(
                                 f.fieldNameIndex(FieldNames.ELEVATION_DIFF_GH),
                                 los.get_elevation_difference_global_horizon_at_point(i),

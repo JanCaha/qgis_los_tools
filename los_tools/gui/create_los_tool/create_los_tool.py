@@ -1,40 +1,18 @@
-import numpy as np
 from functools import partial
 
-from qgis.PyQt.QtWidgets import QWidget, QAction
+import numpy as np
+from qgis.core import Qgis, QgsGeometry, QgsPoint, QgsPointLocator, QgsPointXY, QgsVectorLayer, QgsVertexId, QgsWkbTypes
+from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolAdvancedDigitizing, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QKeyEvent
-from qgis.core import (
-    QgsWkbTypes,
-    QgsGeometry,
-    QgsVectorLayer,
-    QgsPointLocator,
-    Qgis,
-    QgsPoint,
-    QgsPointXY,
-    QgsVertexId,
-)
-from qgis.gui import (
-    QgisInterface,
-    QgsMapMouseEvent,
-    QgsSnapIndicator,
-    QgsMapToolAdvancedDigitizing,
-)
+from qgis.PyQt.QtWidgets import QAction, QWidget
 
 from los_tools.classes import ListOfRasters
-from los_tools.gui import LoSSettings
-from los_tools.gui import RasterValidations
-from los_tools.processing.tools.util_functions import (
-    get_max_decimal_numbers,
-    round_all_values,
-)
+from los_tools.gui import LoSSettings, RasterValidations
+from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
 
 from .create_los_widget import LoSNoTargetInputWidget
-from .los_tasks import (
-    LoSExtractionTaskManager,
-    PrepareLoSWithoutTargetTask,
-    PrepareLoSTask,
-)
+from .los_tasks import LoSExtractionTaskManager, PrepareLoSTask, PrepareLoSWithoutTargetTask
 
 
 class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
@@ -105,9 +83,7 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
             self.hide_widgets()
             self.deactivate()
             return
-        if not ListOfRasters.validate(
-            self._raster_validation_dialog.list_of_selected_rasters
-        ):
+        if not ListOfRasters.validate(self._raster_validation_dialog.list_of_selected_rasters):
             self.messageEmitted.emit(
                 "Tool needs valid setup in `Raster Validatations` dialog.",
                 Qgis.Critical,
@@ -176,20 +152,14 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
         if self._start_point and towards_point:
             self._los_rubber_band.hide()
 
-            rasters_extent = (
-                self._raster_validation_dialog.listOfRasters.extent_polygon()
-            )
+            rasters_extent = self._raster_validation_dialog.listOfRasters.extent_polygon()
 
             if self._widget.los_local or self._widget.los_global:
                 if self._widget.los_local:
-                    line = QgsGeometry.fromPolylineXY(
-                        [self._start_point, towards_point]
-                    )
+                    line = QgsGeometry.fromPolylineXY([self._start_point, towards_point])
 
                 if self._widget.los_global:
-                    line = QgsGeometry.fromPolylineXY(
-                        [self._start_point, towards_point]
-                    )
+                    line = QgsGeometry.fromPolylineXY([self._start_point, towards_point])
 
                     if self._start_point.distance(towards_point) > 0:
                         line = line.extendLine(
@@ -205,41 +175,29 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
 
                 line = line.intersection(rasters_extent)
 
-                self._los_rubber_band.setToGeometry(
-                    line, self._canvas.mapSettings().destinationCrs()
-                )
+                self._los_rubber_band.setToGeometry(line, self._canvas.mapSettings().destinationCrs())
 
             if self._widget.los_no_target:
-                self._los_rubber_band.setToGeometry(
-                    QgsGeometry(), self._canvas.mapSettings().destinationCrs()
-                )
+                self._los_rubber_band.setToGeometry(QgsGeometry(), self._canvas.mapSettings().destinationCrs())
 
                 maximal_length_distance = self._los_settings_dialog.los_maximal_length()
 
                 if maximal_length_distance is None:
-                    maximal_length = (
-                        self._raster_validation_dialog.listOfRasters.maximal_diagonal_size()
-                    )
+                    maximal_length = self._raster_validation_dialog.listOfRasters.maximal_diagonal_size()
                 else:
-                    maximal_length = maximal_length_distance.inUnits(
-                        self._los_layer.crs().mapUnits()
-                    )
+                    maximal_length = maximal_length_distance.inUnits(self._los_layer.crs().mapUnits())
 
                 angle = self._start_point.azimuth(towards_point)
 
                 angles = np.arange(
                     angle - self._widget.angle_difference,
-                    angle
-                    + self._widget.angle_difference
-                    + 0.000000001 * self._widget.angle_step,
+                    angle + self._widget.angle_difference + 0.000000001 * self._widget.angle_step,
                     self._widget.angle_step,
                 ).tolist()
                 round_digits = get_max_decimal_numbers(
                     [
                         angle - self._widget.angle_difference,
-                        angle
-                        + self._widget.angle_difference
-                        + 0.000000001 * self._widget.angle_step,
+                        angle + self._widget.angle_difference + 0.000000001 * self._widget.angle_step,
                         self._widget.angle_step,
                     ]
                 )
@@ -252,9 +210,7 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
 
                     line = line.intersection(rasters_extent)
 
-                    self._los_rubber_band.addGeometry(
-                        line, self._canvas.mapSettings().destinationCrs()
-                    )
+                    self._los_rubber_band.addGeometry(line, self._canvas.mapSettings().destinationCrs())
 
             self._los_rubber_band.show()
 
@@ -277,9 +233,7 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
         if los_geometry.get().partCount() == 1:
             task = PrepareLoSTask(
                 los_geometry,
-                self._widget.sampling_distance.inUnits(
-                    self._los_layer.crs().mapUnits()
-                ),
+                self._widget.sampling_distance.inUnits(self._los_layer.crs().mapUnits()),
                 self._los_layer,
                 list_of_rasters,
                 self._widget.observer_offset,

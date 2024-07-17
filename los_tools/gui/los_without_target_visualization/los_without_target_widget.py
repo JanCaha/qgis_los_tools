@@ -1,9 +1,10 @@
 from typing import Optional
 
-from qgis.PyQt.QtCore import pyqtSignal
-from qgis.PyQt.QtWidgets import QWidget, QFormLayout
-from qgis.gui import QgsDoubleSpinBox
 from qgis.core import QgsUnitTypes
+from qgis.gui import QgsDoubleSpinBox
+from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtWidgets import QFormLayout, QWidget
+
 from los_tools.gui import DistanceWidget
 
 

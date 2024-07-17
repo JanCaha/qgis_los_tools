@@ -1,26 +1,25 @@
 from qgis.core import (
     QgsFeature,
-    QgsFields,
-    QgsField,
-    QgsProcessing,
     QgsFeatureSink,
-    QgsWkbTypes,
+    QgsField,
+    QgsFields,
+    QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
-    QgsProcessingParameterBoolean,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingUtils,
     QgsProcessingException,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsWkbTypes,
 )
-
 from qgis.PyQt.QtCore import QVariant
 
-from los_tools.processing.tools.util_functions import get_los_type
-from los_tools.utils import get_doc_file
+from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
-from los_tools.classes.classes_los import LoSLocal, LoSGlobal, LoSWithoutTarget
+from los_tools.processing.tools.util_functions import get_los_type
+from los_tools.utils import get_doc_file
 
 
 class ExportLoSAlgorithm(QgsProcessingAlgorithm):
@@ -31,9 +30,7 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine]
-            )
+            QgsProcessingParameterFeatureSource(self.INPUT_LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
 
         self.addParameter(
@@ -56,18 +53,14 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Output file"))
 
     def checkParameterValues(self, parameters, context):
-        input_los_layer = self.parameterAsSource(
-            parameters, self.INPUT_LOS_LAYER, context
-        )
+        input_los_layer = self.parameterAsSource(parameters, self.INPUT_LOS_LAYER, context)
 
         field_names = input_los_layer.fields().names()
 
         if FieldNames.LOS_TYPE not in field_names:
             msg = (
                 "Fields specific for LoS not found in current layer ({0}). "
-                "Cannot to_table the layer as horizon lines.".format(
-                    FieldNames.LOS_TYPE
-                )
+                "Cannot to_table the layer as horizon lines.".format(FieldNames.LOS_TYPE)
             )
 
             return False, msg
@@ -75,21 +68,13 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
         return True, "OK"
 
     def processAlgorithm(self, parameters, context, feedback):
-        input_los_layer = self.parameterAsSource(
-            parameters, self.INPUT_LOS_LAYER, context
-        )
+        input_los_layer = self.parameterAsSource(parameters, self.INPUT_LOS_LAYER, context)
 
         if input_los_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.INPUT_LOS_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LOS_LAYER))
 
-        curvature_corrections = self.parameterAsBool(
-            parameters, self.CURVATURE_CORRECTIONS, context
-        )
-        ref_coeff = self.parameterAsDouble(
-            parameters, self.REFRACTION_COEFFICIENT, context
-        )
+        curvature_corrections = self.parameterAsBool(parameters, self.CURVATURE_CORRECTIONS, context)
+        ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
         feature_count = input_los_layer.featureCount()
         iterator = input_los_layer.getFeatures()

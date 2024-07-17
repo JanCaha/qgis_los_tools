@@ -2,11 +2,12 @@ import math
 
 from qgis.core import (
     QgsProcessingAlgorithm,
-    QgsProcessingParameterNumber,
     QgsProcessingFeedback,
     QgsProcessingOutputNumber,
+    QgsProcessingParameterNumber,
     QgsProcessingUtils,
 )
+
 from los_tools.utils import get_doc_file
 
 
@@ -42,11 +43,7 @@ class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
 
         self.addParameter(param)
 
-        self.addOutput(
-            QgsProcessingOutputNumber(
-                self.OUTPUT_ANGLE, "Angle size (in degrees) of object"
-            )
-        )
+        self.addOutput(QgsProcessingOutputNumber(self.OUTPUT_ANGLE, "Angle size (in degrees) of object"))
 
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
         size = self.parameterAsDouble(parameters, self.SIZE, context)

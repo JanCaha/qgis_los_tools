@@ -1,31 +1,29 @@
-import numpy as np
 import math
-from typing import List, Optional, Union
 import re
+from typing import List, Optional, Union
 
+import numpy as np
 from qgis.core import (
+    Qgis,
     QgsGeometry,
     QgsLineString,
+    QgsMessageLog,
     QgsPoint,
     QgsPointXY,
+    QgsPolygon,
+    QgsProcessingException,
     QgsRasterDataProvider,
     QgsRectangle,
     QgsVectorLayer,
-    QgsMessageLog,
-    QgsProcessingException,
-    Qgis,
-    QgsPolygon,
     QgsVertexId,
-    QgsWkbTypes,
     QgsVertexIterator,
+    QgsWkbTypes,
 )
 
 from los_tools.constants.field_names import FieldNames
 
 
-def line_to_polygon(
-    line: QgsLineString, observer_point: QgsPointXY, angle_width: float
-) -> QgsPolygon:
+def line_to_polygon(line: QgsLineString, observer_point: QgsPointXY, angle_width: float) -> QgsPolygon:
     angle_width = angle_width / 2
 
     line_start_point = QgsPointXY(line.startPoint())
@@ -33,24 +31,12 @@ def line_to_polygon(
 
     azimuth = observer_point.azimuth(line_end_point)
 
-    point_1 = observer_point.project(
-        observer_point.distance(line_start_point), azimuth + angle_width
-    )
-    point_2 = observer_point.project(
-        observer_point.distance(line_end_point), azimuth + angle_width
-    )
-    point_3 = observer_point.project(
-        observer_point.distance(line_end_point), azimuth - angle_width
-    )
-    point_4 = observer_point.project(
-        observer_point.distance(line_start_point), azimuth - angle_width
-    )
+    point_1 = observer_point.project(observer_point.distance(line_start_point), azimuth + angle_width)
+    point_2 = observer_point.project(observer_point.distance(line_end_point), azimuth + angle_width)
+    point_3 = observer_point.project(observer_point.distance(line_end_point), azimuth - angle_width)
+    point_4 = observer_point.project(observer_point.distance(line_start_point), azimuth - angle_width)
 
-    poly = QgsPolygon(
-        QgsLineString(
-            [line_start_point, point_1, point_2, line_end_point, point_3, point_4]
-        )
-    )
+    poly = QgsPolygon(QgsLineString([line_start_point, point_1, point_2, line_end_point, point_3, point_4]))
 
     return poly
 
@@ -97,9 +83,7 @@ def check_existence_los_fields(field_names: List[str]) -> None:
     ):
         msg = (
             "Fields specific for LoS not found in current layer ({0}, {1}, {2}). "
-            "Cannot analyse the layer as LoS.".format(
-                FieldNames.LOS_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET
-            )
+            "Cannot analyse the layer as LoS.".format(FieldNames.LOS_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET)
         )
 
         QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)
@@ -132,9 +116,7 @@ def line_geometry_to_coords(geom: QgsGeometry) -> List[List[float]]:
         QgsWkbTypes.Type.MultiLineString25D,
         QgsWkbTypes.Type.MultiLineStringZ,
     ]:
-        raise TypeError(
-            "Geometry has to be LineString or MultiLineString optionally with Z coordinate."
-        )
+        raise TypeError("Geometry has to be LineString or MultiLineString optionally with Z coordinate.")
 
     geom_const = geom.constGet()
 
@@ -180,9 +162,7 @@ def segmentize_line(line: QgsGeometry, segment_length: float) -> QgsLineString:
 
     line_geom = QgsGeometry(line_extented)
 
-    line_geom = line_geom.densifyByDistance(
-        distance=np.nextafter(float(segment_length), np.Inf)
-    )
+    line_geom = line_geom.densifyByDistance(distance=np.nextafter(float(segment_length), np.Inf))
 
     line_res = QgsLineString([x for x in line_geom.vertices()])
 
@@ -200,9 +180,7 @@ def get_diagonal_size(raster: QgsRasterDataProvider) -> float:
 
 
 # taken from plugin rasterinterpolation https://plugins.qgis.org/plugins/rasterinterpolation/
-def bilinear_interpolated_value(
-    raster: QgsRasterDataProvider, point: Union[QgsPoint, QgsPointXY]
-) -> Optional[float]:
+def bilinear_interpolated_value(raster: QgsRasterDataProvider, point: Union[QgsPoint, QgsPointXY]) -> Optional[float]:
     # see the implementation of raster data provider, identify method
     # https://github.com/qgis/Quantum-GIS/blob/master/src/core/raster/qgsrasterdataprovider.cpp#L268
     x = point.x()
@@ -240,10 +218,7 @@ def bilinear_interpolated_value(
     y2 = yMax - yres / 2
 
     value = (
-        v11 * (x2 - x) * (y2 - y)
-        + v21 * (x - x1) * (y2 - y)
-        + v12 * (x2 - x) * (y - y1)
-        + v22 * (x - x1) * (y - y1)
+        v11 * (x2 - x) * (y2 - y) + v21 * (x - x1) * (y2 - y) + v12 * (x2 - x) * (y - y1) + v22 * (x - x1) * (y - y1)
     ) / ((x2 - x1) * (y2 - y1))
 
     if value is not None and value == raster.sourceNoDataValue(1):
@@ -262,7 +237,5 @@ def get_max_decimal_numbers(values: List[Union[int, float]]) -> int:
     return int(max(values))
 
 
-def round_all_values(
-    values: List[Union[int, float]], number_of_digits: int
-) -> List[Union[int, float]]:
+def round_all_values(values: List[Union[int, float]], number_of_digits: int) -> List[Union[int, float]]:
     return [round(x, number_of_digits) for x in values]

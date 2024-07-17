@@ -1,18 +1,18 @@
 from qgis.core import (
+    QgsFeature,
+    QgsField,
+    QgsFields,
     QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterField,
-    QgsField,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsFields,
-    QgsProcessingUtils,
     QgsProcessingException,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingUtils,
+    QgsWkbTypes,
 )
-
 from qgis.PyQt.QtCore import QVariant
+
 from los_tools.constants.field_names import FieldNames
 from los_tools.utils import get_doc_file
 
@@ -26,9 +26,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.POINT_LAYER, "Point layer", [QgsProcessing.TypeVectorPoint]
-            )
+            QgsProcessingParameterFeatureSource(self.POINT_LAYER, "Point layer", [QgsProcessing.TypeVectorPoint])
         )
 
         self.addParameter(
@@ -59,9 +57,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table")
-        )
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table"))
 
     def checkParameterValues(self, parameters, context):
         return super().checkParameterValues(parameters, context)
@@ -70,26 +66,16 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
         point_layer = self.parameterAsVectorLayer(parameters, self.POINT_LAYER, context)
 
         if point_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.POINT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.POINT_LAYER))
 
-        point_field_id = self.parameterAsString(
-            parameters, self.POINT_LAYER_FIELD_ID, context
-        )
+        point_field_id = self.parameterAsString(parameters, self.POINT_LAYER_FIELD_ID, context)
 
-        object_layer = self.parameterAsVectorLayer(
-            parameters, self.OBJECT_LAYER, context
-        )
+        object_layer = self.parameterAsVectorLayer(parameters, self.OBJECT_LAYER, context)
 
         if object_layer is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.OBJECT_LAYER)
-            )
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.OBJECT_LAYER))
 
-        object_field_id = self.parameterAsString(
-            parameters, self.OBJECT_LAYER_FIELD_ID, context
-        )
+        object_field_id = self.parameterAsString(parameters, self.OBJECT_LAYER_FIELD_ID, context)
 
         fields = QgsFields()
         fields.append(QgsField(FieldNames.ID_POINT, QVariant.Int))
@@ -106,24 +92,15 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
         )
 
         if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_TABLE)
-            )
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_TABLE))
 
-        total = (
-            point_layer.dataProvider().featureCount()
-            * object_layer.dataProvider().featureCount()
-        )
+        total = point_layer.dataProvider().featureCount() * object_layer.dataProvider().featureCount()
         i = 0
 
         object_layer_features = object_layer.getFeatures()
 
-        for object_layer_feature_count, object_layer_feature in enumerate(
-            object_layer_features
-        ):
-            for point_layer_feature_count, point_layer_feature in enumerate(
-                point_layer.getFeatures()
-            ):
+        for object_layer_feature_count, object_layer_feature in enumerate(object_layer_features):
+            for point_layer_feature_count, point_layer_feature in enumerate(point_layer.getFeatures()):
                 if feedback.isCanceled():
                     break
 
