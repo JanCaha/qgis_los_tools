@@ -13,6 +13,7 @@
     ],
     "pylint.args": [
         "--ignore=W293,W504",
+        "--disable=E0611",
         "--max-line-length=160"
     ],
     "flake8.args": [
