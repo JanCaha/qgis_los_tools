@@ -1,12 +1,8 @@
 name: Build Documentation and Deploy to GitHub Pages
 
 on:
-  push:
-    branches:
-    - master
-    paths:
-    - "website/**"
-    - "github/workflows/mkdocs_build_deploy.yaml"
+  release:
+    types: [published, edited]
 
 jobs:
 
@@ -16,7 +12,7 @@ jobs:
     
     steps:
     
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v4
