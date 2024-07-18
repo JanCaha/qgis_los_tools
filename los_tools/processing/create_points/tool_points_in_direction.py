@@ -16,11 +16,10 @@ from qgis.core import (
     QgsProcessingUtils,
     QgsWkbTypes,
 )
-from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
 from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
-from los_tools.utils import get_doc_file
+from los_tools.utils import COLUMN_TYPE, get_doc_file
 
 
 class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
@@ -123,11 +122,11 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
         distance = self.parameterAsDouble(parameters, self.DISTANCE, context)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.ID_ORIGINAL_POINT, QVariant.Int))
-        fields.append(QgsField(FieldNames.ID_POINT, QVariant.Int))
-        fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
-        fields.append(QgsField(FieldNames.DIFF_TO_MAIN_AZIMUTH, QVariant.Double))
-        fields.append(QgsField(FieldNames.ANGLE_STEP_POINTS, QVariant.Double))
+        fields.append(QgsField(FieldNames.ID_ORIGINAL_POINT, COLUMN_TYPE.Int))
+        fields.append(QgsField(FieldNames.ID_POINT, COLUMN_TYPE.Int))
+        fields.append(QgsField(FieldNames.AZIMUTH, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.DIFF_TO_MAIN_AZIMUTH, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.ANGLE_STEP_POINTS, COLUMN_TYPE.Double))
 
         sink, dest_id = self.parameterAsSink(
             parameters,

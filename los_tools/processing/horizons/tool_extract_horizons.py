@@ -20,14 +20,13 @@ from qgis.core import (
     QgsSymbol,
     QgsWkbTypes,
 )
-from qgis.PyQt.QtCore import Qt, QVariant
 
 from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.constants.textlabels import TextLabels
 from los_tools.processing.tools.util_functions import get_los_type
-from los_tools.utils import get_doc_file
+from los_tools.utils import COLUMN_TYPE, COLUMN_TYPE_STRING, get_doc_file
 
 
 # TODO příznak horizontu na konci DSM
@@ -149,12 +148,12 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
         los_type = get_los_type(los_layer, field_names)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.HORIZON_TYPE, QVariant.String))
-        fields.append(QgsField(FieldNames.ID_OBSERVER, QVariant.Int))
-        fields.append(QgsField(FieldNames.ID_TARGET, QVariant.Int))
+        fields.append(QgsField(FieldNames.HORIZON_TYPE, COLUMN_TYPE_STRING))
+        fields.append(QgsField(FieldNames.ID_OBSERVER, COLUMN_TYPE.Int))
+        fields.append(QgsField(FieldNames.ID_TARGET, COLUMN_TYPE.Int))
 
         if los_type == NamesConstants.LOS_NO_TARGET:
-            fields.append(QgsField(FieldNames.AZIMUTH, QVariant.Double))
+            fields.append(QgsField(FieldNames.AZIMUTH, COLUMN_TYPE.Double))
 
         sink, self.dest_id = self.parameterAsSink(
             parameters,
