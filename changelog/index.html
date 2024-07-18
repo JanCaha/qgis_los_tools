@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,24 +10,28 @@
         <link rel="shortcut icon" href="../img/favicon.ico">
         <title>Changelog - LoS Tools</title>
         <link href="../css/bootstrap.min.css" rel="stylesheet">
-        <link href="../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/color-brewer.min.css">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/color-brewer.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
         <link href="../css/additions.css" rel="stylesheet">
-        <link href="//cdnjs.cloudflare.com/ajax/libs/featherlight/v.1.7.14/featherlight.min.css" rel="stylesheet">
-
-        <script src="../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../js/bootstrap.min.js" defer></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-        <script>hljs.initHighlightingOnLoad();</script> 
-    </head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+     <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+    html.glightbox-open { overflow: initial; height: 100%; }
+    .gslide-title { margin-top: 0px; user-select: text; }
+    .gslide-desc { color: #666; user-select: text; }
+    .gslide-image img { background: white; }</style> <script src="../assets/javascripts/glightbox.min.js"></script></head>
 
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
                 <a class="navbar-brand" href="..">LoS Tools</a>
                 <!-- Expander button -->
-                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -35,14 +39,14 @@
                 <div id="navbar-collapse" class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li class="navitem">
+                            <li class="nav-item">
                                 <a href=".." class="nav-link">LoS Tools</a>
                             </li>
-                            <li class="navitem active">
-                                <a href="./" class="nav-link">Changelog</a>
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">Changelog</a>
                             </li>
-                            <li class="dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Interactive tools <b class="caret"></b></a>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Interactive tools</a>
                                 <ul class="dropdown-menu">
                                     
 <li>
@@ -66,8 +70,8 @@
 </li>
                                 </ul>
                             </li>
-                            <li class="dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Tools <b class="caret"></b></a>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Tools</a>
                                 <ul class="dropdown-menu">
                                     
   <li class="dropdown-submenu">
@@ -167,10 +171,6 @@
 <li>
     <a href="../tools/LoS%20Creation/tool_create_notarget_los/" class="dropdown-item">Create No Target LoS</a>
 </li>
-            
-<li>
-    <a href="../tools/LoS%20Creation/tool_create_notarget_los_v2/" class="dropdown-item">Create No Target LoS V2</a>
-</li>
     </ul>
   </li>
                                     
@@ -213,15 +213,15 @@
                             </li>
                         </ul>
 
-                    <ul class="nav navbar-nav ml-auto">
+                    <ul class="nav navbar-nav ms-md-auto">
                         <li class="nav-item">
-                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
 
                             <li class="nav-item">
-                                <a href="https://github.com/JanCaha/qgis_los_tools" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
+                                <a href="https://github.com/JanCaha/qgis_los_tools" class="nav-link"><i class="fa-brands fa-github"></i> GitHub</a>
                             </li>
                     </ul>
                 </div>
@@ -230,40 +230,40 @@
 
         <div class="container">
             <div class="row">
-                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
     <div class="navbar-header">
-        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
             <span class="fa fa-angle-down"></span>
         </button>
     </div>
 
     
-    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#changelog" class="nav-link">Changelog</a>
+            <li class="nav-item" data-bs-level="1"><a href="#changelog" class="nav-link">Changelog</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#version-10" class="nav-link">version 1.0</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#version-07" class="nav-link">version 0.7</a>
+            <li class="nav-item" data-bs-level="2"><a href="#version-10" class="nav-link">version 1.0</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#version-05" class="nav-link">version 0.5</a>
+            <li class="nav-item" data-bs-level="2"><a href="#version-07" class="nav-link">version 0.7</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#version-04" class="nav-link">version 0.4</a>
+            <li class="nav-item" data-bs-level="2"><a href="#version-05" class="nav-link">version 0.5</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#version-02" class="nav-link">version 0.2</a>
+            <li class="nav-item" data-bs-level="2"><a href="#version-04" class="nav-link">version 0.4</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#version-01" class="nav-link">version 0.1</a>
+            <li class="nav-item" data-bs-level="2"><a href="#version-02" class="nav-link">version 0.2</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#version-01" class="nav-link">version 0.1</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -362,21 +362,21 @@
                 <p>Copyright &copy; 2020 <a href="https://twitter.com/cahik13">Jan Caha</a>.</p>
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
         <script>
             var base_url = "..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="../js/base.js" defer></script>
-        <script src="//code.jquery.com/jquery-3.6.0.min.js" defer></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/featherlight/v.1.7.14/featherlight.min.js" defer></script>
-        <script src="../search/main.js" defer></script>
+        <script src="../js/base.js"></script>
+        <script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="../search/main.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="searchModalLabel">Search</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p>From here you can search these documents. Enter your search terms below.</p>
@@ -396,7 +396,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <table class="table">
@@ -432,5 +432,6 @@
     </div>
 </div>
 
-    </body>
+    <script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+</script></body>
 </html>
