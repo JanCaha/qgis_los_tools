@@ -1,4 +1,4 @@
-# Create No Target LoS V2
+# Create No Target LoS
 
 Create line-of-sight between each point from observer’s layer and targets layer, where `Observer ID field` value from observer is equal to `Target and Observer agreement ID field` of target. This ensures that each point from target’s layer is linked to one point from observers layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.
 
@@ -41,5 +41,4 @@ This variant of the tool specifies sampling and length of LoS by table `Sampling
 
 ## Tool screenshot
 
-![Create no target LoS V2](../../images/tool_create_notarget_los_v2.png)
-	
+![Create no target LoS](../../images/tool_create_notarget_los.png)
