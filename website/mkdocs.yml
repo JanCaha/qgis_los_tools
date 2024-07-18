@@ -11,20 +11,31 @@ edit_uri: ""
 theme:
     name: cerulean
     custom_dir: custom_theme/
-    
-extra_css: 
+
+extra_css:
     - css\additions.css
-    - //cdnjs.cloudflare.com/ajax/libs/featherlight/v.1.7.14/featherlight.min.css
 
 extra_javascript:
     - //code.jquery.com/jquery-3.6.0.min.js
-    - //cdnjs.cloudflare.com/ajax/libs/featherlight/v.1.7.14/featherlight.min.js
 
 docs_dir: pages
 site_dir: docs
-    
+
 plugins:
     - search
-
-markdown_extensions:
-    - featherlight
+    - glightbox:
+          touchNavigation: true
+          loop: false
+          effect: zoom
+          slide_effect: slide
+          width: 100%
+          height: auto
+          zoomable: true
+          draggable: true
+          skip_classes:
+              - custom-skip-class-name
+          auto_caption: false
+          caption_position: bottom
+          background: white
+          shadow: true
+          manual: false
