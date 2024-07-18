@@ -17,13 +17,12 @@ from qgis.core import (
     QgsProcessingUtils,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QVariant
 
 from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.processing.tools.util_functions import get_los_type
-from los_tools.utils import get_doc_file
+from los_tools.utils import COLUMN_TYPE, get_doc_file
 
 
 class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
@@ -98,28 +97,28 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
             fields.append(QgsField(attribute.name(), attribute.type()))
 
         if los_type == NamesConstants.LOS_LOCAL:
-            fields.append(QgsField(FieldNames.VISIBLE, QVariant.Bool))
-            fields.append(QgsField(FieldNames.VIEWING_ANGLE, QVariant.Double))
-            fields.append(QgsField(FieldNames.ELEVATION_DIFF, QVariant.Double))
-            fields.append(QgsField(FieldNames.ANGLE_DIFF_LH, QVariant.Double))
-            fields.append(QgsField(FieldNames.ELEVATION_DIFF_LH, QVariant.Double))
-            fields.append(QgsField(FieldNames.SLOPE_DIFFERENCE_LH, QVariant.Double))
-            fields.append(QgsField(FieldNames.HORIZON_COUNT, QVariant.Int))
-            fields.append(QgsField(FieldNames.DISTANCE_LH, QVariant.Double))
-            # los_layer.addAttribute(QgsField(FieldNames.FUZZY_VISIBILITY, QVariant.Double))
+            fields.append(QgsField(FieldNames.VISIBLE, COLUMN_TYPE.Bool))
+            fields.append(QgsField(FieldNames.VIEWING_ANGLE, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.ELEVATION_DIFF, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.ANGLE_DIFF_LH, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.ELEVATION_DIFF_LH, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.SLOPE_DIFFERENCE_LH, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.HORIZON_COUNT, COLUMN_TYPE.Int))
+            fields.append(QgsField(FieldNames.DISTANCE_LH, COLUMN_TYPE.Double))
+            # los_layer.addAttribute(QgsField(FieldNames.FUZZY_VISIBILITY, COLUMN_TYPE.Double))
 
         elif los_type == NamesConstants.LOS_GLOBAL:
-            fields.append(QgsField(FieldNames.VISIBLE, QVariant.Bool))
-            fields.append(QgsField(FieldNames.ANGLE_DIFF_GH, QVariant.Double))
-            fields.append(QgsField(FieldNames.ELEVATION_DIFF_GH, QVariant.Double))
-            fields.append(QgsField(FieldNames.HORIZON_COUNT_BEHIND, QVariant.Int))
-            fields.append(QgsField(FieldNames.DISTANCE_GH, QVariant.Double))
+            fields.append(QgsField(FieldNames.VISIBLE, COLUMN_TYPE.Bool))
+            fields.append(QgsField(FieldNames.ANGLE_DIFF_GH, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.ELEVATION_DIFF_GH, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.HORIZON_COUNT_BEHIND, COLUMN_TYPE.Int))
+            fields.append(QgsField(FieldNames.DISTANCE_GH, COLUMN_TYPE.Double))
 
         elif los_type == NamesConstants.LOS_NO_TARGET:
-            fields.append(QgsField(FieldNames.MAXIMAL_VERTICAL_ANGLE, QVariant.Double))
-            fields.append(QgsField(FieldNames.DISTANCE_GH, QVariant.Double))
-            fields.append(QgsField(FieldNames.DISTANCE_LH, QVariant.Double))
-            fields.append(QgsField(FieldNames.VERTICAL_ANGLE_LH, QVariant.Double))
+            fields.append(QgsField(FieldNames.MAXIMAL_VERTICAL_ANGLE, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.DISTANCE_GH, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.DISTANCE_LH, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.VERTICAL_ANGLE_LH, COLUMN_TYPE.Double))
 
         sink, dest_id = self.parameterAsSink(
             parameters,

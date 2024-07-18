@@ -18,14 +18,14 @@ from qgis.core import (
     QgsVectorLayer,
     QgsWkbTypes,
 )
-from qgis.PyQt.QtCore import Qt, QVariant
+from qgis.PyQt.QtCore import Qt
 
 from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.constants.textlabels import TextLabels
 from los_tools.processing.tools.util_functions import get_los_type
-from los_tools.utils import get_doc_file
+from los_tools.utils import COLUMN_TYPE, get_doc_file
 
 
 class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
@@ -123,17 +123,17 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         los_type = get_los_type(los_layer, field_names)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.ID_OBSERVER, QVariant.Int))
-        fields.append(QgsField(FieldNames.ID_TARGET, QVariant.Int))
-        fields.append(QgsField(FieldNames.VISIBLE, QVariant.Bool))
+        fields.append(QgsField(FieldNames.ID_OBSERVER, COLUMN_TYPE.Int))
+        fields.append(QgsField(FieldNames.ID_TARGET, COLUMN_TYPE.Int))
+        fields.append(QgsField(FieldNames.VISIBLE, COLUMN_TYPE.Bool))
 
         if extended_attributes:
-            fields.append(QgsField(FieldNames.ELEVATION_DIFF_LH, QVariant.Double))
-            fields.append(QgsField(FieldNames.ANGLE_DIFF_LH, QVariant.Double))
+            fields.append(QgsField(FieldNames.ELEVATION_DIFF_LH, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.ANGLE_DIFF_LH, COLUMN_TYPE.Double))
 
             if los_type == NamesConstants.LOS_GLOBAL or los_type == NamesConstants.LOS_NO_TARGET:
-                fields.append(QgsField(FieldNames.ELEVATION_DIFF_GH, QVariant.Double))
-                fields.append(QgsField(FieldNames.ANGLE_DIFF_GH, QVariant.Double))
+                fields.append(QgsField(FieldNames.ELEVATION_DIFF_GH, COLUMN_TYPE.Double))
+                fields.append(QgsField(FieldNames.ANGLE_DIFF_GH, COLUMN_TYPE.Double))
 
         sink, self.dest_id = self.parameterAsSink(
             parameters,

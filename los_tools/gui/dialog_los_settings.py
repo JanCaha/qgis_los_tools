@@ -11,9 +11,8 @@ from qgis.core import (
     QgsProject,
     QgsUnitTypes,
     QgsVectorLayer,
-    QgsWkbTypes,
 )
-from qgis.PyQt.QtCore import QMetaType, Qt, QVariant
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -30,15 +29,10 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 
+from los_tools.utils import _column_type_class
+
 from ..constants.field_names import FieldNames
 from .custom_classes import Distance, DistanceWidget
-
-if Qgis.versionInt() >= 33800:
-    source_type = QMetaType.Type
-    source_type_string = source_type.QString
-else:
-    source_type = QVariant.Type
-    source_type_string = source_type.String
 
 
 class LoSSettings(QDialog):
@@ -270,12 +264,12 @@ class LoSSettings(QDialog):
         size_field_name = FieldNames.TEMPLATE_SIZE.replace("?", unit_name)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.SIZE_ANGLE, QVariant.Double))
-        fields.append(QgsField(distance_field_name, QVariant.Double))
-        fields.append(QgsField(size_field_name, QVariant.Double))
+        fields.append(QgsField(FieldNames.SIZE_ANGLE, _column_type_class().Double))
+        fields.append(QgsField(distance_field_name, _column_type_class().Double))
+        fields.append(QgsField(size_field_name, _column_type_class().Double))
 
         layer = QgsMemoryProviderUtils.createMemoryLayer(
-            "Sampling Table", fields=fields, geometryType=QgsWkbTypes.NoGeometry
+            "Sampling Table", fields=fields, geometryType=Qgis.WkbType.NoGeometry
         )
 
         angle = self.object_angle_size.value()

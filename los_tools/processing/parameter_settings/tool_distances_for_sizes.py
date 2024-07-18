@@ -14,10 +14,9 @@ from qgis.core import (
     QgsProcessingUtils,
     QgsWkbTypes,
 )
-from qgis.PyQt.QtCore import QVariant
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.utils import get_doc_file
+from los_tools.utils import COLUMN_TYPE, get_doc_file
 
 
 class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
@@ -65,9 +64,9 @@ class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
         maximal_distance = self.parameterAsBoolean(parameters, self.MAXIMALDISTANCE, context)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.SIZE_ANGLE, QVariant.Double))
-        fields.append(QgsField(FieldNames.DISTANCE, QVariant.Double))
-        fields.append(QgsField(FieldNames.SIZE, QVariant.Double))
+        fields.append(QgsField(FieldNames.SIZE_ANGLE, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.DISTANCE, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.SIZE, COLUMN_TYPE.Double))
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields, QgsWkbTypes.NoGeometry)
 
