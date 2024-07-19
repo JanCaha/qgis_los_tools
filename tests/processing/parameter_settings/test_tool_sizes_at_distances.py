@@ -64,7 +64,6 @@ def test_run_alg() -> None:
     sampling_sizes = []
 
     for feature in table.getFeatures():
-
         angles.append(feature.attribute(FieldNames.SIZE_ANGLE))
         distances.append(feature.attribute(FieldNames.DISTANCE))
         sampling_sizes.append(feature.attribute(FieldNames.SIZE))

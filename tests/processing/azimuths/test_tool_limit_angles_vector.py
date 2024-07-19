@@ -29,7 +29,6 @@ def test_parameters() -> None:
 
 
 def test_alg_settings() -> None:
-
     alg = LimitAnglesAlgorithm()
     alg.initAlgorithm()
 
@@ -40,7 +39,6 @@ def test_check_wrong_params(
     los_no_target_wrong: QgsVectorLayer,
     layer_polygon: QgsVectorLayer,
 ) -> None:
-
     alg = LimitAnglesAlgorithm()
     alg.initAlgorithm()
 

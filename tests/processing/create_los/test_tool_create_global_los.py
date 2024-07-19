@@ -144,7 +144,6 @@ def test_run_alg(raster_small: QgsRasterLayer, layer_points: QgsVectorLayer, lay
 
     for observer_id in observers_ids:
         for target_id in targets_ids:
-
             request = QgsFeatureRequest()
             request.setFilterExpression(f"{OBSERVERS_ID} = '{observer_id}'")
             observer_feature = list(layer_points.getFeatures(request))[0]

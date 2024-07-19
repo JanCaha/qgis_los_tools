@@ -49,7 +49,6 @@ def small_raster_example() -> QgsRasterLayer:
 
 
 def test_bilinear_interpolated_value_small_raster(small_raster_example: QgsRasterLayer):
-
     small_raster_dp = small_raster_example.dataProvider()
 
     bilinear_value = bilinear_interpolated_value(small_raster_dp, QgsPointXY(1, 1))
@@ -69,7 +68,6 @@ def test_bilinear_interpolated_value_small_raster(small_raster_example: QgsRaste
 
 
 def test_bilinear_interpolated_value(raster_small: QgsRasterLayer):
-
     raster_dp = raster_small.dataProvider()
 
     base_x = -336429.64
@@ -110,7 +108,6 @@ def test_calculate_distance():
 
 
 def test_segmentize_line():
-
     line = QgsGeometry.fromPolyline([QgsPoint(0, 0), QgsPoint(1, 0), QgsPoint(1, 1), QgsPoint(2, 2)])
 
     line_seg = segmentize_line(line, 0.1)
@@ -125,7 +122,6 @@ def test_segmentize_line():
 
 
 def test_segmentize_los_line():
-
     line = QgsGeometry.fromPolyline([QgsPoint(0, 0), QgsPoint(1, 0), QgsPoint(1, 1), QgsPoint(2, 2)])
 
     with pytest.raises(ValueError, match="Should only segmentize lines with at most 3 vertices"):
@@ -143,7 +139,6 @@ def test_segmentize_los_line():
 
 
 def test_wkt_to_array():
-
     points_count = 10
     p = []
     for i in range(points_count):

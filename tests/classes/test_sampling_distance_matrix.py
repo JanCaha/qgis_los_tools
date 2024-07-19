@@ -20,7 +20,6 @@ def test_repr(table_angle_distance_size: QgsVectorLayer):
 
 
 def test_get_rows(table_angle_distance_size: QgsVectorLayer):
-
     distance_sampling_matrix = SamplingDistanceMatrix(table_angle_distance_size)
 
     assert isinstance(distance_sampling_matrix.get_row(0), list)
@@ -30,7 +29,6 @@ def test_get_rows(table_angle_distance_size: QgsVectorLayer):
 
 
 def test_validate_table(table_angle_distance_size: QgsVectorLayer):
-
     result, msg = SamplingDistanceMatrix.validate_table(table_angle_distance_size)
 
     assert isinstance(result, bool)
@@ -41,7 +39,6 @@ def test_validate_table(table_angle_distance_size: QgsVectorLayer):
 
 
 def test_distances(table_angle_distance_size: QgsVectorLayer):
-
     distance_sampling_matrix = SamplingDistanceMatrix(table_angle_distance_size)
 
     assert distance_sampling_matrix.minimum_distance == 0
@@ -49,7 +46,6 @@ def test_distances(table_angle_distance_size: QgsVectorLayer):
 
 
 def test_next_distance(table_angle_distance_size: QgsVectorLayer):
-
     distance_sampling_matrix = SamplingDistanceMatrix(table_angle_distance_size)
 
     assert distance_sampling_matrix.next_distance(0) == 0.5
@@ -65,7 +61,6 @@ def test_next_distance(table_angle_distance_size: QgsVectorLayer):
 
 
 def test_build_line(table_angle_distance_size: QgsVectorLayer):
-
     distance_sampling_matrix = SamplingDistanceMatrix(table_angle_distance_size)
 
     start_point = QgsPoint(0, 0)
@@ -89,7 +84,6 @@ def test_build_line(table_angle_distance_size: QgsVectorLayer):
 
 
 def test_values_minus_one(table_angle_distance_size: QgsVectorLayer):
-
     fields = table_angle_distance_size.fields()
 
     field_index_angle = fields.indexFromName(FieldNames.SIZE_ANGLE)
