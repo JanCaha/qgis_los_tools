@@ -292,8 +292,7 @@ class LoSToolsPlugin:
                 selected_crs,
             )
 
-        else:
-            return self._layer_LoS
+        return self._layer_LoS
 
     def reset_los_layer(self) -> None:
         self._layer_LoS = None
