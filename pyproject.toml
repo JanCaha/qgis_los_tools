@@ -24,7 +24,6 @@ addopts = [
 line-length = 120
 
 [tool.isort]
-atomic = true
 profile = "black"
 line_length = 120
 skip_gitignore = true
@@ -33,7 +32,16 @@ skip_gitignore = true
 max-line-length = 120
 
 [tool.pylint.messages_control]
-disable = "W293,W504,E0611"
+disable = [
+    "redefined-outer-name",
+    "no-name-in-module",
+    "missing-function-docstring",
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "invalid-name",
+    "too-many-arguments",
+    "attribute-defined-outside-init"
+]
 
 [tool.mypy]
 follow_imports = "silent"
