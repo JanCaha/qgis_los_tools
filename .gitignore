@@ -7,4 +7,5 @@ __pycache__
 !/tests/_data/results/__init__.txt
 /tests/_data/*.gpkg-wal
 /tests/_data/*.gpkg-shm
+/tests/_data/*.aux.xml
 /website/docs

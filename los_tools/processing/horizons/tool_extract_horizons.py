@@ -20,6 +20,7 @@ from qgis.core import (
     QgsSymbol,
     QgsWkbTypes,
 )
+from qgis.PyQt.QtCore import Qt
 
 from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
