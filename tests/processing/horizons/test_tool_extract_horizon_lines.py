@@ -109,5 +109,7 @@ def test_run_alg(los_fixture_name: str, horizon_type: int, request) -> None:
     )
     assert (
         horizon_result
-        == list(horizon_lines_layer.uniqueValues(horizon_lines_layer.fields().lookupField(FieldNames.HORIZON_TYPE)))[0]
+        == sorted(
+            list(horizon_lines_layer.uniqueValues(horizon_lines_layer.fields().lookupField(FieldNames.HORIZON_TYPE)))
+        )[0]
     )
