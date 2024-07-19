@@ -29,8 +29,10 @@ profile = "black"
 line_length = 120
 skip_gitignore = true
 
-[tool.pylint.'MESSAGES CONTROL']
+[tool.pylint.format]
 max-line-length = 120
+
+[tool.pylint.messages_control]
 disable = "W293,W504,E0611"
 
 [tool.mypy]
