@@ -33,4 +33,4 @@ jobs:
         
         - uses: stefanzweifel/git-auto-commit-action@v5
           with:
-            commit_message: Black and isort formatting  
+            commit_message: Black and isort formatting
