@@ -1,69 +1,28 @@
 import numpy as np
-from qgis.core import Qgis, QgsGeometry, QgsPointLocator, QgsWkbTypes
-from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolAdvancedDigitizing, QgsSnapIndicator
+from qgis.core import QgsGeometry, QgsPointLocator
+from qgis.gui import QgisInterface, QgsMapMouseEvent
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QKeyEvent
-from qgis.PyQt.QtWidgets import QWidget
 
+from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWithWidget
+from los_tools.gui.los_without_target_visualization.los_without_target_widget import LoSNoTargetInputWidget
 from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
 
-from .los_without_target_widget import LoSNoTargetInputWidget
 
+class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
 
-class LosNoTargetMapTool(QgsMapToolAdvancedDigitizing):
     def __init__(self, iface: QgisInterface) -> None:
-        super().__init__(iface.mapCanvas(), iface.cadDockWidget())
-        self._iface = iface
-        self._canvas = self._iface.mapCanvas()
+        super().__init__(iface)
 
         self._point = None
 
-        self._snapper = self._canvas.snappingUtils()
-        self.snap_marker = QgsSnapIndicator(self._canvas)
-
-        self._los_rubber_band = self.createRubberBand(QgsWkbTypes.LineGeometry)
-
-        self._widget: QWidget = None
+        self._widget = LoSNoTargetInputWidget()
+        self._widget.hide()
 
     def create_widget(self):
-        self.delete_widget()
-
-        self._widget = LoSNoTargetInputWidget()
-        self._iface.addUserInputWidget(self._widget)
-        self._widget.setFocus(Qt.TabFocusReason)
+        super().create_widget()
 
         self._widget.valuesChanged.connect(self.draw_los)
-
-    def delete_widget(self):
-        if self._widget:
-            self._widget.releaseKeyboard()
-            self._widget.deleteLater()
-            self._widget = None
-
-    def activate(self) -> None:
-        super(LosNoTargetMapTool, self).activate()
-        self.create_widget()
-        self.messageDiscarded.emit()
-        self._canvas = self._iface.mapCanvas()
-        self._snapper = self._canvas.snappingUtils()
-        if self._canvas.mapSettings().destinationCrs().isGeographic():
-            self.messageEmitted.emit(
-                "Tool only works if canvas is in projected CRS. Currently canvas is in geographic CRS.",
-                Qgis.Critical,
-            )
-            self.deactivate()
-            return
-        self._widget.setUnit(self._canvas.mapSettings().destinationCrs().mapUnits())
-
-    def clean(self) -> None:
-        self.snap_marker.setVisible(False)
-        self._los_rubber_band.hide()
-
-    def deactivate(self) -> None:
-        self.clean()
-        self.delete_widget()
-        self._iface.mapCanvas().unsetMapTool(self)
-        super(LosNoTargetMapTool, self).deactivate()
 
     def canvasReleaseEvent(self, e: QgsMapMouseEvent) -> None:
         if e.button() == Qt.RightButton:
@@ -90,14 +49,8 @@ class LosNoTargetMapTool(QgsMapToolAdvancedDigitizing):
         return super().keyPressEvent(e)
 
     def draw_los(self):
-        canvas_crs = self._canvas.mapSettings().destinationCrs()
 
-        if canvas_crs.isGeographic():
-            self._iface.messageBar().pushMessage(
-                "LoS can be drawn only for projected CRS. Canvas is currently in geographic CRS.",
-                Qgis.Critical,
-                duration=5,
-            )
+        if not self.canvas_crs_is_projected():
             return
 
         if self._point:

@@ -1,22 +1,22 @@
 from functools import partial
 
 import numpy as np
-from qgis.core import Qgis, QgsGeometry, QgsPoint, QgsPointLocator, QgsPointXY, QgsVectorLayer, QgsVertexId, QgsWkbTypes
-from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolAdvancedDigitizing, QgsSnapIndicator
+from qgis.core import Qgis, QgsGeometry, QgsPoint, QgsPointLocator, QgsPointXY, QgsVectorLayer, QgsVertexId
+from qgis.gui import QgisInterface, QgsMapMouseEvent
 from qgis.PyQt.QtCore import Qt, pyqtSignal
-from qgis.PyQt.QtGui import QKeyEvent
-from qgis.PyQt.QtWidgets import QAction, QWidget
+from qgis.PyQt.QtGui import QAction
 
 from los_tools.classes.list_raster import ListOfRasters
+from los_tools.gui.create_los_tool.create_los_widget import LoSInputWidget
+from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWithWidget
 from los_tools.gui.dialog_los_settings import LoSSettings
 from los_tools.gui.dialog_raster_validations import RasterValidations
 from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
 
-from .create_los_widget import LoSNoTargetInputWidget
 from .los_tasks import LoSExtractionTaskManager, PrepareLoSTask, PrepareLoSWithoutTargetTask
 
 
-class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
+class CreateLoSMapTool(LoSDigitizingToolWithWidget):
     featuresAdded = pyqtSignal()
 
     def __init__(
@@ -27,9 +27,7 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
         los_layer: QgsVectorLayer = None,
         add_result_action: QAction = None,
     ) -> None:
-        super().__init__(iface.mapCanvas(), iface.cadDockWidget())
-        self._iface = iface
-        self._canvas = self._iface.mapCanvas()
+        super().__init__(iface)
 
         self.task_manager = LoSExtractionTaskManager()
 
@@ -44,46 +42,21 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
 
         self._last_towards_point: QgsPointXY = None
 
-        self._snapper = self._canvas.snappingUtils()
-        self.snap_marker = QgsSnapIndicator(self._canvas)
-
-        self._los_rubber_band = self.createRubberBand(QgsWkbTypes.LineGeometry)
-
-        self._widget: QWidget = None
+        self._widget = LoSInputWidget()
+        self._widget.hide()
 
     def set_los_layer(self, layer: QgsVectorLayer) -> None:
         self._los_layer = layer
 
     def create_widget(self):
-        self.delete_widget()
-
-        self._widget = LoSNoTargetInputWidget()
-        self._iface.addUserInputWidget(self._widget)
-        self._widget.setFocus(Qt.TabFocusReason)
+        super().create_widget()
 
         self._widget.valuesChanged.connect(partial(self.draw_los, None))
         self._widget.saveToLayerClicked.connect(self.add_los_to_layer)
 
-    def delete_widget(self):
-        if self._widget:
-            self._widget.releaseKeyboard()
-            self._widget.deleteLater()
-            self._widget = None
-
     def activate(self) -> None:
-        super(CreateLoSMapTool, self).activate()
-        self.create_widget()
-        self.messageDiscarded.emit()
-        self._canvas = self._iface.mapCanvas()
-        self._snapper = self._canvas.snappingUtils()
-        if self._canvas.mapSettings().destinationCrs().isGeographic():
-            self.messageEmitted.emit(
-                "Tool only works if canvas is in projected CRS. Currently canvas is in geographic CRS.",
-                Qgis.Critical,
-            )
-            self.hide_widgets()
-            self.deactivate()
-            return
+        super().activate()
+
         if not ListOfRasters.validate(self._raster_validation_dialog.list_of_selected_rasters):
             self.messageEmitted.emit(
                 "Tool needs valid setup in `Raster Validatations` dialog.",
@@ -93,17 +66,10 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
             return
 
     def clean(self) -> None:
+        super().clean()
         if self._widget:
             self._widget.disableAddLos()
-        self.snap_marker.setVisible(False)
-        self._los_rubber_band.hide()
         self._start_point = None
-
-    def deactivate(self) -> None:
-        self.clean()
-        self.delete_widget()
-        self._iface.mapCanvas().unsetMapTool(self)
-        super(CreateLoSMapTool, self).deactivate()
 
     def canvasReleaseEvent(self, e: QgsMapMouseEvent) -> None:
         if e.button() == Qt.RightButton:
@@ -130,24 +96,11 @@ class CreateLoSMapTool(QgsMapToolAdvancedDigitizing):
         if self._start_point is not None:
             self.draw_los(self._snap_point)
 
-    def keyPressEvent(self, e: QKeyEvent) -> None:
-        if e.key() == Qt.Key_Escape:
-            self.deactivate()
-            self._iface.mapCanvas().unsetMapTool(self)
-        return super().keyPressEvent(e)
-
     def draw_los(self, towards_point: QgsPointXY):
         if towards_point is None:
             towards_point = self._last_towards_point
 
-        canvas_crs = self._canvas.mapSettings().destinationCrs()
-
-        if canvas_crs.isGeographic():
-            self._iface.messageBar().pushMessage(
-                "LoS can be drawn only for projected CRS. Canvas is currently in geographic CRS.",
-                Qgis.Critical,
-                duration=5,
-            )
+        if not self.canvas_crs_is_projected():
             return
 
         if self._start_point and towards_point:
