@@ -20,8 +20,13 @@ repository=https://github.com/JanCaha/qgis_los_tools
 
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
-changelog=1.1.1 - simplify inner working of GUI tools
-1.1 - update some internals including test, style python using black and isort, avoid some warnings in QGIS 3.38, remove older version of `No Target LoS Tool`
+changelog=1.1.1 
+    - simplify inner working of GUI tools
+    <p>1.1 
+    - update some internals including test
+    - style python using black and isort
+    - avoid some warnings in QGIS 3.38
+    - remove older version of `No Target LoS Tool`
 
 
 # Tags are comma separated with spaces allowed
