@@ -2,6 +2,7 @@ import inspect
 import os
 import re
 import sys
+import typing
 from functools import partial
 
 from qgis.core import (
@@ -24,7 +25,7 @@ from .gui.create_los_tool.create_los_tool import CreateLoSMapTool
 from .gui.dialog_los_settings import LoSSettings
 from .gui.dialog_object_parameters import ObjectParameters
 from .gui.dialog_raster_validations import RasterValidations
-from .gui.dialog_tool_set_camera import SetCameraTool
+from .gui.dialog_tool_set_camera import SetCameraDialog
 from .gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
 from .gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
 from .utils import get_icon_path
@@ -36,7 +37,6 @@ if cmd_folder not in sys.path:
 
 
 class LoSToolsPlugin:
-    camera_tool: SetCameraTool = None
 
     los_notarget_action_name = "Visualize LoS No Target Tool"
     optimize_point_location_action_name = "Optimize Point Location Tool"
@@ -49,7 +49,7 @@ class LoSToolsPlugin:
         self.iface: QgisInterface = iface
         self.provider = LoSToolsProvider()
 
-        self.actions = []
+        self.actions: typing.List[QAction] = []
         self.menu = PluginConstants.plugin_name
 
         if self.iface is not None:
@@ -58,6 +58,8 @@ class LoSToolsPlugin:
 
             self.iface.newProjectCreated.connect(self.reset_los_layer)
             self.iface.projectRead.connect(self.reset_los_layer)
+
+            self.camera_tool: SetCameraDialog = None
 
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
@@ -237,19 +239,13 @@ class LoSToolsPlugin:
 
     def run_tool_set_camera(self):
         if self.camera_tool is None:
-            self.camera_tool = SetCameraTool(
+            self.camera_tool = SetCameraDialog(
                 parent=self.iface.mainWindow(),
                 canvas=self.iface.mapCanvas(),
                 iface=self.iface,
             )
 
-        self.camera_tool.show()
-        result = self.camera_tool.exec()
-
-        if result == 1:
-            self.camera_tool.update_camera_position()
-        else:
-            self.camera_tool.restore_canvas_tools()
+        self.camera_tool.exec()
 
     def open_dialog_los_settings(self):
         self.los_settings_dialog.exec()
@@ -292,8 +288,7 @@ class LoSToolsPlugin:
                 selected_crs,
             )
 
-        else:
-            return self._layer_LoS
+        return self._layer_LoS
 
     def reset_los_layer(self) -> None:
         self._layer_LoS = None

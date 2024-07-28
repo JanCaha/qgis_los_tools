@@ -1,5 +1,3 @@
-import numpy as np
-from osgeo import gdal
 from processing.core.Processing import Processing
 from qgis.core import QgsPointXY, QgsRasterLayer, QgsVectorLayer
 

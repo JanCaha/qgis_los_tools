@@ -15,7 +15,6 @@ from tests.utils import result_filename
 
 
 def test_parameters() -> None:
-
     alg = ExtractLoSVisibilityPartsAlgorithm()
     alg.initAlgorithm()
 
@@ -26,7 +25,6 @@ def test_parameters() -> None:
 
 
 def test_alg_settings() -> None:
-
     alg = ExtractLoSVisibilityPartsAlgorithm()
     alg.initAlgorithm()
 
@@ -34,7 +32,6 @@ def test_alg_settings() -> None:
 
 
 def test_check_wrong_params(los_no_target_wrong: QgsVectorLayer) -> None:
-
     alg = ExtractLoSVisibilityPartsAlgorithm()
     alg.initAlgorithm()
 
@@ -50,7 +47,6 @@ def test_check_wrong_params(los_no_target_wrong: QgsVectorLayer) -> None:
     [("los_local"), ("los_global"), ("los_no_target")],
 )
 def test_run_alg(los_fixture_name: str, request) -> None:
-
     los: QgsVectorLayer = request.getfixturevalue(los_fixture_name)
 
     alg = ExtractLoSVisibilityPartsAlgorithm()

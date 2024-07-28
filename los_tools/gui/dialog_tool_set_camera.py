@@ -1,4 +1,6 @@
 import math
+from enum import Enum
+from functools import partial
 from typing import List
 
 from qgis._3d import QgsLayoutItem3DMap
@@ -32,6 +34,7 @@ from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QPushButton,
     QToolButton,
     QVBoxLayout,
 )
@@ -39,7 +42,12 @@ from qgis.PyQt.QtWidgets import (
 from los_tools.processing.tools.util_functions import bilinear_interpolated_value
 
 
-class SetCameraTool(QDialog):
+class PointType(Enum):
+    OBSERVER = 1
+    TARGET = 2
+
+
+class SetCameraDialog(QDialog):
     observer: QgsPointXY = None
     target: QgsPointXY = None
 
@@ -73,10 +81,9 @@ class SetCameraTool(QDialog):
         self.layout_cb.currentIndexChanged.connect(self.set_layout)
         self.layout_cb.addItems(layouts)
 
-        self.observer_btn = QToolButton()
-        self.observer_btn.setCheckable(True)
+        self.observer_btn = QPushButton()
         self.observer_btn.setText("Choose observer point on the map")
-        self.observer_btn.toggled.connect(self.btn_map_tool_clicked)
+        self.observer_btn.clicked.connect(partial(self.select_point, PointType.OBSERVER))
 
         self.dsm_cb = QgsMapLayerComboBox()
         self.dsm_cb.setFilters(QgsMapLayerProxyModel.RasterLayer)
@@ -93,10 +100,9 @@ class SetCameraTool(QDialog):
         self.hlayout1.addWidget(self.observer_btn)
         self.hlayout1.addWidget(self.observer_coordinate)
 
-        self.target_btn = QToolButton()
-        self.target_btn.setCheckable(True)
+        self.target_btn = QPushButton()
         self.target_btn.setText("Choose target point on the map")
-        self.target_btn.toggled.connect(self.btn_map_tool_clicked)
+        self.target_btn.clicked.connect(partial(self.select_point, PointType.TARGET))
 
         self.target_coordinate = QLineEdit()
         self.target_coordinate.setEnabled(False)
@@ -165,67 +171,54 @@ class SetCameraTool(QDialog):
 
         return items
 
-    def active_selection_tool(self) -> None:
-        if self.observer_btn.isChecked():
-            self.active_button = self.observer_btn
+    def accept(self) -> None:
+        self.update_camera_position()
+        super().accept()
 
-        if self.target_btn.isChecked():
-            self.active_button = self.target_btn
+    def reject(self) -> None:
+        self.restore_canvas_tools()
+        super().reject()
 
-    def btn_map_tool_clicked(self, checked):
-        self.active_selection_tool()
+    def select_point(self, point_type: PointType) -> None:
+        self.hide()
 
-        if checked:
-            self.start_selecting_point()
-        else:
-            self.stop_selecting_point()
-
-    def create_map_tool(self):
         self.mapTool = PointCaptureMapTool(self.canvas)
 
-        self.mapTool.canvasClicked.connect(self.update_point)
+        self.mapTool.canvasClicked.connect(partial(self.update_point, point_type=point_type))
 
-        self.mapTool.complete.connect(self.stop_selecting_point)
+        self.mapTool.complete.connect(self.restore_canvas_tools)
 
-    def start_selecting_point(self):
-        self.create_map_tool()
         self.canvas.setMapTool(self.mapTool)
 
-    def update_point(self, point, button: QToolButton):
+    def update_point(self, point, point_type: PointType):
+
         canvas_crs = self.canvas.mapSettings().destinationCrs()
 
         point = self.mapTool.get_point()
 
         if self.mapTool.is_point_snapped():
-            msg = "Snapped to point at {} {} from layer {}.".format(point.x(), point.y(), self.mapTool.snap_layer())
+            msg = f"Snapped to point at {point.x()} {point.y()} from layer {self.mapTool.snap_layer()}."
         else:
-            msg = "Point at {} {} selected.".format(point.x(), point.y())
+            msg = f"Point at {point.x()} {point.y()} selected."
 
         self.iface.messageBar().pushMessage("Point defined", msg, duration=5)
 
-        text_point = "{:.3f};{:.3f}[{}]".format(point.x(), point.y(), canvas_crs.authid())
+        text_point = f"{point.x():.3f};{point.y():.3f}[{canvas_crs.authid()}]"
 
-        if "observer" in self.active_button.text():
+        if point_type == PointType.OBSERVER:
             self.observer = point
             self.observer_coordinate.setText(text_point)
 
-        if "target" in self.active_button.text():
+        if point_type == PointType.TARGET:
             self.target = point
             self.target_coordinate.setText(text_point)
 
         self.info_update.emit()
 
     def restore_canvas_tools(self) -> None:
+        self.show()
         self.canvas.setMapTool(self.prev_map_tool)
         self.canvas.setCursor(self.prev_cursor)
-
-    def stop_selecting_point(self):
-        self.observer_btn.setChecked(False)
-        self.target_btn.setChecked(False)
-
-        self.active_button = None
-
-        self.restore_canvas_tools()
 
     def update_camera_position(self) -> None:
         settings = self.layout_item_3d.mapSettings()
@@ -244,7 +237,6 @@ class SetCameraTool(QDialog):
         end_point = QgsPointXY(look_from_point.x(), look_from_point.z())
 
         angle = start_point.azimuth(end_point)
-        angle = angle
 
         distance = look_at_point.distance(look_from_point)
 
@@ -260,8 +252,9 @@ class SetCameraTool(QDialog):
         self.layout_item_3d.setCameraPose(camera_pose)
         self.layout_item_3d.refresh()
 
-        msg = "Layout item `{}` in layout `{}` camera settings updated.".format(
-            self.layout_item_3d.displayName(), self.layout.name()
+        msg = (
+            f"Layout item `{self.layout_item_3d.displayName()}` in layout `{self.layout.name()}` "
+            "camera settings updated."
         )
 
         self.iface.messageBar().pushMessage("Layout item updated", msg, duration=5)

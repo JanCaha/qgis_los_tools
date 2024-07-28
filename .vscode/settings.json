@@ -11,22 +11,29 @@
         "/usr/share/qgis/python/plugins",
         "/usr/share/qgis/python"
     ],
+    "svg.preview.background": "dark-transparent",
+    "python.testing.pytestArgs": [
+        "tests",
+        "--cov=los_tools",
+        "--cov-report=term-missing:skip-covered",
+        "-rP",
+        "-s"
+    ],
+    "python.testing.pytestEnabled": true,
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+    },
     "pylint.args": [
-        "--ignore=W293,W504",
-        "--disable=E0611",
-        "--max-line-length=160"
+        "--disable= redefined-outer-name,no-name-in-module,missing-function-docstring,missing-class-docstring,missing-module-docstring,invalid-name,too-many-arguments,attribute-defined-outside-init",
+        "--max-line-length=120"
     ],
     "flake8.args": [
-        "--ignore=W293,W504",
         "--max-line-length",
-        "160"
-    ],
-    "mypy-type-checker.args": [
-        "--follow-imports=silent",
-        "--ignore-missing-imports",
-        "--show-column-numbers",
-        "--no-pretty",
-        "--no-strict-optional"
+        "120"
     ],
     "isort.args": [
         "--profile",
@@ -38,9 +45,4 @@
         "--line-length",
         "120"
     ],
-    "svg.preview.background": "dark-transparent",
-    "python.testing.pytestArgs": [
-        "tests"
-    ],
-    "python.testing.pytestEnabled": true
 }

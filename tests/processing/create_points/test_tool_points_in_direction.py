@@ -98,7 +98,6 @@ def test_run(layer_points: QgsVectorLayer, layer_point: QgsVectorLayer) -> None:
     assert number_of_elements == output_layer.featureCount()
 
     for id_orig in unique_ids_orig:
-
         request = QgsFeatureRequest()
         request.setFilterExpression(f"{FieldNames.ID_ORIGINAL_POINT} = '{id_orig}'")
         order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)

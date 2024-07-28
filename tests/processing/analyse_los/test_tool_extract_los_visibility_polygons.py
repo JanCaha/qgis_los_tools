@@ -43,7 +43,6 @@ def test_check_wrong_params(los_no_target_wrong: QgsVectorLayer) -> None:
 
 
 def test_run_alg(los_no_target: QgsVectorLayer) -> None:
-
     alg = ExtractLoSVisibilityPolygonsAlgorithm()
     alg.initAlgorithm()
 

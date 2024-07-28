@@ -6,7 +6,7 @@
 name=LoS Tools
 qgisMinimumVersion=3.30
 description=This plugin creates and analyzes lines-of-sight (LoS) and also provides supporting tools.
-version=1.1
+version=1.1.1
 author=Jan Caha
 email=jan.caha@outlook.com
 
@@ -20,7 +20,14 @@ repository=https://github.com/JanCaha/qgis_los_tools
 
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
-changelog=1.1 - update some internals including test, style python using black and isort, avoid some warnings in QGIS 3.38, remove older version of `No Target LoS Tool`
+changelog=1.1.1 
+    - simplify inner working of GUI tools
+    - fix `Set Camera` GUI tool
+    <p>1.1 
+    - update some internals including test
+    - style python using black and isort
+    - avoid some warnings in QGIS 3.38
+    - remove older version of `No Target LoS Tool`
 
 
 # Tags are comma separated with spaces allowed

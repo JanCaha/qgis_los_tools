@@ -74,10 +74,10 @@ class LoS:
             target_distance = calculate_distance(first_point_x, first_point_y, self.target_x, self.target_y)
             sampling_distance = calculate_distance(points[0][0], points[0][1], points[1][0], points[1][1])
 
-        for i in range(0, len(points)):
-            point_x = points[i][0]
-            point_y = points[i][1]
-            point_z = points[i][2]
+        for i, point in enumerate(points):
+            point_x = point[0]
+            point_y = point[1]
+            point_z = point[2]
 
             distance = calculate_distance(first_point_x, first_point_y, point_x, point_y)
 
@@ -137,15 +137,10 @@ class LoS:
 
     def __str__(self):
         string = ""
-        for i in range(0, len(self.points)):
-            string += "{} - {} {} {} (prev. {}) - vis. {} hor. {} \n".format(
-                i,
-                self.points[i][self.DISTANCE],
-                self.points[i][self.Z],
-                self.points[i][self.VERTICAL_ANGLE],
-                self.previous_max_angle[i],
-                self.visible[i],
-                self.horizon[i],
+        for i, point in enumerate(self.points):
+            string += (
+                f"{i} - {point[self.DISTANCE]} {point[self.Z]} {point[self.VERTICAL_ANGLE]} "
+                f"(prev. {self.previous_max_angle[i]}) - vis. {self.visible[i]} hor. {self.horizon[i]} \n"
             )
         return string
 
@@ -171,8 +166,8 @@ class LoS:
     def get_horizons(self) -> List[QgsPoint]:
         points: List[QgsPoint] = []
 
-        for i in range(0, len(self.horizon)):
-            if self.horizon[i]:
+        for i, horizon in enumerate(self.horizon):
+            if horizon:
                 points.append(self.get_geom_at_index(i))
 
         return points

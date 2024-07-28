@@ -1,0 +1,36 @@
+name: Code Style for Plugin LoS Tools
+
+on: push
+
+jobs:
+
+  Codestyle-for-Plugin-LoS-Tools:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+        - name: Checkout
+          uses: actions/checkout@v4
+        
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.10'
+            cache: 'pip'
+
+        - name: Install Python packages
+          run: pip install black isort
+    
+        - name: Black
+          run: black .
+        
+        - name: Isort
+          run: isort .
+        
+        - uses: stefanzweifel/git-auto-commit-action@v5
+          with:
+            commit_message: Black and isort formatting

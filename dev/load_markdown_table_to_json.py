@@ -7,7 +7,7 @@ def extract_table(file: Path) -> dict:
 
     previous_line_table = False
 
-    with open(file) as f:
+    with open(file, encoding="utf-8") as f:
 
         for line in f.readlines():
 
