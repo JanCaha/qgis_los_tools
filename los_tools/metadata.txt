@@ -22,6 +22,7 @@ hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 changelog=1.1.1 
     - simplify inner working of GUI tools
+    - fix `Set Camera` GUI tool
     <p>1.1 
     - update some internals including test
     - style python using black and isort
