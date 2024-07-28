@@ -47,7 +47,7 @@ class PointType(Enum):
     TARGET = 2
 
 
-class SetCameraTool(QDialog):
+class SetCameraDialog(QDialog):
     observer: QgsPointXY = None
     target: QgsPointXY = None
 

@@ -24,7 +24,7 @@ from .gui.create_los_tool.create_los_tool import CreateLoSMapTool
 from .gui.dialog_los_settings import LoSSettings
 from .gui.dialog_object_parameters import ObjectParameters
 from .gui.dialog_raster_validations import RasterValidations
-from .gui.dialog_tool_set_camera import SetCameraTool
+from .gui.dialog_tool_set_camera import SetCameraDialog
 from .gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
 from .gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
 from .utils import get_icon_path
@@ -36,7 +36,7 @@ if cmd_folder not in sys.path:
 
 
 class LoSToolsPlugin:
-    camera_tool: SetCameraTool = None
+    camera_tool: SetCameraDialog = None
 
     los_notarget_action_name = "Visualize LoS No Target Tool"
     optimize_point_location_action_name = "Optimize Point Location Tool"
@@ -237,7 +237,7 @@ class LoSToolsPlugin:
 
     def run_tool_set_camera(self):
         if self.camera_tool is None:
-            self.camera_tool = SetCameraTool(
+            self.camera_tool = SetCameraDialog(
                 parent=self.iface.mainWindow(),
                 canvas=self.iface.mapCanvas(),
                 iface=self.iface,
