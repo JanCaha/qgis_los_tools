@@ -138,14 +138,9 @@ class LoS:
     def __str__(self):
         string = ""
         for i, point in enumerate(self.points):
-            string += "{} - {} {} {} (prev. {}) - vis. {} hor. {} \n".format(
-                i,
-                point[self.DISTANCE],
-                point[self.Z],
-                point[self.VERTICAL_ANGLE],
-                self.previous_max_angle[i],
-                self.visible[i],
-                self.horizon[i],
+            string += (
+                f"{i} - {point[self.DISTANCE]} {point[self.Z]} {point[self.VERTICAL_ANGLE]} "
+                f"(prev. {self.previous_max_angle[i]}) - vis. {self.visible[i]} hor. {self.horizon[i]} \n"
             )
         return string
 
