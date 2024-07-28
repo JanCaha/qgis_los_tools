@@ -1,5 +1,5 @@
-from qgis.core import Qgis
-from qgis.gui import QgisInterface, QgsMapToolAdvancedDigitizing, QgsSnapIndicator
+from qgis.core import Qgis, QgsPointLocator
+from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolAdvancedDigitizing, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QKeyEvent
 from qgis.PyQt.QtWidgets import QWidget
@@ -65,10 +65,18 @@ class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
         self._los_rubber_band.hide()
 
     def keyPressEvent(self, e: QKeyEvent) -> None:
-        if e.key() == Qt.Key_Escape:
+        if e.key() == Qt.Key_Escape or e.key() == Qt.Key_Backspace:
             self.deactivate()
             self._iface.mapCanvas().unsetMapTool(self)
         return super().keyPressEvent(e)
+
+    def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
+        result = self._snapper.snapToMap(event.pos())
+        self.snap_marker.setMatch(result)
+        if result.type() == QgsPointLocator.Vertex:
+            self._snap_point = result.point()
+        else:
+            self._snap_point = event.mapPoint()
 
     def canvas_crs_is_projected(self) -> bool:
         if self._canvas.mapSettings().destinationCrs().isGeographic():
