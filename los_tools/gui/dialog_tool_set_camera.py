@@ -171,17 +171,26 @@ class SetCameraTool(QDialog):
 
         return items
 
+    def accept(self) -> None:
+        self.update_camera_position()
+        super().accept()
+
+    def reject(self) -> None:
+        self.restore_canvas_tools()
+        super().reject()
+
     def select_point(self, point_type: PointType) -> None:
+        self.hide()
+
         self.mapTool = PointCaptureMapTool(self.canvas)
 
-        self.mapTool.canvasClicked.connect(partial(self.update_point_1, point_type=point_type))
+        self.mapTool.canvasClicked.connect(partial(self.update_point, point_type=point_type))
 
         self.mapTool.complete.connect(self.restore_canvas_tools)
 
         self.canvas.setMapTool(self.mapTool)
-        self.hide()
 
-    def update_point_1(self, point, point_type: PointType):
+    def update_point(self, point, point_type: PointType):
 
         canvas_crs = self.canvas.mapSettings().destinationCrs()
 

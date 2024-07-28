@@ -243,13 +243,7 @@ class LoSToolsPlugin:
                 iface=self.iface,
             )
 
-        self.camera_tool.show()
-        result = self.camera_tool.exec()
-
-        if result == 1:
-            self.camera_tool.update_camera_position()
-        else:
-            self.camera_tool.restore_canvas_tools()
+        self.camera_tool.exec()
 
     def open_dialog_los_settings(self):
         self.los_settings_dialog.exec()
