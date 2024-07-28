@@ -2,6 +2,7 @@ import inspect
 import os
 import re
 import sys
+import typing
 from functools import partial
 
 from qgis.core import (
@@ -36,7 +37,6 @@ if cmd_folder not in sys.path:
 
 
 class LoSToolsPlugin:
-    camera_tool: SetCameraDialog = None
 
     los_notarget_action_name = "Visualize LoS No Target Tool"
     optimize_point_location_action_name = "Optimize Point Location Tool"
@@ -49,7 +49,7 @@ class LoSToolsPlugin:
         self.iface: QgisInterface = iface
         self.provider = LoSToolsProvider()
 
-        self.actions = []
+        self.actions: typing.List[QAction] = []
         self.menu = PluginConstants.plugin_name
 
         if self.iface is not None:
@@ -58,6 +58,8 @@ class LoSToolsPlugin:
 
             self.iface.newProjectCreated.connect(self.reset_los_layer)
             self.iface.projectRead.connect(self.reset_los_layer)
+
+            self.camera_tool: SetCameraDialog = None
 
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
