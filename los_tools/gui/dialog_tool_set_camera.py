@@ -197,13 +197,13 @@ class SetCameraTool(QDialog):
         point = self.mapTool.get_point()
 
         if self.mapTool.is_point_snapped():
-            msg = "Snapped to point at {} {} from layer {}.".format(point.x(), point.y(), self.mapTool.snap_layer())
+            msg = f"Snapped to point at {point.x()} {point.y()} from layer {self.mapTool.snap_layer()}."
         else:
-            msg = "Point at {} {} selected.".format(point.x(), point.y())
+            msg = f"Point at {point.x()} {point.y()} selected."
 
         self.iface.messageBar().pushMessage("Point defined", msg, duration=5)
 
-        text_point = "{:.3f};{:.3f}[{}]".format(point.x(), point.y(), canvas_crs.authid())
+        text_point = f"{point.x():.3f};{point.y():.3f}[{canvas_crs.authid()}]"
 
         if point_type == PointType.OBSERVER:
             self.observer = point
@@ -252,8 +252,9 @@ class SetCameraTool(QDialog):
         self.layout_item_3d.setCameraPose(camera_pose)
         self.layout_item_3d.refresh()
 
-        msg = "Layout item `{}` in layout `{}` camera settings updated.".format(
-            self.layout_item_3d.displayName(), self.layout.name()
+        msg = (
+            f"Layout item `{self.layout_item_3d.displayName()}` in layout `{self.layout.name()}` "
+            "camera settings updated."
         )
 
         self.iface.messageBar().pushMessage("Layout item updated", msg, duration=5)
