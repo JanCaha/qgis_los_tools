@@ -59,7 +59,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
 
         if not ListOfRasters.validate(self._raster_validation_dialog.list_of_selected_rasters):
             self.messageEmitted.emit(
-                "Tool needs valid setup in `Raster Validatations` dialog.",
+                "Tool needs valid setup in `Raster Validations` dialog.",
                 Qgis.Critical,
             )
             self.deactivate()
@@ -217,9 +217,9 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         if self.task_manager.all_los_tasks_finished():
             self.set_result_action_active(True)
 
-    def task_finished_message(self, miliseconds: int) -> None:
+    def task_finished_message(self, milliseconds: int) -> None:
         self._iface.messageBar().pushMessage(
-            "LoS Processing Finished. Lasted {} seconds.".format(miliseconds / 1000),
+            f"LoS Processing Finished. Lasted {milliseconds / 1000} seconds.",
             Qgis.MessageLevel.Info,
             2,
         )
