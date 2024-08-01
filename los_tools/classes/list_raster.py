@@ -57,12 +57,12 @@ class ListOfRasters:
 
         for raster in rasters:
             if not first_raster_crs == raster.crs():
-                msg = "All CRS for all rasters must be equal. " "Right now they are not."
+                msg = "All CRS for all rasters must be equal. Right now they are not."
 
                 return False, msg
 
             if not raster.crs() == crs:
-                msg = "Provided crs template and raster layers crs must be equal. " "Right now they are not."
+                msg = "Provided crs template and raster layers crs must be equal. Right now they are not."
 
                 return False, msg
 
@@ -79,7 +79,8 @@ class ListOfRasters:
             return (
                 False,
                 "Raster cell sizes must be unique to form complete ordering. "
-                "Rasters are order strictly by cell size, same cell size for multiple rasters does not allow strict ordering. "
+                "Rasters are order strictly by cell size, "
+                "same cell size for multiple rasters does not allow strict ordering. "
                 f"The values [{','.join([str(x) for x in values])}] are not unique.",
             )
 
@@ -149,7 +150,7 @@ class ListOfRasters:
         return [x.dataProvider() for x in self.rasters]
 
     def maximal_diagonal_size(self) -> float:
-        extent: QgsRectangle = None
+        extent: Optional[QgsRectangle] = None
 
         for raster in self.rasters:
             if extent is None:
