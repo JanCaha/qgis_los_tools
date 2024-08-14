@@ -262,7 +262,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
         return {self.OUTPUT_LAYER: dest_id}
 
     def name(self):
-        return "notargetlos2"
+        return "notargetlos"
 
     def displayName(self):
         return "Create No Target LoS"
