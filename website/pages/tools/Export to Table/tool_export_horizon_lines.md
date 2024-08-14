@@ -1,19 +1,19 @@
 # Export Horizon Lines Layer to table
 
-Export horizon lines layer (or only selected features) to table suitable for export outside of QGIS. In the output table every row is a single point on specific LoS. 
+Exports the horizon lines layer (or only selected features) to a table suitable for export outside of QGIS. In the output table, each row represents a single point on a specific LoS.
 
 ## Parameters
 
-| Label               | Name                | Type           | Description                                         |
-| ------------------- | ------------------- | -------------- | --------------------------------------------------- |
-| Horizon Lines Layer | `HorizonLinesLayer` | [vector: line] | Horizon lines layer to export.                      |
-| Output file         | `OutputFile`        | [table]        | Output containing exported points of horizon lines. |
+| Label               | Name                | Type           | Description                                              |
+| ------------------- | ------------------- | -------------- | -------------------------------------------------------- |
+| Horizon Lines Layer | `HorizonLinesLayer` | [vector: line] | Horizon lines layer to export.                           |
+| Output file         | `OutputFile`        | [table]        | Output file containing exported points of horizon lines. |
 
 ## Outputs
 
-| Label       | Name         | Type    | Description                                         |
-| ----------- | ------------ | ------- | --------------------------------------------------- |
-| Output file | `OutputFile` | [table] | Output containing exported points of horizon lines. |
+| Label       | Name         | Type    | Description                                              |
+| ----------- | ------------ | ------- | -------------------------------------------------------- |
+| Output file | `OutputFile` | [table] | Output file containing exported points of horizon lines. |
 
 ### Fields in the output layer
 

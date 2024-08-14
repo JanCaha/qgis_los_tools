@@ -1,26 +1,25 @@
 # Calculate Object Distances
 
-The tool calculates distances at which objects of specified size (specified in the table) have given horizontal angular size.
+This tool calculates the distances at which objects of specified sizes (provided in the table) have a given horizontal angular size.
 
-I.e. at which distances will object of size 1, 5 and 10 meters be detected when the angular size of 0.1 degree is set?
+For example, it calculates the distances at which objects of sizes 1, 5, and 10 meters have an angular size of 0.1 degrees.    
 
 To be usable in other plugin tools, there is a necessary parameter to be set maximal distance. It special row into the output table so that it can be later correctly processed.
-	
 
 ## Parameters
 
-| Label                                                                         | Name              | Type                                    | Description                                                                                                                                                                                         |
-| ----------------------------------------------------------------------------- | ----------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Angle size of object (in degrees)                                             | `Angle`           | [number]<br/><br/> Default: <br/> `0.1` | Horizontal angular size that the objects should have (in degrees).                                                                                                                                  |
-| Sizes of object to calculate (in meters)                                      | `Size`            | [matrix]                                | Sizes of the objects in meters (table).                                                                                                                                                             |  |
-| Add maximal distance value (with sampling equal to maximal sampling distance) | `MaximalDistance` | [boolean]<br/><br/>Default: `True`      | Add special row to the output used in other tools. The row has size of the object equal to maximum size in the input table and distance -1. This is used to indicate maximal possible legth of LoS. |
-| Output table                                                                  | `OutputTable`     | [table]                                 | Output table containing information about angle size, size of objects and relevant distances (without geometry).                                                                                    |
+| Label                                                                         | Name              | Type                                    | Description                                                                                                                                                                                                                 |
+| ----------------------------------------------------------------------------- | ----------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Angle size of object (in degrees)                                             | `Angle`           | [number]<br/><br/> Default: <br/> `0.1` | Horizontal angular size that the objects should have (in degrees).                                                                                                                                                          |
+| Sizes of object to calculate (in meters)                                      | `Size`            | [matrix]                                | Sizes of the objects in meters (table).                                                                                                                                                                                     |  |
+| Add maximal distance value (with sampling equal to maximal sampling distance) | `MaximalDistance` | [boolean]<br/><br/>Default: `True`      | Add a special row to the output used in other tools. The row has the size of the object equal to the maximum size in the input table and a distance of -1. This is used to indicate the maximum possible length of the LoS. |
+| Output table                                                                  | `OutputTable`     | [table]                                 | Output table containing information about angular size, object sizes, and relevant distances.                                                                                                                               |
 
 ## Outputs
 
-| Label        | Name          | Type    | Description                                                                                                      |
-| ------------ | ------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| Output table | `OutputTable` | [table] | Output table containing information about angle size, size of objects and relevant distances (without geometry). |
+| Label        | Name          | Type    | Description                                                                                   |
+| ------------ | ------------- | ------- | --------------------------------------------------------------------------------------------- |
+| Output table | `OutputTable` | [table] | Output table containing information about angular size, object sizes, and relevant distances. |
 
 ### Fields in the output layer
 

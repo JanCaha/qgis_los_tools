@@ -1,6 +1,6 @@
 {
-	"ALG_DESC": "Export horizon lines layer (or only selected features) to table suitable for export outside of QGIS. In the output table every row is a single point on specific LoS.",
-	"ALG_CREATOR": "Jan Caha", 
-	"HorizonLinesLayer": "Horizon lines layer to export.", 
-	"OutputFile": "Output containing exported points of horizon lines."
+    "ALG_DESC": "Exports the horizon lines layer (or only selected features) to a table suitable for export outside of QGIS. In the output table, each row represents a single point on a specific LoS.",
+    "ALG_CREATOR": "Jan Caha",
+    "HorizonLinesLayer": "Horizon lines layer to export.",
+    "OutputFile": "Output file containing exported points of horizon lines."
 }

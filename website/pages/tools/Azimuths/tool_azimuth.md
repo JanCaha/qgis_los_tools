@@ -1,22 +1,22 @@
 # Extract Azimuth between Points and Centroids
 
-Calculates azimuths between points in one layer and centroids of polygons or lines in second layer.
+Calculates azimuths between points in one layer and the centroids of polygons or lines in a second layer.
 
 ## Parameters
 
-| Label                 | Name            | Type                    | Description                                          |
-| --------------------- | --------------- | ----------------------- | ---------------------------------------------------- |
-| Point layer           | `PointLayer`    | [vector: point]         | Layer of points to calculate the azimuth from.       |
-| Point layer ID field  | `PointLayerID`  | [tablefield: numeric]   | Field containing ID for points.                      |
-| Object layer          | `ObjectLayer`   | [vector: line, polygon] | Layer of lines/polygons to calculate the azimuth to. |
-| Object layer ID field | `ObjectLayerID` | [tablefield: numeric]   | Field containing ID for object layer.                |
-| Output table          | `OutputTable`   | [table]                 | Table containing the result (without geometry).      |
+| Label                 | Name            | Type                    | Description                                                |
+| --------------------- | --------------- | ----------------------- | ---------------------------------------------------------- |
+| Point layer           | `PointLayer`    | [vector: point]         | Layer of points from which to calculate the azimuth.       |
+| Point layer ID field  | `PointLayerID`  | [tablefield: numeric]   | Field containing IDs for the points.                       |
+| Object layer          | `ObjectLayer`   | [vector: line, polygon] | Layer of lines/polygons to which to calculate the azimuth. |
+| Object layer ID field | `ObjectLayerID` | [tablefield: numeric]   | Field containing IDs for the object layer.                 |
+| Output table          | `OutputTable`   | [table]                 | Table containing the results (without geometry).           |
 
 ## Outputs
 
-| Label        | Name          | Type    | Description                                     |
-| ------------ | ------------- | ------- | ----------------------------------------------- |
-| Output table | `OutputTable` | [table] | Table containing the result (without geometry). |
+| Label        | Name          | Type    | Description                                      |
+| ------------ | ------------- | ------- | ------------------------------------------------ |
+| Output table | `OutputTable` | [table] | Table containing the results (without geometry). |
 
 For $n$ points and $m$ lines/polygons the output layer will have $n \times m$ rows.
 
