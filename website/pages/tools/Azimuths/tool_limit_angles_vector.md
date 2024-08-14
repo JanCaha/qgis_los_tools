@@ -1,21 +1,21 @@
 # Extract Limit Azimuths
 
-Calculates minimal and maximal azimuth for set of LoS without target that passes through specified layer (either polygon or line).
+Calculates the minimal and maximal azimuth for a set of LoS without a target that passes through a specified layer (either polygon or line).
 
 ## Parameters
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
-| LoS layer | `LoSLayer` | [vector: line] | LoS layer for calculation. |
-| Object layer | `ObjectLayer` | [vector: line, polygon] | The main object which determines the direction. |
-| Objects layer ID field | `ObjectLayerID` | [tablefield: numeric] | The field to identify objects from Object layer. |
-| Output table | `OutputTable` | [table]  | Table containing the result (without geometry). |
+| Label                  | Name            | Type                    | Description                                          |
+| ---------------------- | --------------- | ----------------------- | ---------------------------------------------------- |
+| LoS layer              | `LoSLayer`      | [vector: line]          | LoS layer for calculation.                           |
+| Object layer           | `ObjectLayer`   | [vector: line, polygon] | The main object which determines the direction.      |
+| Objects layer ID field | `ObjectLayerID` | [tablefield: numeric]   | The field to identify objects from the Object layer. |
+| Output table           | `OutputTable`   | [table]                 | Table containing the result (without geometry).      |
 
 ## Outputs
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
-| Output table | `OutputTable` | [table]  | Table containing the result (without geometry). |
+| Label        | Name          | Type    | Description                                     |
+| ------------ | ------------- | ------- | ----------------------------------------------- |
+| Output table | `OutputTable` | [table] | Table containing the result (without geometry). |
 
 ### Fields in the output layer
 
@@ -27,4 +27,3 @@ Calculates minimal and maximal azimuth for set of LoS without target that passes
 ## Tool screenshot
 
 ![Extract Limit Azimuths](../../images/tool_limit_angles_vector.png)
-	
