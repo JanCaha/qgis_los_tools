@@ -1,26 +1,26 @@
 # Create Global LoS
 
-Create line-of-sight from each point from observers layer through each point in targets layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.
+Creates a line-of-sight from each point in the observers layer through each point in the targets layer. Each line-of-sight starts at the observer and ends at the edge of the DEM raster behind the target.
 
 ## Parameters
 
-| Label                 | Name              | Type                                     | Description                                            |
-| --------------------- | ----------------- | ---------------------------------------- | ------------------------------------------------------ |
-| Raster Layer DEM      | `DemRasters`      | [raster][list]                           | Raster DEMs on which the LoS is calculated.            |
-| Observers point layer | `ObserverPoints`  | [vector: point]                          | Point layer representing the observers.                |
-| Observer ID field     | `ObserverIdField` | [tablefield: numeric]                    | Field containing ID for observer points.               |
-| Observer offset field | `ObserverOffset`  | [tablefield: numeric]                    | Field containing offset above DEM for observer points. |
-| Targets point layer   | `TargetPoints`    | [vector: point]                          | Point layer representing the targets.                  |
-| Target ID field       | `TargetIdField`   | [tablefield: numeric]                    | Field containing ID for target points.                 |
-| Target offset field   | `TargetOffset`    | [tablefield: numeric]                    | Field containing offset above DEM for target points.   |
-| LoS sampling distance | `LineDensity`     | [distance] <br/><br/> Default: <br/> `1` | The distance by which the LoS is segmentized.          |
-| Output layer          | `OutputLayer`     | [vector: line]                           | Output layer containing LoS.                           |
+| Label                 | Name              | Type                                     | Description                                                |
+| --------------------- | ----------------- | ---------------------------------------- | ---------------------------------------------------------- |
+| Raster Layer DEM      | `DemRasters`      | [raster][list]                           | Raster DEMs on which the LoS is calculated.                |
+| Observers point layer | `ObserverPoints`  | [vector: point]                          | Point layer representing the observers.                    |
+| Observer ID field     | `ObserverIdField` | [tablefield: numeric]                    | Field containing IDs for observer points.                  |
+| Observer offset field | `ObserverOffset`  | [tablefield: numeric]                    | Field containing the offset above DEM for observer points. |
+| Targets point layer   | `TargetPoints`    | [vector: point]                          | Point layer representing the targets.                      |
+| Target ID field       | `TargetIdField`   | [tablefield: numeric]                    | Field containing IDs for target points.                    |
+| Target offset field   | `TargetOffset`    | [tablefield: numeric]                    | Field containing the offset above DEM for target points.   |
+| LoS sampling distance | `LineDensity`     | [distance] <br/><br/> Default: <br/> `1` | The distance by which the LoS is segmented.                |
+| Output layer          | `OutputLayer`     | [vector: line]                           | Output layer containing the LoS.                           |
 
 ## Outputs
 
-| Label        | Name          | Type           | Description                  |
-| ------------ | ------------- | -------------- | ---------------------------- |
-| Output layer | `OutputLayer` | [vector: line] | Output layer containing LoS. |
+| Label        | Name          | Type           | Description                      |
+| ------------ | ------------- | -------------- | -------------------------------- |
+| Output layer | `OutputLayer` | [vector: line] | Output layer containing the LoS. |
 
 ### Fields in the output layer
 
@@ -36,4 +36,3 @@ Create line-of-sight from each point from observers layer through each point in 
 ## Tool screenshot
 
 ![Create global LoS](../../images/tool_create_global_los.png)
-	

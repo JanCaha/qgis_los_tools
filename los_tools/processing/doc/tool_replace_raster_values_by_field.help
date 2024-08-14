@@ -1,9 +1,8 @@
 {
-	"ALG_DESC": "Tool to replace raster values in polygons by field value (defined by `ValueField`). ",
-	"ALG_CREATOR": "Jan Caha", 
-	"RasterLayer": "Raster layer to use as base.", 
-	"VectorLayer": "Vector layer that specifies areas of raster to replace the values.", 
-	"RasterValue": "Value to use as replacement.",
-	"ValueField": "Field from vector layer that defines values that should be used in output raster.",
-	"OutputRaster": "Output raster with new values."
+    "ALG_DESC": "Tool to replace raster values within polygons based on a specified field value (`ValueField`).",
+    "ALG_CREATOR": "Jan Caha", 
+    "RasterLayer": "Base raster layer.",
+    "VectorLayer": "Vector layer defining areas where raster values will be replaced.",
+    "ValueField": "Field from the vector layer specifying the values to use in the output raster.",
+    "OutputRaster": "Output raster with updated values."
 }

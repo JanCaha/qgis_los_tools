@@ -1,9 +1,9 @@
 {
-	"ALG_DESC": "Calculates azimuths between points in one layer and centroids of polygons or lines in second layer.",
-	"ALG_CREATOR": "Jan Caha", 
-	"PointLayer": "Layer of points to calculate the azimuth from.", 
-	"PointLayerID": "Field containing ID for points.",
-	"ObjectLayer": "Layer of lines/polygons to calculate the azimuth to.",
-	"ObjectLayerID": "Field containing ID for object layer.",
-	"OutputTable": "Table containing the result (without geometry)."
+    "ALG_DESC": "Calculates azimuths between points in one layer and the centroids of polygons or lines in a second layer.",
+    "ALG_CREATOR": "Jan Caha", 
+    "PointLayer": "Layer of points from which to calculate the azimuth.", 
+    "PointLayerID": "Field containing IDs for the points.",
+    "ObjectLayer": "Layer of lines/polygons to which to calculate the azimuth.",
+    "ObjectLayerID": "Field containing IDs for the object layer.",
+    "OutputTable": "Table containing the results (without geometry)."
 }

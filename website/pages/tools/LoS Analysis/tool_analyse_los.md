@@ -1,15 +1,15 @@
 # Analyse LoS
 
-Analyse line-of-sight layer. Calculate the attributes according to type of line-of-sight (see Outputs).
+Analyze the line-of-sight layer. Calculate the attributes of LoS according to the type of line-of-sight (see Outputs).
 
 ## Parameters
 
-| Label                        | Name                    | Type                                      | Description                                              |
-| ---------------------------- | ----------------------- | ----------------------------------------- | -------------------------------------------------------- |
-| LoS layer                    | `LoSLayer`              | [vector: line]                            | LoS layer to analyse.                                    |
-| Use curvature corrections?   | `CurvatureCorrections`  | [boolean]<br/><br/>Default: `True`        | Should the curvature and refraction corrections be used? |
-| Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of refraction coefficient.                         |
-| Output layer                 | `OutputLayer`           | [vector: line]                            | Output layer containing LoS with new attributes.         |
+| Label                        | Name                    | Type                                      | Description                                             |
+| ---------------------------- | ----------------------- | ----------------------------------------- | ------------------------------------------------------- |
+| LoS layer                    | `LoSLayer`              | [vector: line]                            | LoS layer to analyze.                                   |
+| Use curvature corrections?   | `CurvatureCorrections`  | [boolean]<br/><br/>Default: `True`        | Should curvature and refraction corrections be applied? |
+| Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of the refraction coefficient.                    |
+| Output layer                 | `OutputLayer`           | [vector: line]                            | Output layer containing LoS with new attributes.        |
 
 ## Outputs
 
