@@ -1,8 +1,8 @@
 {
-	"ALG_DESC": "Tool to replace raster values in polygons by constant value (specified by `RasterValue`). ",
-	"ALG_CREATOR": "Jan Caha", 
-	"RasterLayer": "Raster layer to use as base.", 
-	"VectorLayer": "Vector layer that specifies areas of raster to replace the values.", 
-	"RasterValue": "Value to use as replacement.",
-	"OutputRaster": "Output raster with new values."
+    "ALG_DESC": "Replaces raster values within specified polygons with a constant value.",
+    "ALG_CREATOR": "Jan Caha", 
+    "RasterLayer": "Raster layer to use as the base.", 
+    "VectorLayer": "Vector layer specifying the areas of the raster where values will be replaced.", 
+    "RasterValue": "Constant value to use as the replacement.",
+    "OutputRaster": "Output raster with the new values."
 }

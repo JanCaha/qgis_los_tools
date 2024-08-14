@@ -1,21 +1,21 @@
 # Export LoS Layer to table
 
-Export LoS layer (or only selected features) to table suitable for export outside of QGIS. In the output table every row is a single point on specific LoS. 
+Exports the LoS layer (or only selected features) to a table suitable for export outside of QGIS. In the output table, each row represents a single point on a specific LoS.
 
 ## Parameters
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
-| LoS layer | `LoSLayer` | [vector: line] | LoS layer to export. |
-| Use curvature corrections? | `CurvatureCorrections` | [boolean]<br/><br/>Default: `True` | Should the curvarture and refraction corrections be used? |
-| Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of refraction coefficient. |
-| Output file | `OutputFile` | [table] | Output containing exported points. |
+| Label                        | Name                    | Type                                      | Description                                             |
+| ---------------------------- | ----------------------- | ----------------------------------------- | ------------------------------------------------------- |
+| LoS layer                    | `LoSLayer`              | [vector: line]                            | LoS layer to export.                                    |
+| Use curvature corrections?   | `CurvatureCorrections`  | [boolean]<br/><br/>Default: `True`        | Should curvature and refraction corrections be applied? |
+| Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of the refraction coefficient.                    |
+| Output file                  | `OutputFile`            | [table]                                   | Output file containing exported points.                 |
 
 ## Outputs
 
-| Label | Name | Type | Description |
-| --- | --- | --- | --- |
-| Output file | `OutputFile` | [table] | Output containing exported points. |
+| Label       | Name         | Type    | Description                             |
+| ----------- | ------------ | ------- | --------------------------------------- |
+| Output file | `OutputFile` | [table] | Output file containing exported points. |
 
 ### Fields in the output layer
 

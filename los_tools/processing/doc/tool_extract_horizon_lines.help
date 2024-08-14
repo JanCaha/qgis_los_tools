@@ -1,9 +1,9 @@
 {
-	"ALG_DESC": "Tool that extracts horizon lines from LoS without target. For other types of LoS this operation does not make sense. For global horizon line it is possible to select value that should be used as M dimension for points creating the line.",
-	"ALG_CREATOR": "Jan Caha", 
-	"LoSLayer": "LoS layer to analyse.", 
-	"HorizonType": "Type of horizon line to extract. Values: local or global.",
-	"CurvatureCorrections": "Should the curvature and refraction corrections be used?",
-	"RefractionCoefficient": "Value of refraction coefficient. Default value: 0.13.",
-	"OutputLayer": "Output layer containing LoS with new attributes."
+    "ALG_DESC": "This tool extracts horizon lines from LoS without a target. For other types of LoS, this operation is not applicable. For the global horizon line, it is possible to select a value that should be used as the M dimension for points creating the line.",
+    "ALG_CREATOR": "Jan Caha", 
+    "LoSLayer": "LoS layer to analyze.", 
+    "HorizonType": "Type of horizon line to extract. Values: local or global.",
+    "CurvatureCorrections": "Should curvature and refraction corrections be applied?",
+    "RefractionCoefficient": "Value of the refraction coefficient. Default value: 0.13.",
+    "OutputLayer": "Output layer containing the extracted horizon lines."
 }

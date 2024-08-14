@@ -1,9 +1,9 @@
 {
-	"ALG_DESC": "The tool calculates sizes of objects at specific distances (specified in the table) that have given horizontal angular size.<br/><br/> I.e. what sizes of objects have given horizontal angular size at distances specified in the table.<br/><br/>To be usable in other plugin tools, there are two necessary parameter to be set: default sampling size, used before first distance from the table is used, and maximal distance. Both adds special row into the output table so that it can be later correctly processed.",
-	"ALG_CREATOR": "Jan Caha", 
+    "ALG_DESC": "This tool calculates the sizes of objects at specific distances (as specified in the table) that have a given horizontal angular size.<br/><br/> For example, it determines the sizes of objects that have a given horizontal angular size at the distances specified in the table.<br/><br/>To be usable in other plugin tools, two necessary parameters must be set: the default sampling size, used before the first distance from the table is applied, and the maximal distance. Both add a special row into the output table so that it can be correctly processed later.",
+    "ALG_CREATOR": "Jan Caha", 
     "Angle": "Horizontal angular size that the objects should have (in degrees).",
     "Distance": "Distances of the objects in meters (table).",
-    "DefaultSamplingDistance": "Sampling distance to used, in tools that work with this table, for values smaller then smallest distance..",
-    "MaximalDistance": "Add special row to the output used in other tools. The row has size of the object equal to maximum size in the input table and distance -1. This is used to indicate maximal possible legth of LoS.",
-    "OutputTable": "Output table containing information about angle size, size of objects and relevant distances."
+    "DefaultSamplingDistance": "Sampling distance to be used in tools that work with this table for values smaller than the smallest distance.",
+    "MaximalDistance": "Adds a special row to the output used in other tools. The row has the size of the object equal to the maximum size in the input table and a distance of -1. This is used to indicate the maximal possible length of the line of sight (LoS).",
+    "OutputTable": "Output table containing information about the angle size, size of objects, and relevant distances."
 }

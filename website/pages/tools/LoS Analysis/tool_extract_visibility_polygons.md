@@ -1,21 +1,21 @@
 # Extract Visible/Invisible Polygons from LoS
 
-Extract individual parts from lines-of-sight as polygons. Works for LoS without target. The line is divided into visible and invisible segments and extended to polygon by knowing angle step between individual LoS.
+Extracts individual parts from lines-of-sight as polygons. Works for LoS without a target. The line is divided into visible and invisible segments and extended to polygons by knowing the angle step between individual LoS.
 
 ## Parameters
 
-| Label                        | Name                    | Type                                      | Description                                              |
-| ---------------------------- | ----------------------- | ----------------------------------------- | -------------------------------------------------------- |
-| LoS layer                    | `LoSLayer`              | [vector: line]                            | LoS layer to extract polygons from.                      |
-| Use curvature corrections?   | `CurvatureCorrections`  | [boolean]<br/><br/>Default: `True`        | Should the curvature and refraction corrections be used? |
-| Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of refraction coefficient.                         |
-| Output layer                 | `OutputLayer`           | [vector: point]                           | Output layer containing points.                          |
+| Label                        | Name                    | Type                                      | Description                                             |
+| ---------------------------- | ----------------------- | ----------------------------------------- | ------------------------------------------------------- |
+| LoS layer                    | `LoSLayer`              | [vector: line]                            | LoS layer to extract polygons from.                     |
+| Use curvature corrections?   | `CurvatureCorrections`  | [boolean]<br/><br/>Default: `True`        | Should curvature and refraction corrections be applied? |
+| Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of the refraction coefficient.                    |
+| Output layer                 | `OutputLayer`           | [vector: point]                           | Output layer containing polygons.                       |
 
 ## Outputs
 
-| Label        | Name          | Type            | Description                     |
-| ------------ | ------------- | --------------- | ------------------------------- |
-| Output layer | `OutputLayer` | [vector: point] | Output layer containing points. |
+| Label        | Name          | Type            | Description                       |
+| ------------ | ------------- | --------------- | --------------------------------- |
+| Output layer | `OutputLayer` | [vector: point] | Output layer containing polygons. |
 
 ### Fields in the output layer
 

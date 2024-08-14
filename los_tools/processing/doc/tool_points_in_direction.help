@@ -1,11 +1,11 @@
 {
-	"ALG_DESC": "Create set of points at given distance from points from input layer that span given angle offset from main direction layer.",
-	"ALG_CREATOR": "Jan Caha", 
-	"InputLayer": "Point layer around which the new points will be created.", 
-	"DirectionLayer": "Point layer (containing only one point) that specifies main direction.", 
-	"IdField": "Field value to assign to `id_original_point` for new layer.",
-	"AngleOffset": "Offset from main direction, the whole range is [main azimuth - angleOffset;main azimuth + angleOffset].",
-	"AngleStep": "Determines density of point placement between `Minimal angle` and `Maximal angle`. Angular distance of points. Number of points will be (`Maximal angle` - `Minimal angle`) / `AngleStep`.",
-	"Distance": "How far from the original point the new points should be created.",
-	"OutputLayer": "Output layer containing LoS with new attributes."
+    "ALG_DESC": "Creates a set of points at a given distance from points in the input layer, spanning a specified angle offset from the main direction layer.",
+    "ALG_CREATOR": "Jan Caha", 
+    "InputLayer": "Point layer around which the new points will be created.", 
+    "DirectionLayer": "Point layer (containing only one point) that specifies the main direction.", 
+    "IdField": "Field value to assign to `id_original_point` for the new layer.",
+    "AngleOffset": "Offset from the main direction. The whole range is [main azimuth - angleOffset; main azimuth + angleOffset].",
+    "AngleStep": "Determines the density of point placement between `Minimal angle` and `Maximal angle`. The angular distance between points. The number of points will be (`Maximal angle` - `Minimal angle`) / `AngleStep`.",
+    "Distance": "Distance from the original point at which the new points should be created.",
+    "OutputLayer": "Output layer containing the new points."
 }

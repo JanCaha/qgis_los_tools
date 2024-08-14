@@ -1,21 +1,21 @@
 # Extract Visible/Invisible Lines from LoS
 
-Extract individual parts from lines-of-sight. The line is divided into visible and invisible segments.
+Extracts individual parts from lines-of-sight. The line is divided into visible and invisible segments.
 
 ## Parameters
 
-| Label                        | Name                    | Type                                      | Description                                              |
-| ---------------------------- | ----------------------- | ----------------------------------------- | -------------------------------------------------------- |
-| LoS layer                    | `LoSLayer`              | [vector: line]                            | LoS layer to extract lines from.                         |
-| Use curvature corrections?   | `CurvatureCorrections`  | [boolean]<br/><br/>Default: `True`        | Should the curvature and refraction corrections be used? |
-| Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of refraction coefficient.                         |
-| Output layer                 | `OutputLayer`           | [vector: point]                           | Output layer containing points.                          |
+| Label                        | Name                    | Type                                      | Description                                             |
+| ---------------------------- | ----------------------- | ----------------------------------------- | ------------------------------------------------------- |
+| LoS layer                    | `LoSLayer`              | [vector: line]                            | LoS layer to extract lines from.                        |
+| Use curvature corrections?   | `CurvatureCorrections`  | [boolean]<br/><br/>Default: `True`        | Should curvature and refraction corrections be applied? |
+| Refraction coefficient value | `RefractionCoefficient` | [number] <br/><br/> Default: <br/> `0.13` | Value of the refraction coefficient.                    |
+| Output layer                 | `OutputLayer`           | [vector: point]                           | Output layer containing lines                           |
 
 ## Outputs
 
-| Label        | Name          | Type            | Description                     |
-| ------------ | ------------- | --------------- | ------------------------------- |
-| Output layer | `OutputLayer` | [vector: point] | Output layer containing points. |
+| Label        | Name          | Type            | Description                    |
+| ------------ | ------------- | --------------- | ------------------------------ |
+| Output layer | `OutputLayer` | [vector: point] | Output layer containing lines. |
 
 ### Fields in the output layer
 

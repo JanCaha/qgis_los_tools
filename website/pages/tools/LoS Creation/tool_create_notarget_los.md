@@ -1,6 +1,6 @@
 # Create No Target LoS
 
-Create line-of-sight between each point from observer’s layer and targets layer, where `Observer ID field` value from observer is equal to `Target and Observer agreement ID field` of target. This ensures that each point from target’s layer is linked to one point from observers layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.
+Creates a line-of-sight between each point in the observers layer and the targets layer, where the `Observer ID field` value from the observer matches the `Target and Observer agreement ID field` of the target. This ensures that each point in the targets layer is linked to one point in the observers layer. Each line-of-sight starts at the observer and ends at the edge of the DEM raster behind the target.
 
 The target points can be and usually should be created by tools [Create points around](../Points Creation/tool_points_around.md) and [Create points in direction](../Points Creation/tool_points_in_direction.md).
 
@@ -10,23 +10,23 @@ This variant of the tool specifies sampling and length of LoS by table `Sampling
 
 ## Parameters
 
-| Label                                  | Name                      | Type                  | Description                                                                                                                        |
-| -------------------------------------- | ------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Raster Layer DEM                       | `DemRasters`              | [raster][list]        | Raster DEMs on which the LoS is calculated.                                                                                        |
-| Sampling distance - distance table     | `LineSettingsTable`       | [vector: nogeometry]  | Distance table, specify sampling size on LoS by distance.                                                                          |
-| Observers point layer                  | `ObserverPoints`          | [vector: point]       | Point layer representing the observers.                                                                                            |
-| Observer ID field                      | `ObserverIdField`         | [tablefield: numeric] | Field containing ID for observer points.                                                                                           |
-| Observer offset field                  | `ObserverOffset`          | [tablefield: numeric] | Field containing offset above DEM for observer points.                                                                             |
-| Targets point layer                    | `TargetPoints`            | [vector: point]       | Point layer representing the targets.                                                                                              |
-| Target ID field                        | `TargetIdField`           | [tablefield: numeric] | Field containing ID for target points.                                                                                             |
-| Target and Observer agreement ID field | `TargetDefinitionIdField` | [tablefield: numeric] | Field that specifies which target point is linked to which observer point. Values in this field are compared to `ObserverIdField`. |
-| Output layer                           | `OutputLayer`             | [vector: line]        | Output layer containing LoS.                                                                                                       |
+| Label                                  | Name                      | Type                  | Description                                                                                                                                                                                                                    |
+| -------------------------------------- | ------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Raster Layer DEM                       | `DemRasters`              | [raster][list]        | List of DEM rasters on which the LoS is calculated. The rasters are ordered from smallest spatial resolution to highest. Elevation for the LoS is taken from the raster with the smallest spatial resolution that has a value. |
+| Sampling distance - distance table     | `LineSettingsTable`       | [vector: nogeometry]  | Distance table specifying the sampling size on the LoS by distance.                                                                                                                                                            |
+| Observers point layer                  | `ObserverPoints`          | [vector: point]       | Point layer representing the observers.                                                                                                                                                                                        |
+| Observer ID field                      | `ObserverIdField`         | [tablefield: numeric] | Field containing IDs for observer points.                                                                                                                                                                                      |
+| Observer offset field                  | `ObserverOffset`          | [tablefield: numeric] | Field containing the offset above DEM for observer points.                                                                                                                                                                     |
+| Targets point layer                    | `TargetPoints`            | [vector: point]       | Point layer representing the targets.                                                                                                                                                                                          |
+| Target ID field                        | `TargetIdField`           | [tablefield: numeric] | Field containing IDs for target points.                                                                                                                                                                                        |
+| Target and Observer agreement ID field | `TargetDefinitionIdField` | [tablefield: numeric] | Field that specifies which target point is linked to which observer point. Values in this field are compared to the `ObserverIdField`.                                                                                         |
+| Output layer                           | `OutputLayer`             | [vector: line]        | Output layer containing the LoS.                                                                                                                                                                                               |
 
 ## Outputs
 
-| Label        | Name          | Type           | Description                  |
-| ------------ | ------------- | -------------- | ---------------------------- |
-| Output layer | `OutputLayer` | [vector: line] | Output layer containing LoS. |
+| Label        | Name          | Type           | Description                      |
+| ------------ | ------------- | -------------- | -------------------------------- |
+| Output layer | `OutputLayer` | [vector: line] | Output layer containing the LoS. |
 
 ### Fields in the output layer
 

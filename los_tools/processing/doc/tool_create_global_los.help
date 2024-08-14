@@ -1,13 +1,13 @@
 {
-	"ALG_DESC": "Create line-of-sight from each point from observers layer through each point in targets layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.",
-	"ALG_CREATOR": "Jan Caha",
-	"DemRasters": "Raster DEMs on which the LoS is calculated.",
-	"ObserverPoints": "Point layer representing the observers.",
-	"ObserverIdField": "Field containing ID for observer points.",
-	"ObserverOffset": "Field containing offset above DEM for observer points.",
-	"TargetPoints": "Point layer representing the targets.",
-	"TargetIdField": "Field containing ID for target points.",
-	"TargetOffset": "Field containing offset above DEM for target points.",
-	"LineDensity": "The distance by which the LoS is segmentized.",
-	"OutputLayer": "Output layer containing LoS."
+    "ALG_DESC": "Creates a line-of-sight from each point in the observers layer through each point in the targets layer. Each line-of-sight starts at the observer and ends at the edge of the DEM raster behind the target.",
+    "ALG_CREATOR": "Jan Caha",
+    "DemRasters": "Raster DEMs on which the LoS is calculated.",
+    "ObserverPoints": "Point layer representing the observers.",
+    "ObserverIdField": "Field containing IDs for observer points.",
+    "ObserverOffset": "Field containing the offset above DEM for observer points.",
+    "TargetPoints": "Point layer representing the targets.",
+    "TargetIdField": "Field containing IDs for target points.",
+    "TargetOffset": "Field containing the offset above DEM for target points.",
+    "LineDensity": "The distance by which the LoS is segmented.",
+    "OutputLayer": "Output layer containing the LoS."
 }
