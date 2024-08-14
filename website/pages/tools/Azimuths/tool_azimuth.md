@@ -29,4 +29,3 @@ For $n$ points and $m$ lines/polygons the output layer will have $n \times m$ ro
 ## Tool screenshot
 
 ![Extract Azimuth between Points and Centroids](../../images/tool_azimuth.png)
-	

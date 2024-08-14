@@ -1,11 +1,11 @@
 {
-	"ALG_DESC": "Create points at given distance from points from input layer that span from minimal to maximal angle with specified angle step.",
-	"ALG_CREATOR": "Jan Caha", 
-	"InputLayer": "Point layer around which the new points will be created.", 
-	"IdField": "Field value to assign to `id_original_point` for new layer.",
-	"AngleStart": "Angle (azimuth) at which the generation of points should start.",
-	"AngleEnd": "Angle (azimuth) at which the generation of points should end.",
-	"AngleStep": "Determines density of point placement between `Minimal angle` and `Maximal angle`. Angular distance of points. Number of points will be (`Maximal angle` - `Minimal angle`) / `AngleStep`.",
-	"Distance": "How far from the original point the new points should be created.",
-	"OutputLayer": "Output layer containing LoS with new attributes."
+    "ALG_DESC": "Creates points at a specified distance from points in the input layer, spanning from a minimal to a maximal angle with a specified angle step.",
+    "ALG_CREATOR": "Jan Caha", 
+    "InputLayer": "Point layer around which the new points will be created.", 
+    "IdField": "Field value to assign to `id_original_point` for the new layer.",
+    "AngleStart": "Angle (azimuth) at which the generation of points should start.",
+    "AngleEnd": "Angle (azimuth) at which the generation of points should end.",
+    "AngleStep": "Determines the density of point placement between `AngleStart` and `AngleEnd`. The angular distance between points. The number of points will be (`AngleEnd` - `AngleStart`) / `AngleStep`.",
+    "Distance": "Distance from the original point at which the new points should be created.",
+    "OutputLayer": "Output layer containing the new points."
 }
