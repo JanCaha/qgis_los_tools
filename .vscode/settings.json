@@ -11,17 +11,36 @@
         "/usr/share/qgis/python/plugins",
         "/usr/share/qgis/python"
     ],
-    "svg.preview.background": "dark-transparent",
-    "python.testing.unittestArgs": [
-        "-v",
-        "-s",
-        "./tests",
-        "-p",
-        "test_*.py"
+    "pylint.args": [
+        "--ignore=W293,W504",
+        "--disable=E0611",
+        "--max-line-length=160"
     ],
+    "flake8.args": [
+        "--ignore=W293,W504",
+        "--max-line-length",
+        "160"
+    ],
+    "mypy-type-checker.args": [
+        "--follow-imports=silent",
+        "--ignore-missing-imports",
+        "--show-column-numbers",
+        "--no-pretty",
+        "--no-strict-optional"
+    ],
+    "isort.args": [
+        "--profile",
+        "black",
+        "--line-width",
+        "120"
+    ],
+    "black-formatter.args": [
+        "--line-length",
+        "120"
+    ],
+    "svg.preview.background": "dark-transparent",
     "python.testing.pytestArgs": [
         "tests"
     ],
-    "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true
 }

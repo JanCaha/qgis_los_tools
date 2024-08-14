@@ -1,13 +1,12 @@
 name: Build Documentation and Deploy to GitHub Pages
 
 on:
+  release:
+    types: [published, edited]
   push:
-    branches:
-    - master
-    paths:
-    - "website/**"
-    - "github/workflows/mkdocs_build_deploy.yaml"
-
+    tags:
+      - 'v*'
+    
 jobs:
 
   build-deploy:
@@ -16,7 +15,7 @@ jobs:
     
     steps:
     
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -31,8 +30,8 @@ jobs:
         python3 -m pip install MarkdownHighlight
         python3 -m pip install https://codeload.github.com/mkdocs/mkdocs-bootstrap/zip/master
         python3 -m pip install git+https://github.com/mkdocs/mkdocs-bootswatch
-        python3 -m pip install git+https://github.com/it-novum/mkdocs-featherlight.git
-
+        pip install mkdocs-glightbox
+        
     - name: Build
       run: |
         mkdocs build --config-file ./website/mkdocs.yml

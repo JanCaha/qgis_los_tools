@@ -1,17 +1,17 @@
-from typing import Union, Optional
+from typing import Optional, Union
 
-from qgis.core import (QgsUnitTypes)
-from qgis.gui import (QgsDoubleSpinBox)
-from qgis.PyQt.QtWidgets import (QWidget, QHBoxLayout, QComboBox)
-from qgis.PyQt.QtCore import (Qt, pyqtSignal)
+from qgis.core import QgsUnitTypes
+from qgis.gui import QgsDoubleSpinBox
+from qgis.PyQt.QtCore import Qt, pyqtSignal
+from qgis.PyQt.QtWidgets import QComboBox, QHBoxLayout, QWidget
 
 
 class Distance:
-
     def __init__(
-            self,
-            distance: float = 0,
-            unit: QgsUnitTypes.DistanceUnit = QgsUnitTypes.DistanceUnit.DistanceMeters) -> None:
+        self,
+        distance: float = 0,
+        unit: QgsUnitTypes.DistanceUnit = QgsUnitTypes.DistanceUnit.DistanceMeters,
+    ) -> None:
         self._distance: float = distance
         self._unit: QgsUnitTypes.DistanceUnit = unit
 
@@ -36,12 +36,13 @@ class Distance:
 
 
 class DistanceWidget(QWidget):
-
     valueChanged = pyqtSignal()
 
-    def __init__(self,
-                 parent: Optional['QWidget'] = None,
-                 flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Widget) -> None:
+    def __init__(
+        self,
+        parent: Optional["QWidget"] = None,
+        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Widget,
+    ) -> None:
         super().__init__(parent, flags)
 
         self.init_gui()
@@ -58,16 +59,26 @@ class DistanceWidget(QWidget):
         self.distance_value.valueChanged.connect(self._raiseValueChanged)
 
         self.units = QComboBox(self)
-        self.units.addItem(QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMeters),
-                           QgsUnitTypes.DistanceUnit.DistanceMeters)
-        self.units.addItem(QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceKilometers),
-                           QgsUnitTypes.DistanceUnit.DistanceKilometers)
-        self.units.addItem(QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceFeet),
-                           QgsUnitTypes.DistanceUnit.DistanceFeet)
-        self.units.addItem(QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMiles),
-                           QgsUnitTypes.DistanceUnit.DistanceMiles)
-        self.units.addItem(QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceYards),
-                           QgsUnitTypes.DistanceUnit.DistanceYards)
+        self.units.addItem(
+            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMeters),
+            QgsUnitTypes.DistanceUnit.DistanceMeters,
+        )
+        self.units.addItem(
+            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceKilometers),
+            QgsUnitTypes.DistanceUnit.DistanceKilometers,
+        )
+        self.units.addItem(
+            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceFeet),
+            QgsUnitTypes.DistanceUnit.DistanceFeet,
+        )
+        self.units.addItem(
+            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMiles),
+            QgsUnitTypes.DistanceUnit.DistanceMiles,
+        )
+        self.units.addItem(
+            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceYards),
+            QgsUnitTypes.DistanceUnit.DistanceYards,
+        )
         self.units.currentIndexChanged.connect(self._raiseValueChanged)
 
         layout.addWidget(self.distance_value)
@@ -76,9 +87,11 @@ class DistanceWidget(QWidget):
     def _raiseValueChanged(self):
         self.valueChanged.emit()
 
-    def setValue(self,
-                 value: float,
-                 unit: QgsUnitTypes.DistanceUnit = QgsUnitTypes.DistanceUnit.DistanceMeters):
+    def setValue(
+        self,
+        value: float,
+        unit: QgsUnitTypes.DistanceUnit = QgsUnitTypes.DistanceUnit.DistanceMeters,
+    ):
         self.units.setCurrentText(QgsUnitTypes.toString(unit))
         self.distance_value.setValue(value)
 

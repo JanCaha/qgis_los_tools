@@ -1,16 +1,25 @@
-from typing import List, Dict
+from typing import Dict, List
 
-from qgis.core import (QgsProject, QgsRasterLayer, QgsPointXY, QgsUnitTypes)
-from qgis.PyQt.QtWidgets import (QDialog, QPushButton, QFormLayout, QTreeWidget, QLabel,
-                                 QTreeWidgetItem, QGroupBox, QTextBrowser, QLineEdit, QHeaderView)
-from qgis.PyQt.QtCore import (Qt)
+from qgis.core import QgsPointXY, QgsProject, QgsRasterLayer, QgsUnitTypes
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtWidgets import (
+    QDialog,
+    QFormLayout,
+    QGroupBox,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTextBrowser,
+    QTreeWidget,
+    QTreeWidgetItem,
+)
 
 from ..classes.list_raster import ListOfRasters
 from .dialog_tool_set_camera import PointCaptureMapTool
 
 
 class RasterValidations(QDialog):
-
     def __init__(self, iface=None) -> None:
         super().__init__(iface.mainWindow())
 
@@ -29,7 +38,6 @@ class RasterValidations(QDialog):
         self.init_gui()
 
     def init_gui(self):
-
         self.setMinimumWidth(600)
         self.setWindowTitle("Rasters Validation and Sampling")
 
@@ -101,10 +109,14 @@ class RasterValidations(QDialog):
             distance_unit = QgsUnitTypes.toAbbreviatedString(distance_unit)
 
             item.setText(
-                1, "{} {} - {} {}".format(round(raster.extent().width() / raster.width(),
-                                                3), distance_unit,
-                                          round(raster.extent().height() / raster.height(), 3),
-                                          distance_unit))
+                1,
+                "{} {} - {} {}".format(
+                    round(raster.extent().width() / raster.width(), 3),
+                    distance_unit,
+                    round(raster.extent().height() / raster.height(), 3),
+                    distance_unit,
+                ),
+            )
             item.setData(1, Qt.UserRole, raster.extent().width() / raster.width())
 
             self._rasters_view.addTopLevelItem(item)
@@ -173,13 +185,10 @@ class RasterValidations(QDialog):
             return ListOfRasters([])
 
     def test_interpolated_value_at_point(self):
-
         if self.list_of_selected_rasters and self._point and self._point_crs:
-
             list_of_rasters = self.listOfRasters
             if not list_of_rasters.is_empty():
-                value = list_of_rasters.extract_interpolated_value_at_point(
-                    self._point, self._point_crs)
+                value = list_of_rasters.extract_interpolated_value_at_point(self._point, self._point_crs)
                 if value:
                     value = str(round(value, 6))
                 else:
@@ -207,7 +216,6 @@ class RasterValidations(QDialog):
         all_msgs = []
 
         if 0 < len(rasters):
-
             valid, msg = ListOfRasters.validate_bands(rasters)
             if not valid:
                 all_msgs.append(msg)

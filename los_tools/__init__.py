@@ -22,11 +22,11 @@
  This script initializes the plugin, making it known to QGIS.
 """
 
-__author__ = 'Jan Caha'
-__date__ = '2020-03-05'
-__copyright__ = '(C) 2020 by Jan Caha'
+__author__ = "Jan Caha"
+__date__ = "2020-03-05"
+__copyright__ = "(C) 2020 by Jan Caha"
 
-from .los_tools_plugin import LoSToolsPlugin
+from los_tools.los_tools_plugin import LoSToolsPlugin
 
 
 # noinspection PyPep8Naming

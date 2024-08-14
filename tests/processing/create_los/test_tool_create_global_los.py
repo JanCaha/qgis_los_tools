@@ -1,171 +1,173 @@
-from qgis.core import (QgsVectorLayer, QgsRasterLayer, QgsFeatureRequest)
-from qgis._core import QgsWkbTypes
+import pytest
+from qgis.core import Qgis, QgsFeatureRequest, QgsRasterLayer, QgsVectorLayer
 
-from los_tools.processing.create_los.tool_create_global_los import CreateGlobalLosAlgorithm
 from los_tools.constants.field_names import FieldNames
+from los_tools.processing.create_los.tool_create_global_los import CreateGlobalLosAlgorithm
 from los_tools.processing.tools.util_functions import get_diagonal_size
+from tests.custom_assertions import (
+    assert_algorithm,
+    assert_check_parameter_values,
+    assert_field_names_exist,
+    assert_layer,
+    assert_parameter,
+    assert_run,
+)
+from tests.utils import result_filename
 
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
-from tests.utils_tests import (get_data_path, get_data_path_results)
+OBSERVERS_ID = "id_point"
+OBSERVERS_OFFSET = "observ_offset"
+TARGETS_ID = "id_point"
+TARGETS_OFFSET = "offset"
 
 
-class CreateGlobalLosAlgorithmTest(QgsProcessingAlgorithmTestCase):
+def test_parameters() -> None:
+    alg = CreateGlobalLosAlgorithm()
+    alg.initAlgorithm()
 
-    def setUp(self) -> None:
+    assert_parameter(alg.parameterDefinition("DemRasters"), parameter_type="multilayer")
+    assert_parameter(alg.parameterDefinition("ObserverPoints"), parameter_type="source")
+    assert_parameter(
+        alg.parameterDefinition("ObserverIdField"), parameter_type="field", parent_parameter="ObserverPoints"
+    )
+    assert_parameter(
+        alg.parameterDefinition("ObserverOffset"), parameter_type="field", parent_parameter="ObserverPoints"
+    )
+    assert_parameter(alg.parameterDefinition("TargetPoints"), parameter_type="source")
+    assert_parameter(alg.parameterDefinition("TargetIdField"), parameter_type="field", parent_parameter="TargetPoints")
+    assert_parameter(alg.parameterDefinition("TargetOffset"), parameter_type="field", parent_parameter="TargetPoints")
+    assert_parameter(alg.parameterDefinition("LineDensity"), parameter_type="distance", default_value=1)
+    assert_parameter(alg.parameterDefinition("OutputLayer"), parameter_type="sink")
 
-        super().setUp()
 
-        self.observers = QgsVectorLayer(get_data_path(file="points.gpkg"))
-        self.observers_id = "id_point"
-        self.observers_offset = "observ_offset"
+def test_alg_settings() -> None:
+    alg = CreateGlobalLosAlgorithm()
+    alg.initAlgorithm()
 
-        self.targets = QgsVectorLayer(get_data_path(file="single_point.gpkg"))
-        self.targets_id = "id_point"
-        self.targets_offset = "offset"
+    assert_algorithm(alg)
 
-        self.dsm = QgsRasterLayer(get_data_path(file="dsm.tif"))
 
-        self.output_path = get_data_path_results(file="los_global.gpkg")
+def test_wrong_params(
+    raster_small: QgsRasterLayer,
+    raster_multi_band: QgsRasterLayer,
+    raster_wrong_crs: QgsRasterLayer,
+    layer_points: QgsVectorLayer,
+    layer_point: QgsVectorLayer,
+    layer_point_wgs84: QgsVectorLayer,
+    layer_points_epsg5514: QgsVectorLayer,
+) -> None:
+    alg = CreateGlobalLosAlgorithm()
+    alg.initAlgorithm()
 
-        self.alg = CreateGlobalLosAlgorithm()
-        self.alg.initAlgorithm()
+    # multiband raster fail
+    params = {
+        "DemRasters": [raster_multi_band],
+        "ObserverPoints": layer_points,
+        "TargetPoints": layer_point,
+    }
 
-    def test_parameters(self) -> None:
+    with pytest.raises(AssertionError, match="Rasters can only have one band"):
+        assert_check_parameter_values(alg, params)
 
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("DemRasters"),
-                                          parameter_type="multilayer")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("ObserverPoints"),
-                                          parameter_type="source")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("ObserverIdField"),
-                                          parameter_type="field",
-                                          parent_parameter="ObserverPoints")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("ObserverOffset"),
-                                          parameter_type="field",
-                                          parent_parameter="ObserverPoints")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("TargetPoints"),
-                                          parameter_type="source")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("TargetIdField"),
-                                          parameter_type="field",
-                                          parent_parameter="TargetPoints")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("TargetOffset"),
-                                          parameter_type="field",
-                                          parent_parameter="TargetPoints")
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("LineDensity"),
-                                          parameter_type="distance",
-                                          default_value=1)
-        self.assertQgsProcessingParameter(self.alg.parameterDefinition("OutputLayer"),
-                                          parameter_type="sink")
+    # observer layer with geographic coordinates
+    params = {
+        "DemRasters": [raster_small],
+        "ObserverPoints": layer_point_wgs84,
+        "TargetPoints": layer_point_wgs84,
+    }
 
-    def test_alg_settings(self) -> None:
+    with pytest.raises(AssertionError, match="`Observers point layer` crs must be projected."):
+        assert_check_parameter_values(alg, params)
 
-        self.assertAlgSettings()
+    # raster crs != observers crs
+    params = {
+        "DemRasters": [raster_wrong_crs],
+        "ObserverPoints": layer_points,
+        "TargetPoints": layer_point,
+    }
 
-    def test_check_wrong_params(self) -> None:
+    with pytest.raises(AssertionError, match="Provided crs template and raster layers crs must be equal"):
+        assert_check_parameter_values(alg, params)
 
-        # multiband raster fail
-        params = {
-            "DemRasters": [QgsRasterLayer(get_data_path(file="raster_multiband.tif"))],
-            "ObserverPoints": self.observers,
-            "TargetPoints": self.targets
-        }
+    # observers crs != target crs
+    params = {
+        "DemRasters": [raster_small],
+        "ObserverPoints": layer_points,
+        "TargetPoints": layer_points_epsg5514,
+    }
 
-        self.assertCheckParameterValuesRaisesMessage(parameters=params,
-                                                     message="Rasters can only have one band")
+    with pytest.raises(AssertionError, match="`Observers point layer` and `Targets point layer` crs must be equal."):
+        assert_check_parameter_values(alg, params)
 
-        # observer layer with geographic coordinates
-        params = {
-            "DemRasters": [self.dsm],
-            "ObserverPoints": QgsVectorLayer(get_data_path(file="single_point_wgs84.gpkg")),
-            "TargetPoints": self.targets
-        }
 
-        self.assertCheckParameterValuesRaisesMessage(
-            parameters=params, message="`Observers point layer` crs must be projected.")
+def test_run_alg(raster_small: QgsRasterLayer, layer_points: QgsVectorLayer, layer_point: QgsVectorLayer) -> None:
+    alg = CreateGlobalLosAlgorithm()
+    alg.initAlgorithm()
 
-        # raster crs != observers crs
-        params = {
-            "DemRasters": [QgsRasterLayer(get_data_path(file="dsm_epsg_5514.tif"))],
-            "ObserverPoints": self.observers,
-            "TargetPoints": self.targets
-        }
+    output_path = result_filename("los_global.gpkg")
 
-        self.assertCheckParameterValuesRaisesMessage(
-            parameters=params, message="Provided crs template and raster layers crs must be equal")
+    params = {
+        "DemRasters": [raster_small],
+        "ObserverPoints": layer_points,
+        "ObserverIdField": OBSERVERS_ID,
+        "ObserverOffset": OBSERVERS_OFFSET,
+        "TargetPoints": layer_point,
+        "TargetIdField": TARGETS_ID,
+        "TargetOffset": TARGETS_OFFSET,
+        "LineDensity": 1,
+        "OutputLayer": output_path,
+    }
 
-        # observers crs != target crs
-        params = {
-            "DemRasters": [self.dsm],
-            "ObserverPoints": self.observers,
-            "TargetPoints": QgsVectorLayer(get_data_path(file="points_epsg_5514.gpkg"))
-        }
+    assert_run(alg, parameters=params)
 
-        self.assertCheckParameterValuesRaisesMessage(
-            parameters=params,
-            message="`Observers point layer` and `Targets point layer` crs must be equal.")
+    los_layer = QgsVectorLayer(output_path)
 
-    def test_run_alg(self) -> None:
+    assert_layer(los_layer, geom_type=Qgis.WkbType.LineStringZ, crs=layer_points.sourceCrs())
 
-        params = {
-            "DemRasters": [self.dsm],
-            "ObserverPoints": self.observers,
-            "ObserverIdField": self.observers_id,
-            "ObserverOffset": self.observers_offset,
-            "TargetPoints": self.targets,
-            "TargetIdField": self.targets_id,
-            "TargetOffset": self.targets_offset,
-            "LineDensity": 1,
-            "OutputLayer": self.output_path
-        }
+    assert_field_names_exist(
+        [
+            FieldNames.LOS_TYPE,
+            FieldNames.ID_OBSERVER,
+            FieldNames.ID_TARGET,
+            FieldNames.OBSERVER_OFFSET,
+            FieldNames.TARGET_OFFSET,
+        ],
+        los_layer,
+    )
 
-        self.assertRunAlgorithm(parameters=params)
+    assert layer_points.featureCount() * layer_point.featureCount() == los_layer.featureCount()
 
-        los_layer = QgsVectorLayer(self.output_path)
+    observers_ids = list(layer_points.uniqueValues(layer_points.fields().lookupField(OBSERVERS_ID)))
+    targets_ids = list(layer_point.uniqueValues(layer_point.fields().lookupField(TARGETS_ID)))
 
-        self.assertQgsVectorLayer(los_layer,
-                                  geom_type=QgsWkbTypes.LineStringZ,
-                                  crs=self.observers.sourceCrs())
+    dsm_max_size = get_diagonal_size(raster_small.dataProvider())
+    dsm_extent = raster_small.dataProvider().extent()
 
-        self.assertFieldNamesInQgsVectorLayer([
-            FieldNames.LOS_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET,
-            FieldNames.OBSERVER_OFFSET, FieldNames.TARGET_OFFSET
-        ], los_layer)
+    for observer_id in observers_ids:
+        for target_id in targets_ids:
 
-        self.assertEqual(self.observers.featureCount() * self.targets.featureCount(),
-                         los_layer.featureCount())
+            request = QgsFeatureRequest()
+            request.setFilterExpression(f"{OBSERVERS_ID} = '{observer_id}'")
+            observer_feature = list(layer_points.getFeatures(request))[0]
 
-        observers_ids = list(
-            self.observers.uniqueValues(self.observers.fields().lookupField(self.observers_id)))
-        targets_ids = list(
-            self.targets.uniqueValues(self.targets.fields().lookupField(self.targets_id)))
+            request = QgsFeatureRequest()
+            request.setFilterExpression(f"{TARGETS_ID} = '{target_id}'")
+            target_feature = list(layer_point.getFeatures(request))[0]
 
-        dsm_max_size = get_diagonal_size(self.dsm.dataProvider())
-        dsm_extent = self.dsm.dataProvider().extent()
+            request = QgsFeatureRequest()
+            request.setFilterExpression(
+                f"{FieldNames.ID_OBSERVER} = '{observer_id}' AND {FieldNames.ID_TARGET} = '{target_id}'"
+            )
+            los_layer_feature = list(los_layer.getFeatures(request))[0]
 
-        for observer_id in observers_ids:
-            for target_id in targets_ids:
-                with self.subTest(observer_id=observer_id, target_id=target_id):
+            assert (
+                observer_feature.geometry().distance(target_feature.geometry()) < los_layer_feature.geometry().length()
+            )
 
-                    request = QgsFeatureRequest()
-                    request.setFilterExpression("{} = '{}'".format(self.observers_id, observer_id))
-                    observer_feature = list(self.observers.getFeatures(request))[0]
+            assert los_layer_feature.geometry().length() < dsm_max_size
 
-                    request = QgsFeatureRequest()
-                    request.setFilterExpression("{} = '{}'".format(self.targets_id, target_id))
-                    target_feature = list(self.targets.getFeatures(request))[0]
+            vertices = los_layer_feature.geometry().asPolyline()
 
-                    request = QgsFeatureRequest()
-                    request.setFilterExpression("{} = '{}' AND {} = '{}'".format(
-                        FieldNames.ID_OBSERVER, observer_id, FieldNames.ID_TARGET, target_id))
-                    los_layer_feature = list(los_layer.getFeatures(request))[0]
+            assert observer_feature.geometry().asPoint() == vertices[0]
+            assert target_feature.geometry().asPoint() in vertices
 
-                    self.assertTrue(observer_feature.geometry().distance(target_feature.geometry())
-                                    < los_layer_feature.geometry().length())
-
-                    self.assertTrue(los_layer_feature.geometry().length() < dsm_max_size)
-
-                    vertices = los_layer_feature.geometry().asPolyline()
-
-                    self.assertEqual(observer_feature.geometry().asPoint(), vertices[0])
-                    self.assertIn(target_feature.geometry().asPoint(), vertices)
-
-                    self.assertTrue(dsm_extent.contains(target_feature.geometry().boundingBox()))
+            assert dsm_extent.contains(target_feature.geometry().boundingBox())

@@ -1,147 +1,112 @@
-import unittest
-
-import numpy as np
 import math
 
-from qgis.core import (QgsVectorLayer, QgsFeatureRequest, QgsProcessingFeedback,
-                       QgsProcessingContext)
+import numpy as np
+import pytest
+from qgis.core import QgsFeatureRequest, QgsProcessingContext, QgsProcessingFeedback, QgsVectorLayer
 
-from los_tools.processing.create_points.tool_points_in_direction import CreatePointsInDirectionAlgorithm
 from los_tools.constants.field_names import FieldNames
+from los_tools.processing.create_points.tool_points_in_direction import CreatePointsInDirectionAlgorithm
+from tests.custom_assertions import (
+    assert_algorithm,
+    assert_check_parameter_values,
+    assert_field_names_exist,
+    assert_layer,
+    assert_parameter,
+    assert_run,
+)
+from tests.utils import result_filename
 
-from tests.AlgorithmTestCase import QgsProcessingAlgorithmTestCase
-from tests.utils_tests import (print_alg_params, print_alg_outputs, get_data_path,
-                               get_data_path_results)
+
+def test_parameters() -> None:
+    alg = CreatePointsInDirectionAlgorithm()
+    alg.initAlgorithm()
+
+    assert_parameter(alg.parameterDefinition("InputLayer"), parameter_type="source")
+    assert_parameter(alg.parameterDefinition("IdField"), parameter_type="field", parent_parameter="InputLayer")
+    assert_parameter(alg.parameterDefinition("DirectionLayer"), parameter_type="source")
+    assert_parameter(alg.parameterDefinition("AngleOffset"), parameter_type="number", default_value=20)
+    assert_parameter(alg.parameterDefinition("AngleStep"), parameter_type="number", default_value=1)
+    assert_parameter(alg.parameterDefinition("Distance"), parameter_type="distance", default_value=10)
+    assert_parameter(alg.parameterDefinition("OutputLayer"), parameter_type="sink")
 
 
-class CreatePointsInDirectionAlgorithmTest(QgsProcessingAlgorithmTestCase):
+def test_alg_settings() -> None:
+    alg = CreatePointsInDirectionAlgorithm()
+    alg.initAlgorithm()
 
-    def setUp(self) -> None:
-        self.points = QgsVectorLayer(get_data_path(file="points.gpkg"))
-        self.points_id_field = "id_point"
-        self.single_point = QgsVectorLayer(get_data_path(file="single_point.gpkg"))
+    assert_algorithm(alg)
 
-        self.alg = CreatePointsInDirectionAlgorithm()
-        self.alg.initAlgorithm()
 
-        self.feedback = QgsProcessingFeedback()
-        self.context = QgsProcessingContext()
+def test_wrong_params(layer_points: QgsVectorLayer) -> None:
+    alg = CreatePointsInDirectionAlgorithm()
+    alg.initAlgorithm()
 
-    @unittest.skip("printing not necessary `test_show_params()`")
-    def test_show_params(self) -> None:
-        print("{}".format(self.alg.name()))
-        print("----------------------------------")
-        print_alg_params(self.alg)
-        print("----------------------------------")
-        print_alg_outputs(self.alg)
+    output_path = result_filename("points_direction.gpkg")
 
-    def test_parameters(self) -> None:
+    params = {
+        "InputLayer": layer_points,
+        "IdField": "id_point",
+        "DirectionLayer": layer_points,
+        "AngleOffset": 10,
+        "AngleStep": 0.5,
+        "Distance": 10,
+        "OutputLayer": output_path,
+    }
 
-        param_input_layer = self.alg.parameterDefinition("InputLayer")
-        param_id_field = self.alg.parameterDefinition("IdField")
-        param_direction_layer = self.alg.parameterDefinition("DirectionLayer")
-        param_angle_offset = self.alg.parameterDefinition("AngleOffset")
-        param_angle_step = self.alg.parameterDefinition("AngleStep")
-        param_distance = self.alg.parameterDefinition("Distance")
-        param_output_layer = self.alg.parameterDefinition("OutputLayer")
+    with pytest.raises(AssertionError, match="`Main direction point layer` should only containt one feature."):
+        assert_check_parameter_values(alg, parameters=params)
 
-        self.assertEqual("source", param_input_layer.type())
-        self.assertEqual("field", param_id_field.type())
-        self.assertEqual("source", param_direction_layer.type())
-        self.assertEqual("number", param_angle_offset.type())
-        self.assertEqual("number", param_angle_step.type())
-        self.assertEqual("distance", param_distance.type())
-        self.assertEqual("sink", param_output_layer.type())
 
-        self.assertEqual("InputLayer", param_id_field.parentLayerParameterName())
-        self.assertIn("InputLayer", param_distance.dependsOnOtherParameters())
+def test_run(layer_points: QgsVectorLayer, layer_point: QgsVectorLayer) -> None:
+    alg = CreatePointsInDirectionAlgorithm()
+    alg.initAlgorithm()
 
-        self.assertEqual(20, param_angle_offset.defaultValue())
-        self.assertEqual(1, param_angle_step.defaultValue())
-        self.assertEqual(10, param_distance.defaultValue())
+    output_path = result_filename("points_direction.gpkg")
 
-    def test_alg_settings(self) -> None:
+    angle_offset = 20
+    angle_step = 1
+    distance = 10
 
-        self.assertAlgSettings()
+    params = {
+        "InputLayer": layer_points,
+        "IdField": "id_point",
+        "DirectionLayer": layer_point,
+        "AngleOffset": angle_offset,
+        "AngleStep": angle_step,
+        "Distance": distance,
+        "OutputLayer": output_path,
+    }
 
-    def test_check_wrong_params(self) -> None:
+    assert_run(alg, parameters=params)
 
-        output_path = get_data_path_results(file="points_direction.gpkg")
+    output_layer = QgsVectorLayer(output_path)
 
-        params = {
-            "InputLayer": self.points,
-            "IdField": self.points_id_field,
-            "DirectionLayer": self.points,
-            "AngleOffset": 10,
-            "AngleStep": 0.5,
-            "Distance": 10,
-            "OutputLayer": output_path,
-        }
+    assert_field_names_exist(
+        [FieldNames.ID_ORIGINAL_POINT, FieldNames.ID_POINT, FieldNames.AZIMUTH, FieldNames.ANGLE_STEP_POINTS],
+        output_layer,
+    )
 
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
+    unique_ids_orig = list(layer_points.uniqueValues(layer_points.fields().lookupField("id_point")))
+    unique_ids_new = list(output_layer.uniqueValues(output_layer.fields().lookupField(FieldNames.ID_ORIGINAL_POINT)))
 
-        self.assertFalse(can_run)
-        self.assertIn("`Main direction point layer` should only containt one feature.", msg)
+    assert unique_ids_orig == unique_ids_new
 
-    def test_run_alg(self) -> None:
+    angles = np.arange(0 - angle_offset, 0 + angle_offset + 0.1 * angle_step, step=angle_step).tolist()
 
-        output_path = get_data_path_results(file="points_direction.gpkg")
+    number_of_elements = len(angles) * len(unique_ids_orig)
 
-        angle_offset = 20
-        angle_step = 1
-        distance = 10
+    assert number_of_elements == output_layer.featureCount()
 
-        params = {
-            "InputLayer": self.points,
-            "IdField": self.points_id_field,
-            "DirectionLayer": self.single_point,
-            "AngleOffset": angle_offset,
-            "AngleStep": angle_step,
-            "Distance": distance,
-            "OutputLayer": output_path,
-        }
+    for id_orig in unique_ids_orig:
 
-        can_run, msg = self.alg.checkParameterValues(params, context=self.context)
+        request = QgsFeatureRequest()
+        request.setFilterExpression(f"{FieldNames.ID_ORIGINAL_POINT} = '{id_orig}'")
+        order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
+        request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
 
-        self.assertTrue(can_run)
-        self.assertIn("", msg)
+        features = list(output_layer.getFeatures(request))
 
-        self.alg.run(parameters=params, context=self.context, feedback=self.feedback)
-
-        output_layer = QgsVectorLayer(output_path)
-
-        self.assertIn(FieldNames.ID_ORIGINAL_POINT, output_layer.fields().names())
-        self.assertIn(FieldNames.ID_POINT, output_layer.fields().names())
-        self.assertIn(FieldNames.AZIMUTH, output_layer.fields().names())
-        self.assertIn(FieldNames.ANGLE_STEP_POINTS, output_layer.fields().names())
-
-        unique_ids_orig = list(
-            self.points.uniqueValues(self.points.fields().lookupField(self.points_id_field)))
-        unique_ids_new = list(
-            output_layer.uniqueValues(output_layer.fields().lookupField(
-                FieldNames.ID_ORIGINAL_POINT)))
-
-        self.assertListEqual(unique_ids_orig, unique_ids_new)
-
-        angles = np.arange(0 - angle_offset, 0 + angle_offset + 0.1 * angle_step,
-                           step=angle_step).tolist()
-
-        number_of_elements = len(angles) * len(unique_ids_orig)
-
-        self.assertEqual(number_of_elements, output_layer.featureCount())
-
-        for id_orig in unique_ids_orig:
-
-            request = QgsFeatureRequest()
-            request.setFilterExpression("{} = '{}'".format(FieldNames.ID_ORIGINAL_POINT, id_orig))
-            order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
-            request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
-
-            features = list(output_layer.getFeatures(request))
-
-            for i in range(0, len(features) - 1):
-                with self.subTest(id_original_point=id_orig, point_range=i):
-                    self.assertAlmostEqual(features[i].geometry().distance(features[i +
-                                                                                    1].geometry()),
-                                           math.radians(angle_step) * distance,
-                                           places=5)
+        for i in range(0, len(features) - 1):
+            assert features[i].geometry().distance(features[i + 1].geometry()) == pytest.approx(
+                math.radians(angle_step) * distance, abs=0.00001
+            )

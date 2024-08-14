@@ -1,76 +1,85 @@
 import math
 
-from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterMatrix,
-                       QgsProcessingParameterNumber, QgsProcessingParameterBoolean,
-                       QgsProcessingFeedback, QgsFields, QgsField, QgsWkbTypes,
-                       QgsProcessingParameterFeatureSink, QgsFeature, QgsProcessingException,
-                       QgsProcessingUtils)
-
-from qgis.PyQt.QtCore import QVariant
+from qgis.core import (
+    QgsFeature,
+    QgsField,
+    QgsFields,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingFeedback,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterMatrix,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsWkbTypes,
+)
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.utils import get_doc_file
+from los_tools.utils import COLUMN_TYPE, get_doc_file
 
 
 class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
-
     ANGLE = "Angle"
     SIZES = "Size"
     MAXIMALDISTANCE = "MaximalDistance"
     OUTPUT_TABLE = "OutputTable"
 
     def initAlgorithm(self, config=None):
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.ANGLE,
+                "Angle size of object (in degrees)",
+                QgsProcessingParameterNumber.Double,
+                defaultValue=0.1,
+                minValue=0.0,
+                maxValue=100.0,
+                optional=False,
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterNumber(self.ANGLE,
-                                         "Angle size of object (in degrees)",
-                                         QgsProcessingParameterNumber.Double,
-                                         defaultValue=0.1,
-                                         minValue=0.0,
-                                         maxValue=100.0,
-                                         optional=False))
-
-        self.addParameter(
-            QgsProcessingParameterMatrix(self.SIZES,
-                                         "Sizes of object to calculate (in meters)",
-                                         numberRows=1,
-                                         headers=["Size"],
-                                         defaultValue=[1]))
+            QgsProcessingParameterMatrix(
+                self.SIZES,
+                "Sizes of object to calculate (in meters)",
+                numberRows=1,
+                headers=["Size"],
+                defaultValue=[1],
+            )
+        )
 
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.MAXIMALDISTANCE,
                 "Add maximal distance value (with sampling equal to maximal sampling distance)",
-                defaultValue=False))
+                defaultValue=False,
+            )
+        )
 
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_TABLE, "Output table"))
 
     def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
-
         angle = self.parameterAsDouble(parameters, self.ANGLE, context)
         sizes = self.parameterAsMatrix(parameters, self.SIZES, context)
         maximal_distance = self.parameterAsBoolean(parameters, self.MAXIMALDISTANCE, context)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.SIZE_ANGLE, QVariant.Double))
-        fields.append(QgsField(FieldNames.DISTANCE, QVariant.Double))
-        fields.append(QgsField(FieldNames.SIZE, QVariant.Double))
+        fields.append(QgsField(FieldNames.SIZE_ANGLE, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.DISTANCE, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.SIZE, COLUMN_TYPE.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields,
-                                             QgsWkbTypes.NoGeometry)
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields, QgsWkbTypes.NoGeometry)
 
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_TABLE))
 
-        result_string_print = "Sizes at distances:\n" \
-                              "Size - Distance\n"
+        result_string_print = "Sizes at distances:\n" "Size - Distance\n"
 
         angle = float(angle)
 
         maximal_sampling_distance = 0
 
         for size in sizes:
-
             size = float(size)
 
             distance = round(size / math.tan(math.radians(angle)), 3)
@@ -88,7 +97,6 @@ class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
             sink.addFeature(f)
 
         if maximal_distance:
-
             f = QgsFeature(fields)
             f.setAttribute(f.fieldNameIndex(FieldNames.SIZE_ANGLE), float(angle))
             f.setAttribute(f.fieldNameIndex(FieldNames.DISTANCE), -1)

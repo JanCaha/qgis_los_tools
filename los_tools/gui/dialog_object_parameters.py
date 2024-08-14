@@ -1,10 +1,9 @@
-from typing import Optional, Union
 import math
 from enum import Enum, auto
+from typing import Optional, Union
 
-from qgis.PyQt.QtWidgets import (QDialog, QDoubleSpinBox,
-                                 QWidget, QFormLayout, QComboBox)
-from qgis.PyQt.QtCore import (Qt)
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtWidgets import QComboBox, QDialog, QDoubleSpinBox, QFormLayout, QWidget
 
 from .custom_classes import DistanceWidget
 
@@ -16,16 +15,16 @@ class CalculationType(Enum):
 
 
 class ObjectParameters(QDialog):
-
-    def __init__(self,
-                 parent: Optional[QWidget] = None,
-                 flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Dialog) -> None:
+    def __init__(
+        self,
+        parent: Optional[QWidget] = None,
+        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Dialog,
+    ) -> None:
         super().__init__(parent, flags)
 
         self.init_gui()
 
     def init_gui(self) -> None:
-
         self.setWindowTitle("Object Visibility Parameters")
         self.setMinimumWidth(600)
 
@@ -89,17 +88,33 @@ class ObjectParameters(QDialog):
         self.block_all_signals(True)
 
         if self.calculation_type == CalculationType.DISTANCE:
-            self.object_distance.setValue(round(self.object_size.value() / math.tan(math.radians(self.object_angle_size.value())), 3))
+            self.object_distance.setValue(
+                round(
+                    self.object_size.value() / math.tan(math.radians(self.object_angle_size.value())),
+                    3,
+                )
+            )
 
         elif self.calculation_type == CalculationType.SIZE:
-            self.object_size.setValue(round((math.tan(math.radians(self.object_angle_size.value()))) * self.object_distance.value(), 3))
+            self.object_size.setValue(
+                round(
+                    (math.tan(math.radians(self.object_angle_size.value()))) * self.object_distance.value(),
+                    3,
+                )
+            )
 
         elif self.calculation_type == CalculationType.ANGLE:
             self.object_angle_size.setValue(
-                math.degrees(math.atan(self.object_size.value() / self.object_distance.value())))
+                math.degrees(math.atan(self.object_size.value() / self.object_distance.value()))
+            )
 
         else:
-            self.object_distance.setValue(round(self.object_size.value() / math.tan(math.radians(self.object_angle_size.value())), 3))
+            self.object_distance.setValue(
+                round(
+                    self.object_size.value() / math.tan(math.radians(self.object_angle_size.value())),
+                    3,
+                )
+            )
 
         self.block_all_signals(False)
 

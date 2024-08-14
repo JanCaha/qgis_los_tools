@@ -20,15 +20,13 @@ from los_tools.processing.los_tools_provider import LoSToolsProvider
 
 from .constants.fields import Fields
 from .constants.plugin import PluginConstants
-from .gui.create_los_tool import CreateLoSMapTool
+from .gui.create_los_tool.create_los_tool import CreateLoSMapTool
 from .gui.dialog_los_settings import LoSSettings
 from .gui.dialog_object_parameters import ObjectParameters
 from .gui.dialog_raster_validations import RasterValidations
 from .gui.dialog_tool_set_camera import SetCameraTool
 from .gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
-from .gui.optimize_point_location_tool.optimize_points_location_tool import (
-    OptimizePointsLocationTool,
-)
+from .gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
 from .utils import get_icon_path
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
@@ -240,7 +238,9 @@ class LoSToolsPlugin:
     def run_tool_set_camera(self):
         if self.camera_tool is None:
             self.camera_tool = SetCameraTool(
-                parent=self.iface.mainWindow(), canvas=self.iface.mapCanvas(), iface=self.iface
+                parent=self.iface.mainWindow(),
+                canvas=self.iface.mapCanvas(),
+                iface=self.iface,
             )
 
         self.camera_tool.show()
@@ -286,7 +286,10 @@ class LoSToolsPlugin:
                 selected_crs = QgsCoordinateReferenceSystem.fromEpsgId(3857)
 
             return QgsMemoryProviderUtils.createMemoryLayer(
-                "Manually Created LoS", Fields.los_plugin_layer_fields, QgsWkbTypes.LineString25D, selected_crs
+                "Manually Created LoS",
+                Fields.los_plugin_layer_fields,
+                QgsWkbTypes.LineString25D,
+                selected_crs,
             )
 
         else:

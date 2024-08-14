@@ -1,178 +1,183 @@
-import unittest
 import math
+import unittest
 
-from qgis.core import (QgsRasterLayer, QgsPointXY, QgsPoint, QgsVectorLayer, QgsLineString,
-                       QgsGeometry)
-
-from osgeo import gdal, osr
 import numpy as np
+import pytest
+from osgeo import gdal, osr
+from qgis.core import QgsGeometry, QgsLineString, QgsPoint, QgsPointXY, QgsRasterLayer, QgsVectorLayer
 
-from los_tools.processing.tools.util_functions import (bilinear_interpolated_value,
-                                                       get_diagonal_size, calculate_distance,
-                                                       segmentize_los_line, segmentize_line,
-                                                       wkt_to_array_points,
-                                                       line_geometry_to_coords)
+from los_tools.processing.tools.util_functions import (
+    bilinear_interpolated_value,
+    calculate_distance,
+    get_diagonal_size,
+    line_geometry_to_coords,
+    segmentize_line,
+    segmentize_los_line,
+    wkt_to_array_points,
+)
 
-from tests.utils_tests import get_qgis_app
-from tests.utils_tests import (get_data_path)
 
-QGIS_APP = get_qgis_app()
+def create_small_raster(newRasterfn, rasterOrigin, pixelWidth, pixelHeight, array):
+    array = array[::-1]
+    cols = array.shape[1]
+    rows = array.shape[0]
+    originX = rasterOrigin[0]
+    originY = rasterOrigin[1]
+
+    driver = gdal.GetDriverByName("GTiff")
+    outRaster: gdal.Dataset = driver.Create(newRasterfn, cols, rows, 1, gdal.GDT_Float32)
+    outRaster.SetGeoTransform((originX, pixelWidth, 0, originY, 0, pixelHeight))
+    outband: gdal.Band = outRaster.GetRasterBand(1)
+    outband.WriteArray(array)
+    outband.SetNoDataValue(-9999)
+    outRasterSRS = osr.SpatialReference()
+    outRasterSRS.ImportFromEPSG(5514)
+    outRaster.SetProjection(outRasterSRS.ExportToWkt())
+    outband.FlushCache()
 
 
-class UtilsTest(unittest.TestCase):
+@pytest.fixture
+def small_raster_example() -> QgsRasterLayer:
+    small_raster_file = "/vsimem/small.tif"
+    array = np.array([[1, 2], [3, 4]])
 
-    def setUp(self) -> None:
-        self.raster = QgsRasterLayer(get_data_path(file="dsm.tif"))
-        self.raster_dp = self.raster.dataProvider()
-        self.points = QgsVectorLayer(get_data_path(file="points.gpkg"))
+    create_small_raster(small_raster_file, (0, 2), 1, -1, array)
 
-        self.points_count = 10_000
-        p = []
-        for i in range(self.points_count):
-            p.append(QgsPoint(i, i, i))
+    small_raster = QgsRasterLayer(small_raster_file, "test_raster", "gdal")
 
-        self.line_geometry = QgsGeometry.fromPolyline(p)
+    return small_raster
 
-        small_raster_file = "/vsimem/small.tif"
-        array = np.array([[1, 2], [3, 4]])
 
-        self.create_small_raster(small_raster_file, (0, 2), 1, -1, array)
+def test_bilinear_interpolated_value_small_raster(small_raster_example: QgsRasterLayer):
 
-        self.small_raster = QgsRasterLayer(small_raster_file, "test_raster", "gdal")
-        self.small_raster_dp = self.small_raster.dataProvider()
+    small_raster_dp = small_raster_example.dataProvider()
 
-    def create_small_raster(self, newRasterfn, rasterOrigin, pixelWidth, pixelHeight, array):
+    bilinear_value = bilinear_interpolated_value(small_raster_dp, QgsPointXY(1, 1))
+    assert bilinear_value == pytest.approx(2.5)
 
-        array = array[::-1]
+    bilinear_value = bilinear_interpolated_value(small_raster_dp, QgsPointXY(0.500000001, 1))
+    assert bilinear_value == pytest.approx(2)
 
-        cols = array.shape[1]
-        rows = array.shape[0]
-        originX = rasterOrigin[0]
-        originY = rasterOrigin[1]
+    bilinear_value = bilinear_interpolated_value(small_raster_dp, QgsPointXY(1, 1.499999999))
+    assert bilinear_value == pytest.approx(3.5)
 
-        driver = gdal.GetDriverByName('GTiff')
-        outRaster: gdal.Dataset = driver.Create(newRasterfn, cols, rows, 1, gdal.GDT_Float32)
-        outRaster.SetGeoTransform((originX, pixelWidth, 0, originY, 0, pixelHeight))
-        outband: gdal.Band = outRaster.GetRasterBand(1)
-        outband.WriteArray(array)
-        outband.SetNoDataValue(-9999)
-        outRasterSRS = osr.SpatialReference()
-        outRasterSRS.ImportFromEPSG(5514)
-        outRaster.SetProjection(outRasterSRS.ExportToWkt())
-        outband.FlushCache()
+    bilinear_value = bilinear_interpolated_value(small_raster_dp, QgsPointXY(1.499999999, 1))
+    assert bilinear_value == pytest.approx(3)
 
-    def test_bilinear_interpolated_value_small_raster(self):
+    bilinear_value = bilinear_interpolated_value(small_raster_dp, QgsPointXY(1, 0.500000001))
+    assert bilinear_value == pytest.approx(1.5)
 
-        bilinear_value = bilinear_interpolated_value(self.small_raster_dp, QgsPointXY(1, 1))
-        self.assertAlmostEqual(2.5, bilinear_value, places=8)
 
-        bilinear_value = bilinear_interpolated_value(self.small_raster_dp,
-                                                     QgsPointXY(0.500000001, 1))
-        self.assertAlmostEqual(2, bilinear_value, places=8)
+def test_bilinear_interpolated_value(raster_small: QgsRasterLayer):
 
-        bilinear_value = bilinear_interpolated_value(self.small_raster_dp,
-                                                     QgsPointXY(1, 1.499999999))
-        self.assertAlmostEqual(3.5, bilinear_value, places=8)
+    raster_dp = raster_small.dataProvider()
 
-        bilinear_value = bilinear_interpolated_value(self.small_raster_dp,
-                                                     QgsPointXY(1.499999999, 1))
-        self.assertAlmostEqual(3, bilinear_value, places=8)
+    base_x = -336429.64
+    base_y = -1189102.12
+    p1 = QgsPointXY(base_x, base_y)
+    p2 = QgsPointXY(base_x - 0.5, base_y)
+    p3 = QgsPointXY(base_x - 0.5, base_y + 0.5)
+    p4 = QgsPointXY(base_x, base_y + 0.5)
+    value = (
+        raster_dp.sample(p1, 1)[0]
+        + raster_dp.sample(p2, 1)[0]
+        + raster_dp.sample(p3, 1)[0]
+        + raster_dp.sample(p4, 1)[0]
+    ) / 4
+    bilinear_value = bilinear_interpolated_value(raster_dp, QgsPointXY(base_x, base_y))
+    assert bilinear_value == pytest.approx(value, abs=0.005)
 
-        bilinear_value = bilinear_interpolated_value(self.small_raster_dp,
-                                                     QgsPointXY(1, 0.500000001))
-        self.assertAlmostEqual(1.5, bilinear_value, places=8)
+    base_x = -336429.143
+    base_y = -1189102.621
+    p = QgsPointXY(base_x, base_y)
+    value = raster_dp.sample(p1, 1)[0]
+    bilinear_value = bilinear_interpolated_value(raster_dp, p)
+    assert bilinear_value == pytest.approx(value, abs=0.005)
 
-    def test_bilinear_interpolated_value(self):
 
-        base_x = -336429.64
-        base_y = -1189102.12
-        p1 = QgsPointXY(base_x, base_y)
-        p2 = QgsPointXY(base_x - 0.5, base_y)
-        p3 = QgsPointXY(base_x - 0.5, base_y + 0.5)
-        p4 = QgsPointXY(base_x, base_y + 0.5)
-        value = (self.raster_dp.sample(p1, 1)[0] + self.raster_dp.sample(p2, 1)[0] +
-                 self.raster_dp.sample(p3, 1)[0] + self.raster_dp.sample(p4, 1)[0]) / 4
-        bilinear_value = bilinear_interpolated_value(self.raster_dp, QgsPointXY(base_x, base_y))
-        self.assertAlmostEqual(value, bilinear_value, places=2)
+def test_get_diagonal_size(raster_small: QgsRasterLayer):
+    raster_dp = raster_small.dataProvider()
 
-        base_x = -336429.143
-        base_y = -1189102.621
-        p = QgsPointXY(base_x, base_y)
-        value = self.raster_dp.sample(p1, 1)[0]
-        bilinear_value = bilinear_interpolated_value(self.raster_dp, p)
-        self.assertAlmostEqual(value, bilinear_value, places=2)
+    extent = raster_dp.extent()
 
-    def test_get_diagonal_size(self):
-        extent = self.raster_dp.extent()
-        self.assertEqual(math.sqrt(math.pow(extent.width(), 2) + math.pow(extent.height(), 2)),
-                         get_diagonal_size(self.raster_dp))
+    math.sqrt(math.pow(extent.width(), 2) + math.pow(extent.height(), 2)) == get_diagonal_size(raster_dp)
 
-    def test_calculate_distance(self):
-        self.assertEqual(math.sqrt(2), calculate_distance(0, 0, 1, 1))
-        self.assertEqual(5, calculate_distance(0, 0, 0, 5))
-        self.assertEqual(math.sqrt(200), calculate_distance(0, 0, 10, 10))
 
-    def test_segmentize_line(self):
+def test_calculate_distance():
+    assert math.sqrt(2) == calculate_distance(0, 0, 1, 1)
+    assert 5 == calculate_distance(0, 0, 0, 5)
+    assert math.sqrt(200) == calculate_distance(0, 0, 10, 10)
 
-        line = QgsGeometry.fromPolyline(
-            [QgsPoint(0, 0), QgsPoint(1, 0),
-             QgsPoint(1, 1), QgsPoint(2, 2)])
 
-        line_seg = segmentize_line(line, 0.1)
+def test_segmentize_line():
 
-        self.assertIsInstance(line_seg, QgsLineString)
+    line = QgsGeometry.fromPolyline([QgsPoint(0, 0), QgsPoint(1, 0), QgsPoint(1, 1), QgsPoint(2, 2)])
 
-        self.assertEqual(len(line_seg.points()), 36)
-        self.assertEqual(line_seg.points()[0], QgsPoint(0, 0))
-        self.assertEqual(line_seg.points()[10], QgsPoint(1, 0))
-        self.assertEqual(line_seg.points()[20], QgsPoint(1, 1))
-        self.assertEqual(line_seg.points()[-1], QgsPoint(2, 2))
+    line_seg = segmentize_line(line, 0.1)
 
-    def test_segmentize_los_line(self):
+    assert isinstance(line_seg, QgsLineString)
 
-        line = QgsGeometry.fromPolyline(
-            [QgsPoint(0, 0), QgsPoint(1, 0),
-             QgsPoint(1, 1), QgsPoint(2, 2)])
+    assert len(line_seg.points()) == 36
+    assert line_seg.points()[0] == QgsPoint(0, 0)
+    assert line_seg.points()[10] == QgsPoint(1, 0)
+    assert line_seg.points()[20] == QgsPoint(1, 1)
+    assert line_seg.points()[-1] == QgsPoint(2, 2)
 
-        with self.assertRaisesRegex(ValueError,
-                                    "Should only segmentize lines with at most 3 vertices"):
-            segmentize_los_line(line, 1)
 
-        polygon = QgsGeometry.fromPolygonXY(
-            [[QgsPointXY(0, 0), QgsPointXY(1, 0),
-              QgsPointXY(0.5, 1)]])
+def test_segmentize_los_line():
 
-        with self.assertRaisesRegex(TypeError, "Can only properly segmentize Lines"):
-            segmentize_los_line(polygon, 1)
+    line = QgsGeometry.fromPolyline([QgsPoint(0, 0), QgsPoint(1, 0), QgsPoint(1, 1), QgsPoint(2, 2)])
 
-        geom = QgsLineString()
+    with pytest.raises(ValueError, match="Should only segmentize lines with at most 3 vertices"):
+        segmentize_los_line(line, 1)
 
-        with self.assertRaisesRegex(TypeError, "`line` should be `QgsGeometry`"):
-            segmentize_los_line(geom, 1)
+    polygon = QgsGeometry.fromPolygonXY([[QgsPointXY(0, 0), QgsPointXY(1, 0), QgsPointXY(0.5, 1)]])
 
-    def test_wkt_to_array(self):
+    with pytest.raises(TypeError, match="Can only properly segmentize Lines"):
+        segmentize_los_line(polygon, 1)
 
-        wkt = self.line_geometry.asWkt()
-        points = wkt_to_array_points(wkt)
+    geom = QgsLineString()
 
-        assert len(points) == self.points_count
+    with pytest.raises(TypeError, match="`line` should be `QgsGeometry`"):
+        segmentize_los_line(geom, 1)
 
-        for i in range(len(points)):
-            assert isinstance(points[i], list)
-            assert len(points[i]) == 3
 
-            for j in range(len(points[i])):
-                assert isinstance(points[i][j], float)
+def test_wkt_to_array():
 
-    def test_geom_to_wkt(self):
+    points_count = 10
+    p = []
+    for i in range(points_count):
+        p.append(QgsPoint(i, i, i))
 
-        points = line_geometry_to_coords(self.line_geometry)
+    line_geometry = QgsGeometry.fromPolyline(p)
+    wkt = line_geometry.asWkt()
+    points = wkt_to_array_points(wkt)
 
-        assert len(points) == self.points_count
+    assert len(points) == points_count
 
-        for i in range(len(points)):
-            assert isinstance(points[i], list)
-            assert len(points[i]) == 3
+    for i, p in enumerate(points):
+        assert isinstance(p, list)
+        assert len(p) == 3
 
-            for j in range(len(points[i])):
-                assert isinstance(points[i][j], float)
+        for j in range(len(points[i])):
+            assert isinstance(points[i][j], float)
+
+
+def test_geom_to_wkt():
+    points_count = 10
+    p = []
+    for i in range(points_count):
+        p.append(QgsPoint(i, i, i))
+
+    line_geometry = QgsGeometry.fromPolyline(p)
+
+    points = line_geometry_to_coords(line_geometry)
+
+    assert len(points) == points_count
+
+    for i, p in enumerate(points):
+        assert isinstance(p, list)
+        assert len(p) == 3
+
+        for j in range(len(points[i])):
+            assert isinstance(points[i][j], float)

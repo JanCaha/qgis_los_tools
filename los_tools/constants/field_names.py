@@ -1,5 +1,4 @@
 class FieldNames:
-
     ID_ORIGINAL_POINT = "id_original_point"
     AZIMUTH = "azimuth"
     DIFF_TO_MAIN_AZIMUTH = "difference_to_main_azimuth"
