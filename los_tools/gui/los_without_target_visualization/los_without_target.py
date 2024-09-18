@@ -24,6 +24,10 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         self._widget.valuesChanged.connect(self.draw_los)
 
     def canvasReleaseEvent(self, e: QgsMapMouseEvent) -> None:
+        if e.button() == Qt.RightButton and self._los_rubber_band.size() == 0:
+            self.deactivate()
+        if e.button() == Qt.RightButton:
+            self.clean()
         if e.button() == Qt.LeftButton:
             self.draw_los()
 
