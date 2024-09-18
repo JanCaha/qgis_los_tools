@@ -17,6 +17,8 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         self._widget.hide()
 
     def create_widget(self):
+        if not self._widget:
+            self._widget = LoSNoTargetInputWidget()
         super().create_widget()
 
         self._widget.valuesChanged.connect(self.draw_los)

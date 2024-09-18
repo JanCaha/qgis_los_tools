@@ -49,6 +49,9 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         self._los_layer = layer
 
     def create_widget(self):
+        if not self._widget:
+            self._widget = LoSInputWidget()
+
         super().create_widget()
 
         self._widget.valuesChanged.connect(partial(self.draw_los, None))
