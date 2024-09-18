@@ -115,7 +115,6 @@ class SamplingDistanceMatrix:
         return current_distance + value_to_add
 
     def build_line(self, origin_point: QgsPoint, direction_point: QgsPoint) -> QgsLineString:
-        line: Union[QgsLineString, QgsGeometry]
 
         lines = []
 

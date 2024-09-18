@@ -62,7 +62,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
 
     def clean(self) -> None:
         self.snap_marker.setVisible(False)
-        self._los_rubber_band.hide()
+        self._los_rubber_band.reset()
 
     def keyPressEvent(self, e: QKeyEvent) -> None:
         if e.key() == Qt.Key_Escape or e.key() == Qt.Key_Backspace:

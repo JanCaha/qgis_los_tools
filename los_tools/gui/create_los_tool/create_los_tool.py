@@ -49,6 +49,9 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         self._los_layer = layer
 
     def create_widget(self):
+        if not self._widget:
+            self._widget = LoSInputWidget()
+
         super().create_widget()
 
         self._widget.valuesChanged.connect(partial(self.draw_los, None))
@@ -72,6 +75,8 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         self._start_point = None
 
     def canvasReleaseEvent(self, e: QgsMapMouseEvent) -> None:
+        if e.button() == Qt.RightButton and self._start_point is None and self._los_rubber_band.size() == 0:
+            self.deactivate()
         if e.button() == Qt.RightButton:
             self.clean()
         elif e.button() == Qt.LeftButton:

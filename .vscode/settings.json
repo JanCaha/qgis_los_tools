@@ -14,10 +14,9 @@
     "svg.preview.background": "dark-transparent",
     "python.testing.pytestArgs": [
         "tests",
-        "--cov=los_tools",
-        "--cov-report=term-missing:skip-covered",
         "-rP",
-        "-s"
+        "-s",
+        "--no-cov"
     ],
     "python.testing.pytestEnabled": true,
     "[python]": {
