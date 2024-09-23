@@ -1,4 +1,6 @@
-from qgis.core import Qgis, QgsPointLocator
+import typing
+
+from qgis.core import Qgis, QgsPointLocator, QgsPointXY
 from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolAdvancedDigitizing, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QKeyEvent
@@ -19,6 +21,8 @@ class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
         self.snap_marker = QgsSnapIndicator(self._canvas)
 
         self._los_rubber_band = self.createRubberBand(Qgis.GeometryType.Line)
+
+        self._snap_point: typing.Optional[QgsPointXY] = None
 
     def activate(self) -> None:
         super().activate()
@@ -70,7 +74,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
             self._iface.mapCanvas().unsetMapTool(self)
         return super().keyPressEvent(e)
 
-    def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
+    def _set_snap_point(self, event: QgsMapMouseEvent) -> None:
         result = self._snapper.snapToMap(event.pos())
         self.snap_marker.setMatch(result)
         if result.type() == QgsPointLocator.Vertex:

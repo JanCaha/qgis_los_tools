@@ -91,12 +91,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
                 self._start_point = None
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
-        result = self._snapper.snapToMap(event.pos())
-        self.snap_marker.setMatch(result)
-        if result.type() == QgsPointLocator.Vertex:
-            self._snap_point = result.point()
-        else:
-            self._snap_point = event.mapPoint()
+        self._set_snap_point(event)
 
         if self._start_point is not None:
             self.draw_los(self._snap_point)
@@ -216,6 +211,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         task.taskFinishedTime.connect(self.task_finished_message)
 
         self.task_manager.addTask(task)
+        self.clean()
 
     def task_finished(self) -> None:
         self.featuresAdded.emit()
