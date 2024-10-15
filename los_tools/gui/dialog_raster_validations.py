@@ -34,6 +34,8 @@ class RasterValidations(QDialog):
 
         self.init_gui()
 
+        self._prepare()
+
     def init_gui(self):
         self.setMinimumWidth(600)
         self.setWindowTitle("Rasters Validation and Sampling")
@@ -152,16 +154,17 @@ class RasterValidations(QDialog):
         self._prev_map_tool = self._canvas.mapTool()
         self._prev_cursor = self._canvas.cursor()
 
-    def open(self) -> None:
+    def _prepare(self) -> None:
         self._default_tools()
         self._populate_raster_view()
         self.validate()
+
+    def open(self) -> None:
+        self._prepare()
         super().open()
 
     def exec(self) -> int:
-        self._default_tools()
-        self._populate_raster_view()
-        self.validate()
+        self._prepare()
         return super().exec()
 
     def select_sample_point(self) -> None:
