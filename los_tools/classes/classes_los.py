@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import copy
 import math
+import typing
 from typing import List, Optional, Union
 
 from qgis.core import QgsFeature, QgsGeometry, QgsPoint
@@ -507,6 +509,38 @@ class LoSWithoutTarget(LoS):
             sampling_distance=sampling_distance,
         )
 
+    @classmethod
+    def from_another(
+        cls,
+        other: LoSWithoutTarget,
+        distance_limit: typing.Optional[float] = None,
+    ) -> LoSWithoutTarget:
+        obj = LoSWithoutTarget.__new__(LoSWithoutTarget)
+        obj.observer_offset = other.observer_offset
+        obj.use_curvature_corrections = other.use_curvature_corrections
+        obj.refraction_coefficient = other.refraction_coefficient
+        obj.is_global = False
+        obj.is_without_target = True
+        obj.target_offset = 0
+        obj.target_x = None
+        obj.target_y = None
+        obj.target_index = None
+        obj.global_horizon_index = None
+
+        if distance_limit is None:
+            obj.points = copy.deepcopy(other.points)
+            obj.previous_max_angle = copy.deepcopy(other.previous_max_angle)
+            obj.visible = copy.deepcopy(other.visible)
+            obj.horizon = copy.deepcopy(other.horizon)
+        else:
+            index_limit = other._get_distance_limit_index(distance_limit)
+            obj.points = copy.deepcopy(other.points[:index_limit])
+            obj.previous_max_angle = copy.deepcopy(other.previous_max_angle[:index_limit])
+            obj.visible = copy.deepcopy(other.visible[:index_limit])
+            obj.horizon = copy.deepcopy(other.horizon[:index_limit])
+
+        return obj
+
     def get_horizontal_angle(self) -> float:
         azimuth = QgsPoint(self.points[0][self.X], self.points[0][self.Y]).azimuth(
             QgsPoint(self.points[-1][self.X], self.points[-1][self.Y])
@@ -581,3 +615,13 @@ class LoSWithoutTarget(LoS):
 
         else:
             return None
+
+    def _get_distance_limit_index(self, distance: float) -> int:
+        index = len(self.points) - 1
+
+        for i in range(1, len(self.points)):
+            if self.points[i][self.DISTANCE] > distance:
+                index = i
+                break
+
+        return index
