@@ -1,18 +1,18 @@
 import typing
 
 from qgis.core import Qgis, QgsPointLocator, QgsPointXY
-from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolAdvancedDigitizing, QgsSnapIndicator
+from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolEdit, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QKeyEvent
 from qgis.PyQt.QtWidgets import QWidget
 
 
-class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
+class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
     _widget: QWidget
 
     def __init__(self, iface: QgisInterface) -> None:
-        super().__init__(iface.mapCanvas(), iface.cadDockWidget())
+        super().__init__(iface.mapCanvas())
 
         self._iface = iface
         self._canvas = self._iface.mapCanvas()
