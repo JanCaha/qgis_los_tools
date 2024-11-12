@@ -156,6 +156,8 @@ class LoS:
         return int(self.visible[index]) if return_integer else self.visible[index]
 
     def get_geom_at_index(self, index: int) -> QgsPoint:
+        if index == -1:
+            index = 0
         point = QgsPoint(
             self.points[index][self.X],
             self.points[index][self.Y],
