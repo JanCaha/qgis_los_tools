@@ -69,3 +69,5 @@ class FieldNames:
 
     ANGLE_STEP = "angle_step_between_los"
     ANGLE_STEP_POINTS = "angle_step_between_points"
+
+    HORIZON_DISTANCE = "horizon_distance"
