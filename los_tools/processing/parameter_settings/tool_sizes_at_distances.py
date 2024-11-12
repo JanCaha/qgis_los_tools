@@ -73,7 +73,7 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
         distances = self.parameterAsMatrix(parameters, self.DISTANCES, context)
 
         if len(distances) < 1:
-            msg = f"Legth of distances must be at least 1. It is {len(distances)}."
+            msg = f"Length of distances must be at least 1. It is {len(distances)}."
 
             return False, msg
 

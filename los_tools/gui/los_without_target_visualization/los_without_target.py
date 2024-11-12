@@ -29,6 +29,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         if e.button() == Qt.RightButton:
             self.clean()
         if e.button() == Qt.LeftButton:
+            self._set_snap_point(e)
             self.draw_los()
 
     def draw_los(self):

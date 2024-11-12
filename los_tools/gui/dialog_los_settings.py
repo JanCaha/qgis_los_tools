@@ -106,8 +106,9 @@ class LoSSettings(QDialog):
         self.maximal_los_length.setValue(100, QgsUnitTypes.DistanceKilometers)
         self.maximal_los_length.valueChanged.connect(self.fill_distances)
         self.maximal_los_length.setDisabled(True)
+
         self.use_maximal_los_length = QCheckBox()
-        self.use_maximal_los_length.stateChanged.connect(self.fill_distances)
+        self.use_maximal_los_length.toggled.connect(self.fill_distances)
 
         layout_group_box_los.addRow("Default Sampling Size", self.default_sampling_size)
         layout_group_box_los.addRow("Use Maximal LoS Length", self.use_maximal_los_length)
@@ -209,7 +210,7 @@ class LoSSettings(QDialog):
         self.fill_distances()
 
     def fill_distances(self) -> None:
-        self.maximal_los_length.setEnabled(self.use_maximal_los_length.isChecked())
+        self.maximal_los_length.setDisabled(not self.use_maximal_los_length.isChecked())
 
         self.treeView.clear()
 
@@ -246,7 +247,7 @@ class LoSSettings(QDialog):
             item = QTreeWidgetItem()
             item.setText(
                 0,
-                f"Over {self._distances[-1]} to {self.maximal_los_length.distance().inUnits(result_unit)}",
+                f"Over {self._distances[-1]} to {self.maximal_los_length.distance()}",
             )
             item.setText(1, str(size))
 
