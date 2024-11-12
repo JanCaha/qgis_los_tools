@@ -1,0 +1,9 @@
+{
+    "ALG_DESC": "This tool extracts horizon lines from LoS without a target. For other types of LoS, this operation is not applicable. Maximal horizon till specified distance is created. So horizon lines for several distances can be created at once.",
+    "ALG_CREATOR": "Jan Caha", 
+    "LoSLayer": "LoS layer to analyze.", 
+    "Distances": "Table of distance limits for which horizon lines should be extracted.",
+    "CurvatureCorrections": "Should curvature and refraction corrections be applied?",
+    "RefractionCoefficient": "Value of the refraction coefficient. Default value: 0.13.",
+    "OutputLayer": "Output layer containing the extracted horizon lines."
+}

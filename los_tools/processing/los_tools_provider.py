@@ -18,6 +18,7 @@ from los_tools.processing.create_points.tool_points_around import CreatePointsAr
 from los_tools.processing.create_points.tool_points_by_azimuths import CreatePointsInAzimuthsAlgorithm
 from los_tools.processing.create_points.tool_points_in_direction import CreatePointsInDirectionAlgorithm
 from los_tools.processing.horizons.tool_extract_horizon_lines import ExtractHorizonLinesAlgorithm
+from los_tools.processing.horizons.tool_extract_horizon_lines_by_distances import ExtractHorizonLinesByDistanceAlgorithm
 from los_tools.processing.horizons.tool_extract_horizons import ExtractHorizonsAlgorithm
 from los_tools.processing.parameter_settings.tool_angle_at_distance_for_size import ObjectDetectionAngleAlgorithm
 from los_tools.processing.parameter_settings.tool_distances_for_sizes import ObjectDistancesAlgorithm
@@ -77,6 +78,7 @@ class LoSToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ExtractLoSVisibilityPolygonsAlgorithm())
         self.addAlgorithm(ObjectDetectionAngleAlgorithm())
         self.addAlgorithm(CreatePointsInAzimuthsAlgorithm())
+        self.addAlgorithm(ExtractHorizonLinesByDistanceAlgorithm())
 
     def id(self):
         return PluginConstants.provider_id
