@@ -8,6 +8,15 @@ from los_tools.constants.field_names import FieldNames
 from tests.utils import data_file_path
 
 
+@pytest.fixture(autouse=True, scope="function")
+def _monkeypatch_iface(qgis_iface, monkeypatch):
+    def add_user_input_widget(widget):
+        pass
+
+    qgis_iface.addUserInputWidget = None
+    monkeypatch.setattr(qgis_iface, "addUserInputWidget", add_user_input_widget)
+
+
 def _raster_layer(path: Path) -> QgsRasterLayer:
     layer = QgsRasterLayer(path.as_posix(), path.stem, "gdal")
     assert layer.isValid()
