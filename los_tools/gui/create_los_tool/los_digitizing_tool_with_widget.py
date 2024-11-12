@@ -25,7 +25,6 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         self._snap_point: typing.Optional[QgsPointXY] = None
 
     def activate(self) -> None:
-        super().activate()
 
         self.create_widget()
 
@@ -42,6 +41,8 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
             self.deactivate()
             return
 
+        super().activate()
+
     def deactivate(self) -> None:
         self.clean()
         self.delete_widget()
@@ -49,18 +50,14 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         super().deactivate()
 
     def create_widget(self):
-        self.release_keyboard()
         self._iface.addUserInputWidget(self._widget)
         self._widget.setFocus(Qt.TabFocusReason)
         self._widget.show()
 
-    def release_keyboard(self):
-        if self._widget:
-            self._widget.releaseKeyboard()
-
     def delete_widget(self):
         if self._widget:
-            self.release_keyboard()
+            self._widget.hide()
+            self._widget.releaseKeyboard()
             self._widget.deleteLater()
             self._widget = None
 
