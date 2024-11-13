@@ -67,20 +67,20 @@ class ObjectParameters(QDialog):
 
     def enable_gui_elements(self) -> None:
         if self.calculation_type == CalculationType.DISTANCE:
-            self.object_distance.setEnabled(False)
+            self.object_distance.setDisabled(True)
             self.object_angle_size.setEnabled(True)
             self.object_size.setEnabled(True)
         elif self.calculation_type == CalculationType.SIZE:
             self.object_distance.setEnabled(True)
             self.object_angle_size.setEnabled(True)
-            self.object_size.setEnabled(False)
+            self.object_size.setDisabled(True)
         elif self.calculation_type == CalculationType.ANGLE:
             self.object_distance.setEnabled(True)
-            self.object_angle_size.setEnabled(False)
+            self.object_angle_size.setDisabled(True)
             self.object_size.setEnabled(True)
         else:
             # default is distance
-            self.object_distance.setEnabled(False)
+            self.object_distance.setDisabled(True)
             self.object_angle_size.setEnabled(True)
             self.object_size.setEnabled(True)
 
