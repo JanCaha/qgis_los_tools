@@ -213,7 +213,8 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
 
     def task_finished_message(self, milliseconds: int) -> None:
         self._iface.messageBar().pushMessage(
+            "LoS Added",
             f"LoS Processing Finished. Lasted {milliseconds / 1000} seconds.",
             Qgis.MessageLevel.Info,
-            2,
+            duration=2,
         )
