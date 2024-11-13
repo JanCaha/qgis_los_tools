@@ -1,8 +1,10 @@
+import typing
 from pathlib import Path
 
 import pytest
 from pytest_qgis.utils import clean_qgis_layer
 from qgis.core import QgsFeature, QgsRasterLayer, QgsVectorLayer
+from qgis.gui import QgisInterface
 
 from los_tools.constants.field_names import FieldNames
 from tests.utils import data_file_path
@@ -185,6 +187,12 @@ def layer_point_wgs84() -> QgsVectorLayer:
 @clean_qgis_layer
 def layer_points() -> QgsVectorLayer:
     return _vector_layer(data_file_path("points.gpkg"))
+
+
+@pytest.fixture
+@clean_qgis_layer
+def layer_points_wgs84() -> QgsVectorLayer:
+    return _vector_layer(data_file_path("points_wgs84.gpkg"))
 
 
 @pytest.fixture
