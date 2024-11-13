@@ -2,7 +2,7 @@ from pathlib import Path
 
 from qgis.core import QgsPointXY
 from qgis.gui import QgsMapCanvas, QgsMapMouseEvent
-from qgis.PyQt.QtCore import QEvent, Qt
+from qgis.PyQt.QtCore import QEvent, QPointF, Qt
 from qgis.PyQt.QtGui import QMouseEvent
 
 
@@ -41,24 +41,23 @@ def result_filename(filename: str) -> str:
 
 def create_mouse_event(
     qgis_canvas: QgsMapCanvas,
-    point_in_canvas_crs_coordinates: QgsPointXY,
+    point_in_canvas_crs: QgsPointXY,
     event: QEvent.Type = QEvent.Type.MouseButtonRelease,
     mouse_button: Qt.MouseButton = Qt.MouseButton.LeftButton,
     key_modifier: Qt.KeyboardModifier = Qt.KeyboardModifier.NoModifier,
 ):
-    point_in_canvas_coords = qgis_canvas.getCoordinateTransform().toMapCoordinatesF(
-        point_in_canvas_crs_coordinates.x(), point_in_canvas_crs_coordinates.y()
-    )
-
     event = QMouseEvent(
         event,
-        point_in_canvas_coords.toQPointF(),
+        QPointF(0, 0),
         mouse_button,
         mouse_button,
         key_modifier,
     )
 
-    return QgsMapMouseEvent(
+    mouse_event = QgsMapMouseEvent(
         qgis_canvas,
         event,
     )
+    mouse_event.setMapPoint(point_in_canvas_crs)
+
+    return mouse_event
