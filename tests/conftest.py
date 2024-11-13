@@ -203,3 +203,12 @@ def layer_size_distance() -> QgsVectorLayer:
 @clean_qgis_layer
 def layer_points_in_direction() -> QgsVectorLayer:
     return _vector_layer(data_file_path("points_in_direction.gpkg"))
+
+
+@pytest.fixture
+def mock_add_message_to_messagebar(qgis_iface: QgisInterface) -> typing.Callable:
+
+    def add_message(message, level):
+        qgis_iface.messageBar().pushMessage("Patched", message, level=level, duration=0)
+
+    return add_message
