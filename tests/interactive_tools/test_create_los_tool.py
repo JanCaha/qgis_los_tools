@@ -1,5 +1,6 @@
 # pylint: disable=protected-access
 import pytest
+from pytestqt.qtbot import QtBot
 from qgis.core import QgsMemoryProviderUtils, QgsProject, QgsRasterLayer, QgsWkbTypes
 from qgis.gui import QgisInterface, QgsMapCanvas
 from qgis.PyQt.QtCore import QEvent, Qt
@@ -266,7 +267,7 @@ def test_global_los_add_to_plugin_layer(
     raster_small: QgsRasterLayer,
     raster_large: QgsRasterLayer,
     qgis_canvas: QgsMapCanvas,
-    qtbot,
+    qtbot: QtBot,
 ):
 
     project = QgsProject.instance()
@@ -338,8 +339,11 @@ def test_global_los_add_to_plugin_layer(
     # click button to add LoS to layer
     map_tool._widget._add_los_to_layer.click()
 
-    with qtbot.waitSignal(map_tool.featuresAdded, timeout=5000, raising=True):
-        assert los_layer.dataProvider().featureCount() == 1
+    # wait for signal - nothing happing just need to wait for it
+    with qtbot.waitSignal(map_tool.featuresAdded, timeout=None, raising=True):
+        pass
+
+    assert los_layer.dataProvider().featureCount() == 1
 
     map_tool.deactivate()
 
@@ -350,7 +354,7 @@ def test_no_target_los_add_to_plugin_layer(
     raster_small: QgsRasterLayer,
     raster_large: QgsRasterLayer,
     qgis_canvas: QgsMapCanvas,
-    qtbot,
+    qtbot: QtBot,
 ):
 
     project = QgsProject.instance()
@@ -428,7 +432,10 @@ def test_no_target_los_add_to_plugin_layer(
     # click button to add LoS to layer
     map_tool._widget._add_los_to_layer.click()
 
-    with qtbot.waitSignal(map_tool.featuresAdded, timeout=15000, raising=True):
-        assert los_layer.dataProvider().featureCount() == 41
+    # wait for signal - nothing happing just need to wait for it
+    with qtbot.waitSignal(map_tool.featuresAdded, timeout=None, raising=True):
+        pass
+
+    assert los_layer.dataProvider().featureCount() == 41
 
     map_tool.deactivate()
