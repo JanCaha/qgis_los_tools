@@ -82,6 +82,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
     def canvas_crs_is_projected(self) -> bool:
         if self._canvas.mapSettings().destinationCrs().isGeographic():
             self._iface.messageBar().pushMessage(
+                "Can't Drawn LoS",
                 "LoS can be drawn only for projected CRS. Canvas is currently in geographic CRS.",
                 Qgis.Critical,
                 duration=5,
