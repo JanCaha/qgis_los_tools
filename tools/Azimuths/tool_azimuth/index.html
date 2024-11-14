@@ -129,6 +129,10 @@
 </li>
             
 <li>
+    <a href="../../Horizons/tool_extract_horizon_lines_by_distances/" class="dropdown-item">Extract Horizon Lines</a>
+</li>
+            
+<li>
     <a href="../../Horizons/tool_extract_horizons/" class="dropdown-item">Extract Horizons</a>
 </li>
     </ul>
@@ -263,7 +267,7 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="extract-azimuth-between-points-and-centroids">Extract Azimuth between Points and Centroids</h1>
-<p>Calculates azimuths between points in one layer and centroids of polygons or lines in second layer.</p>
+<p>Calculates azimuths between points in one layer and the centroids of polygons or lines in a second layer.</p>
 <h2 id="parameters">Parameters</h2>
 <table>
 <thead>
@@ -279,31 +283,31 @@
 <td>Point layer</td>
 <td><code>PointLayer</code></td>
 <td>[vector: point]</td>
-<td>Layer of points to calculate the azimuth from.</td>
+<td>Layer of points from which to calculate the azimuth.</td>
 </tr>
 <tr>
 <td>Point layer ID field</td>
 <td><code>PointLayerID</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field containing ID for points.</td>
+<td>Field containing IDs for the points.</td>
 </tr>
 <tr>
 <td>Object layer</td>
 <td><code>ObjectLayer</code></td>
 <td>[vector: line, polygon]</td>
-<td>Layer of lines/polygons to calculate the azimuth to.</td>
+<td>Layer of lines/polygons to which to calculate the azimuth.</td>
 </tr>
 <tr>
 <td>Object layer ID field</td>
 <td><code>ObjectLayerID</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field containing ID for object layer.</td>
+<td>Field containing IDs for the object layer.</td>
 </tr>
 <tr>
 <td>Output table</td>
 <td><code>OutputTable</code></td>
 <td>[table]</td>
-<td>Table containing the result (without geometry).</td>
+<td>Table containing the results (without geometry).</td>
 </tr>
 </tbody>
 </table>
@@ -322,7 +326,7 @@
 <td>Output table</td>
 <td><code>OutputTable</code></td>
 <td>[table]</td>
-<td>Table containing the result (without geometry).</td>
+<td>Table containing the results (without geometry).</td>
 </tr>
 </tbody>
 </table>

@@ -129,6 +129,10 @@
 </li>
             
 <li>
+    <a href="../../Horizons/tool_extract_horizon_lines_by_distances/" class="dropdown-item">Extract Horizon Lines</a>
+</li>
+            
+<li>
     <a href="../../Horizons/tool_extract_horizons/" class="dropdown-item">Extract Horizons</a>
 </li>
     </ul>
@@ -294,19 +298,19 @@
 <td>Default sampling size (in meters)</td>
 <td><code>DefaultSamplingDistance</code></td>
 <td>[number]<br/><br/> Default: <br/> <code>1.0</code></td>
-<td>Sampling distance to used, in tools that work with this table, for values smaller than smallest distance.</td>
+<td>Sampling distance to be used in tools that work with this table for values smaller than the smallest distance.</td>
 </tr>
 <tr>
 <td>Add maximal distance value (with sampling equal to maximal sampling distance)</td>
 <td><code>MaximalDistance</code></td>
 <td>[boolean]<br/><br/>Default: <code>True</code></td>
-<td>Add special row to the output used in other tools. The row has size of the object equal to maximum size in the input table and distance -1. This is used to indicate maximal possible legth of LoS.</td>
+<td>Adds a special row to the output used in other tools. The row has the size of the object equal to the maximum size in the input table and a distance of -1. This is used to indicate the maximal possible length of the line of sight (LoS).</td>
 </tr>
 <tr>
 <td>Output table</td>
 <td><code>OutputTable</code></td>
 <td>[table]</td>
-<td>Output table containing information about angle size, size of objects and relevant distances (without geometry).</td>
+<td>Output table containing information about the angle size, size of objects, and relevant distances.</td>
 </tr>
 </tbody>
 </table>
@@ -325,7 +329,7 @@
 <td>Output table</td>
 <td><code>OutputTable</code></td>
 <td>[table]</td>
-<td>Output table containing information about angle size, size of objects and relevant distances (without geometry)</td>
+<td>Output table containing information about the angle size, size of objects, and relevant distances.</td>
 </tr>
 </tbody>
 </table>

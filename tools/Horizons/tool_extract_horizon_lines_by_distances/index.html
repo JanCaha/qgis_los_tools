@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <meta name="author" content="Jan Caha">
-        <link rel="canonical" href="https://jancaha.github.io/qgis_los_tools/tools/Points%20Creation/tool_optimize_point_location/">
+        <link rel="canonical" href="https://jancaha.github.io/qgis_los_tools/tools/Horizons/tool_extract_horizon_lines_by_distances/">
         <link rel="shortcut icon" href="../../../img/favicon.ico">
-        <title>Optimize Point Location - LoS Tools</title>
+        <title>Extract Horizon Lines - LoS Tools</title>
         <link href="../../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../../css/fontawesome.min.css" rel="stylesheet">
         <link href="../../../css/brands.min.css" rel="stylesheet">
@@ -125,15 +125,15 @@
     <ul class="dropdown-menu">
             
 <li>
-    <a href="../../Horizons/tool_extract_horizon_lines/" class="dropdown-item">Extract Horizon Lines</a>
+    <a href="../tool_extract_horizon_lines/" class="dropdown-item">Extract Horizon Lines</a>
 </li>
             
 <li>
-    <a href="../../Horizons/tool_extract_horizon_lines_by_distances/" class="dropdown-item">Extract Horizon Lines</a>
+    <a href="./" class="dropdown-item active" aria-current="page">Extract Horizon Lines</a>
 </li>
             
 <li>
-    <a href="../../Horizons/tool_extract_horizons/" class="dropdown-item">Extract Horizons</a>
+    <a href="../tool_extract_horizons/" class="dropdown-item">Extract Horizons</a>
 </li>
     </ul>
   </li>
@@ -183,19 +183,19 @@
     <ul class="dropdown-menu">
             
 <li>
-    <a href="./" class="dropdown-item active" aria-current="page">Optimize Point Location</a>
+    <a href="../../Points%20Creation/tool_optimize_point_location/" class="dropdown-item">Optimize Point Location</a>
 </li>
             
 <li>
-    <a href="../tool_points_around/" class="dropdown-item">Create Points Around</a>
+    <a href="../../Points%20Creation/tool_points_around/" class="dropdown-item">Create Points Around</a>
 </li>
             
 <li>
-    <a href="../tool_points_by_azimuths/" class="dropdown-item">Create Points by Azimuths</a>
+    <a href="../../Points%20Creation/tool_points_by_azimuths/" class="dropdown-item">Create Points by Azimuths</a>
 </li>
             
 <li>
-    <a href="../tool_points_in_direction/" class="dropdown-item">Create Points in Direction</a>
+    <a href="../../Points%20Creation/tool_points_in_direction/" class="dropdown-item">Create Points in Direction</a>
 </li>
     </ul>
   </li>
@@ -245,7 +245,7 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-bs-level="1"><a href="#optimize-point-location" class="nav-link">Optimize Point Location</a>
+            <li class="nav-item" data-bs-level="1"><a href="#extract-horizon-lines" class="nav-link">Extract Horizon Lines</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-bs-level="2"><a href="#parameters" class="nav-link">Parameters</a>
               <ul class="nav flex-column">
@@ -266,9 +266,9 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="optimize-point-location">Optimize Point Location</h1>
-<p>Optimizes point locations for visibility analyses using an optimization raster. The values of <code>InputRaster</code> serve as the optimization criterion, with higher values indicating better options. The result is a copy of <code>InputLayer</code> with point locations adjusted.</p>
-<p>The optimization process is guided by two addition parameters - <code>Distance</code> and <code>MaskRaster</code>. <code>Distance</code> specifies distance around origin point to search for better values on <code>InputRaster</code> to move the point to. <code>MaskRaster</code> allows to optionally input raster that can move forbid some areas to be used as new point location. <code>MaskRaster</code> values <code>NoData</code> and <code>0</code> can be used to mark unavailable areas, other values can be used to place optimized points.</p>
+<h1 id="extract-horizon-lines">Extract Horizon Lines</h1>
+<p>Tool that extracts horizon lines from LoS without target (created using tool <a href="../../LoS%20Creation/tool_create_notarget_los/">Create no target LoS</a>). For other types of LoS this operation does not make sense.</p>
+<p>The horizon lines are extracted for a set of distances from the observer. The distances are provided in the table. The horizon line is extracted for each observer and distance separately, only horizons that are closer to the observer than the given distance are consider for each horizon line.</p>
 <h2 id="parameters">Parameters</h2>
 <table>
 <thead>
@@ -281,34 +281,34 @@
 </thead>
 <tbody>
 <tr>
-<td>Location optimization raster</td>
-<td><code>InputRaster</code></td>
-<td>[raster]</td>
-<td>Raster layer used as the optimization criterion. Higher values are better.</td>
+<td>LoS layer</td>
+<td><code>LoSLayer</code></td>
+<td>[vector: line]</td>
+<td>LoS layer to analyse.</td>
 </tr>
 <tr>
-<td>Input point layer (points to optimize)</td>
-<td><code>InputLayer</code></td>
-<td>[vector: point]</td>
-<td>Point layer that specifies the input points.</td>
+<td>Distance limits for horizon lines</td>
+<td><code>Distances</code></td>
+<td>[matrix]</td>
+<td>Table of distance limits for which horizon lines should be extracted.</td>
 </tr>
 <tr>
-<td>Search radius</td>
-<td><code>Distance</code></td>
-<td>[number] <br/><br/> Default: <br/> <code>30</code></td>
-<td>Distance around each point to search for a better value. Linked to the <code>InputRaster</code> parameter.</td>
-</tr>
-<tr>
-<td>Mask raster</td>
-<td><code>MaskRaster</code></td>
-<td>[raster]</td>
-<td>Raster specifying areas that can be used. Values <code>NoData</code> and <code>0</code> mark areas that are unavailable.</td>
-</tr>
-<tr>
-<td>Output layer (optimized points)</td>
+<td>Output layer</td>
 <td><code>OutputLayer</code></td>
-<td>[vector: point]</td>
-<td>Copy of <code>InputLayer</code> with adjusted point positions.</td>
+<td>[vector: line]</td>
+<td>Output layer horizon lines.</td>
+</tr>
+<tr>
+<td>Use curvature corrections?</td>
+<td><code>CurvatureCorrections</code></td>
+<td>[boolean]<br/><br/>Default: <code>True</code></td>
+<td>Should the curvarture and refraction corrections be used?</td>
+</tr>
+<tr>
+<td>Refraction coefficient value</td>
+<td><code>RefractionCoefficient</code></td>
+<td>[number] <br/><br/> Default: <br/> <code>0.13</code></td>
+<td>Value of refraction coefficient.</td>
 </tr>
 </tbody>
 </table>
@@ -324,17 +324,22 @@
 </thead>
 <tbody>
 <tr>
-<td>Output layer (optimized points)</td>
+<td>Output layer</td>
 <td><code>OutputLayer</code></td>
-<td>[vector: point]</td>
-<td>Copy of <code>InputLayer</code> with adjusted point positions.</td>
+<td>[vector: line]</td>
+<td>Output layer horizon lines.</td>
 </tr>
 </tbody>
 </table>
 <h3 id="fields-in-the-output-layer">Fields in the output layer</h3>
-<p>The same as in <code>InputLayer</code>.</p>
+<ul>
+<li><strong>horizon_distance</strong> - double - maximal distance of the horizon line from observer</li>
+<li><strong>id_observer</strong> - integer - value from expected field (<code>id_observer</code>) in <code>LoSLayer</code></li>
+<li><strong>observer_x</strong> - double - X coordinate of observer point, to be used later in analyses</li>
+<li><strong>observer_y</strong> - double - Y coordinate of observer point, to be used later in analyses</li>
+</ul>
 <h2 id="tool-screenshot">Tool screenshot</h2>
-<p><a class="glightbox" href="../../../images/tool_optimize_point_location.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="Optimize point location" src="../../../images/tool_optimize_point_location.png" /></a></p></div>
+<p><a class="glightbox" href="../../../images/tool_extract_horizon_lines_by_distances.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="Extract Horizon Lines" src="../../../images/tool_extract_horizon_lines_by_distances.png" /></a></p></div>
             </div>
         </div>
 

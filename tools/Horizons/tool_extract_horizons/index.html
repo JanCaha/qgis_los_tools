@@ -129,6 +129,10 @@
 </li>
             
 <li>
+    <a href="../tool_extract_horizon_lines_by_distances/" class="dropdown-item">Extract Horizon Lines</a>
+</li>
+            
+<li>
     <a href="./" class="dropdown-item active" aria-current="page">Extract Horizons</a>
 </li>
     </ul>
@@ -263,8 +267,7 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="extract-horizons">Extract Horizons</h1>
-<p>Tool that extracts horizons as points from LoS. </p>
-<p>Some combinations of LoS type and horizon to extract might not make a sense. E.g. extracting global horizon from local LoS raises an error.</p>
+<p>This tool extracts horizons as points from LoS. Some combinations of LoS type and horizon to extract might not make sense. For example, extracting a global horizon from a local LoS raises an error.</p>
 <h2 id="parameters">Parameters</h2>
 <table>
 <thead>
@@ -280,13 +283,13 @@
 <td>LoS layer</td>
 <td><code>LoSLayer</code></td>
 <td>[vector: line]</td>
-<td>LoS layer to analyse.</td>
+<td>LoS layer to analyze.</td>
 </tr>
 <tr>
 <td>Horizon type</td>
 <td><code>HorizonType</code></td>
 <td>[enumeration] <br/><br/> Default: <br/> <code>1</code></td>
-<td>Type of horizon line to extract. <br/><br/> <strong>Values</strong>: <br/> <strong>0</strong> - local <br/> <strong>1</strong> - global.</td>
+<td>Type of horizon line to extract.  <br/><br/> <strong>Values</strong>: <br/> <strong>0</strong> - local <br/> <strong>1</strong> - global.</td>
 </tr>
 <tr>
 <td>Output layer</td>
@@ -298,13 +301,13 @@
 <td>Use curvature corrections?</td>
 <td><code>CurvatureCorrections</code></td>
 <td>[boolean]<br/><br/>Default: <code>True</code></td>
-<td>Should the curvature and refraction corrections be used?</td>
+<td>Should curvature and refraction corrections be applied?</td>
 </tr>
 <tr>
 <td>Refraction coefficient value</td>
 <td><code>RefractionCoefficient</code></td>
 <td>[number] <br/><br/> Default: <br/> <code>0.13</code></td>
-<td>Value of refraction coefficient.</td>
+<td>Value of the refraction coefficient.</td>
 </tr>
 <tr>
 <td>Output layer</td>

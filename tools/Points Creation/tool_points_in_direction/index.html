@@ -129,6 +129,10 @@
 </li>
             
 <li>
+    <a href="../../Horizons/tool_extract_horizon_lines_by_distances/" class="dropdown-item">Extract Horizon Lines</a>
+</li>
+            
+<li>
     <a href="../../Horizons/tool_extract_horizons/" class="dropdown-item">Extract Horizons</a>
 </li>
     </ul>
@@ -263,7 +267,7 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="create-points-in-direction">Create Points in Direction</h1>
-<p>Create set of points at given distance from points from input layer that span given angle offset from main direction layer.</p>
+<p>Creates a set of points at a given distance from points in the input layer, spanning a specified angle offset from the main direction layer.</p>
 <p>The default value produces range of values [-20;20] by one angle from azimuth of point in main direction layer.</p>
 <h2 id="parameters">Parameters</h2>
 <table>
@@ -286,37 +290,37 @@
 <td>Main direction point layer</td>
 <td><code>DirectionLayer</code></td>
 <td>[vector: point]</td>
-<td>Point layer (containing only one point) that specifies main direction.</td>
+<td>Point layer (containing only one point) that specifies the main direction.</td>
 </tr>
 <tr>
 <td>ID field to assign to output</td>
 <td><code>IdField</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field value to assign to <code>id_original_point</code> for new layer.</td>
+<td>Field value to assign to <code>id_original_point</code> for the new layer.</td>
 </tr>
 <tr>
 <td>Angle offset from the main direction</td>
 <td><code>AngleOffset</code></td>
 <td>[number] <br/><br/> Default: <br/> <code>20</code></td>
-<td>Offset from main direction, the whole range is [main azimuth - angleOffset;main azimuth + angleOffset].</td>
+<td>Offset from the main direction. The whole range is [main azimuth - angleOffset; main azimuth + angleOffset].</td>
 </tr>
 <tr>
 <td>Angle step</td>
 <td><code>AngleStep</code></td>
 <td>[number] <br/><br/> Default: <br/> <code>1</code></td>
-<td>Determines density of point placement between <code>Minimal angle</code> and <code>Maximal angle</code>. Angular distance of points. Number of points will be (<code>Maximal angle</code> - <code>Minimal angle</code>) / <code>AngleStep</code>.</td>
+<td>Determines the density of point placement between <code>Minimal angle</code> and <code>Maximal angle</code>. The angular distance between points. The number of points will be (<code>Maximal angle</code> - <code>Minimal angle</code>) / <code>AngleStep</code>.</td>
 </tr>
 <tr>
 <td>Distance</td>
 <td><code>Distance</code></td>
 <td>[number] <br/><br/> Default: <br/> <code>10</code></td>
-<td>How far from the original point the new points should be created.</td>
+<td>Distance from the original point at which the new points should be created.</td>
 </tr>
 <tr>
 <td>Output layer</td>
 <td><code>OutputLayer</code></td>
 <td>[vector: point]</td>
-<td>Output layer containing points.</td>
+<td>Output layer containing the new points.</td>
 </tr>
 </tbody>
 </table>
@@ -335,7 +339,7 @@
 <td>Output layer</td>
 <td><code>OutputLayer</code></td>
 <td>[vector: point]</td>
-<td>Output layer containing points.</td>
+<td>Output layer containing the new points.</td>
 </tr>
 </tbody>
 </table>
@@ -346,7 +350,6 @@
 <li><strong>id_point</strong> - integer - unique id value for the point</li>
 <li><strong>difference_to_main_azimuth</strong> - double - difference of main point azimuth to this point's azimuth</li>
 <li><strong>angle_step_between_points</strong> - double - azimuth step between individual points</li>
-<li></li>
 </ul>
 <h2 id="tool-screenshot">Tool screenshot</h2>
 <p><a class="glightbox" href="../../../images/tool_points_in_direction.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="Create points in direction" src="../../../images/tool_points_in_direction.png" /></a></p></div>

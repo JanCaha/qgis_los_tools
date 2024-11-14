@@ -129,6 +129,10 @@
 </li>
             
 <li>
+    <a href="../../Horizons/tool_extract_horizon_lines_by_distances/" class="dropdown-item">Extract Horizon Lines</a>
+</li>
+            
+<li>
     <a href="../../Horizons/tool_extract_horizons/" class="dropdown-item">Extract Horizons</a>
 </li>
     </ul>
@@ -263,7 +267,7 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="create-global-los">Create Global LoS</h1>
-<p>Create line-of-sight from each point from observers layer through each point in targets layer. Each line-of-sight starts at observer and ends at an edge of DEM raster behind target.</p>
+<p>Creates a line-of-sight from each point in the observers layer through each point in the targets layer. Each line-of-sight starts at the observer and ends at the edge of the DEM raster behind the target.</p>
 <h2 id="parameters">Parameters</h2>
 <table>
 <thead>
@@ -291,13 +295,13 @@
 <td>Observer ID field</td>
 <td><code>ObserverIdField</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field containing ID for observer points.</td>
+<td>Field containing IDs for observer points.</td>
 </tr>
 <tr>
 <td>Observer offset field</td>
 <td><code>ObserverOffset</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field containing offset above DEM for observer points.</td>
+<td>Field containing the offset above DEM for observer points.</td>
 </tr>
 <tr>
 <td>Targets point layer</td>
@@ -309,25 +313,25 @@
 <td>Target ID field</td>
 <td><code>TargetIdField</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field containing ID for target points.</td>
+<td>Field containing IDs for target points.</td>
 </tr>
 <tr>
 <td>Target offset field</td>
 <td><code>TargetOffset</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field containing offset above DEM for target points.</td>
+<td>Field containing the offset above DEM for target points.</td>
 </tr>
 <tr>
 <td>LoS sampling distance</td>
 <td><code>LineDensity</code></td>
 <td>[distance] <br/><br/> Default: <br/> <code>1</code></td>
-<td>The distance by which the LoS is segmentized.</td>
+<td>The distance by which the LoS is segmented.</td>
 </tr>
 <tr>
 <td>Output layer</td>
 <td><code>OutputLayer</code></td>
 <td>[vector: line]</td>
-<td>Output layer containing LoS.</td>
+<td>Output layer containing the LoS.</td>
 </tr>
 </tbody>
 </table>
@@ -346,7 +350,7 @@
 <td>Output layer</td>
 <td><code>OutputLayer</code></td>
 <td>[vector: line]</td>
-<td>Output layer containing LoS.</td>
+<td>Output layer containing the LoS.</td>
 </tr>
 </tbody>
 </table>

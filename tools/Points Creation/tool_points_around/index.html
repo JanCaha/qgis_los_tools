@@ -129,6 +129,10 @@
 </li>
             
 <li>
+    <a href="../../Horizons/tool_extract_horizon_lines_by_distances/" class="dropdown-item">Extract Horizon Lines</a>
+</li>
+            
+<li>
     <a href="../../Horizons/tool_extract_horizons/" class="dropdown-item">Extract Horizons</a>
 </li>
     </ul>
@@ -263,7 +267,7 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="create-points-around">Create Points Around</h1>
-<p>Create points at given distance from points from input layer that span from minimal to maximal angle with specified angle step.</p>
+<p>Creates points at a specified distance from points in the input layer, spanning from a minimal to a maximal angle with a specified angle step.</p>
 <p>The default values create points from angle 0 (north) to angle 359 (almost north) by one 1 degree, which means 360 points (one point per degree).</p>
 <h2 id="parameters">Parameters</h2>
 <table>
@@ -286,7 +290,7 @@
 <td>ID field to assign to output</td>
 <td><code>IdField</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field value to assign to <code>id_original_point</code> for new layer.</td>
+<td>Field value to assign to <code>id_original_point</code> for the new layer.</td>
 </tr>
 <tr>
 <td>Minimal angle</td>
@@ -304,19 +308,19 @@
 <td>Angle step</td>
 <td><code>AngleStep</code></td>
 <td>[number] <br/><br/> Default: <br/> <code>1</code></td>
-<td>Determines density of point placement between <code>Minimal angle</code> and <code>Maximal angle</code>. Angular distance of points. Number of points will be (<code>Maximal angle</code> - <code>Minimal angle</code>) / <code>AngleStep</code>.</td>
+<td>DDetermines the density of point placement between <code>AngleStart</code> and <code>AngleEnd</code>. The angular distance between points. The number of points will be (<code>AngleEnd</code> - <code>AngleStart</code>) / <code>AngleStep</code>.</td>
 </tr>
 <tr>
 <td>Distance</td>
 <td><code>Distance</code></td>
 <td>[number] <br/><br/> Default: <br/> <code>10</code></td>
-<td>How far from the original point the new points should be created.</td>
+<td>Distance from the original point at which the new points should be created.</td>
 </tr>
 <tr>
 <td>Output layer</td>
 <td><code>OutputLayer</code></td>
 <td>[vector: point]</td>
-<td>Output layer containing points.</td>
+<td>Output layer containing the new points.</td>
 </tr>
 </tbody>
 </table>
@@ -335,7 +339,7 @@
 <td>Output layer</td>
 <td><code>OutputLayer</code></td>
 <td>[vector: point]</td>
-<td>Output layer containing points.</td>
+<td>Output layer containing the new points.</td>
 </tr>
 </tbody>
 </table>

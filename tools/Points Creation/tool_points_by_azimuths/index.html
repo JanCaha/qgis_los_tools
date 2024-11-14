@@ -129,6 +129,10 @@
 </li>
             
 <li>
+    <a href="../../Horizons/tool_extract_horizon_lines_by_distances/" class="dropdown-item">Extract Horizon Lines</a>
+</li>
+            
+<li>
     <a href="../../Horizons/tool_extract_horizons/" class="dropdown-item">Extract Horizons</a>
 </li>
     </ul>
@@ -263,7 +267,7 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="create-points-by-azimuths">Create Points by Azimuths</h1>
-<p>Create points at given distance from points from input layer that span from minimal to maximal azimuth with specified angle step.</p>
+<p>Creates a set of points at a specified distance from points in the input layer, spanning a given angle offset from the main direction layer.</p>
 <p>The default values create points from angle 0 (north) to angle 360 (almost north) by one 1 degree, which means 360 points (one point per degree). But smaller section can be generated. For example just wedge from 90 to 180 degrees. It is possible to also select the opposite wedge by checking <em>Goes trough north (0 or 360 degrees)</em> option. That will generate values from 180 to 360 and then 0 to 90 to fulfill the requirement.</p>
 <h2 id="parameters">Parameters</h2>
 <table>
@@ -286,7 +290,7 @@
 <td>ID field to assign to output</td>
 <td><code>IdField</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field value to assign to <code>id_original_point</code> for new layer.</td>
+<td>Field value to assign to <code>id_original_point</code> for the new layer.</td>
 </tr>
 <tr>
 <td>Minimal angle</td>
@@ -304,7 +308,7 @@
 <td>Goes trough north (0 or 360 degrees)</td>
 <td><code>OverNorth</code></td>
 <td>[boolean]<br/><br/>Default: <code>True</code></td>
-<td>Specify if the number goes trough North (azimuth 0), as there are two ways to connect azimuths 90 - 270, one through south (over azimuth 180) and second through north (azimuth 0 or 360).</td>
+<td>Specify if the angle spans through North (azimuth 0). There are two ways to connect azimuths 90 - 270: one through south (over azimuth 180) and the other through north (azimuth 0 or 360).</td>
 </tr>
 <tr>
 <td>Angle step</td>
@@ -316,13 +320,13 @@
 <td>Distance</td>
 <td><code>Distance</code></td>
 <td>[number] <br/><br/> Default: <br/> <code>10</code></td>
-<td>How far from the original point the new points should be created.</td>
+<td>Distance from the original point at which the new points should be created.</td>
 </tr>
 <tr>
 <td>Output layer</td>
 <td><code>OutputLayer</code></td>
 <td>[vector: point]</td>
-<td>Output layer containing points.</td>
+<td>Output layer containing the new points.</td>
 </tr>
 </tbody>
 </table>
@@ -341,7 +345,7 @@
 <td>Output layer</td>
 <td><code>OutputLayer</code></td>
 <td>[vector: point]</td>
-<td>Output layer containing points.</td>
+<td>Output layer containing the new points.</td>
 </tr>
 </tbody>
 </table>

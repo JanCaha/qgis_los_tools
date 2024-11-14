@@ -129,6 +129,10 @@
 </li>
             
 <li>
+    <a href="../../Horizons/tool_extract_horizon_lines_by_distances/" class="dropdown-item">Extract Horizon Lines</a>
+</li>
+            
+<li>
     <a href="../../Horizons/tool_extract_horizons/" class="dropdown-item">Extract Horizons</a>
 </li>
     </ul>
@@ -263,7 +267,7 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="replace-raster-values-by-field-values">Replace Raster Values by Field Values</h1>
-<p>Tool to replace raster values in polygons with field values (defined by <code>ValueField</code>). </p>
+<p>Tool to replace raster values within polygons based on a specified field value (<code>ValueField</code>).</p>
 <h2 id="parameters">Parameters</h2>
 <table>
 <thead>
@@ -279,25 +283,25 @@
 <td>Raster Layer</td>
 <td><code>RasterLayer</code></td>
 <td>[raster]</td>
-<td>Raster layer to use as base.</td>
+<td>Base raster layer.</td>
 </tr>
 <tr>
 <td>Vector Layer</td>
 <td><code>VectorLayer</code></td>
 <td>[vector: polygon]</td>
-<td>Vector layer that specifies areas of raster to replace the values.</td>
+<td>Vector layer defining areas where raster values will be replaced.</td>
 </tr>
 <tr>
 <td>Field specifying replacement</td>
 <td><code>ValueField</code></td>
 <td>[tablefield: numeric]</td>
-<td>Field from vector layer that defines values that should be used in output raster.</td>
+<td>Field from the vector layer specifying the values to use in the output raster.</td>
 </tr>
 <tr>
 <td>Output Raster</td>
 <td><code>OutputRaster</code></td>
 <td>[raster]</td>
-<td>Output raster with new values.</td>
+<td>Output raster with updated values.</td>
 </tr>
 </tbody>
 </table>
@@ -316,7 +320,7 @@
 <td>Output Raster</td>
 <td><code>OutputRaster</code></td>
 <td>[raster]</td>
-<td>Output raster with new values.</td>
+<td>Output raster with updated values.</td>
 </tr>
 </tbody>
 </table>
