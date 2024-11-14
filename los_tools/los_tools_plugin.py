@@ -176,7 +176,6 @@ class LoSToolsPlugin:
                 self.raster_validations_dialog,
                 self.los_settings_dialog,
                 self._layer_LoS,
-                self.add_los_layer_action,
             )
 
             self.create_los_tool.deactivated.connect(partial(self.deactivateTool, self.create_los_action_name))

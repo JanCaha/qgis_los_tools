@@ -1,18 +1,18 @@
 import typing
 
 from qgis.core import Qgis, QgsPointLocator, QgsPointXY
-from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolAdvancedDigitizing, QgsSnapIndicator
+from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolEdit, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QKeyEvent
 from qgis.PyQt.QtWidgets import QWidget
 
 
-class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
+class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
     _widget: QWidget
 
     def __init__(self, iface: QgisInterface) -> None:
-        super().__init__(iface.mapCanvas(), iface.cadDockWidget())
+        super().__init__(iface.mapCanvas())
 
         self._iface = iface
         self._canvas = self._iface.mapCanvas()
@@ -25,13 +25,11 @@ class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
         self._snap_point: typing.Optional[QgsPointXY] = None
 
     def activate(self) -> None:
-        super().activate()
 
         self.create_widget()
 
         self.messageDiscarded.emit()
 
-        self._canvas = self._iface.mapCanvas()
         self._snapper = self._canvas.snappingUtils()
 
         if self._canvas.mapSettings().destinationCrs().isGeographic():
@@ -42,6 +40,8 @@ class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
             self.deactivate()
             return
 
+        super().activate()
+
     def deactivate(self) -> None:
         self.clean()
         self.delete_widget()
@@ -49,18 +49,14 @@ class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
         super().deactivate()
 
     def create_widget(self):
-        self.release_keyboard()
         self._iface.addUserInputWidget(self._widget)
         self._widget.setFocus(Qt.TabFocusReason)
         self._widget.show()
 
-    def release_keyboard(self):
-        if self._widget:
-            self._widget.releaseKeyboard()
-
     def delete_widget(self):
         if self._widget:
-            self.release_keyboard()
+            self._widget.hide()
+            self._widget.releaseKeyboard()
             self._widget.deleteLater()
             self._widget = None
 
@@ -75,7 +71,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
         return super().keyPressEvent(e)
 
     def _set_snap_point(self, event: QgsMapMouseEvent) -> None:
-        result = self._snapper.snapToMap(event.pos())
+        result = self._snapper.snapToMap(event.mapPoint())
         self.snap_marker.setMatch(result)
         if result.type() == QgsPointLocator.Vertex:
             self._snap_point = result.point()
@@ -85,6 +81,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolAdvancedDigitizing):
     def canvas_crs_is_projected(self) -> bool:
         if self._canvas.mapSettings().destinationCrs().isGeographic():
             self._iface.messageBar().pushMessage(
+                "Can't Drawn LoS",
                 "LoS can be drawn only for projected CRS. Canvas is currently in geographic CRS.",
                 Qgis.Critical,
                 duration=5,

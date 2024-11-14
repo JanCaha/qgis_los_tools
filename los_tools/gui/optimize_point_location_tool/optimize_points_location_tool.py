@@ -10,19 +10,11 @@ from qgis.core import (
     QgsRasterLayer,
     QgsRectangle,
     QgsSnappingConfig,
-    QgsTolerance,
     QgsUnitTypes,
     QgsVectorDataProvider,
     QgsWkbTypes,
 )
-from qgis.gui import (
-    QgisInterface,
-    QgsMapCanvas,
-    QgsMapMouseEvent,
-    QgsMapToolAdvancedDigitizing,
-    QgsRubberBand,
-    QgsSnapIndicator,
-)
+from qgis.gui import QgisInterface, QgsMapCanvas, QgsMapMouseEvent, QgsMapToolEdit, QgsRubberBand, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QWidget
@@ -31,20 +23,20 @@ from los_tools.gui.optimize_point_location_tool.optimize_points_location_widget 
 from los_tools.processing.create_points.tool_optimize_point_location import OptimizePointLocationAlgorithm
 
 
-class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
+class OptimizePointsLocationTool(QgsMapToolEdit):
     def __init__(self, canvas: QgsMapCanvas, iface: QgisInterface) -> None:
-        super().__init__(canvas, iface.cadDockWidget())
+        super().__init__(canvas)
         self._canvas = canvas
         self._iface = iface
 
         self.snap_marker = QgsSnapIndicator(self._canvas)
 
-        self.circle_rubber = QgsRubberBand(self._canvas, QgsWkbTypes.PolygonGeometry)
+        self.circle_rubber = QgsRubberBand(self._canvas, Qgis.GeometryType.PolygonGeometry)
         self.circle_rubber.setColor(QColor.fromRgb(255, 64, 64))
         self.circle_rubber.setWidth(2)
         self.circle_rubber.setOpacity(0.3)
 
-        self.point_rubber = QgsRubberBand(self._canvas, QgsWkbTypes.PointGeometry)
+        self.point_rubber = QgsRubberBand(self._canvas, Qgis.GeometryType.PointGeometry)
         self.point_rubber.setColor(QColor.fromRgb(64, 64, 255))
         self.point_rubber.setWidth(2)
         self.point_rubber.setOpacity(0.75)
@@ -102,7 +94,7 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
             return
         if self.currentVectorLayer().crs().isGeographic():
             self.messageEmitted.emit(
-                "Tool only works for layers with projected CRS. Current layer has geographic crs",
+                "Tool only works for layers with projected CRS. Current layer has geographic crs.",
                 Qgis.Critical,
             )
             self._canvas.unsetMapTool(self)
@@ -114,13 +106,12 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
             )
             self._canvas.unsetMapTool(self)
             return
-        if self.currentVectorLayer().geometryType() not in [
-            QgsWkbTypes.Point,
-            QgsWkbTypes.Point25D,
-            QgsWkbTypes.PointM,
-            QgsWkbTypes.PointZ,
-            QgsWkbTypes.PointZM,
-            QgsWkbTypes.PointGeometry,
+        if self.currentVectorLayer().wkbType() not in [
+            Qgis.WkbType.Point,
+            Qgis.WkbType.Point25D,
+            Qgis.WkbType.PointM,
+            Qgis.WkbType.PointZ,
+            Qgis.WkbType.PointZM,
         ]:
             self.messageEmitted.emit(
                 "Tool only works for point layers. Current layer is {}.".format(
@@ -143,7 +134,9 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
         self._candidate_point = None
         self.snap_marker.setVisible(False)
         self.point_rubber.hide()
+        self.point_rubber.reset()
         self.circle_rubber.hide()
+        self.circle_rubber.reset()
         return super().clean()
 
     def deactivate(self) -> None:
@@ -151,13 +144,8 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
         self.delete_widget()
         super(OptimizePointsLocationTool, self).deactivate()
 
-    def draw_rubber_bands(self, point: QgsPointXY = None) -> None:
+    def get_candidate_point(self, point: QgsPointXY = None) -> None:
         if point:
-            circle = QgsCircle(QgsPoint(point.x(), point.y()), self._circle_radius)
-            self.circle_rubber.setToGeometry(
-                QgsGeometry(circle.toPolygon(segments=36 * 2)),
-                self.currentVectorLayer(),
-            )
             self._candidate_point = OptimizePointLocationAlgorithm.optimized_point(
                 point,
                 self._raster,
@@ -165,6 +153,16 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
                 self._cell_size,
                 self._no_data_value,
                 self._distance_cells,
+            )
+        else:
+            self._candidate_point = None
+
+    def draw_rubber_bands(self, point: QgsPointXY = None) -> None:
+        if point:
+            circle = QgsCircle(QgsPoint(point.x(), point.y()), self._circle_radius)
+            self.circle_rubber.setToGeometry(
+                QgsGeometry(circle.toPolygon(segments=36 * 2)),
+                self.currentVectorLayer(),
             )
             self.point_rubber.setToGeometry(QgsGeometry.fromPointXY(self._candidate_point))
             self.circle_rubber.show()
@@ -188,7 +186,7 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
         layerSettings.setEnabled(True)
         layerSettings.setTypeFlag(Qgis.SnappingTypes(Qgis.SnappingType.Vertex))
         layerSettings.setTolerance(20)
-        layerSettings.setUnits(QgsTolerance.Pixels)
+        layerSettings.setUnits(Qgis.MapToolUnit.Pixels)
 
         config.setIndividualLayerSettings(self.currentVectorLayer(), layerSettings)
         utils.setConfig(config)
@@ -208,6 +206,7 @@ class OptimizePointsLocationTool(QgsMapToolAdvancedDigitizing):
         if match:
             self._point = match.point()
             self._pointId = match.featureId()
+            self.get_candidate_point(self._point)
             self.draw_rubber_bands(self._point)
         else:
             self.clean()

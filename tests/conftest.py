@@ -1,11 +1,22 @@
+import typing
 from pathlib import Path
 
 import pytest
 from pytest_qgis.utils import clean_qgis_layer
-from qgis.core import QgsFeature, QgsRasterLayer, QgsVectorLayer
+from qgis.core import Qgis, QgsFeature, QgsRasterLayer, QgsVectorLayer
+from qgis.gui import QgisInterface
 
 from los_tools.constants.field_names import FieldNames
 from tests.utils import data_file_path
+
+
+@pytest.fixture(autouse=True, scope="function")
+def _monkeypatch_iface(qgis_iface, monkeypatch):
+    def add_user_input_widget(widget):
+        pass
+
+    qgis_iface.addUserInputWidget = None
+    monkeypatch.setattr(qgis_iface, "addUserInputWidget", add_user_input_widget)
 
 
 def _raster_layer(path: Path) -> QgsRasterLayer:
@@ -180,6 +191,12 @@ def layer_points() -> QgsVectorLayer:
 
 @pytest.fixture
 @clean_qgis_layer
+def layer_points_wgs84() -> QgsVectorLayer:
+    return _vector_layer(data_file_path("points_wgs84.gpkg"))
+
+
+@pytest.fixture
+@clean_qgis_layer
 def layer_points_epsg5514() -> QgsVectorLayer:
     return _vector_layer(data_file_path("points_epsg_5514.gpkg"))
 
@@ -194,3 +211,26 @@ def layer_size_distance() -> QgsVectorLayer:
 @clean_qgis_layer
 def layer_points_in_direction() -> QgsVectorLayer:
     return _vector_layer(data_file_path("points_in_direction.gpkg"))
+
+
+@pytest.fixture
+def mock_add_message_to_messagebar(qgis_iface: QgisInterface) -> typing.Callable:
+
+    def add_message(message, level):
+        qgis_iface.messageBar().pushMessage("Patched", message, level=level, duration=0)
+
+    return add_message
+
+
+@pytest.fixture(autouse=True, scope="function")
+def _clear_message_bar_messages(qgis_iface: QgisInterface):
+    mb = qgis_iface.messageBar()
+    mb.messages[Qgis.MessageLevel.Info] = []
+    mb.messages[Qgis.MessageLevel.Warning] = []
+    mb.messages[Qgis.MessageLevel.Critical] = []
+    mb.messages[Qgis.MessageLevel.Success] = []
+
+
+@pytest.fixture(autouse=True, scope="function")
+def _clean_project(qgis_iface: QgisInterface) -> None:
+    qgis_iface.newProject()

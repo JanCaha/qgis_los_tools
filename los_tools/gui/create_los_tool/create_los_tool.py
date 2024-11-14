@@ -1,10 +1,9 @@
 from functools import partial
 
 import numpy as np
-from qgis.core import Qgis, QgsGeometry, QgsPoint, QgsPointLocator, QgsPointXY, QgsVectorLayer, QgsVertexId
+from qgis.core import Qgis, QgsGeometry, QgsPoint, QgsPointXY, QgsVectorLayer, QgsVertexId
 from qgis.gui import QgisInterface, QgsMapMouseEvent
 from qgis.PyQt.QtCore import Qt, pyqtSignal
-from qgis.PyQt.QtGui import QAction
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.gui.create_los_tool.create_los_widget import LoSInputWidget
@@ -18,6 +17,7 @@ from .los_tasks import LoSExtractionTaskManager, PrepareLoSTask, PrepareLoSWitho
 
 class CreateLoSMapTool(LoSDigitizingToolWithWidget):
     featuresAdded = pyqtSignal()
+    addLoSStatusChanged = pyqtSignal(bool)
 
     def __init__(
         self,
@@ -25,7 +25,6 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         raster_validation_dialog: RasterValidations,
         los_settings_dialog: LoSSettings,
         los_layer: QgsVectorLayer = None,
-        add_result_action: QAction = None,
     ) -> None:
         super().__init__(iface)
 
@@ -35,8 +34,6 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
 
         self._raster_validation_dialog = raster_validation_dialog
         self._los_settings_dialog = los_settings_dialog
-
-        self.add_result_action = add_result_action
 
         self._start_point: QgsPointXY = None
 
@@ -54,6 +51,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
 
         super().create_widget()
 
+        self.addLoSStatusChanged.connect(self._widget.setAddLoSEnabled)
         self._widget.valuesChanged.connect(partial(self.draw_los, None))
         self._widget.saveToLayerClicked.connect(self.add_los_to_layer)
 
@@ -71,8 +69,9 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
     def clean(self) -> None:
         super().clean()
         if self._widget:
-            self._widget.disableAddLos()
+            self._widget.setAddLoSEnabled(False)
         self._start_point = None
+        self._last_towards_point = None
 
     def canvasReleaseEvent(self, e: QgsMapMouseEvent) -> None:
         if e.button() == Qt.RightButton and self._start_point is None and self._los_rubber_band.size() == 0:
@@ -87,7 +86,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
                     self._start_point = e.mapPoint()
             else:
                 self.draw_los(self._snap_point)
-                self._widget.enableAddLos()
+                self.addLoSStatusChanged.emit(True)
                 self._start_point = None
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
@@ -171,18 +170,12 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         if towards_point:
             self._last_towards_point = QgsPointXY(towards_point.x(), towards_point.y())
 
-    def set_result_action_active(self, active: bool) -> None:
-        if self.add_result_action:
-            self.add_result_action.setEnabled(active)
-
     def add_los_to_layer(self) -> None:
         los_geometry = self._los_rubber_band.asGeometry()
 
         list_of_rasters = self._raster_validation_dialog.listOfRasters
 
-        # text = self.add_result_action.text()
-        # self.add_result_action.setText("Obtaining data ...")
-        self.set_result_action_active(False)
+        self.addLoSStatusChanged.emit(False)
 
         if los_geometry.get().partCount() == 1:
             task = PrepareLoSTask(
@@ -216,11 +209,12 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
     def task_finished(self) -> None:
         self.featuresAdded.emit()
         if self.task_manager.all_los_tasks_finished():
-            self.set_result_action_active(True)
+            self.addLoSStatusChanged.emit(True)
 
     def task_finished_message(self, milliseconds: int) -> None:
         self._iface.messageBar().pushMessage(
+            "LoS Added",
             f"LoS Processing Finished. Lasted {milliseconds / 1000} seconds.",
             Qgis.MessageLevel.Info,
-            2,
+            duration=2,
         )

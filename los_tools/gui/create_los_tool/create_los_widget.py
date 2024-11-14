@@ -135,10 +135,7 @@ class LoSInputWidget(QWidget):
 
     def clickedAddLosToLayer(self) -> None:
         self.saveToLayerClicked.emit()
-        self.disableAddLos()
+        self.setAddLoSEnabled(False)
 
-    def enableAddLos(self) -> None:
-        self._add_los_to_layer.setEnabled(True)
-
-    def disableAddLos(self) -> None:
-        self._add_los_to_layer.setEnabled(False)
+    def setAddLoSEnabled(self, enabled: bool) -> None:
+        self._add_los_to_layer.setEnabled(enabled)

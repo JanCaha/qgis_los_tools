@@ -19,6 +19,8 @@ addopts = [
     "-vv",
     "-s"
 ]
+qgis_canvas_width=2000
+qgis_canvas_height=2000
 
 [tool.black]
 line-length = 120
