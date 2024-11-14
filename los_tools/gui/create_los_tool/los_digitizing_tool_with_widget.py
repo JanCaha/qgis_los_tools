@@ -71,7 +71,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         return super().keyPressEvent(e)
 
     def _set_snap_point(self, event: QgsMapMouseEvent) -> None:
-        result = self._snapper.snapToMap(event.pos())
+        result = self._snapper.snapToMap(event.mapPoint())
         self.snap_marker.setMatch(result)
         if result.type() == QgsPointLocator.Vertex:
             self._snap_point = result.point()
