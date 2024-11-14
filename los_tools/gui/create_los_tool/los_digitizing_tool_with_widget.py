@@ -30,7 +30,6 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
         self.messageDiscarded.emit()
 
-        self._canvas = self._iface.mapCanvas()
         self._snapper = self._canvas.snappingUtils()
 
         if self._canvas.mapSettings().destinationCrs().isGeographic():
