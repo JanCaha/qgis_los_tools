@@ -229,3 +229,8 @@ def _clear_message_bar_messages(qgis_iface: QgisInterface):
     mb.messages[Qgis.MessageLevel.Warning] = []
     mb.messages[Qgis.MessageLevel.Critical] = []
     mb.messages[Qgis.MessageLevel.Success] = []
+
+
+@pytest.fixture(autouse=True, scope="function")
+def _clean_project(qgis_iface: QgisInterface) -> None:
+    qgis_iface.newProject()
