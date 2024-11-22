@@ -150,6 +150,6 @@ class SamplingDistanceMatrix:
     def densified_line(self, start_point: QgsPoint, end_point: QgsPoint, sampling_row_index: int) -> QgsLineString:
         line = QgsGeometry.fromPolyline([start_point, end_point])
 
-        line = line.densifyByDistance(distance=np.nextafter(self.get_row_sampling_distance(sampling_row_index), np.Inf))
+        line = line.densifyByDistance(distance=np.nextafter(self.get_row_sampling_distance(sampling_row_index), np.inf))
 
         return QgsLineString([x for x in line.vertices()])

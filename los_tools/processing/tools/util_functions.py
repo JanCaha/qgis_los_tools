@@ -162,7 +162,7 @@ def segmentize_line(line: QgsGeometry, segment_length: float) -> QgsLineString:
 
     line_geom = QgsGeometry(line_extented)
 
-    line_geom = line_geom.densifyByDistance(distance=np.nextafter(float(segment_length), np.Inf))
+    line_geom = line_geom.densifyByDistance(distance=np.nextafter(float(segment_length), np.inf))
 
     line_res = QgsLineString([x for x in line_geom.vertices()])
 

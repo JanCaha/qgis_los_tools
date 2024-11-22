@@ -6,7 +6,7 @@
 name=LoS Tools
 qgisMinimumVersion=3.30
 description=This plugin creates and analyzes lines-of-sight (LoS) and also provides supporting tools.
-version=1.2.0
+version=1.2.1
 author=Jan Caha
 email=jan.caha@outlook.com
 
@@ -20,7 +20,9 @@ repository=https://github.com/JanCaha/qgis_los_tools
 
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
-changelog=1.2.0
+changelog=1.2.1
+    - fix bad use of numpy to avoid exception
+    <p>1.2.0
     - new tool to extract horizon lines at specific distance
     - minor fixes to gui tools (based on tests written for them)
     <p>1.1.2
