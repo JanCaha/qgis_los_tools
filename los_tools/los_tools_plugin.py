@@ -107,7 +107,7 @@ class LoSToolsPlugin:
             self.add_action(
                 icon_path=get_icon_path("calculator.svg"),
                 text="Object Visibility Parameters",
-                callback=self.open_dialog_object_visiblity_parameters,
+                callback=self.open_dialog_object_visibility_parameters,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
                 checkable=True,
@@ -316,5 +316,5 @@ class LoSToolsPlugin:
             text = f"{text} {text_part}"
         action.setText(text)
 
-    def open_dialog_object_visiblity_parameters(self) -> None:
+    def open_dialog_object_visibility_parameters(self) -> None:
         self.object_parameters_dialog.exec()
