@@ -70,6 +70,8 @@ class DialogCameraSetting(QDialog):
         self.observer_offset.setMinimum(0)
         self.observer_offset.setValue(1.6)
 
+        self.terrain_type = QLabel()
+
     def sync_to_project(self):
         self.elevation_provider = QgsProject.instance().elevationProperties().terrainProvider()
 
