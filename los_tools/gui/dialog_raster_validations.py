@@ -1,7 +1,7 @@
 from typing import List
 
 from qgis.core import QgsPointXY, QgsProject, QgsRasterLayer, QgsUnitTypes
-from qgis.gui import QgsMapToolEmitPoint
+from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import (
     QDialog,
@@ -16,11 +16,16 @@ from qgis.PyQt.QtWidgets import (
     QTreeWidgetItem,
 )
 
+from los_tools.gui.point_capture_map_tool import PointCaptureMapTool
+
 from ..classes.list_raster import ListOfRasters
 
 
 class RasterValidations(QDialog):
-    def __init__(self, iface=None) -> None:
+
+    map_tool: PointCaptureMapTool
+
+    def __init__(self, iface: QgisInterface = None) -> None:
         super().__init__(iface.mainWindow())
 
         self._iface = iface
@@ -28,9 +33,6 @@ class RasterValidations(QDialog):
 
         self._point = None
         self._point_crs = None
-
-        self.map_tool = QgsMapToolEmitPoint(self._canvas)
-        self.map_tool.canvasClicked.connect(self.update_test_point)
 
         self.init_gui()
 
@@ -150,12 +152,7 @@ class RasterValidations(QDialog):
         layers = [x for x in project.mapLayers(True)]
         return layers
 
-    def _default_tools(self) -> None:
-        self._prev_map_tool = self._canvas.mapTool()
-        self._prev_cursor = self._canvas.cursor()
-
     def _prepare(self) -> None:
-        self._default_tools()
         self._populate_raster_view()
         self.validate()
 
@@ -168,11 +165,15 @@ class RasterValidations(QDialog):
         return super().exec()
 
     def select_sample_point(self) -> None:
+        self.map_tool = PointCaptureMapTool(self._canvas)
+        self.map_tool.canvasClicked.connect(self.update_test_point)
+        self.map_tool.canvasClicked.connect(self.map_tool.deactivate)
+        self.map_tool.deactivated.connect(self.show)
+
         self._canvas.setMapTool(self.map_tool)
         self.hide()
 
     def update_test_point(self, point):
-        self.restore_canvas_tools()
         self.show()
         canvas_crs = self._canvas.mapSettings().destinationCrs()
         text_point = "{:.3f};{:.3f}[{}]".format(point.x(), point.y(), canvas_crs.authid())
@@ -180,10 +181,6 @@ class RasterValidations(QDialog):
         self._point = QgsPointXY(point.x(), point.y())
         self._point_crs = canvas_crs
         self.test_interpolated_value_at_point()
-
-    def restore_canvas_tools(self) -> None:
-        self._canvas.setMapTool(self._prev_map_tool)
-        self._canvas.setCursor(self._prev_cursor)
 
     @property
     def listOfRasters(self) -> ListOfRasters:
