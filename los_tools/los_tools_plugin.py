@@ -21,11 +21,12 @@ from los_tools.processing.los_tools_provider import LoSToolsProvider
 
 from .constants.fields import Fields
 from .constants.plugin import PluginConstants
+from .gui._3d.dialog_create_3d_view import Create3DView
+from .gui._3d.dialog_tool_set_camera import SetCameraDialog
 from .gui.create_los_tool.create_los_tool import CreateLoSMapTool
 from .gui.dialog_los_settings import LoSSettings
 from .gui.dialog_object_parameters import ObjectParameters
 from .gui.dialog_raster_validations import RasterValidations
-from .gui.dialog_tool_set_camera import SetCameraDialog
 from .gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
 from .gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
 from .utils import get_icon_path
@@ -59,8 +60,6 @@ class LoSToolsPlugin:
             self.iface.newProjectCreated.connect(self.reset_los_layer)
             self.iface.projectRead.connect(self.reset_los_layer)
 
-            self.camera_tool: SetCameraDialog = None
-
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
 
@@ -68,6 +67,10 @@ class LoSToolsPlugin:
         self.initProcessing()
 
         if self.iface is not None:
+            self.raster_validations_dialog = RasterValidations(iface=self.iface)
+            self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
+            self.object_parameters_dialog = ObjectParameters(self.iface.mainWindow())
+
             self.add_los_layer_action = self.add_action(
                 icon_path=get_icon_path("add_los_layer.svg"),
                 text="Add Plugin Layer To Project",
@@ -129,6 +132,15 @@ class LoSToolsPlugin:
                 add_to_specific_toolbar=self.toolbar,
             )
 
+            self.add_action(
+                icon_path=None,  # get_icon_path("calculator.svg"),
+                text="Create 3D View",
+                callback=self.dialog_create_3d_view,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
+                checkable=True,
+            )
+
             self.toolbar.addSeparator()
 
             self.add_action(
@@ -158,10 +170,6 @@ class LoSToolsPlugin:
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
             )
-
-            self.raster_validations_dialog = RasterValidations(iface=self.iface)
-            self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
-            self.object_parameters_dialog = ObjectParameters(self.iface.mainWindow())
 
             self.los_notarget_tool = LosNoTargetMapTool(self.iface)
             self.los_notarget_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
@@ -237,14 +245,8 @@ class LoSToolsPlugin:
         return action
 
     def run_tool_set_camera(self):
-        if self.camera_tool is None:
-            self.camera_tool = SetCameraDialog(
-                parent=self.iface.mainWindow(),
-                canvas=self.iface.mapCanvas(),
-                iface=self.iface,
-            )
-
-        self.camera_tool.exec()
+        dialog = SetCameraDialog(self.iface, self.iface.mainWindow())
+        dialog.exec()
 
     def open_dialog_los_settings(self):
         self.los_settings_dialog.exec()
@@ -318,3 +320,7 @@ class LoSToolsPlugin:
 
     def open_dialog_object_visibility_parameters(self) -> None:
         self.object_parameters_dialog.exec()
+
+    def dialog_create_3d_view(self):
+        dialog = Create3DView(self.iface, self.iface.mainWindow())
+        dialog.exec()
