@@ -2,7 +2,7 @@ from typing import List
 
 from qgis.core import QgsPointXY, QgsProject, QgsRasterLayer, QgsUnitTypes
 from qgis.gui import QgisInterface
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QFormLayout,
@@ -24,6 +24,9 @@ from ..classes.list_raster import ListOfRasters
 class RasterValidations(QDialog):
 
     map_tool: PointCaptureMapTool
+    list_of_rasters: ListOfRasters
+
+    selectedRastersChanged = pyqtSignal()
 
     def __init__(self, iface: QgisInterface = None) -> None:
         super().__init__(iface.mainWindow())
@@ -34,9 +37,11 @@ class RasterValidations(QDialog):
         self._point = None
         self._point_crs = None
 
+        self.list_of_rasters = ListOfRasters([])
+
         self.init_gui()
 
-        self._prepare()
+        self._setup_layers()
 
     def init_gui(self):
         self.setMinimumWidth(600)
@@ -62,6 +67,7 @@ class RasterValidations(QDialog):
 
         self._rasters_view.itemChanged.connect(self.validate)
         self._rasters_view.itemChanged.connect(self.test_interpolated_value_at_point)
+        self._rasters_view.itemChanged.connect(self.selectedRastersChanged.emit)
 
         self.select_point = QPushButton()
         self.select_point.setText("Choose sample point on the map")
@@ -89,39 +95,32 @@ class RasterValidations(QDialog):
 
         layout.addRow(group_box)
 
-    def _populate_raster_view(self) -> None:
+    def _setup_layers(self) -> None:
+        self._rasters_view.clear()
 
-        items_to_remove = []
-        for i in range(self._rasters_view.topLevelItemCount()):
-            item = self._rasters_view.topLevelItem(i)
-            raster_id: str = item.data(0, Qt.UserRole)
-            layer = QgsProject.instance().mapLayer(raster_id)
-            if layer is None:
-                items_to_remove.append(item)
+        project = QgsProject.instance()
 
-        for item in items_to_remove:
-            self._rasters_view.invisibleRootItem().removeChild(item)
+        layers = [x for x in project.mapLayers(True)]
 
-        for raster in self.rasters:
+        rasters_tmp: List[QgsRasterLayer] = []
+
+        for layerId in layers:
+            layer = project.mapLayer(layerId)
+            if isinstance(layer, QgsRasterLayer):
+                if layer.providerType() == "wms":
+                    continue
+                rasters_tmp.append(layer)
+
+        for raster in rasters_tmp:
             item_name = raster.name()
-
-            if raster.providerType() == "wms":
-                break
 
             if self._rasters_view.findItems(item_name, Qt.MatchFlag.MatchExactly):
                 continue
 
-            layer_tree_root = QgsProject.instance().layerTreeRoot()
-            tree_layer = layer_tree_root.findLayer(raster.id())
-
             item = QTreeWidgetItem()
             item.setText(0, raster.name())
             item.setData(0, Qt.UserRole, raster.id())
-
-            if tree_layer.isVisible():
-                item.setCheckState(0, Qt.CheckState.Checked)
-            else:
-                item.setCheckState(0, Qt.CheckState.Unchecked)
+            item.setCheckState(0, Qt.CheckState.Unchecked)
 
             distance_unit = raster.crs().mapUnits()
             distance_unit = QgsUnitTypes.toAbbreviatedString(distance_unit)
@@ -136,32 +135,30 @@ class RasterValidations(QDialog):
 
             self._rasters_view.addTopLevelItem(item)
 
-    @property
-    def rasters(self) -> List[QgsRasterLayer]:
-        project = QgsProject.instance()
-        rasters_tmp = []
-        for layerId in self._layers_ids():
-            layer = project.mapLayer(layerId)
-            if isinstance(layer, QgsRasterLayer):
-                rasters_tmp.append(layer)
+    def sync(self):
+        self._rasters_view.blockSignals(True)
 
-        return rasters_tmp
+        rasters = self.list_of_rasters.rasters
 
-    def _layers_ids(self) -> List[str]:
-        project = QgsProject.instance()
-        layers = [x for x in project.mapLayers(True)]
-        return layers
+        for raster in rasters:
+            for item in self._rasters_view.findItems(raster.name(), Qt.MatchFlag.MatchExactly):
+                data = item.data(0, Qt.UserRole)
+                if data == raster.id():
+                    item.setCheckState(0, Qt.CheckState.Checked)
+                    break
 
-    def _prepare(self) -> None:
-        self._populate_raster_view()
-        self.validate()
+        self._rasters_view.blockSignals(False)
+
+    def setup_used_rasters(self, list_of_rasters: ListOfRasters) -> None:
+        self.list_of_rasters = list_of_rasters
+        self.sync()
 
     def open(self) -> None:
-        self._prepare()
+        self.validate()
         super().open()
 
     def exec(self) -> int:
-        self._prepare()
+        self.validate()
         return super().exec()
 
     def select_sample_point(self) -> None:
@@ -173,10 +170,10 @@ class RasterValidations(QDialog):
         self._canvas.setMapTool(self.map_tool)
         self.hide()
 
-    def update_test_point(self, point):
+    def update_test_point(self, point: QgsPointXY) -> None:
         self.show()
         canvas_crs = self._canvas.mapSettings().destinationCrs()
-        text_point = "{:.3f};{:.3f}[{}]".format(point.x(), point.y(), canvas_crs.authid())
+        text_point = f"{point.x():.3f};{point.y():.3f}[{canvas_crs.authid()}]"
         self.point_coordinate.setText(text_point)
         self._point = QgsPointXY(point.x(), point.y())
         self._point_crs = canvas_crs
