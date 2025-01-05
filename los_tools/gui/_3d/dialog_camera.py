@@ -20,12 +20,14 @@ class DialogCameraSetting(QDialog):
     crs_terrain: QgsCoordinateReferenceSystem
     point_observer: QgsPointXY = QgsPointXY()
     point_target: QgsPointXY = QgsPointXY()
-    elevation_provider = QgsAbstractTerrainProvider
+    elevation_provider: QgsAbstractTerrainProvider
 
     observer_coordinate: QLineEdit = None
     target_coordinate: QLineEdit = None
     button_box: QDialogButtonBox = None
     terrain_type: QLabel = None
+
+    map_tool: PointCaptureMapTool = None
 
     valuesChanged = pyqtSignal()
 
