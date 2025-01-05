@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from qgis.core import QgsPointXY
+from qgis.core import Qgis, QgsLayout, QgsLayoutExporter, QgsPointXY
 from qgis.gui import QgsMapCanvas, QgsMapMouseEvent
-from qgis.PyQt.QtCore import QEvent, QPoint, Qt
+from qgis.PyQt.QtCore import QEvent, QPoint, QSize, Qt
 
 
 def data_path() -> Path:
@@ -56,3 +56,23 @@ def create_mouse_event(
     mouse_event.setMapPoint(point_in_canvas_crs)
 
     return mouse_event
+
+
+def export_layout(path: Path, layout: QgsLayout, page: int = 0) -> None:
+    """Export layout to image."""
+
+    dpi = 300
+
+    layoutSize = layout.pageCollection().page(page - 1).sizeWithUnits()
+
+    width = layout.convertFromLayoutUnits(layoutSize.width(), Qgis.LayoutUnit.Millimeters)
+    height = layout.convertFromLayoutUnits(layoutSize.height(), Qgis.LayoutUnit.Millimeters)
+    imageSize = QSize(int(width.length() * dpi / 25.4), int(height.length() * dpi / 25.4))
+
+    image_settings = QgsLayoutExporter.ImageExportSettings()
+    image_settings.dpi = dpi
+    image_settings.imageSize = imageSize
+    image_settings.pages = [page]
+
+    exporter = QgsLayoutExporter(layout)
+    exporter.exportToImage(path.as_posix(), image_settings)
