@@ -36,9 +36,6 @@ class DialogCameraSetting(QDialog):
 
         self._iface = iface
 
-        self.prev_map_tool = self._iface.mapCanvas().mapTool()
-        self.prev_cursor = self._iface.mapCanvas().cursor()
-
         self.snapper = self._iface.mapCanvas().snappingUtils()
 
         self.init_gui()
@@ -123,14 +120,6 @@ class DialogCameraSetting(QDialog):
 
         return transform.transform(point)
 
-    def close_point_selection_tool(self) -> None:
-        self.show()
-        self.restore_canvas_tools()
-
-    def restore_canvas_tools(self) -> None:
-        self._iface.mapCanvas().setMapTool(self.prev_map_tool)
-        self._iface.mapCanvas().setCursor(self.prev_cursor)
-
     def set_acceptable(self) -> None:
         if self.point_observer.isEmpty():
             return
@@ -138,7 +127,3 @@ class DialogCameraSetting(QDialog):
             return
 
         self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
-
-    def reject(self) -> None:
-        self.restore_canvas_tools()
-        super().reject()
