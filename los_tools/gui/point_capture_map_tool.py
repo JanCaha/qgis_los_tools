@@ -1,49 +1,43 @@
-from qgis.core import Qgis, QgsPointLocator, QgsPointXY, QgsSettings
+from qgis.core import QgsPointLocator, QgsPointXY, QgsSettings
 from qgis.gui import QgsMapCanvas, QgsMapMouseEvent, QgsMapToolEmitPoint, QgsVertexMarker
-from qgis.PyQt.QtCore import QPoint, Qt, pyqtSignal
+from qgis.PyQt.QtCore import QPoint, Qt
 from qgis.PyQt.QtGui import QColor
 
 
 class PointCaptureMapTool(QgsMapToolEmitPoint):
-    complete = pyqtSignal()
 
     _current_point: QgsPointXY = None
     _snapped: bool = False
     _snap_layer_name: str = ""
-    _canvas: QgsMapCanvas
 
     def __init__(self, canvas: QgsMapCanvas):
         QgsMapToolEmitPoint.__init__(self, canvas)
 
-        self._canvas = canvas
-
         self.cursor = Qt.CursorShape.CrossCursor
 
-        self.snapper = self._canvas.snappingUtils()
+        self.snapper = self.canvas().snappingUtils()
 
         settings = QgsSettings()
         self.snap_color = settings.value("/qgis/digitizing/snap_color", QColor("#ff00ff"))
 
-        self.snap_marker = QgsVertexMarker(self._canvas)
+        self.snap_marker = QgsVertexMarker(self.canvas())
 
         self._previous_settings()
 
     def _previous_settings(self):
-        self._prev_cursor = self._canvas.cursor()
-        self._prev_map_tool = self._canvas.mapTool()
+        self._prev_cursor = self.canvas().cursor()
+        self._prev_map_tool = self.canvas().mapTool()
 
     def deactivate(self):
-        self._canvas.scene().removeItem(self.snap_marker)
-        self._canvas.setCursor(self._prev_cursor)
-        self._canvas.setMapTool(self._prev_map_tool)
+        self.canvas().scene().removeItem(self.snap_marker)
+        self.canvas().setCursor(self._prev_cursor)
+        self.canvas().setMapTool(self._prev_map_tool)
         QgsMapToolEmitPoint.deactivate(self)
 
     def activate(self):
-        self.snapper = self._canvas.snappingUtils()
+        self.snapper = self.canvas().snappingUtils()
         self._previous_settings()
-
-    def canvasReleaseEvent(self, event):
-        self.complete.emit()
+        self.canvas().setCursor(self.cursor)
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
         x = event.pos().x()
@@ -76,13 +70,13 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
         return self._snap_layer_name
 
     def update_snap_marker(self, snapped_point: QgsPointXY = None):
-        self._canvas.scene().removeItem(self.snap_marker)
+        self.canvas().scene().removeItem(self.snap_marker)
 
         if snapped_point:
             self.create_vertex_marker(snapped_point)
 
     def create_vertex_marker(self, snapped_point: QgsPointXY):
-        self.snap_marker = QgsVertexMarker(self._canvas)
+        self.snap_marker = QgsVertexMarker(self.canvas())
 
         self.snap_marker.setCenter(snapped_point)
         self.snap_marker.setIconSize(16)
