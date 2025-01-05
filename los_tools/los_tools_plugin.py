@@ -304,6 +304,7 @@ class LoSToolsPlugin:
 
     def run_create_los_tool(self):
         self.get_action_by_text(self.create_los_action_name).setChecked(True)
+        self.create_los_tool.set_list_of_rasters(self.rasters_for_los)
         self.iface.mapCanvas().setMapTool(self.create_los_tool)
 
     def _plugin_los_layer(self) -> QgsVectorLayer:
@@ -361,8 +362,13 @@ class LoSToolsPlugin:
         raster_validations.selectedRastersChanged.connect(partial(self.get_rasters_for_los, raster_validations))
         if self.rasters_for_los:
             raster_validations.setup_used_rasters(self.rasters_for_los)
+        raster_validations.selectedRastersChanged.connect(self.list_of_rasters_for_los_updated)
         raster_validations.exec()
 
     def get_rasters_for_los(self, raster_validations: RasterValidations) -> None:
         if raster_validations:
             self.rasters_for_los = raster_validations.listOfRasters
+
+    def list_of_rasters_for_los_updated(self):
+        self.create_los_tool.set_list_of_rasters(self.rasters_for_los)
+        self.create_los_tool.reactivate()

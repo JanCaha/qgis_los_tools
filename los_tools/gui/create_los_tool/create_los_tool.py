@@ -44,6 +44,9 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         self._widget = LoSInputWidget()
         self._widget.hide()
 
+    def set_list_of_rasters(self, raster_list: ListOfRasters) -> None:
+        self._raster_list = raster_list
+
     def set_los_layer(self, layer: QgsVectorLayer) -> None:
         self._los_layer = layer
 
