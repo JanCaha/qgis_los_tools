@@ -94,8 +94,8 @@ class SetCameraDialog(DialogCameraSetting):
     def update_point(self, point, point_type: PointType):
         super().update_point(point, point_type)
 
-        if self.mapTool.is_point_snapped():
-            msg = f"Snapped to point at {point.x()} {point.y()} from layer {self.mapTool.snap_layer()}."
+        if self.map_tool.is_point_snapped():
+            msg = f"Snapped to point at {point.x()} {point.y()} from layer {self.map_tool.snap_layer()}."
         else:
             msg = f"Point at {point.x()} {point.y()} selected."
 

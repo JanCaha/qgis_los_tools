@@ -86,7 +86,7 @@ class DialogCameraSetting(QDialog):
         self.terrain_type.setText(elevation_description)
 
     def update_point(self, point: QgsPointXY, point_type: PointType):
-        point = self.mapTool.get_point()
+        point = self.map_tool.get_point()
 
         text_point = (
             f"{point.x():.3f};{point.y():.3f} [{self._iface.mapCanvas().mapSettings().destinationCrs().authid()}]"
@@ -105,12 +105,13 @@ class DialogCameraSetting(QDialog):
     def select_point(self, point_type: PointType) -> None:
         self.hide()
 
-        self.mapTool = PointCaptureMapTool(self._iface.mapCanvas())
+        self.map_tool = PointCaptureMapTool(self._iface.mapCanvas())
 
-        self.mapTool.canvasClicked.connect(partial(self.update_point, point_type=point_type))
-        self.mapTool.canvasClicked.connect(self.close_point_selection_tool)
+        self.map_tool.canvasClicked.connect(partial(self.update_point, point_type=point_type))
+        self.map_tool.canvasClicked.connect(self.map_tool.deactivate)
+        self.map_tool.deactivated.connect(self.show)
 
-        self._iface.mapCanvas().setMapTool(self.mapTool)
+        self._iface.mapCanvas().setMapTool(self.map_tool)
 
     def convert_point_from_canvas_crs_to_elevation_provider_crs(self, point: QgsPointXY) -> QgsPointXY:
 
