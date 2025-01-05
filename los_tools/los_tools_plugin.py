@@ -138,7 +138,7 @@ class LoSToolsPlugin:
                 callback=self.dialog_create_3d_view,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
-                checkable=True,
+                checkable=False,
             )
 
             self.toolbar.addSeparator()
