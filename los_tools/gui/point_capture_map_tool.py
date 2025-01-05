@@ -35,6 +35,16 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
         self._prev_cursor = self.canvas().cursor()
         self.canvas().setCursor(self.cursor)
 
+    def canvasPressEvent(self, event: QgsMapMouseEvent) -> None:
+        pass
+
+    def canvasReleaseEvent(self, event: QgsMapMouseEvent) -> None:
+        if event.button() == Qt.MouseButton.RightButton:
+            self.deactivate()
+        else:
+            point = self.toMapCoordinates(event.pos())
+            self.canvasClicked.emit(point, event.button())
+
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
         x = event.pos().x()
         y = event.pos().y()
