@@ -9,7 +9,6 @@ from los_tools.classes.list_raster import ListOfRasters
 from los_tools.gui.create_los_tool.create_los_widget import LoSInputWidget
 from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWithWidget
 from los_tools.gui.dialog_los_settings import LoSSettings
-from los_tools.gui.dialog_raster_validations import RasterValidations
 from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
 
 from .los_tasks import LoSExtractionTaskManager, PrepareLoSTask, PrepareLoSWithoutTargetTask
@@ -22,7 +21,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
     def __init__(
         self,
         iface: QgisInterface,
-        raster_validation_dialog: RasterValidations,
+        raster_list: ListOfRasters,
         los_settings_dialog: LoSSettings,
         los_layer: QgsVectorLayer = None,
     ) -> None:
@@ -32,7 +31,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
 
         self._los_layer = los_layer
 
-        self._raster_validation_dialog = raster_validation_dialog
+        self._raster_list = raster_list
         self._los_settings_dialog = los_settings_dialog
 
         self._start_point: QgsPointXY = None
@@ -58,7 +57,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
     def activate(self) -> None:
         super().activate()
 
-        if not ListOfRasters.validate(self._raster_validation_dialog.list_of_selected_rasters):
+        if not ListOfRasters.validate(self._raster_list.rasters):
             self.messageEmitted.emit(
                 "Tool needs valid setup in `Raster Validations` dialog.",
                 Qgis.Critical,
@@ -105,7 +104,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         if self._start_point and towards_point:
             self._los_rubber_band.hide()
 
-            rasters_extent = self._raster_validation_dialog.listOfRasters.extent_polygon()
+            rasters_extent = self._raster_list.extent_polygon()
 
             if self._widget.los_local or self._widget.los_global:
                 if self._widget.los_local:
@@ -117,7 +116,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
                     if self._start_point.distance(towards_point) > 0:
                         line = line.extendLine(
                             0,
-                            self._raster_validation_dialog.listOfRasters.maximal_diagonal_size(),
+                            self._raster_list.maximal_diagonal_size(),
                         )
 
                         # insert target point
@@ -136,7 +135,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
                 maximal_length_distance = self._los_settings_dialog.los_maximal_length()
 
                 if maximal_length_distance is None:
-                    maximal_length = self._raster_validation_dialog.listOfRasters.maximal_diagonal_size()
+                    maximal_length = self._raster_list.maximal_diagonal_size()
                 else:
                     maximal_length = maximal_length_distance.inUnits(self._los_layer.crs().mapUnits())
 
@@ -173,8 +172,6 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
     def add_los_to_layer(self) -> None:
         los_geometry = self._los_rubber_band.asGeometry()
 
-        list_of_rasters = self._raster_validation_dialog.listOfRasters
-
         self.addLoSStatusChanged.emit(False)
 
         if los_geometry.get().partCount() == 1:
@@ -182,7 +179,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
                 los_geometry,
                 self._widget.sampling_distance.inUnits(self._los_layer.crs().mapUnits()),
                 self._los_layer,
-                list_of_rasters,
+                self._raster_list,
                 self._widget.observer_offset,
                 self._widget.target_offset,
                 self._widget.los_global,
@@ -193,7 +190,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
             task = PrepareLoSWithoutTargetTask(
                 los_geometry,
                 self._los_layer,
-                list_of_rasters,
+                self._raster_list,
                 self._los_settings_dialog,
                 self._widget.observer_offset,
                 self._widget.angle_step,
