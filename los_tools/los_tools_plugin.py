@@ -10,6 +10,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsMemoryProviderUtils,
     QgsProject,
+    QgsRasterLayer,
     QgsVectorLayer,
     QgsWkbTypes,
 )
@@ -17,6 +18,7 @@ from qgis.gui import QgisInterface
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMenu, QToolBar, QToolButton
 
+from los_tools.classes.list_raster import ListOfRasters
 from los_tools.processing.los_tools_provider import LoSToolsProvider
 
 from .constants.fields import Fields
@@ -43,6 +45,8 @@ class LoSToolsPlugin:
     optimize_point_location_action_name = "Optimize Point Location Tool"
     create_los_action_name = "Create LoS"
 
+    rasters_for_los: ListOfRasters = None
+
     def __init__(self, iface: QgisInterface):
         self.add_los_layer_action: QAction = None
         self._layer_LoS: QgsVectorLayer = None
@@ -57,19 +61,49 @@ class LoSToolsPlugin:
             self.toolbar: QToolBar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
             self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
 
-            self.iface.newProjectCreated.connect(self.reset_los_layer)
+            self.iface.newProjectCreated.connect(self.project_updated)
+            self.iface.projectRead.connect(self.project_updated)
             self.iface.projectRead.connect(self.reset_los_layer)
+
+    def project_updated(self) -> None:
+        self.current_project_visible_raster_layers()
+        project = QgsProject.instance()
+        project.layersRemoved.connect(self.update_list_of_rasters)
+
+    def update_list_of_rasters(self, list_of_ids: typing.List[str]):
+        selected_ids = []
+
+        if self.rasters_for_los:
+            selected_ids = self.rasters_for_los.raster_layer_ids()
+
+        for id in list_of_ids:
+            if id in selected_ids:
+                self.rasters_for_los.remove_raster(id)
 
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
+
+    def current_project_visible_raster_layers(self) -> None:
+        layers = []
+        all_layers = QgsProject.instance().mapLayers(True)
+        layer_tree_root = QgsProject.instance().layerTreeRoot()
+        for layer_id in all_layers.keys():
+            layer = QgsProject.instance().mapLayer(layer_id)
+            if isinstance(layer, QgsRasterLayer):
+                tree_layer = layer_tree_root.findLayer(layer_id)
+                if tree_layer.isVisible():
+                    layers.append(layer)
+
+        self.rasters_for_los = ListOfRasters(layers)
 
     def initGui(self):
         self.initProcessing()
 
         if self.iface is not None:
-            self.raster_validations_dialog = RasterValidations(iface=self.iface)
             self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
             self.object_parameters_dialog = ObjectParameters(self.iface.mainWindow())
+
+            self.current_project_visible_raster_layers()
 
             self.add_los_layer_action = self.add_action(
                 icon_path=get_icon_path("add_los_layer.svg"),
@@ -126,8 +160,8 @@ class LoSToolsPlugin:
 
             self.add_action(
                 icon_path=get_icon_path("rasters_list.svg"),
-                text="Raster Validatations",
-                callback=self.open_dialog_raster_validations,
+                text="Raster Validations",
+                callback=self.dialog_raster_selection,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
             )
@@ -181,7 +215,7 @@ class LoSToolsPlugin:
 
             self.create_los_tool = CreateLoSMapTool(
                 self.iface,
-                self.raster_validations_dialog,
+                self.rasters_for_los,
                 self.los_settings_dialog,
                 self._layer_LoS,
             )
@@ -250,9 +284,6 @@ class LoSToolsPlugin:
 
     def open_dialog_los_settings(self):
         self.los_settings_dialog.exec()
-
-    def open_dialog_raster_validations(self):
-        self.raster_validations_dialog.exec()
 
     def run_visualize_los_notarget_tool(self):
         self.get_action_by_text(self.los_notarget_action_name).setChecked(True)
@@ -324,3 +355,14 @@ class LoSToolsPlugin:
     def dialog_create_3d_view(self):
         dialog = Create3DView(self.iface, self.iface.mainWindow())
         dialog.exec()
+
+    def dialog_raster_selection(self):
+        raster_validations = RasterValidations(iface=self.iface)
+        raster_validations.selectedRastersChanged.connect(partial(self.get_rasters_for_los, raster_validations))
+        if self.rasters_for_los:
+            raster_validations.setup_used_rasters(self.rasters_for_los)
+        raster_validations.exec()
+
+    def get_rasters_for_los(self, raster_validations: RasterValidations) -> None:
+        if raster_validations:
+            self.rasters_for_los = raster_validations.listOfRasters
