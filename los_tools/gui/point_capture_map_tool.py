@@ -22,21 +22,17 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
 
         self.snap_marker = QgsVertexMarker(self.canvas())
 
-        self._previous_settings()
-
-    def _previous_settings(self):
         self._prev_cursor = self.canvas().cursor()
-        self._prev_map_tool = self.canvas().mapTool()
 
     def deactivate(self):
         self.canvas().scene().removeItem(self.snap_marker)
         self.canvas().setCursor(self._prev_cursor)
-        self.canvas().setMapTool(self._prev_map_tool)
+        self.canvas().unsetMapTool(self)
         QgsMapToolEmitPoint.deactivate(self)
 
     def activate(self):
         self.snapper = self.canvas().snappingUtils()
-        self._previous_settings()
+        self._prev_cursor = self.canvas().cursor()
         self.canvas().setCursor(self.cursor)
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
