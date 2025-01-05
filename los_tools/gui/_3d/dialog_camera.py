@@ -111,8 +111,7 @@ class DialogCameraSetting(QDialog):
         self.mapTool = PointCaptureMapTool(self._iface.mapCanvas())
 
         self.mapTool.canvasClicked.connect(partial(self.update_point, point_type=point_type))
-
-        self.mapTool.complete.connect(self.close_point_selection_tool)
+        self.mapTool.canvasClicked.connect(self.close_point_selection_tool)
 
         self._iface.mapCanvas().setMapTool(self.mapTool)
 
