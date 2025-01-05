@@ -16,9 +16,8 @@ from qgis.PyQt.QtWidgets import (
     QTreeWidgetItem,
 )
 
+from los_tools.classes.list_raster import ListOfRasters
 from los_tools.gui.point_capture_map_tool import PointCaptureMapTool
-
-from ..classes.list_raster import ListOfRasters
 
 
 class RasterValidations(QDialog):

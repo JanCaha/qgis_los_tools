@@ -5,7 +5,7 @@ from typing import Optional, Union
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QComboBox, QDialog, QDoubleSpinBox, QFormLayout, QWidget
 
-from .custom_classes import DistanceWidget
+from los_tools.gui.custom_classes import DistanceWidget
 
 
 class CalculationType(Enum):

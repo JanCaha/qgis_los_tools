@@ -8,10 +8,13 @@ from qgis.PyQt.QtCore import Qt, pyqtSignal
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.gui.create_los_tool.create_los_widget import LoSInputWidget
 from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWithWidget
+from los_tools.gui.create_los_tool.los_tasks import (
+    LoSExtractionTaskManager,
+    PrepareLoSTask,
+    PrepareLoSWithoutTargetTask,
+)
 from los_tools.gui.dialog_los_settings import LoSSettings
 from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
-
-from .los_tasks import LoSExtractionTaskManager, PrepareLoSTask, PrepareLoSWithoutTargetTask
 
 
 class CreateLoSMapTool(LoSDigitizingToolWithWidget):

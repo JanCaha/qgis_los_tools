@@ -29,10 +29,9 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 
+from los_tools.constants.field_names import FieldNames
+from los_tools.gui.custom_classes import Distance, DistanceWidget
 from los_tools.utils import _column_type_class
-
-from ..constants.field_names import FieldNames
-from .custom_classes import Distance, DistanceWidget
 
 
 class LoSSettings(QDialog):
