@@ -65,6 +65,10 @@ class LoSToolsPlugin:
             self.iface.projectRead.connect(self.project_updated)
             self.iface.projectRead.connect(self.reset_los_layer)
 
+            self.los_no_target_tool: LosNoTargetMapTool = None
+            self.create_los_tool: CreateLoSMapTool = None
+            self.optimize_point_location_tool: OptimizePointsLocationTool = None
+
     def project_updated(self) -> None:
         self.current_project_visible_raster_layers()
         project = QgsProject.instance()
@@ -180,7 +184,7 @@ class LoSToolsPlugin:
             self.add_action(
                 icon_path=get_icon_path("los_no_target_tool.svg"),
                 text=self.los_notarget_action_name,
-                callback=self.run_visualize_los_notarget_tool,
+                callback=self.run_visualize_los_no_target_tool,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
                 checkable=True,
@@ -204,24 +208,6 @@ class LoSToolsPlugin:
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
             )
-
-            self.los_notarget_tool = LosNoTargetMapTool(self.iface)
-            self.los_notarget_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
-
-            self.optimize_point_location_tool = OptimizePointsLocationTool(self.iface.mapCanvas(), self.iface)
-            self.optimize_point_location_tool.deactivated.connect(
-                partial(self.deactivateTool, self.optimize_point_location_action_name)
-            )
-
-            self.create_los_tool = CreateLoSMapTool(
-                self.iface,
-                self.rasters_for_los,
-                self.los_settings_dialog,
-                self._layer_LoS,
-            )
-
-            self.create_los_tool.deactivated.connect(partial(self.deactivateTool, self.create_los_action_name))
-            self.create_los_tool.featuresAdded.connect(self.update_actions_layer_text)
 
             self.reset_los_layer()
 
@@ -285,9 +271,11 @@ class LoSToolsPlugin:
     def open_dialog_los_settings(self):
         self.los_settings_dialog.exec()
 
-    def run_visualize_los_notarget_tool(self):
+    def run_visualize_los_no_target_tool(self):
         self.get_action_by_text(self.los_notarget_action_name).setChecked(True)
-        self.iface.mapCanvas().setMapTool(self.los_notarget_tool)
+        self.los_no_target_tool = LosNoTargetMapTool(self.iface)
+        self.los_no_target_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
+        self.iface.mapCanvas().setMapTool(self.los_no_target_tool)
 
     def get_action_by_text(self, action_text: str) -> QAction:
         action: QAction
@@ -300,11 +288,26 @@ class LoSToolsPlugin:
 
     def run_optimize_point_location_tool(self):
         self.get_action_by_text(self.optimize_point_location_action_name).setChecked(True)
+        self.optimize_point_location_tool = OptimizePointsLocationTool(self.iface.mapCanvas(), self.iface)
+        self.optimize_point_location_tool.deactivated.connect(
+            partial(self.deactivateTool, self.optimize_point_location_action_name)
+        )
         self.iface.mapCanvas().setMapTool(self.optimize_point_location_tool)
 
     def run_create_los_tool(self):
         self.get_action_by_text(self.create_los_action_name).setChecked(True)
+
+        self.create_los_tool = CreateLoSMapTool(
+            self.iface,
+            self.rasters_for_los,
+            self.los_settings_dialog,
+            self._layer_LoS,
+        )
         self.create_los_tool.set_list_of_rasters(self.rasters_for_los)
+        self.create_los_tool.set_los_layer(self._layer_LoS)
+        self.create_los_tool.deactivated.connect(partial(self.deactivateTool, self.create_los_action_name))
+        self.create_los_tool.featuresAdded.connect(self.update_actions_layer_text)
+
         self.iface.mapCanvas().setMapTool(self.create_los_tool)
 
     def _plugin_los_layer(self) -> QgsVectorLayer:
@@ -326,7 +329,8 @@ class LoSToolsPlugin:
     def reset_los_layer(self) -> None:
         self._layer_LoS = None
         self._layer_LoS = self._plugin_los_layer()
-        self.create_los_tool.set_los_layer(self._layer_LoS)
+        if self.create_los_tool:
+            self.create_los_tool.set_los_layer(self._layer_LoS)
         self.update_actions_layer_text()
 
     def add_plugin_los_layer_to_project(self) -> None:
