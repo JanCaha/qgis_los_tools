@@ -45,7 +45,7 @@ class LoSToolsPlugin:
     optimize_point_location_action_name = "Optimize Point Location Tool"
     create_los_action_name = "Create LoS"
 
-    rasters_for_los: ListOfRasters = None
+    list_of_rasters_for_los: ListOfRasters = None
 
     def __init__(self, iface: QgisInterface):
         self.add_los_layer_action: QAction = None
@@ -77,12 +77,12 @@ class LoSToolsPlugin:
     def update_list_of_rasters(self, list_of_ids: typing.List[str]):
         selected_ids = []
 
-        if self.rasters_for_los:
-            selected_ids = self.rasters_for_los.raster_layer_ids()
+        if self.list_of_rasters_for_los:
+            selected_ids = self.list_of_rasters_for_los.raster_ids
 
         for id in list_of_ids:
             if id in selected_ids:
-                self.rasters_for_los.remove_raster(id)
+                self.list_of_rasters_for_los.remove_raster(id)
 
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
@@ -98,7 +98,7 @@ class LoSToolsPlugin:
                 if tree_layer.isVisible():
                     layers.append(layer)
 
-        self.rasters_for_los = ListOfRasters(layers)
+        self.list_of_rasters_for_los = ListOfRasters(layers)
 
     def initGui(self):
         self.initProcessing()
@@ -299,11 +299,11 @@ class LoSToolsPlugin:
 
         self.create_los_tool = CreateLoSMapTool(
             self.iface,
-            self.rasters_for_los,
+            self.list_of_rasters_for_los,
             self.los_settings_dialog,
             self._layer_LoS,
         )
-        self.create_los_tool.set_list_of_rasters(self.rasters_for_los)
+        self.create_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
         self.create_los_tool.set_los_layer(self._layer_LoS)
         self.create_los_tool.deactivated.connect(partial(self.deactivateTool, self.create_los_action_name))
         self.create_los_tool.featuresAdded.connect(self.update_actions_layer_text)
@@ -364,15 +364,15 @@ class LoSToolsPlugin:
     def dialog_raster_selection(self):
         raster_validations = RasterValidations(iface=self.iface)
         raster_validations.selectedRastersChanged.connect(partial(self.get_rasters_for_los, raster_validations))
-        if self.rasters_for_los:
-            raster_validations.setup_used_rasters(self.rasters_for_los)
+        if self.list_of_rasters_for_los:
+            raster_validations.setup_used_rasters(self.list_of_rasters_for_los)
         raster_validations.selectedRastersChanged.connect(self.list_of_rasters_for_los_updated)
         raster_validations.exec()
 
     def get_rasters_for_los(self, raster_validations: RasterValidations) -> None:
         if raster_validations:
-            self.rasters_for_los = raster_validations.listOfRasters
+            self.list_of_rasters_for_los = raster_validations.listOfRasters
 
     def list_of_rasters_for_los_updated(self):
-        self.create_los_tool.set_list_of_rasters(self.rasters_for_los)
+        self.create_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
         self.create_los_tool.reactivate()
