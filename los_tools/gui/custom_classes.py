@@ -40,7 +40,7 @@ class DistanceWidget(QWidget):
 
     def __init__(
         self,
-        parent: Optional["QWidget"] = None,
+        parent: Optional[QWidget] = None,
         flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Widget,
     ) -> None:
         super().__init__(parent, flags)
@@ -52,37 +52,37 @@ class DistanceWidget(QWidget):
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.distance_value = QgsDoubleSpinBox(self)
-        self.distance_value.setMinimum(0.001)
-        self.distance_value.setMaximum(999999999)
-        self.distance_value.setValue(0)
-        self.distance_value.valueChanged.connect(self._raiseValueChanged)
+        self._distance_value = QgsDoubleSpinBox(self)
+        self._distance_value.setMinimum(0.001)
+        self._distance_value.setMaximum(999999999)
+        self._distance_value.setValue(0)
+        self._distance_value.valueChanged.connect(self._raiseValueChanged)
 
-        self.units = QComboBox(self)
-        self.units.addItem(
+        self._units = QComboBox(self)
+        self._units.addItem(
             QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMeters),
             QgsUnitTypes.DistanceUnit.DistanceMeters,
         )
-        self.units.addItem(
+        self._units.addItem(
             QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceKilometers),
             QgsUnitTypes.DistanceUnit.DistanceKilometers,
         )
-        self.units.addItem(
+        self._units.addItem(
             QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceFeet),
             QgsUnitTypes.DistanceUnit.DistanceFeet,
         )
-        self.units.addItem(
+        self._units.addItem(
             QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMiles),
             QgsUnitTypes.DistanceUnit.DistanceMiles,
         )
-        self.units.addItem(
+        self._units.addItem(
             QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceYards),
             QgsUnitTypes.DistanceUnit.DistanceYards,
         )
-        self.units.currentIndexChanged.connect(self._raiseValueChanged)
+        self._units.currentIndexChanged.connect(self._raiseValueChanged)
 
-        layout.addWidget(self.distance_value)
-        layout.addWidget(self.units)
+        layout.addWidget(self._distance_value)
+        layout.addWidget(self._units)
 
     def _raiseValueChanged(self):
         self.valueChanged.emit()
@@ -92,27 +92,35 @@ class DistanceWidget(QWidget):
         value: float,
         unit: QgsUnitTypes.DistanceUnit = QgsUnitTypes.DistanceUnit.DistanceMeters,
     ):
-        self.units.setCurrentText(QgsUnitTypes.toString(unit))
-        self.distance_value.setValue(value)
+        self._units.setCurrentText(QgsUnitTypes.toString(unit))
+        self._distance_value.setValue(value)
 
     def value(self) -> float:
         return self.distance().inUnits(QgsUnitTypes.DistanceUnit.DistanceMeters)
 
     def distance(self) -> Distance:
-        return Distance(self.distance_value.value(), self.units.currentData(Qt.UserRole))
+        return Distance(self._distance_value.value(), self._units.currentData(Qt.UserRole))
 
     def setMinimum(self, value: float) -> None:
-        self.distance_value.setMinimum(value)
+        self._distance_value.setMinimum(value)
 
     def setMaximum(self, value: float) -> None:
-        self.distance_value.setMaximum(value)
+        self._distance_value.setMaximum(value)
 
     def setDecimals(self, prec: int) -> None:
-        self.distance_value.setDecimals(prec)
+        self._distance_value.setDecimals(prec)
 
     def setClearValue(self, customValue: float) -> None:
-        self.distance_value.setClearValue(customValue)
+        self._distance_value.setClearValue(customValue)
 
     def setEnabled(self, value: bool) -> None:
-        self.distance_value.setEnabled(value)
-        self.units.setEnabled(value)
+        self._distance_value.setEnabled(value)
+        self._units.setEnabled(value)
+
+    def unit(self) -> QgsUnitTypes.DistanceUnit:
+        return self._units.currentData()
+
+    def set_units(self, unit: QgsUnitTypes.DistanceUnit) -> None:
+        self._units.setCurrentText(QgsUnitTypes.toString(unit))
+
+
