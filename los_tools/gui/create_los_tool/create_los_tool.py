@@ -42,6 +42,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         self._last_towards_point: QgsPointXY = None
 
         self._widget = LoSInputWidget()
+        self._widget.load_settings()
         self._widget.hide()
 
     def set_list_of_rasters(self, raster_list: ListOfRasters) -> None:
@@ -53,6 +54,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
     def create_widget(self):
         if not self._widget:
             self._widget = LoSInputWidget()
+            self._widget.load_settings()
 
         super().create_widget()
 
