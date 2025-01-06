@@ -90,7 +90,10 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
                 else:
                     self._start_point = e.mapPoint()
             else:
-                self.draw_los(self._snap_point)
+                if self._snap_point:
+                    self.draw_los(self._snap_point)
+                else:
+                    self.draw_los(e.mapPoint())
                 self.addLoSStatusChanged.emit(True)
                 self._start_point = None
 
@@ -98,7 +101,10 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         self._set_snap_point(event)
 
         if self._start_point is not None:
-            self.draw_los(self._snap_point)
+            if self._snap_point:
+                self.draw_los(self._snap_point)
+            else:
+                self.draw_los(event.mapPoint())
 
     def draw_los(self, towards_point: QgsPointXY):
         if towards_point is None:

@@ -1,5 +1,3 @@
-import typing
-
 from qgis.core import Qgis, QgsPointLocator, QgsPointXY
 from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolEdit, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt
@@ -22,7 +20,8 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
         self._los_rubber_band = self.createRubberBand(Qgis.GeometryType.Line)
 
-        self._snap_point: typing.Optional[QgsPointXY] = None
+        self._snap_point: QgsPointXY = None
+        self._selected_point: QgsPointXY = None
 
     def activate(self) -> None:
 
@@ -76,7 +75,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         if result.type() == QgsPointLocator.Vertex:
             self._snap_point = result.point()
         else:
-            self._snap_point = event.mapPoint()
+            self._snap_point = None
 
     def canvas_crs_is_projected(self) -> bool:
         if self._canvas.mapSettings().destinationCrs().isGeographic():

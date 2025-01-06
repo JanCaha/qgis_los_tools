@@ -33,16 +33,19 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         if e.button() == Qt.RightButton:
             self.clean()
         if e.button() == Qt.LeftButton:
+            self._selected_point = e.mapPoint()
             self.draw_los()
 
     def draw_los(self):
 
+        if self._snap_point:
+            self._selected_point = self._snap_point
+
         if not self.canvas_crs_is_projected():
             return
 
-        if self._snap_point:
-            self._los_rubber_band.hide()
-            self._los_rubber_band.setToGeometry(QgsGeometry(), self._canvas.mapSettings().destinationCrs())
+        if self._selected_point:
+            self._los_rubber_band.reset()
             angles = np.arange(
                 self._widget.min_angle,
                 self._widget.max_angle + 0.000000001 * self._widget.angle_step,
@@ -58,8 +61,8 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
             angles = round_all_values(angles, round_digits)
             size_constant = 1
             for angle in angles:
-                new_point = self._snap_point.project(size_constant, angle)
-                geom = QgsGeometry.fromPolylineXY([self._snap_point, new_point])
+                new_point = self._selected_point.project(size_constant, angle)
+                geom = QgsGeometry.fromPolylineXY([self._selected_point, new_point])
                 geom = geom.extendLine(0, self._widget.length - size_constant)
                 self._los_rubber_band.addGeometry(geom, self._canvas.mapSettings().destinationCrs())
             self._los_rubber_band.show()
