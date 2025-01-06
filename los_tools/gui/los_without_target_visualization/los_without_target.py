@@ -1,5 +1,5 @@
 import numpy as np
-from qgis.core import QgsGeometry
+from qgis.core import Qgis, QgsGeometry
 from qgis.gui import QgisInterface, QgsMapMouseEvent
 from qgis.PyQt.QtCore import Qt
 
@@ -14,6 +14,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         super().__init__(iface)
 
         self._widget = LoSNoTargetInputWidget()
+        self._widget.load_settings()
         self._widget.hide()
 
         self._distance_limits_rubber_band = self.createRubberBand(Qgis.GeometryType.Line)
@@ -22,6 +23,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
     def create_widget(self):
         if not self._widget:
             self._widget = LoSNoTargetInputWidget()
+            self._widget.load_settings()
         super().create_widget()
 
         self._widget.valuesChanged.connect(self.draw)
