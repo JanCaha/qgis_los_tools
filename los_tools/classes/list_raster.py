@@ -1,5 +1,5 @@
 import math
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from qgis.core import (
     QgsCoordinateReferenceSystem,
@@ -10,7 +10,6 @@ from qgis.core import (
     QgsMapLayer,
     QgsPoint,
     QgsPointXY,
-    QgsProject,
     QgsRasterDataProvider,
     QgsRasterLayer,
     QgsRectangle,
@@ -21,8 +20,10 @@ from los_tools.processing.tools.util_functions import bilinear_interpolated_valu
 
 
 class ListOfRasters:
+
     def __init__(self, rasters: List[QgsMapLayer]):
-        self._raster_ids: List[str] = []
+
+        self._dict_rasters: Dict[str, QgsRasterLayer] = {}
 
         if rasters:
             first_crs = rasters[0].crs()
@@ -33,26 +34,21 @@ class ListOfRasters:
                 if not first_crs == raster.crs():
                     raise ValueError("All CRS must be equal.")
 
-                self._raster_ids.append(raster.id())
+                self._dict_rasters[raster.id()] = raster
 
             self.order_by_pixel_size()
 
-    def raster_layer_ids(self) -> List[str]:
-        return self._raster_ids
-
-    def remove_raster(self, raster_id: str) -> None:
-        if raster_id in self._raster_ids:
-            self._raster_ids.remove(raster_id)
-
     @property
     def rasters(self) -> List[QgsRasterLayer]:
-        project = QgsProject.instance()
-        list_rasters = []
-        for layer_id in self._raster_ids:
-            map_layer = project.mapLayer(layer_id)
-            if map_layer and isinstance(map_layer, QgsRasterLayer):
-                list_rasters.append(map_layer)
-        return list_rasters
+        return list(self._dict_rasters.values())
+
+    @property
+    def raster_ids(self) -> List[str]:
+        return list(self._dict_rasters.keys())
+
+    def remove_raster(self, raster_id: str) -> None:
+        if raster_id in self._dict_rasters:
+            self._dict_rasters.pop(raster_id)
 
     @staticmethod
     def validate_bands(rasters: List[QgsMapLayer]) -> Tuple[bool, str]:
@@ -157,11 +153,14 @@ class ListOfRasters:
         tuples = []
 
         for raster in self.rasters:
-            tuples.append((raster.id(), raster.extent().width() / raster.width()))
+            tuples.append((raster.id(), raster.extent().width() / raster.width(), raster))
 
         sorted_by_cell_size = sorted(tuples, key=lambda tup: tup[1])
 
-        self._raster_ids = [x[0] for x in sorted_by_cell_size]
+        self._dict_rasters = {}
+
+        for x in sorted_by_cell_size:
+            self._dict_rasters[x[0]] = x[2]
 
     @property
     def rasters_dp(self) -> List[QgsRasterDataProvider]:
