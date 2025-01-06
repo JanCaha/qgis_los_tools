@@ -1,38 +1,48 @@
 # pylint: disable=protected-access
 import pytest
 from pytestqt.qtbot import QtBot
-from qgis.core import QgsMemoryProviderUtils, QgsProject, QgsRasterLayer, QgsWkbTypes
+from qgis.core import QgsMemoryProviderUtils, QgsPointXY, QgsProject, QgsRasterLayer, QgsWkbTypes
 from qgis.gui import QgisInterface, QgsMapCanvas
 from qgis.PyQt.QtCore import QEvent, Qt
 from qgis.PyQt.QtWidgets import QWidget
 
+from los_tools.classes.list_raster import ListOfRasters
 from los_tools.constants.fields import Fields
 from los_tools.gui.create_los_tool.create_los_tool import CreateLoSMapTool
 from los_tools.gui.dialog_los_settings import LoSSettings
-from los_tools.gui.dialog_raster_validations import RasterValidations
 from tests.utils import create_mouse_event
+
+
+@pytest.fixture(scope="function", autouse=True)
+def qgis_project(raster_small: QgsRasterLayer, raster_large: QgsRasterLayer) -> QgsProject:
+    project = QgsProject.instance()
+    project.removeAllMapLayers()
+    project.addMapLayer(raster_small)
+    project.addMapLayer(raster_large)
+
+
+@pytest.fixture(scope="function")
+def list_of_rasters(raster_small: QgsRasterLayer, raster_large: QgsRasterLayer) -> ListOfRasters:
+    return ListOfRasters([raster_small, raster_large])
+
+
+@pytest.fixture
+def center_point(raster_small: QgsRasterLayer) -> QgsPointXY:
+    return raster_small.extent().center()
 
 
 def test_local_los(
     qgis_parent: QWidget,
     qgis_iface: QgisInterface,
-    raster_small: QgsRasterLayer,
-    raster_large: QgsRasterLayer,
     qgis_canvas: QgsMapCanvas,
+    list_of_rasters: ListOfRasters,
+    center_point: QgsPointXY,
 ):
-
-    project = QgsProject.instance()
-    project.addMapLayer(raster_small)
-    project.addMapLayer(raster_large)
-
-    center_point = raster_small.extent().center()
     left_point = center_point.project(75, 90)
-
-    raster_validation_dialog = RasterValidations(qgis_iface)
 
     los_settings = LoSSettings(qgis_parent)
 
-    map_tool = CreateLoSMapTool(qgis_iface, raster_validation_dialog, los_settings)
+    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_settings)
 
     map_tool.activate()
 
@@ -74,23 +84,15 @@ def test_local_los(
 def test_global_los(
     qgis_parent: QWidget,
     qgis_iface: QgisInterface,
-    raster_small: QgsRasterLayer,
-    raster_large: QgsRasterLayer,
     qgis_canvas: QgsMapCanvas,
+    list_of_rasters: ListOfRasters,
+    center_point: QgsPointXY,
 ):
-
-    project = QgsProject.instance()
-    project.addMapLayer(raster_small)
-    project.addMapLayer(raster_large)
-
-    center_point = raster_small.extent().center()
     left_point = center_point.project(75, 90)
-
-    raster_validation_dialog = RasterValidations(qgis_iface)
 
     los_settings = LoSSettings(qgis_parent)
 
-    map_tool = CreateLoSMapTool(qgis_iface, raster_validation_dialog, los_settings)
+    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_settings)
 
     map_tool.activate()
 
@@ -141,23 +143,15 @@ def test_global_los(
 def test_no_target_los(
     qgis_parent: QWidget,
     qgis_iface: QgisInterface,
-    raster_small: QgsRasterLayer,
-    raster_large: QgsRasterLayer,
     qgis_canvas: QgsMapCanvas,
+    list_of_rasters: ListOfRasters,
+    center_point: QgsPointXY,
 ):
-
-    project = QgsProject.instance()
-    project.addMapLayer(raster_small)
-    project.addMapLayer(raster_large)
-
-    center_point = raster_small.extent().center()
     left_point = center_point.project(75, 90)
-
-    raster_validation_dialog = RasterValidations(qgis_iface)
 
     los_settings = LoSSettings(qgis_parent)
 
-    map_tool = CreateLoSMapTool(qgis_iface, raster_validation_dialog, los_settings)
+    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_settings)
 
     map_tool.activate()
 
@@ -212,25 +206,21 @@ def test_no_target_los(
 def test_right_click_when_creating(
     qgis_parent: QWidget,
     qgis_iface: QgisInterface,
-    raster_small: QgsRasterLayer,
-    raster_large: QgsRasterLayer,
     qgis_canvas: QgsMapCanvas,
+    list_of_rasters: ListOfRasters,
+    center_point: QgsPointXY,
 ):
 
-    project = QgsProject.instance()
-    project.addMapLayer(raster_small)
-    project.addMapLayer(raster_large)
-
-    center_point = raster_small.extent().center()
     left_point = center_point.project(75, 90)
-
-    raster_validation_dialog = RasterValidations(qgis_iface)
 
     los_settings = LoSSettings(qgis_parent)
 
-    map_tool = CreateLoSMapTool(qgis_iface, raster_validation_dialog, los_settings)
+    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_settings)
 
     map_tool.activate()
+
+    # set local LoS
+    map_tool._widget._los_type.setCurrentIndex(0)
 
     assert map_tool._start_point is None
     assert map_tool._last_towards_point is None
@@ -264,15 +254,11 @@ def test_right_click_when_creating(
 def test_global_los_add_to_plugin_layer(
     qgis_parent: QWidget,
     qgis_iface: QgisInterface,
-    raster_small: QgsRasterLayer,
-    raster_large: QgsRasterLayer,
     qgis_canvas: QgsMapCanvas,
+    list_of_rasters: ListOfRasters,
+    center_point: QgsPointXY,
     qtbot: QtBot,
 ):
-
-    project = QgsProject.instance()
-    project.addMapLayer(raster_small)
-    project.addMapLayer(raster_large)
 
     crs = qgis_canvas.mapSettings().destinationCrs()
     los_layer = QgsMemoryProviderUtils.createMemoryLayer(
@@ -282,14 +268,11 @@ def test_global_los_add_to_plugin_layer(
         crs,
     )
 
-    center_point = raster_small.extent().center()
     left_point = center_point.project(75, 90)
-
-    raster_validation_dialog = RasterValidations(qgis_iface)
 
     los_settings = LoSSettings(qgis_parent)
 
-    map_tool = CreateLoSMapTool(qgis_iface, raster_validation_dialog, los_settings, los_layer=los_layer)
+    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_settings, los_layer=los_layer)
 
     map_tool.activate()
 
@@ -351,16 +334,11 @@ def test_global_los_add_to_plugin_layer(
 def test_no_target_los_add_to_plugin_layer(
     qgis_parent: QWidget,
     qgis_iface: QgisInterface,
-    raster_small: QgsRasterLayer,
-    raster_large: QgsRasterLayer,
     qgis_canvas: QgsMapCanvas,
+    list_of_rasters: ListOfRasters,
+    center_point: QgsPointXY,
     qtbot: QtBot,
 ):
-
-    project = QgsProject.instance()
-    project.addMapLayer(raster_small)
-    project.addMapLayer(raster_large)
-
     crs = qgis_canvas.mapSettings().destinationCrs()
     los_layer = QgsMemoryProviderUtils.createMemoryLayer(
         "Manually Created LoS",
@@ -369,14 +347,11 @@ def test_no_target_los_add_to_plugin_layer(
         crs,
     )
 
-    center_point = raster_small.extent().center()
     left_point = center_point.project(75, 90)
-
-    raster_validation_dialog = RasterValidations(qgis_iface)
 
     los_settings = LoSSettings(qgis_parent)
 
-    map_tool = CreateLoSMapTool(qgis_iface, raster_validation_dialog, los_settings, los_layer=los_layer)
+    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_settings, los_layer=los_layer)
 
     map_tool.activate()
 
