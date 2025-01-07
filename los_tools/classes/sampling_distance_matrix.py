@@ -12,18 +12,19 @@ class SamplingDistanceMatrix:
     INDEX_SAMPLING_DISTANCE = 0
     INDEX_DISTANCE = 1
 
-    def __init__(self, data: QgsVectorLayer):
+    def __init__(self, data: QgsVectorLayer = None):
         self.data = []
 
         feature: QgsFeature
 
-        for feature in data.getFeatures():
-            self.data.append(
-                [
-                    feature.attribute(FieldNames.SIZE),
-                    feature.attribute(FieldNames.DISTANCE),
-                ]
-            )
+        if data:
+            for feature in data.getFeatures():
+                self.data.append(
+                    [
+                        feature.attribute(FieldNames.SIZE),
+                        feature.attribute(FieldNames.DISTANCE),
+                    ]
+                )
 
         self.sort_data()
 
