@@ -29,6 +29,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 
+from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
 from los_tools.constants.field_names import FieldNames
 from los_tools.gui.custom_classes import Distance, DistanceWidget
 from los_tools.utils import _column_type_class
@@ -36,7 +37,7 @@ from los_tools.utils import _column_type_class
 
 class LoSSettings(QDialog):
 
-    layerCreated = pyqtSignal(QgsVectorLayer)
+    samplingDistanceMatrixUpdated = pyqtSignal(SamplingDistanceMatrix)
 
     def __init__(
         self,
@@ -255,6 +256,9 @@ class LoSSettings(QDialog):
 
             self.treeView.addTopLevelItem(item)
 
+        layer = self.create_data_layer()
+        self.samplingDistanceMatrixUpdated.emit(SamplingDistanceMatrix(layer))
+
     def calculate_size(self, angle: float, distance: Distance) -> Distance:
         size = math.tan(math.radians(angle)) * distance.distance()
         return Distance(size, distance.unit())
@@ -312,10 +316,7 @@ class LoSSettings(QDialog):
 
     def add_layer_to_project(self) -> None:
         project = QgsProject.instance()
-        layer = self.create_data_layer()
-        project.addMapLayer(layer)
-
-        self.layerCreated.emit(layer)
+        project.addMapLayer(self.create_data_layer())
 
         self.close()
 
