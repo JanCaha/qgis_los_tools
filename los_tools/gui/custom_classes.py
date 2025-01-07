@@ -323,13 +323,13 @@ class DistancesWidget(QWidget):
 
     def open_distances_dialog(self):
         dialog = DistancesDialog()
-        dialog.distancesChanged.connect(partial(self.setup_distances, dialog))
-        dialog.exec()
+        if self.distances:
+            dialog.clear_distances()
+            for dist in self.distances:
+                dialog.add_distance(dist)
 
-    def setup_distances(self, dialog: DistancesDialog) -> None:
-        self.distances = dialog.distances()
-        self.distances.sort()
-        self._distance_values.setText(", ".join(str(d) for d in self.distances))
+        dialog.exec()
+        self.set_distances(dialog.distances())
 
     def set_distances(self, distances: List[float]):
         self.distances = distances
