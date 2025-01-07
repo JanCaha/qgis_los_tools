@@ -152,8 +152,8 @@ class NumericTreeItem(QTreeWidgetItem):
         column = self.treeWidget().sortColumn()
 
         try:
-            value1 = self.data(column, Qt.ItemDataRole.EditRole)
-            value2 = other.data(column, Qt.ItemDataRole.EditRole)
+            value1 = float(self.data(column, Qt.ItemDataRole.EditRole))
+            value2 = float(other.data(column, Qt.ItemDataRole.EditRole))
 
             if isinstance(value1, (int, float)) and isinstance(value2, (int, float)):
                 return value1 < value2
