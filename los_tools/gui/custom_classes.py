@@ -165,10 +165,9 @@ class NumericTreeItem(QTreeWidgetItem):
 
 class DistancesDialog(QDialog):
 
-    distancesChanged = pyqtSignal()
-
     def __init__(
         self,
+        distances: List[float] = None,
         distance_units: Qgis.DistanceUnit = Qgis.DistanceUnit.Meters,
         parent: Optional[QWidget] = None,
         flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.WindowType.Window,
@@ -177,6 +176,9 @@ class DistancesDialog(QDialog):
 
         self._distance_units = distance_units
         self.init_gui()
+
+        if distances:
+            self.add_distances(distances)
 
     def init_gui(self) -> None:
         self.setModal(True)
@@ -192,15 +194,20 @@ class DistancesDialog(QDialog):
 
         self._tool_button_add = QToolButton()
         self._tool_button_remove = QToolButton()
+        self._tool_button_clear = QToolButton()
+        self._tool_button_clear.setText("Clear")
+
         line_layout.addStretch(1)
+        line_layout.addWidget(self._tool_button_clear)
         line_layout.addWidget(self._tool_button_add)
         line_layout.addWidget(self._tool_button_remove)
 
         self._tool_button_add.setIcon(QgsApplication.getThemeIcon("/symbologyAdd.svg"))
         self._tool_button_remove.setIcon(QgsApplication.getThemeIcon("/symbologyRemove.svg"))
 
-        self._tool_button_add.clicked.connect(self.add_distance)
-        self._tool_button_remove.clicked.connect(self.remove_distance)
+        self._tool_button_add.clicked.connect(partial(self.add_distance, 0))
+        self._tool_button_remove.clicked.connect(self._remove_distance)
+        self._tool_button_clear.clicked.connect(self.clear_distances)
 
         self._distances_tree_widget = QTreeWidget(self)
         self._distances_tree_widget.setColumnCount(1)
@@ -208,12 +215,15 @@ class DistancesDialog(QDialog):
         self._distances_tree_widget.setItemDelegateForColumn(0, DistanceSpinBoxDelegate(self._distances_tree_widget))
         self._distances_tree_widget.setSortingEnabled(True)
         self._distances_tree_widget.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
-        self._distances_tree_widget.itemChanged.connect(self.distancesChanged.emit)
-        self._distances_tree_widget.currentItemChanged.connect(self.activate_deletion)
+        self._distances_tree_widget.header().setEnabled(False)
+        self._distances_tree_widget.currentItemChanged.connect(self._activate_deletion)
 
         layout.addWidget(label)
         layout.addLayout(line_layout)
         layout.addWidget(self._distances_tree_widget)
+
+    def clear_distances(self):
+        self._distances_tree_widget.clear()
 
     def distances(self) -> List[float]:
         distances = []
@@ -224,24 +234,31 @@ class DistancesDialog(QDialog):
 
         return distances
 
-    def add_distance(self):
-        item = NumericTreeItem([str(0)])
-        item.setData(0, Qt.ItemDataRole.EditRole, 0)
+    def add_distance(self, distance: float = 0):
+        item = NumericTreeItem([str(distance)])
+        item.setData(0, Qt.ItemDataRole.EditRole, float(distance))
         item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable | Qt.ItemIsSelectable)
         self._distances_tree_widget.addTopLevelItem(item)
 
-        self.distancesChanged.emit()
+        self._distances_tree_widget.sortItems(
+            self._distances_tree_widget.sortColumn(),
+            self._distances_tree_widget.header().sortIndicatorOrder(),
+        )
 
-    def remove_distance(self):
-        self._distances_tree_widget.takeTopLevelItem(self._distances_tree_widget.currentIndex().row())
+    def _remove_distance(self):
+        if self._distances_tree_widget.currentIndex().row() != -1:
+            self._distances_tree_widget.takeTopLevelItem(self._distances_tree_widget.currentIndex().row())
 
-        self.distancesChanged.emit()
-
-    def activate_deletion(self) -> None:
+    def _activate_deletion(self) -> None:
         if self._distances_tree_widget.currentIndex().row() == -1:
             self._tool_button_remove.setEnabled(False)
         else:
             self._tool_button_remove.setEnabled(True)
+
+    def add_distances(self, distances: List[float]):
+        distances.sort()
+        for dist in distances:
+            self.add_distance(dist)
 
 
 class DistancesWidget(QWidget):
