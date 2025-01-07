@@ -1,12 +1,18 @@
+from enum import Enum
 from typing import List, Optional
 
 from qgis.core import Qgis, QgsSettings, QgsUnitTypes
 from qgis.gui import QgsDoubleSpinBox
 from qgis.PyQt.QtCore import QSignalBlocker, Qt, pyqtSignal
-from qgis.PyQt.QtWidgets import QCheckBox, QFormLayout, QWidget
+from qgis.PyQt.QtWidgets import QCheckBox, QFormLayout, QGridLayout, QLabel, QTabWidget, QWidget
 
 from los_tools.constants.plugin import PluginConstants
 from los_tools.gui.custom_classes import DistancesWidget, DistanceWidget
+
+
+class LoSNoTargetDefinitionType(Enum):
+    AZIMUTHS = 0
+    DIRECTION_ANGLE_WIDTH = 1
 
 
 class LoSNoTargetInputWidget(QWidget):
@@ -15,7 +21,7 @@ class LoSNoTargetInputWidget(QWidget):
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
-        layout = QFormLayout()
+        layout = QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
@@ -26,7 +32,7 @@ class LoSNoTargetInputWidget(QWidget):
         self._min_angle.setClearValue(0)
         self._min_angle.setDecimals(3)
         self._min_angle.valueChanged.connect(self._on_minimum_changed)
-        self._min_angle.valueChanged.connect(self.emit_values_changed)
+        self._min_angle.valueChanged.connect(self.valuesChanged.emit)
         self._min_angle.valueChanged.connect(self.save_settings)
 
         self._max_angle = QgsDoubleSpinBox(self)
@@ -36,8 +42,38 @@ class LoSNoTargetInputWidget(QWidget):
         self._max_angle.setClearValue(359.999)
         self._max_angle.setDecimals(3)
         self._max_angle.valueChanged.connect(self._on_maximum_changed)
-        self._max_angle.valueChanged.connect(self.emit_values_changed)
+        self._max_angle.valueChanged.connect(self.valuesChanged.emit)
         self._max_angle.valueChanged.connect(self.save_settings)
+
+        self._angle_difference = QgsDoubleSpinBox(self)
+        self._angle_difference.setMinimum(0.000)
+        self._angle_difference.setMaximum(180.000)
+        self._angle_difference.setValue(10.000)
+        self._angle_difference.setClearValue(10.000)
+        self._angle_difference.setDecimals(3)
+        self._angle_difference.setSuffix("°")
+        self._angle_difference.valueChanged.connect(self.valuesChanged.emit)
+        self._angle_difference.valueChanged.connect(self.save_settings)
+
+        page_1 = QWidget(self)
+        page_1_layout = QFormLayout()
+        page_1.setLayout(page_1_layout)
+
+        page_1_layout.addRow("Minimum Azimuth", self._min_angle)
+        page_1_layout.addRow("Maximal Azimuth", self._max_angle)
+
+        page_2 = QWidget(self)
+        page_2_layout = QFormLayout()
+        page_2.setLayout(page_2_layout)
+
+        page_2_layout.addRow("Angle Difference", self._angle_difference)
+
+        self._tabs = QTabWidget(self)
+        self._tabs.addTab(page_1, "Definition by Azimuth")
+        self._tabs.addTab(page_2, "Definition by Angle Width")
+
+        self._tabs.currentChanged.connect(self.valuesChanged.emit)
+        self._tabs.currentChanged.connect(self.save_settings)
 
         self._angle_step = QgsDoubleSpinBox(self)
         self._angle_step.setMinimum(0.001)
@@ -45,7 +81,8 @@ class LoSNoTargetInputWidget(QWidget):
         self._angle_step.setValue(1)
         self._angle_step.setClearValue(1)
         self._angle_step.setDecimals(3)
-        self._angle_step.valueChanged.connect(self.emit_values_changed)
+        self._angle_step.setSuffix("°")
+        self._angle_step.valueChanged.connect(self.valuesChanged.emit)
         self._angle_step.valueChanged.connect(self.save_settings)
 
         self._length = DistanceWidget(self)
@@ -54,7 +91,7 @@ class LoSNoTargetInputWidget(QWidget):
         self._length.setValue(100)
         self._length.setClearValue(100)
         self._length.setDecimals(2)
-        self._length.valueChanged.connect(self.emit_values_changed)
+        self._length.valueChanged.connect(self.valuesChanged.emit)
         self._length.valueChanged.connect(self.save_settings)
 
         self._show_distances = QCheckBox(self)
@@ -69,12 +106,15 @@ class LoSNoTargetInputWidget(QWidget):
         self._distances.valueChanged.connect(self.valuesChanged.emit)
         self._distances.valueChanged.connect(self.save_settings)
 
-        layout.addRow("Minimum Azimuth", self._min_angle)
-        layout.addRow("Maximal Azimuth", self._max_angle)
-        layout.addRow("Angle Step", self._angle_step)
-        layout.addRow("LoS Length", self._length)
-        layout.addRow("Show Distance Limits", self._show_distances)
-        layout.addRow("Distance Limits", self._distances)
+        layout.addWidget(self._tabs, 0, 0, 1, 2)
+        layout.addWidget(QLabel("Angle Step"), 1, 0)
+        layout.addWidget(self._angle_step, 1, 1)
+        layout.addWidget(QLabel("LoS Length"), 2, 0)
+        layout.addWidget(self._length, 2, 1)
+        layout.addWidget(QLabel("Show Distance Limits"), 3, 0)
+        layout.addWidget(self._show_distances, 3, 1)
+        layout.addWidget(QLabel("Distance Limits"), 4, 0)
+        layout.addWidget(self._distances, 4, 1)
 
         self._unit = QgsUnitTypes.DistanceUnit.DistanceMeters
 
@@ -86,8 +126,14 @@ class LoSNoTargetInputWidget(QWidget):
         if self._min_angle.value() > self._max_angle.value():
             self._min_angle.setValue(self._max_angle.value())
 
-    def emit_values_changed(self) -> None:
-        self.valuesChanged.emit()
+    @property
+    def los_type_definition(self) -> LoSNoTargetDefinitionType:
+        if self._tabs.currentIndex() == 0:
+            return LoSNoTargetDefinitionType.AZIMUTHS
+        elif self._tabs.currentIndex() == 1:
+            return LoSNoTargetDefinitionType.DIRECTION_ANGLE_WIDTH
+
+        return LoSNoTargetDefinitionType.AZIMUTHS
 
     @property
     def min_angle(self) -> float:
@@ -109,6 +155,10 @@ class LoSNoTargetInputWidget(QWidget):
     @property
     def length(self) -> float:
         return self._length.distance().inUnits(self._unit)
+
+    @property
+    def angle_difference(self) -> float:
+        return self._angle_difference.value()
 
     @property
     def show_distance_limits(self) -> bool:
@@ -138,6 +188,12 @@ class LoSNoTargetInputWidget(QWidget):
             f"{settings_class}/DistanceLimitsUnits",
             QgsUnitTypes.encodeUnit(self._distances.units()),
             section=QgsSettings.Section.Plugins,
+        )
+        settings.setValue(
+            f"{settings_class}/AngleDifference", self._angle_difference.value(), section=QgsSettings.Section.Plugins
+        )
+        settings.setValue(
+            f"{settings_class}/LoSType", self.los_type_definition.value, section=QgsSettings.Section.Plugins
         )
 
     def load_settings(self) -> None:
@@ -193,3 +249,11 @@ class LoSNoTargetInputWidget(QWidget):
 
         with QSignalBlocker(self._distances):
             self._distances.set_units(unit)
+
+        with QSignalBlocker(self._angle_difference):
+            self._angle_difference.setValue(
+                settings.value(f"{settings_class}/AngleDifference", 10, type=float, section=QgsSettings.Section.Plugins)
+            )
+
+        tab_index = settings.value(f"{settings_class}/LoSType", 0, type=int, section=QgsSettings.Section.Plugins)
+        self._tabs.setCurrentIndex(tab_index)
