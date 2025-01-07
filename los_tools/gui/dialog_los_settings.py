@@ -12,7 +12,7 @@ from qgis.core import (
     QgsUnitTypes,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -35,6 +35,9 @@ from los_tools.utils import _column_type_class
 
 
 class LoSSettings(QDialog):
+
+    layerCreated = pyqtSignal(QgsVectorLayer)
+
     def __init__(
         self,
         parent: Optional[QWidget] = None,
@@ -309,7 +312,10 @@ class LoSSettings(QDialog):
 
     def add_layer_to_project(self) -> None:
         project = QgsProject.instance()
-        project.addMapLayer(self.create_data_layer())
+        layer = self.create_data_layer()
+        project.addMapLayer(layer)
+
+        self.layerCreated.emit(layer)
 
         self.close()
 

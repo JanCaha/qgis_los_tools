@@ -50,6 +50,7 @@ class LoSToolsPlugin:
     def __init__(self, iface: QgisInterface):
         self.add_los_layer_action: QAction = None
         self._layer_LoS: QgsVectorLayer = None
+        self._layer_sampling_settings: QgsVectorLayer = None
 
         self.iface: QgisInterface = iface
         self.provider = LoSToolsProvider()
@@ -105,6 +106,8 @@ class LoSToolsPlugin:
 
         if self.iface is not None:
             self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
+            self.los_settings_dialog.layerCreated.connect(self.store_layer_sampling_settings)
+
             self.object_parameters_dialog = ObjectParameters(self.iface.mainWindow())
 
             self.current_project_visible_raster_layers()
@@ -156,7 +159,7 @@ class LoSToolsPlugin:
 
             self.add_action(
                 icon_path=get_icon_path("los_settings.svg"),
-                text="Calculate Notarget Los Settings",
+                text="Calculate No Target Los Sampling Settings",
                 callback=self.open_dialog_los_settings,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
@@ -376,3 +379,6 @@ class LoSToolsPlugin:
     def list_of_rasters_for_los_updated(self):
         self.create_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
         self.create_los_tool.reactivate()
+
+    def store_layer_sampling_settings(self, layer: QgsVectorLayer) -> None:
+        self._layer_sampling_settings = layer
