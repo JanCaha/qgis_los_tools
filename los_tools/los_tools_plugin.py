@@ -93,6 +93,8 @@ class LoSToolsPlugin:
             self.los_settings_dialog.samplingDistanceMatrixUpdated.connect(self.store_sampling_distance_matrix)
             self.los_settings_dialog.fill_distances()
 
+            self.raster_validations = RasterValidations(iface=self.iface)
+
             self.object_parameters_dialog = ObjectParameters(self.iface.mainWindow())
 
             self.current_project_visible_raster_layers()
@@ -368,14 +370,13 @@ class LoSToolsPlugin:
         dialog.exec()
 
     def open_dialog_raster_selection(self):
-        raster_validations = RasterValidations(iface=self.iface)
-        raster_validations.selectedRastersChanged.connect(
-            partial(self.store_list_of_rasters, raster_validations.listOfRasters)
+        self.raster_validations.selectedRastersChanged.connect(
+            partial(self.store_list_of_rasters, self.raster_validations.listOfRasters)
         )
         if self.list_of_rasters_for_los:
-            raster_validations.setup_used_rasters(self.list_of_rasters_for_los)
-        raster_validations.selectedRastersChanged.connect(self.list_of_rasters_for_los_updated)
-        raster_validations.exec()
+            self.raster_validations.setup_used_rasters(self.list_of_rasters_for_los)
+        self.raster_validations.selectedRastersChanged.connect(self.list_of_rasters_for_los_updated)
+        self.raster_validations.exec()
 
     # store variables in plugin
     def store_list_of_rasters(self, list_of_rasters: ListOfRasters) -> None:
