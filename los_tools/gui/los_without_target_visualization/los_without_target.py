@@ -29,9 +29,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
 
         self._sampling_distance_matrix = sampling_distance_matrix
 
-        self._widget = LoSNoTargetInputWidget()
-        self._widget.load_settings()
-        self._widget.hide()
+        self.create_widget()
 
         self._distance_limits_rubber_band = self.createRubberBand(Qgis.GeometryType.Line)
         self._distance_limits_rubber_band.setColor(Qt.GlobalColor.darkGreen)
@@ -44,9 +42,10 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         if not self._widget:
             self._widget = LoSNoTargetInputWidget()
             self._widget.load_settings()
+            self._widget.set_using_rasters(self._raster_list.raster_to_use())
+            self._widget.valuesChanged.connect(self.draw)
+            self._widget.saveToLayerClicked.connect(self.add_los_to_layer)
         super().create_widget()
-
-        self._widget.valuesChanged.connect(self.draw)
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
         super().canvasMoveEvent(event)

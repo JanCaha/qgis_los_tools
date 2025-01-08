@@ -24,18 +24,16 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
 
         self._last_towards_point: QgsPointXY = None
 
-        self._widget = LoSInputWidget()
-        self._widget.load_settings()
-        self._widget.hide()
+        self.create_widget()
 
     def create_widget(self):
         if not self._widget:
             self._widget = LoSInputWidget()
             self._widget.load_settings()
-
+            self._widget.set_using_rasters(self._raster_list.raster_to_use())
+            self._widget.valuesChanged.connect(partial(self.draw_los, None))
+            self._widget.saveToLayerClicked.connect(self.add_los_to_layer)
         super().create_widget()
-
-        self._widget.valuesChanged.connect(partial(self.draw_los, None))
 
     def clean(self) -> None:
         super().clean()
