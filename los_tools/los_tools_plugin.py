@@ -19,6 +19,7 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMenu, QToolBar, QToolButton
 
 from los_tools.classes.list_raster import ListOfRasters
+from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
 from los_tools.processing.los_tools_provider import LoSToolsProvider
 
 from .constants.fields import Fields
@@ -50,7 +51,7 @@ class LoSToolsPlugin:
     def __init__(self, iface: QgisInterface):
         self.add_los_layer_action: QAction = None
         self._layer_LoS: QgsVectorLayer = None
-        self._layer_sampling_settings: QgsVectorLayer = None
+        self._sampling_distance_matrix = SamplingDistanceMatrix()
 
         self.iface: QgisInterface = iface
         self.provider = LoSToolsProvider()
@@ -106,7 +107,8 @@ class LoSToolsPlugin:
 
         if self.iface is not None:
             self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
-            self.los_settings_dialog.layerCreated.connect(self.store_layer_sampling_settings)
+            self.los_settings_dialog.samplingDistanceMatrixUpdated.connect(self.store_sampling_distance_matrix)
+            self.los_settings_dialog.fill_distances()
 
             self.object_parameters_dialog = ObjectParameters(self.iface.mainWindow())
 
@@ -380,5 +382,5 @@ class LoSToolsPlugin:
         self.create_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
         self.create_los_tool.reactivate()
 
-    def store_layer_sampling_settings(self, layer: QgsVectorLayer) -> None:
-        self._layer_sampling_settings = layer
+    def store_sampling_distance_matrix(self, sampling_distance_matrix: SamplingDistanceMatrix) -> None:
+        self._sampling_distance_matrix = sampling_distance_matrix
