@@ -148,8 +148,6 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
     def task_finished(self) -> None:
         self.featuresAdded.emit()
-        if self.task_manager.all_los_tasks_finished():
-            self.addLoSStatusChanged.emit(True)
 
     def task_finished_message(self, milliseconds: int) -> None:
         self._iface.messageBar().pushMessage(
