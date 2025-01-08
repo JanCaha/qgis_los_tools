@@ -38,6 +38,9 @@ class ListOfRasters:
 
             self.order_by_pixel_size()
 
+    def __repr__(self):
+        return f"ListOfRasters: [{", ".join([x.name() for x in self.rasters])}]"
+
     @property
     def rasters(self) -> List[QgsRasterLayer]:
         return list(self._dict_rasters.values())
