@@ -377,8 +377,12 @@ class LoSToolsPlugin:
             self.list_of_rasters_for_los = raster_validations.listOfRasters
 
     def list_of_rasters_for_los_updated(self):
-        self.create_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
-        self.create_los_tool.reactivate()
+        if self.create_los_tool:
+            self.create_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
+            self.create_los_tool.reactivate()
+        if self.create_no_target_los_tool:
+            self.create_no_target_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
+            self.create_no_target_los_tool.reactivate()
 
     def store_sampling_distance_matrix(self, sampling_distance_matrix: SamplingDistanceMatrix) -> None:
         self._sampling_distance_matrix = sampling_distance_matrix
