@@ -13,24 +13,6 @@ from los_tools.gui.dialog_los_settings import LoSSettings
 from tests.utils import create_mouse_event
 
 
-@pytest.fixture(scope="function", autouse=True)
-def qgis_project(raster_small: QgsRasterLayer, raster_large: QgsRasterLayer) -> QgsProject:
-    project = QgsProject.instance()
-    project.removeAllMapLayers()
-    project.addMapLayer(raster_small)
-    project.addMapLayer(raster_large)
-
-
-@pytest.fixture(scope="function")
-def list_of_rasters(raster_small: QgsRasterLayer, raster_large: QgsRasterLayer) -> ListOfRasters:
-    return ListOfRasters([raster_small, raster_large])
-
-
-@pytest.fixture
-def center_point(raster_small: QgsRasterLayer) -> QgsPointXY:
-    return raster_small.extent().center()
-
-
 def test_local_los(
     qgis_parent: QWidget,
     qgis_iface: QgisInterface,
