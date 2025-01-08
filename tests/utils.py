@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from qgis.core import Qgis, QgsLayout, QgsLayoutExporter, QgsPointXY
+from qgis.core import Qgis, QgsLayout, QgsLayoutExporter, QgsPointXY, QgsProject, QgsVectorLayer
 from qgis.gui import QgsMapCanvas, QgsMapMouseEvent
 from qgis.PyQt.QtCore import QEvent, QPoint, QSize, Qt
 
@@ -76,3 +76,25 @@ def export_layout(path: Path, layout: QgsLayout, page: int = 0) -> None:
 
     exporter = QgsLayoutExporter(layout)
     exporter.exportToImage(path.as_posix(), image_settings)
+
+
+def setup_project_with_snapping(qgis_canvas: QgsMapCanvas, layer: QgsVectorLayer) -> None:
+    # setup project
+    project = QgsProject.instance()
+    project.addMapLayer(layer)
+
+    # properly set up canvas
+    qgis_canvas.setLayers([layer])
+    qgis_canvas.setCurrentLayer(layer)
+    qgis_canvas.zoomToFeatureExtent(layer.extent())
+
+    # set snapping
+    config = qgis_canvas.snappingUtils().config()
+    config.setEnabled(True)
+    config.setMode(Qgis.SnappingMode.AllLayers)
+    config.setType(Qgis.SnappingType.Vertex)
+    config.setUnits(Qgis.MapToolUnit.Pixels)
+    config.setTolerance(10)
+    config.addLayers([layer])
+    project.setSnappingConfig(config)
+    qgis_canvas.snappingUtils().setConfig(config)
