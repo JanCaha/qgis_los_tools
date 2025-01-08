@@ -176,18 +176,21 @@ class LoSSettings(QDialog):
             text = [f"Angular sampling manually set to {round(self.object_angle_size.value(), 3)}°.\n\n"]
         else:
             text = [
-                f"To detect object of size {self.object_size.distance()} "
-                f"at distance {self.object_distance.distance()}, "
-                f"the angular sampling needs to be {round(self.object_angle_size.value(), 3)}°.\n\n"
-                "With this angular sampling of lines-of-sight, it is guaranteed to hit the object at least once.\n\n",
+                f" To detect an object of {self.object_size.distance()} in size "
+                f"at a distance of{self.object_distance.distance()}, "
+                f"an angular sampling of {round(self.object_angle_size.value(), 3)}° is required.\n\n"
+                "This angular sampling of lines-of-sight ensures that the object will be intersected at least once."
+                "\n\n",
             ]
         text += [
-            "The approach can be done, to simplify sampling on each LoS. With growing distance from observer, ",
-            "it is possible to sample less frequently.\n\n",
-            "Below the calculation of sampling distances for various distances can be performed.\n\n",
-            "Default sampling size is used for distances below the first specified distance. ",
-            "Then after each specified distance the calculated sampling distance is used.",
+            "To simplify the calculation process, sampling frequency can be adjusted along each line-of-sight. "
+            "As the distance from the observer increases, the sampling frequency can be reduced.",
+            ".\n\n",
+            "The calculation of sampling distances for various ranges can be performed below.\n\n",
+            "The default sampling size is applied for distances shorter than the first specified distance. ",
+            "Beyond each specified distance threshold, the calculated sampling distance is used.",
         ]
+
         self.text.setText("".join(text))
 
     def _calculate_object_angle_size(self) -> None:
