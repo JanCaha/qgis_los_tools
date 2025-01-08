@@ -4,7 +4,7 @@ from typing import List, Optional
 from qgis.core import Qgis, QgsSettings, QgsUnitTypes
 from qgis.gui import QgsDoubleSpinBox
 from qgis.PyQt.QtCore import QSignalBlocker, Qt
-from qgis.PyQt.QtWidgets import QCheckBox, QFormLayout, QGridLayout, QLabel, QPushButton, QTabWidget, QWidget
+from qgis.PyQt.QtWidgets import QCheckBox, QFormLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QTabWidget, QWidget
 
 from los_tools.constants.plugin import PluginConstants
 from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWidget
@@ -23,6 +23,9 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         layout = QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
+
+        self._rasters = QLineEdit()
+        self._rasters.setReadOnly(True)
 
         self._min_angle = QgsDoubleSpinBox(self)
         self._min_angle.setMinimum(-359.999)
@@ -108,18 +111,21 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
 
         self._add_los_to_layer = QPushButton("Add LoS to Plugin Layer")
         self._add_los_to_layer.setEnabled(False)
-        self._add_los_to_layer.clicked.connect(self.saveToLayerClicked.emit)
+        self._add_los_to_layer.clicked.connect(self.clickedAddLosToLayer)
 
-        layout.addWidget(self._tabs, 0, 0, 1, 2)
-        layout.addWidget(QLabel("Angle Step"), 1, 0)
-        layout.addWidget(self._angle_step, 1, 1)
-        layout.addWidget(QLabel("LoS Length"), 2, 0)
-        layout.addWidget(self._length, 2, 1)
-        layout.addWidget(QLabel("Show Distance Limits"), 3, 0)
-        layout.addWidget(self._show_distances, 3, 1)
-        layout.addWidget(QLabel("Distance Limits"), 4, 0)
-        layout.addWidget(self._distances, 4, 1)
-        layout.addWidget(self._add_los_to_layer, 5, 1, 1, 2)
+        layout.addWidget(QLabel("Rasters"), 0, 0)
+        layout.addWidget(self._rasters, 0, 1)
+
+        layout.addWidget(self._tabs, 1, 0, 1, 2)
+        layout.addWidget(QLabel("Angle Step"), 2, 0)
+        layout.addWidget(self._angle_step, 2, 1)
+        layout.addWidget(QLabel("LoS Length"), 3, 0)
+        layout.addWidget(self._length, 3, 1)
+        layout.addWidget(QLabel("Show Distance Limits"), 4, 0)
+        layout.addWidget(self._show_distances, 4, 1)
+        layout.addWidget(QLabel("Distance Limits"), 5, 0)
+        layout.addWidget(self._distances, 5, 1)
+        layout.addWidget(self._add_los_to_layer, 6, 1, 1, 2)
 
         self._unit = QgsUnitTypes.DistanceUnit.DistanceMeters
 

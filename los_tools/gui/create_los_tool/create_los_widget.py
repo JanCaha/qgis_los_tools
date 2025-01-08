@@ -3,7 +3,7 @@ from typing import Optional
 from qgis.core import Qgis, QgsSettings, QgsUnitTypes
 from qgis.gui import QgsDoubleSpinBox
 from qgis.PyQt.QtCore import QSignalBlocker
-from qgis.PyQt.QtWidgets import QComboBox, QFormLayout, QPushButton, QWidget
+from qgis.PyQt.QtWidgets import QComboBox, QFormLayout, QLineEdit, QPushButton, QWidget
 
 from los_tools.constants.plugin import PluginConstants
 from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWidget
@@ -18,6 +18,9 @@ class LoSInputWidget(LoSDigitizingToolWidget):
         self.form_layout = QFormLayout()
         self.form_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.form_layout)
+
+        self._rasters = QLineEdit()
+        self._rasters.setReadOnly(True)
 
         self._los_type = QComboBox(self)
         self._los_type.addItem("Local")
@@ -50,6 +53,7 @@ class LoSInputWidget(LoSDigitizingToolWidget):
         self._add_los_to_layer.setEnabled(False)
         self._add_los_to_layer.clicked.connect(self.clickedAddLosToLayer)
 
+        self.form_layout.addRow("Rasters", self._rasters)
         self.form_layout.addRow("LoS Type", self._los_type)
         self.form_layout.addRow("Observer Offset", self._observer_offset)
         self.form_layout.addRow("Target Offset", self._target_offset)
