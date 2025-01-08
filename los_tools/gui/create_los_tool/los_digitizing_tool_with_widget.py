@@ -1,15 +1,40 @@
-from qgis.core import Qgis, QgsPointLocator, QgsPointXY
+from qgis.core import Qgis, QgsPointLocator, QgsPointXY, QgsVectorLayer
 from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolEdit, QgsSnapIndicator
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QKeyEvent
-from qgis.PyQt.QtWidgets import QWidget
+from qgis.PyQt.QtWidgets import QPushButton, QWidget
+
+from los_tools.classes.list_raster import ListOfRasters
+from los_tools.gui.create_los_tool.los_tasks import AbstractPrepareLoSTask, LoSExtractionTaskManager
+
+
+class LoSDigitizingToolWidget(QWidget):
+    valuesChanged = pyqtSignal()
+    saveToLayerClicked = pyqtSignal()
+
+    _add_los_to_layer: QPushButton
+
+    def clickedAddLosToLayer(self) -> None:
+        self.saveToLayerClicked.emit()
+        self.setAddLoSEnabled(False)
+
+    def setAddLoSEnabled(self, enabled: bool) -> None:
+        self._add_los_to_layer.setEnabled(enabled)
 
 
 class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
-    _widget: QWidget
+    _widget: LoSDigitizingToolWidget
 
-    def __init__(self, iface: QgisInterface) -> None:
+    featuresAdded = pyqtSignal()
+    addLoSStatusChanged = pyqtSignal(bool)
+
+    def __init__(
+        self,
+        iface: QgisInterface,
+        raster_list: ListOfRasters,
+        los_layer: QgsVectorLayer = None,
+    ) -> None:
         super().__init__(iface.mapCanvas())
 
         self._iface = iface
@@ -19,6 +44,11 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         self.snap_marker = QgsSnapIndicator(self._canvas)
 
         self._los_rubber_band = self.createRubberBand(Qgis.GeometryType.Line)
+
+        self.task_manager = LoSExtractionTaskManager()
+
+        self._raster_list = raster_list
+        self._los_layer = los_layer
 
         self._snap_point: QgsPointXY = None
         self._selected_point: QgsPointXY = None
@@ -39,6 +69,14 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
             self.deactivate()
             return
 
+        if not ListOfRasters.validate(self._raster_list.rasters):
+            self.messageEmitted.emit(
+                "Tool needs valid setup in `Raster Validations` dialog.",
+                Qgis.Critical,
+            )
+            self.deactivate()
+            return
+
         super().activate()
 
     def deactivate(self) -> None:
@@ -51,6 +89,9 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         self._iface.addUserInputWidget(self._widget)
         self._widget.setFocus(Qt.TabFocusReason)
         self._widget.show()
+
+        self.addLoSStatusChanged.connect(self._widget.setAddLoSEnabled)
+        self._widget.saveToLayerClicked.connect(self.add_los_to_layer)
 
     def delete_widget(self):
         if self._widget:
@@ -87,3 +128,37 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
             )
             return False
         return True
+
+    def set_list_of_rasters(self, raster_list: ListOfRasters) -> None:
+        self._raster_list = raster_list
+
+    def prepare_task(self) -> AbstractPrepareLoSTask:
+        return AbstractPrepareLoSTask()
+
+    def add_los_to_layer(self) -> None:
+
+        self.addLoSStatusChanged.emit(False)
+
+        task = self.prepare_task()
+
+        task.taskCompleted.connect(self.task_finished)
+        task.taskFinishedTime.connect(self.task_finished_message)
+
+        self.task_manager.addTask(task)
+        self.clean()
+
+    def task_finished(self) -> None:
+        self.featuresAdded.emit()
+        if self.task_manager.all_los_tasks_finished():
+            self.addLoSStatusChanged.emit(True)
+
+    def task_finished_message(self, milliseconds: int) -> None:
+        self._iface.messageBar().pushMessage(
+            "LoS Added",
+            f"LoS Processing Finished. Lasted {milliseconds / 1000} seconds.",
+            Qgis.MessageLevel.Info,
+            duration=2,
+        )
+
+    def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
+        self._set_snap_point(event)
