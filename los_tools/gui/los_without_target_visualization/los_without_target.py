@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 from qgis.core import Qgis, QgsGeometry, QgsPointXY, QgsTask, QgsVectorLayer
 from qgis.gui import QgisInterface, QgsMapMouseEvent
-from qgis.PyQt.QtCore import Qt, 
+from qgis.PyQt.QtCore import Qt
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
