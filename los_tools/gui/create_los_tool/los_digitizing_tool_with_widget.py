@@ -13,7 +13,7 @@ class LoSDigitizingToolWidget(QWidget):
     saveToLayerClicked = pyqtSignal()
 
     _add_los_to_layer: QPushButton
-    _rasters: QLineEdit
+    _rasters: QLineEdit = None
 
     def clickedAddLosToLayer(self) -> None:
         self.saveToLayerClicked.emit()
@@ -23,7 +23,8 @@ class LoSDigitizingToolWidget(QWidget):
         self._add_los_to_layer.setEnabled(enabled)
 
     def set_using_rasters(self, rasters: str) -> None:
-        self._rasters.setText(rasters)
+        if self._rasters:
+            self._rasters.setText(rasters)
 
 
 class LoSDigitizingToolWithWidget(QgsMapToolEdit):
@@ -163,3 +164,8 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
         self._set_snap_point(event)
+
+    def reactivate(self):
+        if self._widget:
+            self._widget.set_using_rasters(self._raster_list.raster_to_use())
+        return super().reactivate()
