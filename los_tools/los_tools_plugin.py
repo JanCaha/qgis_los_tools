@@ -140,9 +140,29 @@ class LoSToolsPlugin:
             self.toolbar.addWidget(toolButton)
 
             self.add_action(
-                icon_path=get_icon_path("los_tools_icon.svg"),
+                icon_path=get_icon_path("create_los.svg"),
                 text=self.create_los_action_name,
                 callback=self.run_create_los_tool,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
+                checkable=True,
+            )
+
+            self.add_action(
+                icon_path=get_icon_path("create_los_no_target.svg"),
+                text=self.los_notarget_action_name,
+                callback=self.run_visualize_los_no_target_tool,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
+                checkable=True,
+            )
+
+            self.toolbar.addSeparator()
+
+            self.add_action(
+                icon_path=get_icon_path("optimize_point.svg"),
+                text=self.optimize_point_location_action_name,
+                callback=self.run_optimize_point_location_tool,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
                 checkable=True,
@@ -175,6 +195,8 @@ class LoSToolsPlugin:
                 add_to_specific_toolbar=self.toolbar,
             )
 
+            self.toolbar.addSeparator()
+
             self.add_action(
                 icon_path=get_icon_path("camera.svg"),
                 text="Create 3D View with Camera Setup",
@@ -183,28 +205,6 @@ class LoSToolsPlugin:
                 add_to_specific_toolbar=self.toolbar,
                 checkable=False,
             )
-
-            self.toolbar.addSeparator()
-
-            self.add_action(
-                icon_path=get_icon_path("los_no_target_tool.svg"),
-                text=self.los_notarget_action_name,
-                callback=self.run_visualize_los_no_target_tool,
-                add_to_toolbar=False,
-                add_to_specific_toolbar=self.toolbar,
-                checkable=True,
-            )
-
-            self.add_action(
-                icon_path=get_icon_path("optimize_point.svg"),
-                text=self.optimize_point_location_action_name,
-                callback=self.run_optimize_point_location_tool,
-                add_to_toolbar=False,
-                add_to_specific_toolbar=self.toolbar,
-                checkable=True,
-            )
-
-            self.toolbar.addSeparator()
 
             self.add_action(
                 icon_path=get_icon_path("camera_layout_item.svg"),
