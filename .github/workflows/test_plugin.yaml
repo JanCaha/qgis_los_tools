@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        qgis_source: [https://qgis.org/ubuntugis, https://qgis.org/ubuntugis-nightly]
+        qgis_source: [ubuntugis, ubuntugis-nightly]
 
     steps:
 
@@ -30,7 +30,7 @@ jobs:
           wget -O $KEYRING https://download.qgis.org/downloads/qgis-archive-keyring.gpg && \
           sudo touch /etc/apt/sources.list.d/qgis.sources && \
           echo 'Types: deb deb-src' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
-          echo 'URIs: ${{ matrix.qgis_source }}' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
+          echo 'URIs: https://qgis.org/${{ matrix.qgis_source }}' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
           echo 'Suites: '$(lsb_release -c -s) | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
           echo 'Architectures: '$(dpkg --print-architecture) | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
           echo 'Components: main' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
