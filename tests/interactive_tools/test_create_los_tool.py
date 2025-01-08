@@ -1,30 +1,25 @@
 # pylint: disable=protected-access
 import pytest
 from pytestqt.qtbot import QtBot
-from qgis.core import QgsMemoryProviderUtils, QgsPointXY, QgsProject, QgsRasterLayer, QgsWkbTypes
+from qgis.core import QgsPointXY, QgsVectorLayer
 from qgis.gui import QgisInterface, QgsMapCanvas
 from qgis.PyQt.QtCore import QEvent, Qt
-from qgis.PyQt.QtWidgets import QWidget
 
 from los_tools.classes.list_raster import ListOfRasters
-from los_tools.constants.fields import Fields
 from los_tools.gui.create_los_tool.create_los_tool import CreateLoSMapTool
-from los_tools.gui.dialog_los_settings import LoSSettings
 from tests.utils import create_mouse_event
 
 
 def test_local_los(
-    qgis_parent: QWidget,
     qgis_iface: QgisInterface,
     qgis_canvas: QgsMapCanvas,
     list_of_rasters: ListOfRasters,
+    los_layer: QgsVectorLayer,
     center_point: QgsPointXY,
 ):
     left_point = center_point.project(75, 90)
 
-    los_settings = LoSSettings(qgis_parent)
-
-    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_settings)
+    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_layer)
 
     map_tool.activate()
 
@@ -64,17 +59,15 @@ def test_local_los(
 
 
 def test_global_los(
-    qgis_parent: QWidget,
     qgis_iface: QgisInterface,
     qgis_canvas: QgsMapCanvas,
+    los_layer: QgsVectorLayer,
     list_of_rasters: ListOfRasters,
     center_point: QgsPointXY,
 ):
     left_point = center_point.project(75, 90)
 
-    los_settings = LoSSettings(qgis_parent)
-
-    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_settings)
+    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_layer)
 
     map_tool.activate()
 
@@ -123,18 +116,16 @@ def test_global_los(
 
 
 def test_right_click_when_creating(
-    qgis_parent: QWidget,
     qgis_iface: QgisInterface,
     qgis_canvas: QgsMapCanvas,
+    los_layer: QgsVectorLayer,
     list_of_rasters: ListOfRasters,
     center_point: QgsPointXY,
 ):
 
     left_point = center_point.project(75, 90)
 
-    los_settings = LoSSettings(qgis_parent)
-
-    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_settings)
+    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_layer)
 
     map_tool.activate()
 
@@ -171,27 +162,17 @@ def test_right_click_when_creating(
 
 
 def test_global_los_add_to_plugin_layer(
-    qgis_parent: QWidget,
     qgis_iface: QgisInterface,
     qgis_canvas: QgsMapCanvas,
+    los_layer: QgsVectorLayer,
     list_of_rasters: ListOfRasters,
     center_point: QgsPointXY,
     qtbot: QtBot,
 ):
 
-    crs = qgis_canvas.mapSettings().destinationCrs()
-    los_layer = QgsMemoryProviderUtils.createMemoryLayer(
-        "Manually Created LoS",
-        Fields.los_plugin_layer_fields,
-        QgsWkbTypes.LineString25D,
-        crs,
-    )
-
     left_point = center_point.project(75, 90)
 
-    los_settings = LoSSettings(qgis_parent)
-
-    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_settings, los_layer=los_layer)
+    map_tool = CreateLoSMapTool(qgis_iface, list_of_rasters, los_layer)
 
     map_tool.activate()
 
@@ -238,12 +219,10 @@ def test_global_los_add_to_plugin_layer(
 
     assert los_layer.dataProvider().featureCount() == 0
 
-    # click button to add LoS to layer
-    map_tool._widget._add_los_to_layer.click()
-
     # wait for signal - nothing happing just need to wait for it
     with qtbot.waitSignal(map_tool.featuresAdded, timeout=None, raising=True):
-        pass
+        # click button to add LoS to layer
+        map_tool._widget._add_los_to_layer.click()
 
     assert los_layer.dataProvider().featureCount() == 1
 
