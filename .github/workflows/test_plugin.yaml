@@ -13,6 +13,10 @@ jobs:
 
     runs-on: ubuntu-24.04
 
+    strategy:
+      matrix:
+        qgis_source: [https://qgis.org/ubuntugis, https://qgis.org/ubuntugis-nightly]
+
     steps:
 
       - name: Install
@@ -26,12 +30,11 @@ jobs:
           wget -O $KEYRING https://download.qgis.org/downloads/qgis-archive-keyring.gpg && \
           sudo touch /etc/apt/sources.list.d/qgis.sources && \
           echo 'Types: deb deb-src' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
-          echo 'URIs: https://qgis.org/ubuntugis' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
+          echo 'URIs: ${{ matrix.qgis_source }}' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
           echo 'Suites: '$(lsb_release -c -s) | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
           echo 'Architectures: '$(dpkg --print-architecture) | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
           echo 'Components: main' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
           echo 'Signed-By: '$KEYRING | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
-          LASTSUPPORTED=focal && \
           KEYRING=/usr/share/keyrings/ubuntugis-archive-keyring.gpg && \
           sudo gpg --no-default-keyring --keyring $KEYRING --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 6B827C12C2D425E227EDCA75089EBE08314DF160 && \
           sudo touch /etc/apt/sources.list.d/ubuntugis-unstable.sources && \
