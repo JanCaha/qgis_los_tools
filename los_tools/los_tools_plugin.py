@@ -46,66 +46,49 @@ class LoSToolsPlugin:
     optimize_point_location_action_name = "Optimize Point Location Tool"
     create_los_action_name = "Create LoS"
 
-    list_of_rasters_for_los: ListOfRasters = None
-
     def __init__(self, iface: QgisInterface):
-        self.add_los_layer_action: QAction = None
-        self._layer_LoS: QgsVectorLayer = None
-        self._sampling_distance_matrix = SamplingDistanceMatrix()
 
         self.iface: QgisInterface = iface
         self.provider = LoSToolsProvider()
 
-        self.actions: typing.List[QAction] = []
-        self.menu = PluginConstants.plugin_name
-
         if self.iface is not None:
-            self.toolbar: QToolBar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
-            self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
-
             self.iface.newProjectCreated.connect(self.project_updated)
             self.iface.projectRead.connect(self.project_updated)
-            self.iface.projectRead.connect(self.reset_los_layer)
+            self.iface.projectRead.connect(self._reset_los_layer)
+
+            self._layer_LoS: QgsVectorLayer = None
+            self._sampling_distance_matrix = SamplingDistanceMatrix()
+            self.list_of_rasters_for_los: ListOfRasters = None
 
             self.create_no_target_los_tool: LosNoTargetMapTool = None
             self.create_los_tool: CreateLoSMapTool = None
             self.optimize_point_location_tool: OptimizePointsLocationTool = None
 
-    def project_updated(self) -> None:
-        self.current_project_visible_raster_layers()
-        project = QgsProject.instance()
-        project.layersRemoved.connect(self.update_list_of_rasters)
+    def unload(self):
+        QgsApplication.processingRegistry().removeProvider(self.provider)
 
-    def update_list_of_rasters(self, list_of_ids: typing.List[str]):
-        selected_ids = []
+        if self.iface is not None:
+            for action in self.actions:
+                self.iface.removePluginMenu(PluginConstants.plugin_name, action)
+                self.iface.removeToolBarIcon(action)
 
-        if self.list_of_rasters_for_los:
-            selected_ids = self.list_of_rasters_for_los.raster_ids
+            del self.toolbar
 
-        for id in list_of_ids:
-            if id in selected_ids:
-                self.list_of_rasters_for_los.remove_raster(id)
+            self._layer_LoS = None
 
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
-
-    def current_project_visible_raster_layers(self) -> None:
-        layers = []
-        all_layers = QgsProject.instance().mapLayers(True)
-        layer_tree_root = QgsProject.instance().layerTreeRoot()
-        for layer_id in all_layers.keys():
-            layer = QgsProject.instance().mapLayer(layer_id)
-            if isinstance(layer, QgsRasterLayer):
-                tree_layer = layer_tree_root.findLayer(layer_id)
-                if tree_layer.isVisible():
-                    layers.append(layer)
-
-        self.list_of_rasters_for_los = ListOfRasters(layers)
 
     def initGui(self):
         self.initProcessing()
 
         if self.iface is not None:
+            self.actions: typing.List[QAction] = []
+            self.menu = PluginConstants.plugin_name
+
+            self.toolbar: QToolBar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
+            self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
+
             self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
             self.los_settings_dialog.samplingDistanceMatrixUpdated.connect(self.store_sampling_distance_matrix)
             self.los_settings_dialog.fill_distances()
@@ -117,7 +100,7 @@ class LoSToolsPlugin:
             self.add_los_layer_action = self.add_action(
                 icon_path=get_icon_path("add_los_layer.svg"),
                 text="Add Plugin Layer To Project",
-                callback=self.add_plugin_los_layer_to_project,
+                callback=self._add_plugin_los_layer_to_project,
                 add_to_toolbar=False,
             )
             self.add_los_layer_action.setEnabled(True)
@@ -125,7 +108,7 @@ class LoSToolsPlugin:
             self.empty_los_layer_action = self.add_action(
                 icon_path=get_icon_path("remove_los_layer.svg"),
                 text="Empty LoS Layer Features",
-                callback=self.reset_los_layer,
+                callback=self._reset_los_layer,
                 add_to_toolbar=False,
             )
 
@@ -142,7 +125,7 @@ class LoSToolsPlugin:
             self.add_action(
                 icon_path=get_icon_path("create_los.svg"),
                 text=self.create_los_action_name,
-                callback=self.run_create_los_tool,
+                callback=self.run_tool_create_los,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
                 checkable=True,
@@ -151,7 +134,7 @@ class LoSToolsPlugin:
             self.add_action(
                 icon_path=get_icon_path("create_los_no_target.svg"),
                 text=self.los_notarget_action_name,
-                callback=self.run_visualize_los_no_target_tool,
+                callback=self.run_tool_los_no_target,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
                 checkable=True,
@@ -162,7 +145,7 @@ class LoSToolsPlugin:
             self.add_action(
                 icon_path=get_icon_path("optimize_point.svg"),
                 text=self.optimize_point_location_action_name,
-                callback=self.run_optimize_point_location_tool,
+                callback=self.run_tool_optimize_point_location,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
                 checkable=True,
@@ -190,7 +173,7 @@ class LoSToolsPlugin:
             self.add_action(
                 icon_path=get_icon_path("rasters_list.svg"),
                 text="Raster Validations",
-                callback=self.dialog_raster_selection,
+                callback=self.open_dialog_raster_selection,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
             )
@@ -200,7 +183,7 @@ class LoSToolsPlugin:
             self.add_action(
                 icon_path=get_icon_path("camera.svg"),
                 text="Create 3D View with Camera Setup",
-                callback=self.dialog_create_3d_view,
+                callback=self.open_dialog_create_3d_view,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
                 checkable=False,
@@ -214,19 +197,7 @@ class LoSToolsPlugin:
                 add_to_specific_toolbar=self.toolbar,
             )
 
-            self.reset_los_layer()
-
-    def unload(self):
-        QgsApplication.processingRegistry().removeProvider(self.provider)
-
-        if self.iface is not None:
-            for action in self.actions:
-                self.iface.removePluginMenu(PluginConstants.plugin_name, action)
-                self.iface.removeToolBarIcon(action)
-
-            del self.toolbar
-
-            self._layer_LoS = None
+            self._reset_los_layer()
 
     def add_action(
         self,
@@ -269,21 +240,33 @@ class LoSToolsPlugin:
 
         return action
 
-    def run_tool_set_camera(self):
-        dialog = SetCameraDialog(self.iface, self.iface.mainWindow())
-        dialog.exec()
+    def current_project_visible_raster_layers(self) -> None:
+        layers = []
+        all_layers = QgsProject.instance().mapLayers(True)
+        layer_tree_root = QgsProject.instance().layerTreeRoot()
+        for layer_id in all_layers.keys():
+            layer = QgsProject.instance().mapLayer(layer_id)
+            if isinstance(layer, QgsRasterLayer):
+                tree_layer = layer_tree_root.findLayer(layer_id)
+                if tree_layer.isVisible():
+                    layers.append(layer)
 
-    def open_dialog_los_settings(self):
-        self.los_settings_dialog.exec()
+        self.list_of_rasters_for_los = ListOfRasters(layers)
 
-    def run_visualize_los_no_target_tool(self):
-        self.get_action_by_text(self.los_notarget_action_name).setChecked(True)
-        self.create_no_target_los_tool = LosNoTargetMapTool(
-            self.iface, self.list_of_rasters_for_los, self._sampling_distance_matrix, self._layer_LoS
-        )
-        self.create_no_target_los_tool.featuresAdded.connect(self.update_actions_layer_text)
-        self.create_no_target_los_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
-        self.iface.mapCanvas().setMapTool(self.create_no_target_los_tool)
+    def project_updated(self) -> None:
+        self.current_project_visible_raster_layers()
+        project = QgsProject.instance()
+        project.layersRemoved.connect(self.update_list_of_rasters)
+
+    def update_list_of_rasters(self, list_of_ids: typing.List[str]):
+        selected_ids = []
+
+        if self.list_of_rasters_for_los:
+            selected_ids = self.list_of_rasters_for_los.raster_ids
+
+        for id in list_of_ids:
+            if id in selected_ids:
+                self.list_of_rasters_for_los.remove_raster(id)
 
     def get_action_by_text(self, action_text: str) -> QAction:
         action: QAction
@@ -294,7 +277,21 @@ class LoSToolsPlugin:
     def deactivateTool(self, action_name: str):
         self.get_action_by_text(action_name).setChecked(False)
 
-    def run_optimize_point_location_tool(self):
+    # run tools
+    def run_tool_set_camera(self):
+        dialog = SetCameraDialog(self.iface, self.iface.mainWindow())
+        dialog.exec()
+
+    def run_tool_los_no_target(self):
+        self.get_action_by_text(self.los_notarget_action_name).setChecked(True)
+        self.create_no_target_los_tool = LosNoTargetMapTool(
+            self.iface, self.list_of_rasters_for_los, self._sampling_distance_matrix, self._layer_LoS
+        )
+        self.create_no_target_los_tool.featuresAdded.connect(self.update_actions_layer_text)
+        self.create_no_target_los_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
+        self.iface.mapCanvas().setMapTool(self.create_no_target_los_tool)
+
+    def run_tool_optimize_point_location(self):
         self.get_action_by_text(self.optimize_point_location_action_name).setChecked(True)
         self.optimize_point_location_tool = OptimizePointsLocationTool(self.iface.mapCanvas(), self.iface)
         self.optimize_point_location_tool.deactivated.connect(
@@ -302,7 +299,7 @@ class LoSToolsPlugin:
         )
         self.iface.mapCanvas().setMapTool(self.optimize_point_location_tool)
 
-    def run_create_los_tool(self):
+    def run_tool_create_los(self):
         self.get_action_by_text(self.create_los_action_name).setChecked(True)
 
         self.create_los_tool = CreateLoSMapTool(
@@ -316,6 +313,7 @@ class LoSToolsPlugin:
 
         self.iface.mapCanvas().setMapTool(self.create_los_tool)
 
+    # handle los layer
     def _plugin_los_layer(self) -> QgsVectorLayer:
         if self._layer_LoS is None:
             selected_crs: QgsCoordinateReferenceSystem = self.iface.mapCanvas().mapSettings().destinationCrs()
@@ -332,16 +330,17 @@ class LoSToolsPlugin:
 
         return self._layer_LoS
 
-    def reset_los_layer(self) -> None:
+    def _reset_los_layer(self) -> None:
         self._layer_LoS = None
         self._layer_LoS = self._plugin_los_layer()
         self.update_actions_layer_text()
 
-    def add_plugin_los_layer_to_project(self) -> None:
+    def _add_plugin_los_layer_to_project(self) -> None:
         if self._layer_LoS:
             QgsProject.instance().addMapLayer(self._layer_LoS)
-            self.reset_los_layer()
+            self._reset_los_layer()
 
+    # update actions with los layer
     def update_actions_layer_text(self) -> None:
         self.update_action_number_features_text(self.empty_los_layer_action)
         self.update_action_number_features_text(self.add_los_layer_action)
@@ -357,14 +356,18 @@ class LoSToolsPlugin:
             text = f"{text} {text_part}"
         action.setText(text)
 
+    # open dialogs
+    def open_dialog_los_settings(self):
+        self.los_settings_dialog.exec()
+
     def open_dialog_object_visibility_parameters(self) -> None:
         self.object_parameters_dialog.exec()
 
-    def dialog_create_3d_view(self):
+    def open_dialog_create_3d_view(self):
         dialog = Create3DView(self.iface, self.iface.mainWindow())
         dialog.exec()
 
-    def dialog_raster_selection(self):
+    def open_dialog_raster_selection(self):
         raster_validations = RasterValidations(iface=self.iface)
         raster_validations.selectedRastersChanged.connect(
             partial(self.store_list_of_rasters, raster_validations.listOfRasters)
@@ -374,10 +377,15 @@ class LoSToolsPlugin:
         raster_validations.selectedRastersChanged.connect(self.list_of_rasters_for_los_updated)
         raster_validations.exec()
 
+    # store variables in plugin
     def store_list_of_rasters(self, list_of_rasters: ListOfRasters) -> None:
         if list_of_rasters:
             self.list_of_rasters_for_los = list_of_rasters
 
+    def store_sampling_distance_matrix(self, sampling_distance_matrix: SamplingDistanceMatrix) -> None:
+        self._sampling_distance_matrix = sampling_distance_matrix
+
+    # update running tools
     def list_of_rasters_for_los_updated(self):
         if self.create_los_tool:
             self.create_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
@@ -385,6 +393,3 @@ class LoSToolsPlugin:
         if self.create_no_target_los_tool:
             self.create_no_target_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
             self.create_no_target_los_tool.reactivate()
-
-    def store_sampling_distance_matrix(self, sampling_distance_matrix: SamplingDistanceMatrix) -> None:
-        self._sampling_distance_matrix = sampling_distance_matrix
