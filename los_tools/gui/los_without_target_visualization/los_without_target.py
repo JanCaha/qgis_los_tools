@@ -68,6 +68,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
             self.deactivate()
         if event.button() == Qt.RightButton:
             self.clean()
+            self.addLoSStatusChanged.emit(False)
         if event.button() == Qt.LeftButton:
             if self._widget.los_type_definition == LoSNoTargetDefinitionType.AZIMUTHS:
                 if self._snap_point:
@@ -75,6 +76,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
                 else:
                     self._selected_point = event.mapPoint()
                 self.draw()
+                self.addLoSStatusChanged.emit(True)
             else:
                 if self._start_point is None or (self._start_point and self._end_point):
                     self._end_point = None
