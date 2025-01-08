@@ -278,7 +278,10 @@ class LoSToolsPlugin:
 
     def run_visualize_los_no_target_tool(self):
         self.get_action_by_text(self.los_notarget_action_name).setChecked(True)
-        self.los_no_target_tool = LosNoTargetMapTool(self.iface)
+        self.los_no_target_tool = LosNoTargetMapTool(
+            self.iface, self.list_of_rasters_for_los, self._sampling_distance_matrix, self._layer_LoS
+        )
+        self.los_no_target_tool.featuresAdded.connect(self.update_actions_layer_text)
         self.los_no_target_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
         self.iface.mapCanvas().setMapTool(self.los_no_target_tool)
 
@@ -305,11 +308,9 @@ class LoSToolsPlugin:
         self.create_los_tool = CreateLoSMapTool(
             self.iface,
             self.list_of_rasters_for_los,
-            self.los_settings_dialog,
             self._layer_LoS,
         )
         self.create_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
-        self.create_los_tool.set_los_layer(self._layer_LoS)
         self.create_los_tool.deactivated.connect(partial(self.deactivateTool, self.create_los_action_name))
         self.create_los_tool.featuresAdded.connect(self.update_actions_layer_text)
 
@@ -334,15 +335,12 @@ class LoSToolsPlugin:
     def reset_los_layer(self) -> None:
         self._layer_LoS = None
         self._layer_LoS = self._plugin_los_layer()
-        if self.create_los_tool:
-            self.create_los_tool.set_los_layer(self._layer_LoS)
         self.update_actions_layer_text()
 
     def add_plugin_los_layer_to_project(self) -> None:
         if self._layer_LoS:
             QgsProject.instance().addMapLayer(self._layer_LoS)
             self.reset_los_layer()
-            self.create_los_tool.set_los_layer(self._layer_LoS)
 
     def update_actions_layer_text(self) -> None:
         self.update_action_number_features_text(self.empty_los_layer_action)
