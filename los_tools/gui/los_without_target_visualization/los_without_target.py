@@ -1,11 +1,14 @@
 from typing import List
 
 import numpy as np
-from qgis.core import Qgis, QgsGeometry, QgsPointXY
+from qgis.core import Qgis, QgsGeometry, QgsPointXY, QgsTask, QgsVectorLayer
 from qgis.gui import QgisInterface, QgsMapMouseEvent
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, 
 
+from los_tools.classes.list_raster import ListOfRasters
+from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
 from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWithWidget
+from los_tools.gui.create_los_tool.los_tasks import PrepareLoSWithoutTargetTask
 from los_tools.gui.los_without_target_visualization.los_without_target_widget import (
     LoSNoTargetDefinitionType,
     LoSNoTargetInputWidget,
@@ -15,8 +18,16 @@ from los_tools.processing.tools.util_functions import get_max_decimal_numbers, r
 
 class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
 
-    def __init__(self, iface: QgisInterface) -> None:
-        super().__init__(iface)
+    def __init__(
+        self,
+        iface: QgisInterface,
+        raster_list: ListOfRasters,
+        sampling_distance_matrix: SamplingDistanceMatrix,
+        los_layer: QgsVectorLayer = None,
+    ) -> None:
+        super().__init__(iface, raster_list, los_layer)
+
+        self._sampling_distance_matrix = sampling_distance_matrix
 
         self._widget = LoSNoTargetInputWidget()
         self._widget.load_settings()
@@ -37,33 +48,33 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
 
         self._widget.valuesChanged.connect(self.draw)
 
-    def canvasMoveEvent(self, e: QgsMapMouseEvent) -> None:
-        self._set_snap_point(e)
+    def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
+        super().canvasMoveEvent(event)
+
         if self._widget.los_type_definition == LoSNoTargetDefinitionType.DIRECTION_ANGLE_WIDTH:
             if self._start_point:
                 if self._snap_point:
                     self._end_point_temp = self._snap_point
                 else:
-                    self._end_point_temp = e.mapPoint()
+                    self._end_point_temp = event.mapPoint()
                 self._los_rubber_band.reset()
                 self._distance_limits_rubber_band.reset()
                 self.draw()
         else:
             self._start_point = None
             self._end_point = None
-        return super().canvasMoveEvent(e)
 
-    def canvasReleaseEvent(self, e: QgsMapMouseEvent) -> None:
-        if e.button() == Qt.RightButton and self._los_rubber_band.size() == 0:
+    def canvasReleaseEvent(self, event: QgsMapMouseEvent) -> None:
+        if event.button() == Qt.RightButton and self._los_rubber_band.size() == 0:
             self.deactivate()
-        if e.button() == Qt.RightButton:
+        if event.button() == Qt.RightButton:
             self.clean()
-        if e.button() == Qt.LeftButton:
+        if event.button() == Qt.LeftButton:
             if self._widget.los_type_definition == LoSNoTargetDefinitionType.AZIMUTHS:
                 if self._snap_point:
                     self._selected_point = self._snap_point
                 else:
-                    self._selected_point = e.mapPoint()
+                    self._selected_point = event.mapPoint()
                 self.draw()
             else:
                 if self._start_point is None or (self._start_point and self._end_point):
@@ -71,13 +82,14 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
                     if self._snap_point:
                         self._start_point = self._snap_point
                     else:
-                        self._start_point = e.mapPoint()
+                        self._start_point = event.mapPoint()
                 elif self._start_point and self._end_point is None:
                     if self._snap_point:
                         self._end_point = self._snap_point
                     else:
-                        self._end_point = e.mapPoint()
+                        self._end_point = event.mapPoint()
                     self.draw()
+                    self.addLoSStatusChanged.emit(True)
 
     def draw(self) -> None:
         if not self.canvas_crs_is_projected():
@@ -114,20 +126,13 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
                 self._los_rubber_band.show()
 
         else:
-            if self._start_point and (self._end_point or self._end_point_temp):
+            if self._start_point and self.end_point():
 
                 self._los_rubber_band.reset()
 
                 maximal_length = self._widget.length
 
-                if self._end_point:
-                    end_point = self._end_point
-                elif self._end_point_temp:
-                    end_point = self._end_point_temp
-                else:
-                    end_point = None
-
-                angle = self._start_point.azimuth(end_point)
+                angle = self._start_point.azimuth(self.end_point())
 
                 angles = self.los_angles(
                     angle - self._widget.angle_difference,
@@ -157,10 +162,11 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
             if self._widget.max_angle > 359:
                 angles.append(angles[0])
         else:
-            if not self._start_point or not self._end_point:
+            if not self._start_point or not self.end_point():
                 return
+
             point = self._start_point
-            angle = self._start_point.azimuth(self._end_point)
+            angle = self._start_point.azimuth(self.end_point())
 
             angles = self.los_angles(
                 angle - self._widget.angle_difference,
@@ -197,3 +203,25 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         )
         angles = round_all_values(angles, round_digits)
         return angles
+
+    def prepare_task(self) -> QgsTask:
+        task = PrepareLoSWithoutTargetTask(
+            self._los_rubber_band.asGeometry(),
+            self._los_layer,
+            self._raster_list,
+            self._sampling_distance_matrix,
+            0,
+            self._widget.angle_step,
+            self._iface.mapCanvas().mapSettings().destinationCrs(),
+        )
+        return task
+
+    def end_point(self) -> QgsPointXY:
+        if self._end_point:
+            end_point = self._end_point
+        elif self._end_point_temp:
+            end_point = self._end_point_temp
+        else:
+            end_point = None
+
+        return end_point

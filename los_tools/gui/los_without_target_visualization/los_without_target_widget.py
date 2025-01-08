@@ -3,10 +3,11 @@ from typing import List, Optional
 
 from qgis.core import Qgis, QgsSettings, QgsUnitTypes
 from qgis.gui import QgsDoubleSpinBox
-from qgis.PyQt.QtCore import QSignalBlocker, Qt, pyqtSignal
-from qgis.PyQt.QtWidgets import QCheckBox, QFormLayout, QGridLayout, QLabel, QTabWidget, QWidget
+from qgis.PyQt.QtCore import QSignalBlocker, Qt
+from qgis.PyQt.QtWidgets import QCheckBox, QFormLayout, QGridLayout, QLabel, QPushButton, QTabWidget, QWidget
 
 from los_tools.constants.plugin import PluginConstants
+from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWidget
 from los_tools.gui.custom_classes import DistancesWidget, DistanceWidget
 
 
@@ -15,9 +16,7 @@ class LoSNoTargetDefinitionType(Enum):
     DIRECTION_ANGLE_WIDTH = 1
 
 
-class LoSNoTargetInputWidget(QWidget):
-
-    valuesChanged = pyqtSignal()
+class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
@@ -82,6 +81,7 @@ class LoSNoTargetInputWidget(QWidget):
         self._angle_step.setClearValue(1)
         self._angle_step.setDecimals(3)
         self._angle_step.setSuffix("°")
+        self._angle_step.valueChanged.connect(self._angle_step_changed)
         self._angle_step.valueChanged.connect(self.valuesChanged.emit)
         self._angle_step.valueChanged.connect(self.save_settings)
 
@@ -106,6 +106,10 @@ class LoSNoTargetInputWidget(QWidget):
         self._distances.valueChanged.connect(self.valuesChanged.emit)
         self._distances.valueChanged.connect(self.save_settings)
 
+        self._add_los_to_layer = QPushButton("Add LoS to Plugin Layer")
+        self._add_los_to_layer.setEnabled(False)
+        self._add_los_to_layer.clicked.connect(self.saveToLayerClicked.emit)
+
         layout.addWidget(self._tabs, 0, 0, 1, 2)
         layout.addWidget(QLabel("Angle Step"), 1, 0)
         layout.addWidget(self._angle_step, 1, 1)
@@ -115,6 +119,7 @@ class LoSNoTargetInputWidget(QWidget):
         layout.addWidget(self._show_distances, 3, 1)
         layout.addWidget(QLabel("Distance Limits"), 4, 0)
         layout.addWidget(self._distances, 4, 1)
+        layout.addWidget(self._add_los_to_layer, 5, 1, 1, 2)
 
         self._unit = QgsUnitTypes.DistanceUnit.DistanceMeters
 
@@ -125,6 +130,10 @@ class LoSNoTargetInputWidget(QWidget):
     def _on_maximum_changed(self) -> None:
         if self._min_angle.value() > self._max_angle.value():
             self._min_angle.setValue(self._max_angle.value())
+
+    def _angle_step_changed(self) -> None:
+        if self._angle_step.value() > self._angle_difference.value() * 2:
+            self._angle_step.setValue(self._angle_difference.value() * 2)
 
     @property
     def los_type_definition(self) -> LoSNoTargetDefinitionType:
