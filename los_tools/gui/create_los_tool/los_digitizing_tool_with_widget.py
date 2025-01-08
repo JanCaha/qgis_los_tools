@@ -91,7 +91,6 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         self._widget.show()
 
         self.addLoSStatusChanged.connect(self._widget.setAddLoSEnabled)
-        self._widget.saveToLayerClicked.connect(self.add_los_to_layer)
 
     def delete_widget(self):
         if self._widget:
