@@ -2,7 +2,7 @@ from qgis.core import Qgis, QgsPointLocator, QgsPointXY, QgsVectorLayer
 from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolEdit, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QKeyEvent
-from qgis.PyQt.QtWidgets import QPushButton, QWidget
+from qgis.PyQt.QtWidgets import QLineEdit, QPushButton, QWidget
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.gui.create_los_tool.los_tasks import AbstractPrepareLoSTask, LoSExtractionTaskManager
@@ -13,6 +13,7 @@ class LoSDigitizingToolWidget(QWidget):
     saveToLayerClicked = pyqtSignal()
 
     _add_los_to_layer: QPushButton
+    _rasters: QLineEdit
 
     def clickedAddLosToLayer(self) -> None:
         self.saveToLayerClicked.emit()
@@ -21,10 +22,13 @@ class LoSDigitizingToolWidget(QWidget):
     def setAddLoSEnabled(self, enabled: bool) -> None:
         self._add_los_to_layer.setEnabled(enabled)
 
+    def set_using_rasters(self, rasters: str) -> None:
+        self._rasters.setText(rasters)
+
 
 class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
-    _widget: LoSDigitizingToolWidget
+    _widget: LoSDigitizingToolWidget = None
 
     featuresAdded = pyqtSignal()
     addLoSStatusChanged = pyqtSignal(bool)
