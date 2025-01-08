@@ -67,7 +67,7 @@ class LoSToolsPlugin:
             self.iface.projectRead.connect(self.project_updated)
             self.iface.projectRead.connect(self.reset_los_layer)
 
-            self.los_no_target_tool: LosNoTargetMapTool = None
+            self.create_no_target_los_tool: LosNoTargetMapTool = None
             self.create_los_tool: CreateLoSMapTool = None
             self.optimize_point_location_tool: OptimizePointsLocationTool = None
 
@@ -278,12 +278,12 @@ class LoSToolsPlugin:
 
     def run_visualize_los_no_target_tool(self):
         self.get_action_by_text(self.los_notarget_action_name).setChecked(True)
-        self.los_no_target_tool = LosNoTargetMapTool(
+        self.create_no_target_los_tool = LosNoTargetMapTool(
             self.iface, self.list_of_rasters_for_los, self._sampling_distance_matrix, self._layer_LoS
         )
-        self.los_no_target_tool.featuresAdded.connect(self.update_actions_layer_text)
-        self.los_no_target_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
-        self.iface.mapCanvas().setMapTool(self.los_no_target_tool)
+        self.create_no_target_los_tool.featuresAdded.connect(self.update_actions_layer_text)
+        self.create_no_target_los_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
+        self.iface.mapCanvas().setMapTool(self.create_no_target_los_tool)
 
     def get_action_by_text(self, action_text: str) -> QAction:
         action: QAction
