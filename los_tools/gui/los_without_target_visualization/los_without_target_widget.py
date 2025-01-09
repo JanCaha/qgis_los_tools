@@ -88,15 +88,6 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         self._angle_step.valueChanged.connect(self.valuesChanged.emit)
         self._angle_step.valueChanged.connect(self.save_settings)
 
-        self._length = DistanceWidget(self)
-        self._length.setMinimum(1)
-        self._length.setMaximum(999999999)
-        self._length.setValue(100)
-        self._length.setClearValue(100)
-        self._length.setDecimals(2)
-        self._length.valueChanged.connect(self.valuesChanged.emit)
-        self._length.valueChanged.connect(self.save_settings)
-
         self._show_distances = QCheckBox(self)
         self._show_distances.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, False)
         self._show_distances.setChecked(False)
@@ -119,13 +110,11 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         layout.addWidget(self._tabs, 1, 0, 1, 2)
         layout.addWidget(QLabel("Angle Step"), 2, 0)
         layout.addWidget(self._angle_step, 2, 1)
-        layout.addWidget(QLabel("LoS Length"), 3, 0)
-        layout.addWidget(self._length, 3, 1)
-        layout.addWidget(QLabel("Show Distance Limits"), 4, 0)
-        layout.addWidget(self._show_distances, 4, 1)
-        layout.addWidget(QLabel("Distance Limits"), 5, 0)
-        layout.addWidget(self._distances, 5, 1)
-        layout.addWidget(self._add_los_to_layer, 6, 1, 1, 2)
+        layout.addWidget(QLabel("Show Distance Limits"), 3, 0)
+        layout.addWidget(self._show_distances, 3, 1)
+        layout.addWidget(QLabel("Distance Limits"), 4, 0)
+        layout.addWidget(self._distances, 4, 1)
+        layout.addWidget(self._add_los_to_layer, 5, 1, 1, 2)
 
         self._unit = QgsUnitTypes.DistanceUnit.DistanceMeters
 
@@ -168,10 +157,6 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         self._unit = unit
 
     @property
-    def length(self) -> float:
-        return self._length.distance().inUnits(self._unit)
-
-    @property
     def angle_difference(self) -> float:
         return self._angle_difference.value()
 
@@ -190,7 +175,6 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         settings.setValue(f"{settings_class}/MinAngle", self.min_angle, section=QgsSettings.Section.Plugins)
         settings.setValue(f"{settings_class}/MaxAngle", self.max_angle, section=QgsSettings.Section.Plugins)
         settings.setValue(f"{settings_class}/AngleStep", self.angle_step, section=QgsSettings.Section.Plugins)
-        settings.setValue(f"{settings_class}/Length", self.length, section=QgsSettings.Section.Plugins)
         settings.setValue(
             f"{settings_class}/ShowDistanceLimits", self.show_distance_limits, section=QgsSettings.Section.Plugins
         )
@@ -228,11 +212,6 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         with QSignalBlocker(self._angle_step):
             self._angle_step.setValue(
                 settings.value(f"{settings_class}/AngleStep", 1, type=float, section=QgsSettings.Section.Plugins)
-            )
-
-        with QSignalBlocker(self._length):
-            self._length.setValue(
-                settings.value(f"{settings_class}/Length", 100, type=float, section=QgsSettings.Section.Plugins)
             )
 
         with QSignalBlocker(self._show_distances):
