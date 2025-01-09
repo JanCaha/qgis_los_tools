@@ -2,7 +2,7 @@ from qgis.core import Qgis, QgsPointLocator, QgsPointXY, QgsVectorLayer
 from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolEdit, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QKeyEvent
-from qgis.PyQt.QtWidgets import QLineEdit, QPushButton, QWidget
+from qgis.PyQt.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QProgressBar, QPushButton, QWidget
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.gui.create_los_tool.los_tasks import AbstractPrepareLoSTask, LoSExtractionTaskManager
@@ -139,6 +139,18 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
     def prepare_task(self) -> AbstractPrepareLoSTask:
         return AbstractPrepareLoSTask()
 
+    def _push_message_bar_widget(self) -> None:
+        self.widget = QWidget()
+        layout = QHBoxLayout()
+        self.progress_bar = QProgressBar(self.widget)
+        self.progress_bar.setRange(0, 0)
+        self.label = QLabel("Saving LoS to layer ...")
+        layout.addWidget(self.label)
+        layout.addWidget(self.progress_bar)
+        layout.addStretch(1)
+        self.widget.setLayout(layout)
+        self._iface.messageBar().pushWidget(self.widget)
+
     def add_los_to_layer(self) -> None:
 
         self.addLoSStatusChanged.emit(False)
@@ -148,6 +160,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         task.taskCompleted.connect(self.task_finished)
         task.taskFinishedTime.connect(self.task_finished_message)
 
+        self._push_message_bar_widget()
         self.task_manager.addTask(task)
         self.clean()
 
@@ -155,6 +168,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         self.featuresAdded.emit()
 
     def task_finished_message(self, milliseconds: int) -> None:
+        self._iface.messageBar().popWidget()
         self._iface.messageBar().pushMessage(
             "LoS Added",
             f"LoS Processing Finished. Lasted {milliseconds / 1000} seconds.",
