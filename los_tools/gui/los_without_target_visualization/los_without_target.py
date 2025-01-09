@@ -122,7 +122,8 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
                 for angle in angles:
                     new_point = self._selected_point.project(size_constant, angle)
                     geom = QgsGeometry.fromPolylineXY([self._selected_point, new_point])
-                    geom = geom.extendLine(0, self._widget.length - size_constant)
+                    geom = geom.extendLine(0, self._raster_list.maximal_diagonal_size() - size_constant)
+                    geom = geom.intersection(self._raster_list.extent_polygon())
                     self._los_rubber_band.addGeometry(geom, self._canvas.mapSettings().destinationCrs())
                 self._los_rubber_band.show()
 
@@ -131,7 +132,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
 
                 self._los_rubber_band.reset()
 
-                maximal_length = self._widget.length
+                maximal_length = self._raster_list.maximal_diagonal_size()
 
                 angle = self._start_point.azimuth(self.end_point())
 
@@ -146,7 +147,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
                     new_point = self._start_point.project(size_constant, angle)
                     line = QgsGeometry.fromPolylineXY([self._start_point, new_point])
                     line = line.extendLine(0, maximal_length - size_constant)
-
+                    line = line.intersection(self._raster_list.extent_polygon())
                     self._los_rubber_band.addGeometry(line, self._canvas.mapSettings().destinationCrs())
                 self._los_rubber_band.show()
 
