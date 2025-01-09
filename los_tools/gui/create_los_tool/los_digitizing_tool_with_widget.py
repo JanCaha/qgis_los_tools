@@ -30,6 +30,7 @@ class LoSDigitizingToolWidget(QWidget):
 class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
     _widget: LoSDigitizingToolWidget = None
+    _progress_bar: QProgressBar = None
 
     featuresAdded = pyqtSignal()
     addLoSStatusChanged = pyqtSignal(bool)
@@ -140,16 +141,17 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         return AbstractPrepareLoSTask()
 
     def _push_message_bar_widget(self) -> None:
-        self.widget = QWidget()
+        self._widget_message_bar_progress_bar = QWidget()
         layout = QHBoxLayout()
-        self.progress_bar = QProgressBar(self.widget)
-        self.progress_bar.setRange(0, 0)
-        self.label = QLabel("Saving LoS to layer ...")
-        layout.addWidget(self.label)
-        layout.addWidget(self.progress_bar)
+        self._progress_bar = QProgressBar(self._widget_message_bar_progress_bar)
+        self._progress_bar.setRange(0, 100)
+        self._progress_bar.setMinimumWidth(200)
+        self._progess_bar_label = QLabel("Saving LoS to layer ...")
+        layout.addWidget(self._progess_bar_label)
+        layout.addWidget(self._progress_bar)
         layout.addStretch(1)
-        self.widget.setLayout(layout)
-        self._iface.messageBar().pushWidget(self.widget)
+        self._widget_message_bar_progress_bar.setLayout(layout)
+        self._iface.messageBar().pushWidget(self._widget_message_bar_progress_bar)
 
     def add_los_to_layer(self) -> None:
 
@@ -161,6 +163,9 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         task.taskFinishedTime.connect(self.task_finished_message)
 
         self._push_message_bar_widget()
+
+        task.progressChanged.connect(self.set_progress)
+
         self.task_manager.addTask(task)
         self.clean()
 
@@ -183,3 +188,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         if self._widget:
             self._widget.set_using_rasters(self._raster_list.raster_to_use())
         return super().reactivate()
+
+    def set_progress(self, value: float) -> None:
+        if self._progress_bar:
+            self._progress_bar.setValue(int(value))
