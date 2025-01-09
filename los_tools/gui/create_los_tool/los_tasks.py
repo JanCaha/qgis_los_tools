@@ -124,7 +124,9 @@ class PrepareLoSWithoutTargetTask(AbstractPrepareLoSTask):
             f.setAttribute(f.fieldNameIndex(FieldNames.ANGLE_STEP), self.angle_step)
 
             self.los_layer.dataProvider().addFeature(f)
+
             self.setProgress((j / number_of_lines) * 100)
+
             j += 1
 
         self.taskFinishedTime.emit(self.elapsedTime())
@@ -185,6 +187,8 @@ class PrepareLoSTask(AbstractPrepareLoSTask):
             f.setAttribute(f.fieldNameIndex(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL)
 
         self.los_layer.dataProvider().addFeature(f)
+
+        self.setProgress(100)
 
         self.taskFinishedTime.emit(self.elapsedTime())
 
