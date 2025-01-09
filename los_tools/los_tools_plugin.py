@@ -53,6 +53,7 @@ class LoSToolsPlugin:
 
         if self.iface is not None:
             self.iface.newProjectCreated.connect(self.project_updated)
+            self.iface.newProjectCreated.connect(self._reset_los_layer)
             self.iface.projectRead.connect(self.project_updated)
             self.iface.projectRead.connect(self._reset_los_layer)
 
@@ -257,6 +258,7 @@ class LoSToolsPlugin:
 
     def project_updated(self) -> None:
         self.current_project_visible_raster_layers()
+        self.raster_validations = RasterValidations(iface=self.iface)
         project = QgsProject.instance()
         project.layersRemoved.connect(self.update_list_of_rasters)
 
