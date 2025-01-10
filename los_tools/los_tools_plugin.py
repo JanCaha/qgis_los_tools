@@ -42,9 +42,9 @@ if cmd_folder not in sys.path:
 
 class LoSToolsPlugin:
 
-    los_notarget_action_name = "Create LoS No Target Tool"
-    optimize_point_location_action_name = "Optimize Point Location Tool"
-    create_los_action_name = "Create LoS"
+    _los_notarget_action_name = "Create LoS No Target Tool"
+    _optimize_point_location_action_name = "Optimize Point Location Tool"
+    _create_los_action_name = "Create LoS"
 
     def __init__(self, iface: QgisInterface):
 
@@ -59,11 +59,11 @@ class LoSToolsPlugin:
 
             self._layer_LoS: QgsVectorLayer = None
             self._sampling_distance_matrix = SamplingDistanceMatrix()
-            self.list_of_rasters_for_los: ListOfRasters = None
+            self._list_of_rasters_for_los: ListOfRasters = None
 
-            self.create_no_target_los_tool: LosNoTargetMapTool = None
-            self.create_los_tool: CreateLoSMapTool = None
-            self.optimize_point_location_tool: OptimizePointsLocationTool = None
+            self._create_no_target_los_tool: LosNoTargetMapTool = None
+            self._create_los_tool: CreateLoSMapTool = None
+            self._optimize_point_location_tool: OptimizePointsLocationTool = None
 
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
@@ -127,7 +127,7 @@ class LoSToolsPlugin:
 
             self.add_action(
                 icon_path=get_icon_path("create_los.svg"),
-                text=self.create_los_action_name,
+                text=self._create_los_action_name,
                 callback=self.run_tool_create_los,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
@@ -136,7 +136,7 @@ class LoSToolsPlugin:
 
             self.add_action(
                 icon_path=get_icon_path("create_los_no_target.svg"),
-                text=self.los_notarget_action_name,
+                text=self._los_notarget_action_name,
                 callback=self.run_tool_los_no_target,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
@@ -147,7 +147,7 @@ class LoSToolsPlugin:
 
             self.add_action(
                 icon_path=get_icon_path("optimize_point.svg"),
-                text=self.optimize_point_location_action_name,
+                text=self._optimize_point_location_action_name,
                 callback=self.run_tool_optimize_point_location,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
@@ -254,7 +254,7 @@ class LoSToolsPlugin:
                 if tree_layer.isVisible():
                     layers.append(layer)
 
-        self.list_of_rasters_for_los = ListOfRasters(layers)
+        self._list_of_rasters_for_los = ListOfRasters(layers)
 
     def project_updated(self) -> None:
         self.current_project_visible_raster_layers()
@@ -265,12 +265,12 @@ class LoSToolsPlugin:
     def update_list_of_rasters(self, list_of_ids: typing.List[str]):
         selected_ids = []
 
-        if self.list_of_rasters_for_los:
-            selected_ids = self.list_of_rasters_for_los.raster_ids
+        if self._list_of_rasters_for_los:
+            selected_ids = self._list_of_rasters_for_los.raster_ids
 
         for id in list_of_ids:
             if id in selected_ids:
-                self.list_of_rasters_for_los.remove_raster(id)
+                self._list_of_rasters_for_los.remove_raster(id)
 
     def get_action_by_text(self, action_text: str) -> QAction:
         action: QAction
@@ -287,35 +287,37 @@ class LoSToolsPlugin:
         dialog.exec()
 
     def run_tool_los_no_target(self):
-        self.get_action_by_text(self.los_notarget_action_name).setChecked(True)
-        self.create_no_target_los_tool = LosNoTargetMapTool(
-            self.iface, self.list_of_rasters_for_los, self._sampling_distance_matrix, self._layer_LoS
+        self.get_action_by_text(self._los_notarget_action_name).setChecked(True)
+        self._create_no_target_los_tool = LosNoTargetMapTool(
+            self.iface, self._list_of_rasters_for_los, self._sampling_distance_matrix, self._layer_LoS
         )
-        self.create_no_target_los_tool.featuresAdded.connect(self.update_actions_layer_text)
-        self.create_no_target_los_tool.deactivated.connect(partial(self.deactivateTool, self.los_notarget_action_name))
-        self.iface.mapCanvas().setMapTool(self.create_no_target_los_tool)
+        self._create_no_target_los_tool.featuresAdded.connect(self.update_actions_layer_text)
+        self._create_no_target_los_tool.deactivated.connect(
+            partial(self.deactivateTool, self._los_notarget_action_name)
+        )
+        self.iface.mapCanvas().setMapTool(self._create_no_target_los_tool)
 
     def run_tool_optimize_point_location(self):
-        self.get_action_by_text(self.optimize_point_location_action_name).setChecked(True)
-        self.optimize_point_location_tool = OptimizePointsLocationTool(self.iface.mapCanvas(), self.iface)
-        self.optimize_point_location_tool.deactivated.connect(
-            partial(self.deactivateTool, self.optimize_point_location_action_name)
+        self.get_action_by_text(self._optimize_point_location_action_name).setChecked(True)
+        self._optimize_point_location_tool = OptimizePointsLocationTool(self.iface.mapCanvas(), self.iface)
+        self._optimize_point_location_tool.deactivated.connect(
+            partial(self.deactivateTool, self._optimize_point_location_action_name)
         )
-        self.iface.mapCanvas().setMapTool(self.optimize_point_location_tool)
+        self.iface.mapCanvas().setMapTool(self._optimize_point_location_tool)
 
     def run_tool_create_los(self):
-        self.get_action_by_text(self.create_los_action_name).setChecked(True)
+        self.get_action_by_text(self._create_los_action_name).setChecked(True)
 
-        self.create_los_tool = CreateLoSMapTool(
+        self._create_los_tool = CreateLoSMapTool(
             self.iface,
-            self.list_of_rasters_for_los,
+            self._list_of_rasters_for_los,
             self._layer_LoS,
         )
-        self.create_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
-        self.create_los_tool.deactivated.connect(partial(self.deactivateTool, self.create_los_action_name))
-        self.create_los_tool.featuresAdded.connect(self.update_actions_layer_text)
+        self._create_los_tool.set_list_of_rasters(self._list_of_rasters_for_los)
+        self._create_los_tool.deactivated.connect(partial(self.deactivateTool, self._create_los_action_name))
+        self._create_los_tool.featuresAdded.connect(self.update_actions_layer_text)
 
-        self.iface.mapCanvas().setMapTool(self.create_los_tool)
+        self.iface.mapCanvas().setMapTool(self._create_los_tool)
 
     # handle los layer
     def _plugin_los_layer(self) -> QgsVectorLayer:
@@ -372,8 +374,8 @@ class LoSToolsPlugin:
         dialog.exec()
 
     def open_dialog_raster_selection(self):
-        if self.list_of_rasters_for_los:
-            self.raster_validations.setup_used_rasters(self.list_of_rasters_for_los)
+        if self._list_of_rasters_for_los:
+            self.raster_validations.setup_used_rasters(self._list_of_rasters_for_los)
         self.raster_validations.selectedRastersChanged.connect(self.store_list_of_rasters)
         self.raster_validations.selectedRastersChanged.connect(self.list_of_rasters_for_los_updated)
         self.raster_validations.exec()
@@ -382,16 +384,16 @@ class LoSToolsPlugin:
     def store_list_of_rasters(self) -> None:
         list_of_rasters = self.raster_validations.listOfRasters
         if list_of_rasters:
-            self.list_of_rasters_for_los = list_of_rasters
+            self._list_of_rasters_for_los = list_of_rasters
 
     def store_sampling_distance_matrix(self, sampling_distance_matrix: SamplingDistanceMatrix) -> None:
         self._sampling_distance_matrix = sampling_distance_matrix
 
     # update running tools
     def list_of_rasters_for_los_updated(self):
-        if self.create_los_tool:
-            self.create_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
-            self.create_los_tool.reactivate()
-        if self.create_no_target_los_tool:
-            self.create_no_target_los_tool.set_list_of_rasters(self.list_of_rasters_for_los)
-            self.create_no_target_los_tool.reactivate()
+        if self._create_los_tool:
+            self._create_los_tool.set_list_of_rasters(self._list_of_rasters_for_los)
+            self._create_los_tool.reactivate()
+        if self._create_no_target_los_tool:
+            self._create_no_target_los_tool.set_list_of_rasters(self._list_of_rasters_for_los)
+            self._create_no_target_los_tool.reactivate()
