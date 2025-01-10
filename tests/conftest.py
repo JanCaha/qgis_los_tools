@@ -11,12 +11,24 @@ from tests.utils import data_file_path
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _monkeypatch_iface(qgis_iface, monkeypatch):
+def _monkeypatch_iface(qgis_iface: QgisInterface, monkeypatch):
     def add_user_input_widget(widget):
         pass
 
     qgis_iface.addUserInputWidget = None
     monkeypatch.setattr(qgis_iface, "addUserInputWidget", add_user_input_widget)
+
+    def push_widget(widget):
+        pass
+
+    qgis_iface.messageBar().pushWidget = None
+    monkeypatch.setattr(qgis_iface.messageBar(), "pushWidget", push_widget)
+
+    def pop_widget():
+        pass
+
+    qgis_iface.messageBar().popWidget = None
+    monkeypatch.setattr(qgis_iface.messageBar(), "popWidget", pop_widget)
 
 
 def _raster_layer(path: Path) -> QgsRasterLayer:
