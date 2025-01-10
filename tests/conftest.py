@@ -2,6 +2,7 @@ import typing
 from pathlib import Path
 
 import pytest
+from pytest import MonkeyPatch
 from pytest_qgis.utils import clean_qgis_layer
 from qgis.core import Qgis, QgsFeature, QgsRasterLayer, QgsVectorLayer
 from qgis.gui import QgisInterface
@@ -11,7 +12,7 @@ from tests.utils import data_file_path
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _monkeypatch_iface(qgis_iface: QgisInterface, monkeypatch):
+def _monkeypatch_iface(qgis_iface: QgisInterface, monkeypatch: MonkeyPatch) -> None:
     def add_user_input_widget(widget):
         pass
 
