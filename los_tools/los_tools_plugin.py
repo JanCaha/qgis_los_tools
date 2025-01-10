@@ -42,7 +42,7 @@ if cmd_folder not in sys.path:
 
 class LoSToolsPlugin:
 
-    los_notarget_action_name = "Visualize LoS No Target Tool"
+    los_notarget_action_name = "Create LoS No Target Tool"
     optimize_point_location_action_name = "Optimize Point Location Tool"
     create_los_action_name = "Create LoS"
 
