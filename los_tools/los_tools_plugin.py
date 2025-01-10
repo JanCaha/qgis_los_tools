@@ -6,6 +6,7 @@ import typing
 from functools import partial
 
 from qgis.core import (
+    Qgis,
     QgsApplication,
     QgsCoordinateReferenceSystem,
     QgsMemoryProviderUtils,
@@ -344,7 +345,20 @@ class LoSToolsPlugin:
     def _add_plugin_los_layer_to_project(self) -> None:
         if self._layer_LoS:
             QgsProject.instance().addMapLayer(self._layer_LoS)
+            self.iface.messageBar().pushMessage(
+                "LoS Layer Added",
+                f"Layer {self._layer_LoS.name()} added to the project.",
+                Qgis.MessageLevel.Info,
+                duration=2,
+            )
             self._reset_los_layer()
+        else:
+            self.iface.messageBar().pushMessage(
+                "LoS Layer",
+                "Could not at plugin LoS layer to the project.",
+                Qgis.MessageLevel.Info,
+                duration=2,
+            )
 
     # update actions with los layer
     def update_actions_layer_text(self) -> None:
