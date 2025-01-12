@@ -384,7 +384,7 @@ class LoSToolsPlugin:
         self.object_parameters_dialog.exec()
 
     def open_dialog_create_3d_view(self):
-        dialog = Create3DView(self.iface, self.iface.mainWindow())
+        dialog = Create3DView(self._list_of_rasters_for_los, self.iface, self.iface.mainWindow())
         dialog.exec()
 
     def open_dialog_raster_selection(self):
