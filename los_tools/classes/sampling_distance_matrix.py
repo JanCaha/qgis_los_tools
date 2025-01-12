@@ -1,9 +1,10 @@
-from typing import List, Union
+from typing import List
 
 import numpy as np
 from qgis.core import QgsFeature, QgsGeometry, QgsLineString, QgsPoint, QgsVectorLayer
 
 from los_tools.constants.field_names import FieldNames
+from los_tools.constants.plugin import PluginConstants
 
 
 class SamplingDistanceMatrix:
@@ -15,14 +16,23 @@ class SamplingDistanceMatrix:
     def __init__(self, data: QgsVectorLayer = None):
         self.data = []
 
-        feature: QgsFeature
-
         if data:
+            unit_name = data.customProperty(PluginConstants.sampling_distanace_layer_units_property)
+
+            if unit_name:
+                distance_field_name = FieldNames.TEMPLATE_DISTANCE.replace("?", unit_name)
+                size_field_name = FieldNames.TEMPLATE_SIZE.replace("?", unit_name)
+            else:
+                distance_field_name = FieldNames.DISTANCE
+                size_field_name = FieldNames.SIZE
+
+            feature: QgsFeature
+
             for feature in data.getFeatures():
                 self.data.append(
                     [
-                        feature.attribute(FieldNames.SIZE),
-                        feature.attribute(FieldNames.DISTANCE),
+                        feature.attribute(size_field_name),
+                        feature.attribute(distance_field_name),
                     ]
                 )
 
