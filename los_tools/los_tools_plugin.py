@@ -263,15 +263,15 @@ class LoSToolsPlugin:
         project = QgsProject.instance()
         project.layersRemoved.connect(self.update_list_of_rasters)
 
-    def update_list_of_rasters(self, list_of_ids: typing.List[str]):
-        selected_ids = []
+    def update_list_of_rasters(self, removed_rasters_ids: typing.List[str]):
+        selected_raster_ids = []
 
         if self._list_of_rasters_for_los:
-            selected_ids = self._list_of_rasters_for_los.raster_ids
+            selected_raster_ids = self._list_of_rasters_for_los.raster_ids
 
-        for id in list_of_ids:
-            if id in selected_ids:
-                self._list_of_rasters_for_los.remove_raster(id)
+        for raster_id in removed_rasters_ids:
+            if raster_id in selected_raster_ids:
+                self._list_of_rasters_for_los.remove_raster(raster_id)
 
     def get_action_by_text(self, action_text: str) -> QAction:
         action: QAction
