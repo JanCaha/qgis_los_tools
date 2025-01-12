@@ -5,9 +5,9 @@ from qgis.gui import QgisInterface, QgsMapMouseEvent
 from qgis.PyQt.QtCore import Qt
 
 from los_tools.classes.list_raster import ListOfRasters
-from los_tools.gui.create_los_tool.create_los_widget import LoSInputWidget
-from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWithWidget
-from los_tools.gui.create_los_tool.los_tasks import PrepareLoSTask
+from los_tools.gui.los_tasks import PrepareLoSTask
+from los_tools.gui.los_tool.create_los_widget import LoSInputWidget
+from los_tools.gui.tools.los_digitizing_tool_with_widget import LoSDigitizingToolWithWidget
 
 
 class CreateLoSMapTool(LoSDigitizingToolWithWidget):
