@@ -9,4 +9,4 @@ class PluginConstants:
     settings_group = "LoSTools"
 
     sampling_distanace_layer_name = "Sampling Table"
-    sampling_distanace_layer_units_property = "units"
+    sampling_distanace_layer_units_property = "sampling_distance_units"
