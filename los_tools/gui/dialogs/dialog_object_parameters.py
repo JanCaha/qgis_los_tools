@@ -26,7 +26,7 @@ class ObjectParameters(QDialog):
 
     def init_gui(self) -> None:
         self.setWindowTitle("Object Visibility Parameters")
-        self.setMinimumWidth(600)
+        self.setMinimumWidth(400)
 
         layout = QFormLayout(self)
         self.setLayout(layout)
@@ -68,21 +68,21 @@ class ObjectParameters(QDialog):
     def enable_gui_elements(self) -> None:
         if self.calculation_type == CalculationType.DISTANCE:
             self.object_distance.setDisabled(True)
-            self.object_angle_size.setEnabled(True)
-            self.object_size.setEnabled(True)
+            self.object_angle_size.setDisabled(False)
+            self.object_size.setDisabled(False)
         elif self.calculation_type == CalculationType.SIZE:
-            self.object_distance.setEnabled(True)
-            self.object_angle_size.setEnabled(True)
+            self.object_distance.setDisabled(False)
+            self.object_angle_size.setDisabled(False)
             self.object_size.setDisabled(True)
         elif self.calculation_type == CalculationType.ANGLE:
-            self.object_distance.setEnabled(True)
+            self.object_distance.setDisabled(False)
             self.object_angle_size.setDisabled(True)
-            self.object_size.setEnabled(True)
+            self.object_size.setDisabled(False)
         else:
             # default is distance
             self.object_distance.setDisabled(True)
-            self.object_angle_size.setEnabled(True)
-            self.object_size.setEnabled(True)
+            self.object_angle_size.setDisabled(False)
+            self.object_size.setDisabled(False)
 
     def calculate(self) -> None:
         self.block_all_signals(True)
