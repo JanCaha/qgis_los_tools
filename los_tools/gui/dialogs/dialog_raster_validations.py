@@ -87,8 +87,7 @@ class RasterValidations(QDialog):
         group_box.setLayout(group_layout)
 
         group_layout.addRow(self.select_point)
-        group_layout.addRow(QLabel("Selected point"))
-        group_layout.addRow(self.point_coordinate)
+        group_layout.addRow("Selected point", self.point_coordinate)
         group_layout.addRow("Value sampled from", self.sampled_from_raster)
         group_layout.addRow("Sampled value", self.sampled_value)
 
