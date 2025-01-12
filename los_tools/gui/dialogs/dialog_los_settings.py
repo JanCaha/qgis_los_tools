@@ -177,7 +177,7 @@ class LoSSettings(QDialog):
         else:
             text = [
                 f" To detect an object of {self.object_size.distance()} in size "
-                f"at a distance of{self.object_distance.distance()}, "
+                f"at a distance of {self.object_distance.distance()}, "
                 f"an angular sampling of {round(self.object_angle_size.value(), 3)}° is required.\n\n"
                 "This angular sampling of lines-of-sight ensures that the object will be intersected at least once."
                 "\n\n",
