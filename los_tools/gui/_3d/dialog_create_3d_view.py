@@ -22,7 +22,7 @@ class Create3DView(DialogCameraSetting):
         layout.addWidget(QLabel("Name of 3D View:"), 0, 0)
         layout.addWidget(self.name_3d_view, 0, 1)
         layout.addWidget(QLabel("Project terrain type is:"), 1, 0)
-        layout.addWidget(self.terrain_type, 1, 1)
+        layout.addWidget(self.raster_names, 1, 1)
         layout.addWidget(self.observer_btn, 2, 0)
         layout.addWidget(self.observer_coordinate, 2, 1)
         layout.addWidget(QLabel("Observer Offset:"), 3, 0)
@@ -48,7 +48,7 @@ class Create3DView(DialogCameraSetting):
         camera_pose = set_camera_to_position_and_look(
             canvas_3d.mapSettings(),
             camera_controller.cameraPose(),
-            self.elevation_provider,
+            self._list_of_rasters,
             self._iface.mapCanvas().mapSettings().destinationCrs(),
             self.point_observer,
             self.point_target,

@@ -1,42 +1,37 @@
 from functools import partial
 
-from qgis.core import (
-    QgsAbstractTerrainProvider,
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
-    QgsPointXY,
-    QgsProject,
-)
+from qgis.core import QgsPointXY
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QDoubleSpinBox, QLabel, QLineEdit, QPushButton, QWidget
 
+from los_tools.classes.list_raster import ListOfRasters
 from los_tools.constants.enums import PointType
 from los_tools.gui.point_capture_map_tool import PointCaptureMapTool
 
 
 class DialogCameraSetting(QDialog):
 
-    crs_terrain: QgsCoordinateReferenceSystem
     point_observer: QgsPointXY = QgsPointXY()
     point_target: QgsPointXY = QgsPointXY()
-    elevation_provider: QgsAbstractTerrainProvider
 
     observer_coordinate: QLineEdit = None
     target_coordinate: QLineEdit = None
     button_box: QDialogButtonBox = None
-    terrain_type: QLabel = None
+    raster_names: QLabel = None
 
     map_tool: PointCaptureMapTool = None
 
     valuesChanged = pyqtSignal()
 
-    def __init__(self, iface: QgisInterface = None, parent: QWidget = None) -> None:
+    def __init__(self, list_of_rasters: ListOfRasters, iface: QgisInterface = None, parent: QWidget = None) -> None:
         if parent is None:
             parent = iface.mainWindow()
         super().__init__(parent)
 
         self._iface = iface
+
+        self._list_of_rasters = list_of_rasters
 
         self.snapper = self._iface.mapCanvas().snappingUtils()
 
@@ -69,23 +64,13 @@ class DialogCameraSetting(QDialog):
         self.observer_offset.setMinimum(0)
         self.observer_offset.setValue(1.6)
 
-        self.terrain_type = QLabel()
+        self.raster_names = QLineEdit()
+        self.raster_names.setReadOnly(True)
 
     def sync_to_project(self):
-        self.elevation_provider = QgsProject.instance().elevationProperties().terrainProvider()
+        self.rasters_crs = self._list_of_rasters.crs()
 
-        self.terrain_crs = self.elevation_provider.crs()
-
-        elevation_description = ""
-
-        if self.elevation_provider.type() == "flat":
-            elevation_description = f"Flat terrain ({self.elevation_provider.offset()})"
-        elif self.elevation_provider.type() == "raster":
-            elevation_description = f"Raster layer ({self.elevation_provider.layer().name()})"
-        elif self.elevation_provider.type() == "mesh":
-            elevation_description = f"Mesh terrain ({self.elevation_provider.layer().name()})"
-
-        self.terrain_type.setText(elevation_description)
+        self.raster_names.setText(self._list_of_rasters.raster_to_use())
 
     def update_point(self, point: QgsPointXY, point_type: PointType):
         point = self.map_tool.get_point()
@@ -114,14 +99,6 @@ class DialogCameraSetting(QDialog):
         self.map_tool.deactivated.connect(self.show)
 
         self._iface.mapCanvas().setMapTool(self.map_tool)
-
-    def convert_point_from_canvas_crs_to_elevation_provider_crs(self, point: QgsPointXY) -> QgsPointXY:
-
-        transform = QgsCoordinateTransform(
-            self._iface.mapCanvas().mapSettings().destinationCrs(), self.terrain_crs, QgsProject.instance()
-        )
-
-        return transform.transform(point)
 
     def set_acceptable(self) -> None:
         if self.point_observer.isEmpty():

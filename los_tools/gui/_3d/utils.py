@@ -1,14 +1,9 @@
 import math
 
 from qgis._3d import Qgs3DMapSettings, QgsCameraPose
-from qgis.core import (
-    QgsAbstractTerrainProvider,
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
-    QgsPointXY,
-    QgsProject,
-    QgsVector3D,
-)
+from qgis.core import QgsCoordinateReferenceSystem, QgsPointXY, QgsVector3D
+
+from los_tools.classes.list_raster import ListOfRasters
 
 
 def heading_angle(p1: QgsVector3D, p2: QgsVector3D):
@@ -33,20 +28,16 @@ def vertical_angle(p1: QgsVector3D, p2: QgsVector3D) -> float:
 def set_camera_to_position_and_look(
     canvas_3d_settings: Qgs3DMapSettings,
     camera_pose: QgsCameraPose,
-    elevation_provider: QgsAbstractTerrainProvider,
+    list_of_rasters: ListOfRasters,
     canvas_crs: QgsCoordinateReferenceSystem,
     point_observer: QgsPointXY,
     point_target: QgsPointXY,
     observer_offset: float,
 ) -> QgsCameraPose:
 
-    point = convert_point_from_canvas_crs_to_elevation_provider_crs(
-        canvas_crs, elevation_provider.crs(), point_observer
-    )
-    observer_z = elevation_provider.heightAt(point.x(), point.y()) + observer_offset
+    observer_z = list_of_rasters.extract_interpolated_value_at_point(point_observer, canvas_crs) + observer_offset
 
-    point = convert_point_from_canvas_crs_to_elevation_provider_crs(canvas_crs, elevation_provider.crs(), point_target)
-    target_z = elevation_provider.heightAt(point.x(), point.y())
+    target_z = list_of_rasters.extract_interpolated_value_at_point(point_target, canvas_crs)
 
     look_at_point = canvas_3d_settings.mapToWorldCoordinates(QgsVector3D(point_target.x(), point_target.y(), target_z))
     look_from_point = canvas_3d_settings.mapToWorldCoordinates(
@@ -59,12 +50,3 @@ def set_camera_to_position_and_look(
     camera_pose.setPitchAngle(vertical_angle(look_from_point, look_at_point))
 
     return camera_pose
-
-
-def convert_point_from_canvas_crs_to_elevation_provider_crs(
-    canvas_crs: QgsCoordinateReferenceSystem, terrain_provider_crs: QgsCoordinateReferenceSystem, point: QgsPointXY
-) -> QgsPointXY:
-
-    transform = QgsCoordinateTransform(canvas_crs, terrain_provider_crs, QgsProject.instance())
-
-    return transform.transform(point)

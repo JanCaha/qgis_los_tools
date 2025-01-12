@@ -29,15 +29,15 @@ class SetCameraDialog(DialogCameraSetting):
         self.layout_cb = QComboBox()
         self.layout_cb.currentIndexChanged.connect(self.set_layout)
 
-        layout.addWidget(QLabel("Select layout with 3D Map:"), 0, 0)
+        layout.addWidget(QLabel("Select layout with 3D Map"), 0, 0)
         layout.addWidget(self.layout_cb, 0, 1)
-        layout.addWidget(QLabel("Select layout item 3D Map to set the camera for:"), 1, 0)
+        layout.addWidget(QLabel("Select layout item 3D Map to set the camera for"), 1, 0)
         layout.addWidget(self.item_cb, 1, 1)
-        layout.addWidget(QLabel("Project terrain type is:"), 2, 0)
-        layout.addWidget(self.terrain_type, 2, 1)
+        layout.addWidget(QLabel("Rasters"), 2, 0)
+        layout.addWidget(self.raster_names, 2, 1)
         layout.addWidget(self.observer_btn, 3, 0)
         layout.addWidget(self.observer_coordinate, 3, 1)
-        layout.addWidget(QLabel("Observer Offset:"), 4, 0)
+        layout.addWidget(QLabel("Observer Offset"), 4, 0)
         layout.addWidget(self.observer_offset, 4, 1)
 
         layout.addWidget(self.target_btn, 5, 0)
@@ -105,7 +105,7 @@ class SetCameraDialog(DialogCameraSetting):
         camera_pose = set_camera_to_position_and_look(
             self.layout_item_3d.mapSettings(),
             self.layout_item_3d.cameraPose(),
-            self.elevation_provider,
+            self._list_of_rasters,
             self._iface.mapCanvas().mapSettings().destinationCrs(),
             self.point_observer,
             self.point_target,
