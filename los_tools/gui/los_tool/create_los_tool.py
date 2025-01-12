@@ -27,12 +27,8 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         self.create_widget()
 
     def create_widget(self):
-        if not self._widget:
-            self._widget = LoSInputWidget()
-            self._widget.load_settings()
-            self._widget.set_using_rasters(self._raster_list.raster_to_use())
-            self._widget.valuesChanged.connect(partial(self.draw_los, None))
-            self._widget.saveToLayerClicked.connect(self.add_los_to_layer)
+        self._widget = LoSInputWidget()
+        self._widget.valuesChanged.connect(partial(self.draw_los, None))
         super().create_widget()
 
     def clean(self) -> None:

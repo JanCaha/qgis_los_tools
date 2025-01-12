@@ -39,12 +39,8 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         self._end_point_temp: QgsPointXY = None
 
     def create_widget(self):
-        if not self._widget:
-            self._widget = LoSNoTargetInputWidget()
-            self._widget.load_settings()
-            self._widget.set_using_rasters(self._raster_list.raster_to_use())
-            self._widget.valuesChanged.connect(self.draw)
-            self._widget.saveToLayerClicked.connect(self.add_los_to_layer)
+        self._widget = LoSNoTargetInputWidget()
+        self._widget.valuesChanged.connect(self.draw)
         super().create_widget()
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:

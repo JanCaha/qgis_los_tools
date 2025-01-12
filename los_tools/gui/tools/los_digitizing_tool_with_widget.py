@@ -26,6 +26,9 @@ class LoSDigitizingToolWidget(QWidget):
         if self._rasters:
             self._rasters.setText(rasters)
 
+    def load_settings(self) -> None:
+        pass
+
 
 class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
@@ -92,9 +95,12 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         super().deactivate()
 
     def create_widget(self):
+        self._widget.load_settings()
+        self._widget.set_using_rasters(self._raster_list.raster_to_use())
+        self._widget.saveToLayerClicked.connect(self.add_los_to_layer)
+
         self._iface.addUserInputWidget(self._widget)
         self._widget.setFocus(Qt.TabFocusReason)
-        self._widget.show()
 
         self.addLoSStatusChanged.connect(self._widget.setAddLoSEnabled)
 
