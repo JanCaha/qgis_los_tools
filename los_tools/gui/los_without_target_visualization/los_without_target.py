@@ -7,12 +7,12 @@ from qgis.PyQt.QtCore import Qt
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
-from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWithWidget
-from los_tools.gui.create_los_tool.los_tasks import PrepareLoSWithoutTargetTask
+from los_tools.gui.los_tasks import PrepareLoSWithoutTargetTask
 from los_tools.gui.los_without_target_visualization.los_without_target_widget import (
     LoSNoTargetDefinitionType,
     LoSNoTargetInputWidget,
 )
+from los_tools.gui.tools.los_digitizing_tool_with_widget import LoSDigitizingToolWithWidget
 from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
 
 

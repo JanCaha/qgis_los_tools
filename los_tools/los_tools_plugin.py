@@ -21,19 +21,18 @@ from qgis.PyQt.QtWidgets import QAction, QMenu, QToolBar, QToolButton
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
+from los_tools.constants.fields import Fields
+from los_tools.constants.plugin import PluginConstants
+from los_tools.gui._3d.dialog_create_3d_view import Create3DView
+from los_tools.gui._3d.dialog_tool_set_camera import SetCameraDialog
+from los_tools.gui.dialogs.dialog_los_settings import LoSSettings
+from los_tools.gui.dialogs.dialog_object_parameters import ObjectParameters
+from los_tools.gui.dialogs.dialog_raster_validations import RasterValidations
+from los_tools.gui.los_tool.create_los_tool import CreateLoSMapTool
+from los_tools.gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
+from los_tools.gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
 from los_tools.processing.los_tools_provider import LoSToolsProvider
-
-from .constants.fields import Fields
-from .constants.plugin import PluginConstants
-from .gui._3d.dialog_create_3d_view import Create3DView
-from .gui._3d.dialog_tool_set_camera import SetCameraDialog
-from .gui.create_los_tool.create_los_tool import CreateLoSMapTool
-from .gui.dialog_los_settings import LoSSettings
-from .gui.dialog_object_parameters import ObjectParameters
-from .gui.dialog_raster_validations import RasterValidations
-from .gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
-from .gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
-from .utils import get_icon_path
+from los_tools.utils import get_icon_path
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 

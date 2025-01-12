@@ -6,7 +6,7 @@ from qgis.gui import QgisInterface, QgsMapCanvas
 from qgis.PyQt.QtCore import QEvent, Qt
 
 from los_tools.classes.list_raster import ListOfRasters
-from los_tools.gui.create_los_tool.create_los_tool import CreateLoSMapTool
+from los_tools.gui.los_tool.create_los_tool import CreateLoSMapTool
 from tests.utils import create_mouse_event
 
 

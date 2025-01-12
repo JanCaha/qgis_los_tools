@@ -7,8 +7,8 @@ from qgis.PyQt.QtCore import QSignalBlocker, Qt
 from qgis.PyQt.QtWidgets import QCheckBox, QFormLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QTabWidget, QWidget
 
 from los_tools.constants.plugin import PluginConstants
-from los_tools.gui.create_los_tool.los_digitizing_tool_with_widget import LoSDigitizingToolWidget
 from los_tools.gui.custom_classes import DistancesWidget, DistanceWidget
+from los_tools.gui.tools.los_digitizing_tool_with_widget import LoSDigitizingToolWidget
 
 
 class LoSNoTargetDefinitionType(Enum):
