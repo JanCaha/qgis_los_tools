@@ -162,7 +162,6 @@ class LoSToolsPlugin:
                 callback=self.open_dialog_object_visibility_parameters,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
-                checkable=True,
             )
 
             self.add_action(
