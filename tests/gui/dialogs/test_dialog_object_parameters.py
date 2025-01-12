@@ -1,6 +1,6 @@
 import pytest
 
-from los_tools.gui.dialog_object_parameters import ObjectParameters
+from los_tools.gui.dialogs.dialog_object_parameters import CalculationType, ObjectParameters
 
 
 def test_widget_object_distance():
@@ -9,6 +9,8 @@ def test_widget_object_distance():
     assert widget is not None
 
     widget.what_calculate.setCurrentIndex(0)
+    assert widget.calculation_type == CalculationType.DISTANCE
+
     widget.object_size.setValue(1)
     widget.object_angle_size.setValue(0.1)
 
@@ -27,6 +29,7 @@ def test_widget_object_size():
     assert widget is not None
 
     widget.what_calculate.setCurrentIndex(1)
+    assert widget.calculation_type == CalculationType.SIZE
 
     widget.object_distance.setValue(1000)
     widget.object_angle_size.setValue(0.1)
@@ -46,6 +49,7 @@ def test_widget_object_angle():
     assert widget is not None
 
     widget.what_calculate.setCurrentIndex(2)
+    assert widget.calculation_type == CalculationType.ANGLE
 
     widget.object_size.setValue(2)
     widget.object_distance.setValue(1000)
