@@ -27,6 +27,13 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         self._rasters = QLineEdit()
         self._rasters.setReadOnly(True)
 
+        self._observer_offset = QgsDoubleSpinBox(self)
+        self._observer_offset.setMinimum(0.0)
+        self._observer_offset.setMaximum(999999.999)
+        self._observer_offset.setValue(1.6)
+        self._observer_offset.setClearValue(1.6)
+        self._observer_offset.valueChanged.connect(self.save_settings)
+
         self._min_angle = QgsDoubleSpinBox(self)
         self._min_angle.setMinimum(-359.999)
         self._min_angle.setMaximum(359.999)
@@ -107,14 +114,17 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         layout.addWidget(QLabel("Rasters"), 0, 0)
         layout.addWidget(self._rasters, 0, 1)
 
-        layout.addWidget(self._tabs, 1, 0, 1, 2)
-        layout.addWidget(QLabel("Angle Step"), 2, 0)
-        layout.addWidget(self._angle_step, 2, 1)
-        layout.addWidget(QLabel("Show Distance Limits"), 3, 0)
-        layout.addWidget(self._show_distances, 3, 1)
-        layout.addWidget(QLabel("Distance Limits"), 4, 0)
-        layout.addWidget(self._distances, 4, 1)
-        layout.addWidget(self._add_los_to_layer, 5, 1, 1, 2)
+        layout.addWidget(QLabel("Observer Offset"), 1, 0)
+        layout.addWidget(self._observer_offset, 1, 1)
+
+        layout.addWidget(self._tabs, 2, 0, 1, 2)
+        layout.addWidget(QLabel("Angle Step"), 3, 0)
+        layout.addWidget(self._angle_step, 3, 1)
+        layout.addWidget(QLabel("Show Distance Limits"), 4, 0)
+        layout.addWidget(self._show_distances, 4, 1)
+        layout.addWidget(QLabel("Distance Limits"), 5, 0)
+        layout.addWidget(self._distances, 5, 1)
+        layout.addWidget(self._add_los_to_layer, 6, 1, 1, 2)
 
         self._unit = QgsUnitTypes.DistanceUnit.DistanceMeters
 
@@ -168,10 +178,15 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
     def distance_limits(self) -> List[float]:
         return self._distances.distances_in_units(self._unit)
 
+    @property
+    def observer_offset(self) -> float:
+        return self._observer_offset.value()
+
     def save_settings(self) -> None:
         settings = QgsSettings()
         settings_class = f"{PluginConstants.settings_group}/LoSNoTarget"
 
+        settings.setValue(f"{settings_class}/ObserverOffset", self.observer_offset, section=QgsSettings.Section.Plugins)
         settings.setValue(f"{settings_class}/MinAngle", self.min_angle, section=QgsSettings.Section.Plugins)
         settings.setValue(f"{settings_class}/MaxAngle", self.max_angle, section=QgsSettings.Section.Plugins)
         settings.setValue(f"{settings_class}/AngleStep", self.angle_step, section=QgsSettings.Section.Plugins)
@@ -198,6 +213,11 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
     def load_settings(self) -> None:
         settings = QgsSettings()
         settings_class = f"{PluginConstants.settings_group}/LoSNoTarget"
+
+        with QSignalBlocker(self._observer_offset):
+            self._observer_offset.setValue(
+                settings.value(f"{settings_class}/ObserverOffset", 1.6, type=float, section=QgsSettings.Section.Plugins)
+            )
 
         with QSignalBlocker(self._min_angle):
             self._min_angle.setValue(

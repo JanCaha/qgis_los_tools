@@ -208,7 +208,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
             self._los_layer,
             self._raster_list,
             self._sampling_distance_matrix,
-            0,
+            self._widget.observer_offset,
             self._widget.angle_step,
             self._iface.mapCanvas().mapSettings().destinationCrs(),
         )
