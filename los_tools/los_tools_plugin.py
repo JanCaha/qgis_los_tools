@@ -196,7 +196,7 @@ class LoSToolsPlugin:
             self.add_action(
                 icon_path=get_icon_path("camera_layout_item.svg"),
                 text="Set Camera to Layout 3D Map",
-                callback=self.run_tool_set_camera,
+                callback=self.open_dialog_set_camera,
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
             )
@@ -283,10 +283,6 @@ class LoSToolsPlugin:
         self.get_action_by_text(action_name).setChecked(False)
 
     # run tools
-    def run_tool_set_camera(self):
-        dialog = SetCameraDialog(self.iface, self.iface.mainWindow())
-        dialog.exec()
-
     def run_tool_los_no_target(self):
         self.get_action_by_text(self._los_notarget_action_name).setChecked(True)
         self._create_no_target_los_tool = LosNoTargetMapTool(
@@ -377,6 +373,10 @@ class LoSToolsPlugin:
         action.setText(text)
 
     # open dialogs
+    def open_dialog_set_camera(self):
+        dialog = SetCameraDialog(self._list_of_rasters_for_los, self.iface, self.iface.mainWindow())
+        dialog.exec()
+
     def open_dialog_los_settings(self):
         self.los_settings_dialog.exec()
 
