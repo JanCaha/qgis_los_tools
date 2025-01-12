@@ -334,3 +334,5 @@ class LoSSettings(QDialog):
         self.object_size.setEnabled(not manual)
         self.object_distance.setEnabled(not manual)
         self.object_angle_size.setReadOnly(not manual)
+        if not manual:
+            self._calculate_object_angle_size()
