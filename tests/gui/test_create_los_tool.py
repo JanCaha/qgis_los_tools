@@ -24,7 +24,8 @@ def test_local_los(
     map_tool.activate()
 
     assert map_tool._start_point is None
-    assert map_tool._last_towards_point is None
+    assert map_tool._end_point is None
+    assert map_tool._direction_point is None
     assert map_tool._los_rubber_band.size() == 0
 
     # set observer point
@@ -32,24 +33,26 @@ def test_local_los(
 
     assert map_tool._start_point is not None
     assert map_tool._start_point.isEmpty() is False
-    assert map_tool._last_towards_point is None
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 0
 
     # move mouse - start creating LoS
     map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event=QEvent.Type.MouseMove))
 
     assert map_tool._start_point is not None
-    assert map_tool._last_towards_point is not None
-    assert map_tool._last_towards_point.isEmpty() is False
+    assert map_tool._direction_point is not None
+    assert map_tool._direction_point.isEmpty() is False
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 1
     assert map_tool._los_rubber_band.asGeometry().length() == 75
 
     # set second point create local LoS
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, left_point))
 
-    assert map_tool._start_point is None
-    assert map_tool._last_towards_point is not None
-    assert map_tool._last_towards_point.isEmpty() is False
+    assert map_tool._start_point is not None
+    assert map_tool._direction_point is not None
+    assert map_tool._direction_point.isEmpty() is False
+    assert map_tool._end_point is not None
     assert map_tool._los_rubber_band.size() == 1
 
     assert map_tool._los_rubber_band.asGeometry().length() == 75
@@ -72,7 +75,8 @@ def test_global_los(
     map_tool.activate()
 
     assert map_tool._start_point is None
-    assert map_tool._last_towards_point is None
+    assert map_tool._direction_point is None
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 0
 
     # set observer point
@@ -80,7 +84,8 @@ def test_global_los(
 
     assert map_tool._start_point is not None
     assert map_tool._start_point.isEmpty() is False
-    assert map_tool._last_towards_point is None
+    assert map_tool._direction_point is None
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 0
     assert map_tool._widget._add_los_to_layer.isEnabled() is False
 
@@ -91,8 +96,9 @@ def test_global_los(
     map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event=QEvent.Type.MouseMove))
 
     assert map_tool._start_point is not None
-    assert map_tool._last_towards_point is not None
-    assert map_tool._last_towards_point.isEmpty() is False
+    assert map_tool._direction_point is not None
+    assert map_tool._direction_point.isEmpty() is False
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 1
     assert map_tool._los_rubber_band.asGeometry().length() == pytest.approx(1822.1, rel=0.1)
     assert map_tool._widget._add_los_to_layer.isEnabled() is False
@@ -100,9 +106,10 @@ def test_global_los(
     # create global LoS
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, left_point))
 
-    assert map_tool._start_point is None
-    assert map_tool._last_towards_point is not None
-    assert map_tool._last_towards_point.isEmpty() is False
+    assert map_tool._start_point is not None
+    assert map_tool._direction_point is not None
+    assert map_tool._direction_point.isEmpty() is False
+    assert map_tool._end_point is not None
     assert map_tool._los_rubber_band.size() == 1
 
     assert map_tool._los_rubber_band.asGeometry().length() == pytest.approx(1822.1, rel=0.1)
@@ -133,7 +140,8 @@ def test_right_click_when_creating(
     map_tool._widget._los_type.setCurrentIndex(0)
 
     assert map_tool._start_point is None
-    assert map_tool._last_towards_point is None
+    assert map_tool._direction_point is None
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 0
 
     # set observer point
@@ -141,15 +149,17 @@ def test_right_click_when_creating(
 
     assert map_tool._start_point is not None
     assert map_tool._start_point.isEmpty() is False
-    assert map_tool._last_towards_point is None
+    assert map_tool._direction_point is None
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 0
 
     # move mouse - start creating LoS
     map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event=QEvent.Type.MouseMove))
 
     assert map_tool._start_point is not None
-    assert map_tool._last_towards_point is not None
-    assert map_tool._last_towards_point.isEmpty() is False
+    assert map_tool._direction_point is not None
+    assert map_tool._direction_point.isEmpty() is False
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 1
     assert map_tool._los_rubber_band.asGeometry().length() == 75
 
@@ -157,7 +167,8 @@ def test_right_click_when_creating(
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, left_point, mouse_button=Qt.MouseButton.RightButton))
 
     assert map_tool._start_point is None
-    assert map_tool._last_towards_point is None
+    assert map_tool._direction_point is None
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 0
 
 
@@ -177,7 +188,8 @@ def test_global_los_add_to_plugin_layer(
     map_tool.activate()
 
     assert map_tool._start_point is None
-    assert map_tool._last_towards_point is None
+    assert map_tool._direction_point is None
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 0
 
     # set observer point
@@ -185,7 +197,8 @@ def test_global_los_add_to_plugin_layer(
 
     assert map_tool._start_point is not None
     assert map_tool._start_point.isEmpty() is False
-    assert map_tool._last_towards_point is None
+    assert map_tool._direction_point is None
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 0
     assert map_tool._widget._add_los_to_layer.isEnabled() is False
 
@@ -196,8 +209,9 @@ def test_global_los_add_to_plugin_layer(
     map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event=QEvent.Type.MouseMove))
 
     assert map_tool._start_point is not None
-    assert map_tool._last_towards_point is not None
-    assert map_tool._last_towards_point.isEmpty() is False
+    assert map_tool._direction_point is not None
+    assert map_tool._direction_point.isEmpty() is False
+    assert map_tool._end_point is None
     assert map_tool._los_rubber_band.size() == 1
     assert map_tool._los_rubber_band.asGeometry().length() == pytest.approx(1822.1, rel=0.1)
     assert map_tool._widget._add_los_to_layer.isEnabled() is False
@@ -205,9 +219,10 @@ def test_global_los_add_to_plugin_layer(
     # create global LoS
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, left_point))
 
-    assert map_tool._start_point is None
-    assert map_tool._last_towards_point is not None
-    assert map_tool._last_towards_point.isEmpty() is False
+    assert map_tool._start_point is not None
+    assert map_tool._direction_point is not None
+    assert map_tool._direction_point.isEmpty() is False
+    assert map_tool._end_point is not None
     assert map_tool._los_rubber_band.size() == 1
 
     assert map_tool._los_rubber_band.asGeometry().length() == pytest.approx(1822.1, rel=0.1)
@@ -225,5 +240,10 @@ def test_global_los_add_to_plugin_layer(
         map_tool._widget._add_los_to_layer.click()
 
     assert los_layer.dataProvider().featureCount() == 1
+
+    assert map_tool._start_point is None
+    assert map_tool._direction_point is None
+    assert map_tool._end_point is None
+    assert map_tool._los_rubber_band.size() == 0
 
     map_tool.deactivate()

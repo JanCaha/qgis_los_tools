@@ -38,9 +38,9 @@ def test_notarget_los_tool_point_definition(
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point))
 
-    # those are not set in this mode
-    assert map_tool._start_point is None
+    assert map_tool._start_point
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     assert map_tool._los_rubber_band.size() == 360
 
@@ -51,9 +51,9 @@ def test_notarget_los_tool_point_definition(
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point, event=QEvent.Type.MouseMove))
 
-    # those are not set in this mode
-    assert map_tool._start_point is None
+    assert map_tool._start_point
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     assert map_tool._snap_point != point
     assert map_tool._snap_point == QgsPointXY(-336366.19582480326062068, -1189110.65821624454110861)
@@ -94,16 +94,19 @@ def test_notarget_los_tool_direction_defition(
 
     assert map_tool._start_point is None
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point))
 
     assert map_tool._start_point
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point.project(10, 90)))
 
     assert map_tool._start_point
     assert map_tool._end_point
+    assert map_tool._direction_point is None
 
     assert map_tool._los_rubber_band.size() == 41
     assert map_tool._distance_limits_rubber_band.size() == 0
@@ -117,16 +120,19 @@ def test_notarget_los_tool_direction_defition(
 
     assert map_tool._start_point is None
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point, event=QEvent.Type.MouseMove))
 
     assert map_tool._start_point
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point.project(10, 90)))
 
     assert map_tool._start_point
     assert map_tool._end_point
+    assert map_tool._direction_point is None
 
     assert map_tool._los_rubber_band.size() == 181
     assert map_tool._distance_limits_rubber_band.size() == 0
@@ -141,16 +147,19 @@ def test_notarget_los_tool_direction_defition(
 
     assert map_tool._start_point is None
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point, event=QEvent.Type.MouseMove))
 
     assert map_tool._start_point
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point.project(10, 180)))
 
     assert map_tool._start_point
     assert map_tool._end_point
+    assert map_tool._direction_point is None
 
     assert map_tool._los_rubber_band.size() == 91
     assert map_tool._distance_limits_rubber_band.size() == 0
@@ -191,16 +200,19 @@ def test_notarget_los_tool_direction_defition_with_limits(
 
     assert map_tool._start_point is None
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point))
 
     assert map_tool._start_point
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point.project(10, 90)))
 
     assert map_tool._start_point
     assert map_tool._end_point
+    assert map_tool._direction_point is None
 
     assert map_tool._los_rubber_band.size() == 41
     assert map_tool._distance_limits_rubber_band.size() == 4
@@ -241,16 +253,19 @@ def test_notarget_los_tool_add_los_to_layer(
 
     assert map_tool._start_point is None
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point))
 
     assert map_tool._start_point
     assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point.project(10, 90)))
 
     assert map_tool._start_point
     assert map_tool._end_point
+    assert map_tool._direction_point is None
 
     assert map_tool._los_rubber_band.size() == 41
     assert map_tool._distance_limits_rubber_band.size() == 0
@@ -261,5 +276,9 @@ def test_notarget_los_tool_add_los_to_layer(
     with qtbot.waitSignal(map_tool.featuresAdded, timeout=None, raising=True):
         # click button to add LoS to layer
         map_tool._widget._add_los_to_layer.click()
+
+    assert map_tool._start_point is None
+    assert map_tool._end_point is None
+    assert map_tool._direction_point is None
 
     assert los_layer.featureCount() == 41
