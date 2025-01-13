@@ -1,5 +1,3 @@
-from functools import partial
-
 from qgis.core import QgsGeometry, QgsPoint, QgsPointXY, QgsTask, QgsVectorLayer, QgsVertexId
 from qgis.gui import QgisInterface, QgsMapMouseEvent
 from qgis.PyQt.QtCore import Qt
@@ -24,7 +22,7 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
 
     def create_widget(self):
         self._widget = LoSInputWidget()
-        self._widget.valuesChanged.connect(partial(self.draw_los, None))
+        self._widget.valuesChanged.connect(self.draw_los)
         super().create_widget()
 
     def clean(self) -> None:
@@ -63,26 +61,28 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
                 self._direction_point = event.mapPoint()
             self.draw_los()
 
-    def draw_los(self, towards_point: QgsPointXY):
-        if towards_point is None:
-            towards_point = self._last_towards_point
+    def draw_los(self):
 
         if not self.canvas_crs_is_projected():
             return
 
-        if self._start_point and towards_point:
+        point: QgsPointXY = None
+        if self._end_point:
+            point = self._end_point
+        elif self._direction_point:
+            point = self._direction_point
+
+        if self._start_point and point:
             self._los_rubber_band.hide()
 
             rasters_extent = self._raster_list.extent_polygon()
 
             if self._widget.los_local or self._widget.los_global:
-                if self._widget.los_local:
-                    line = QgsGeometry.fromPolylineXY([self._start_point, towards_point])
+                line = QgsGeometry.fromPolylineXY([self._start_point, point])
 
                 if self._widget.los_global:
-                    line = QgsGeometry.fromPolylineXY([self._start_point, towards_point])
 
-                    if self._start_point.distance(towards_point) > 0:
+                    if self._start_point.distance(point) > 0:
                         line = line.extendLine(
                             0,
                             self._raster_list.maximal_diagonal_size(),
@@ -91,15 +91,12 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
                         # insert target point
                         line.get().insertVertex(
                             QgsVertexId(0, 0, 1),
-                            QgsPoint(towards_point.x(), towards_point.y()),
+                            QgsPoint(point.x(), point.y()),
                         )
 
                 line = line.intersection(rasters_extent)
 
-                self._los_rubber_band.setToGeometry(line, self._canvas.mapSettings().destinationCrs())
-
-        if towards_point:
-            self._last_towards_point = QgsPointXY(towards_point.x(), towards_point.y())
+                self._los_rubber_band.setToGeometry(line, self.canvas().mapSettings().destinationCrs())
 
     def prepare_task(self) -> QgsTask:
         task = PrepareLoSTask(
