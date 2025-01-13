@@ -20,10 +20,6 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
     ) -> None:
         super().__init__(iface, raster_list, los_layer)
 
-        self._start_point: QgsPointXY = None
-
-        self._last_towards_point: QgsPointXY = None
-
         self.create_widget()
 
     def create_widget(self):
