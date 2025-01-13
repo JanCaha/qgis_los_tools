@@ -34,10 +34,6 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         self._distance_limits_rubber_band = self.createRubberBand(Qgis.GeometryType.Line)
         self._distance_limits_rubber_band.setColor(Qt.GlobalColor.darkGreen)
 
-        self._start_point: QgsPointXY = None
-        self._end_point: QgsPointXY = None
-        self._end_point_temp: QgsPointXY = None
-
     def create_widget(self):
         self._widget = LoSNoTargetInputWidget()
         self._widget.valuesChanged.connect(self.draw)
@@ -49,15 +45,12 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         if self._widget.los_type_definition == LoSNoTargetDefinitionType.DIRECTION_ANGLE_WIDTH:
             if self._start_point:
                 if self._snap_point:
-                    self._end_point_temp = self._snap_point
+                    self._direction_point = self._snap_point
                 else:
-                    self._end_point_temp = event.mapPoint()
+                    self._direction_point = event.mapPoint()
                 self._los_rubber_band.reset()
                 self._distance_limits_rubber_band.reset()
                 self.draw()
-        else:
-            self._start_point = None
-            self._end_point = None
 
     def canvasReleaseEvent(self, event: QgsMapMouseEvent) -> None:
         if event.button() == Qt.RightButton and self._los_rubber_band.size() == 0:
@@ -68,9 +61,9 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         if event.button() == Qt.LeftButton:
             if self._widget.los_type_definition == LoSNoTargetDefinitionType.AZIMUTHS:
                 if self._snap_point:
-                    self._selected_point = self._snap_point
+                    self._start_point = self._snap_point
                 else:
-                    self._selected_point = event.mapPoint()
+                    self._start_point = event.mapPoint()
                 self.draw()
                 self.addLoSStatusChanged.emit(True)
             else:
@@ -93,6 +86,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
             return
 
         self.draw_los()
+
         if self._widget.show_distance_limits:
             self.draw_limits()
         else:
@@ -100,15 +94,13 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
 
     def clean(self) -> None:
         super().clean()
-        self._start_point = None
-        self._end_point = None
         self._distance_limits_rubber_band.reset()
 
     def draw_los(self):
 
         if self._widget.los_type_definition == LoSNoTargetDefinitionType.AZIMUTHS:
 
-            if self._selected_point:
+            if self._start_point:
 
                 self._los_rubber_band.reset()
 
@@ -116,11 +108,11 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
 
                 size_constant = 1
                 for angle in angles:
-                    new_point = self._selected_point.project(size_constant, angle)
-                    geom = QgsGeometry.fromPolylineXY([self._selected_point, new_point])
+                    new_point = self._start_point.project(size_constant, angle)
+                    geom = QgsGeometry.fromPolylineXY([self._start_point, new_point])
                     geom = geom.extendLine(0, self._raster_list.maximal_diagonal_size() - size_constant)
                     geom = geom.intersection(self._raster_list.extent_polygon())
-                    self._los_rubber_band.addGeometry(geom, self._canvas.mapSettings().destinationCrs())
+                    self._los_rubber_band.addGeometry(geom, self.canvas().mapSettings().destinationCrs())
                 self._los_rubber_band.show()
 
         else:
@@ -144,7 +136,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
                     line = QgsGeometry.fromPolylineXY([self._start_point, new_point])
                     line = line.extendLine(0, maximal_length - size_constant)
                     line = line.intersection(self._raster_list.extent_polygon())
-                    self._los_rubber_band.addGeometry(line, self._canvas.mapSettings().destinationCrs())
+                    self._los_rubber_band.addGeometry(line, self.canvas().mapSettings().destinationCrs())
                 self._los_rubber_band.show()
 
     def draw_limits(self) -> None:
@@ -153,9 +145,9 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         point: QgsPointXY = None
 
         if self._widget.los_type_definition == LoSNoTargetDefinitionType.AZIMUTHS:
-            if not self._selected_point:
+            if not self._start_point:
                 return
-            point = self._selected_point
+            point = self._start_point
             angles = self.los_angles(self._widget.min_angle, self._widget.max_angle, self._widget.angle_step)
             if self._widget.max_angle > 359:
                 angles.append(angles[0])
@@ -181,7 +173,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
                 line.append(new_point)
 
             geom = QgsGeometry.fromPolylineXY(line)
-            self._distance_limits_rubber_band.addGeometry(geom, self._canvas.mapSettings().destinationCrs())
+            self._distance_limits_rubber_band.addGeometry(geom, self.canvas().mapSettings().destinationCrs())
 
         self._distance_limits_rubber_band.show()
 
@@ -217,8 +209,8 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
     def end_point(self) -> QgsPointXY:
         if self._end_point:
             end_point = self._end_point
-        elif self._end_point_temp:
-            end_point = self._end_point_temp
+        elif self._direction_point:
+            end_point = self._direction_point
         else:
             end_point = None
 
