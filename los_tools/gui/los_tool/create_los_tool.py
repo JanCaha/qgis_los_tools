@@ -36,7 +36,8 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         if event.button() == Qt.RightButton:
             self.clean()
         elif event.button() == Qt.LeftButton:
-            if self._start_point is None:
+            if self._start_point is None or (self._start_point and self._end_point):
+                self._end_point = None
                 if self._snap_point:
                     self._start_point = self._snap_point
                 else:
@@ -48,8 +49,6 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
                     self._end_point = event.mapPoint()
                 self.draw_los()
                 self.addLoSStatusChanged.emit(True)
-                self._start_point = None
-                self._end_point = None
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
         super().canvasMoveEvent(event)
