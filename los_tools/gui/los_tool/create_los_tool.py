@@ -31,8 +31,6 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         super().clean()
         if self._widget:
             self._widget.setAddLoSEnabled(False)
-        self._start_point = None
-        self._last_towards_point = None
 
     def canvasReleaseEvent(self, e: QgsMapMouseEvent) -> None:
         if e.button() == Qt.RightButton and self._start_point is None and self._los_rubber_band.size() == 0:
