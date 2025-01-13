@@ -7,7 +7,7 @@ This tool allows the creation of No Target LoS settings using an interactive map
 
 It is also possible to visualize distance limits of the No Target LoS on the map.
 
-The tool samples elevation data based on the configuration specified in [Rasters Validation and Sampling](tool_raster_validations.md), and the LoS sampling distances are obtained from [LoS without Target Sampling Settings](tool_los_without_target_sampling_settings.md). The created LoS can be added to the LoS layer from the plugin and subsequently included in the QGIS project.
+The tool samples elevation data based on the configuration specified in [Rasters Validation and Sampling](dialog_raster_validations.md), and the LoS sampling distances are obtained from [LoS without Target Sampling Settings](dialog_los_without_target_sampling_settings.md). The created LoS can be added to the LoS layer from the plugin and subsequently included in the QGIS project.
 
 The tool uses QGIS settings for snapping. By turning snapping on in QGIS, it makes easier to precisely select observation point based on existing layer points.
 

@@ -6,6 +6,8 @@ The output of this tool is a tabular layer, that can be used as a `Sampling dist
 
 This tool summarizes the parameters and the output in more informative manner and allows user to specify the parameters interactively.
 
+The output and changes from this tool are propagated to the plugin, where they are stored and made available to other interactive tools.
+
 ## Tool screenshot
 
 ![Tool Screenshot](../images/interactive_tool_los_without_target_sampling_settings.png)
