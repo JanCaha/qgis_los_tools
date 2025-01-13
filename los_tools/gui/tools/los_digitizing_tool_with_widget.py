@@ -129,7 +129,6 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
         if result.isValid() and result.type() == QgsPointLocator.Vertex:
             self._snap_point = result.point()
-            self._snap_indicator.setVisible(result)
         else:
             self._snap_point = None
 
