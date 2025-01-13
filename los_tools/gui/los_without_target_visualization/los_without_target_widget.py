@@ -269,5 +269,6 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
                 settings.value(f"{settings_class}/AngleDifference", 10, type=float, section=QgsSettings.Section.Plugins)
             )
 
-        tab_index = settings.value(f"{settings_class}/LoSType", 0, type=int, section=QgsSettings.Section.Plugins)
-        self._tabs.setCurrentIndex(tab_index)
+        with QSignalBlocker(self._tabs):
+            tab_index = settings.value(f"{settings_class}/LoSType", 0, type=int, section=QgsSettings.Section.Plugins)
+            self._tabs.setCurrentIndex(tab_index)
