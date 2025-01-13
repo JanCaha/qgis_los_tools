@@ -1,5 +1,5 @@
 from qgis.core import Qgis, QgsPointLocator, QgsPointXY, QgsVectorLayer
-from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolEdit, QgsSnapIndicator
+from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolEdit, QgsMessageBarItem, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QKeyEvent
 from qgis.PyQt.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QProgressBar, QPushButton, QWidget
@@ -37,6 +37,8 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
 
     featuresAdded = pyqtSignal()
     addLoSStatusChanged = pyqtSignal(bool)
+
+    _message_bar_item: QgsMessageBarItem = None
 
     def __init__(
         self,
@@ -154,7 +156,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         layout.addWidget(self._progress_bar)
         layout.addStretch(1)
         self._widget_message_bar_progress_bar.setLayout(layout)
-        self._iface.messageBar().pushWidget(self._widget_message_bar_progress_bar)
+        self._message_bar_item = self._iface.messageBar().pushWidget(self._widget_message_bar_progress_bar)
 
     def add_los_to_layer(self) -> None:
 
@@ -176,7 +178,8 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         self.featuresAdded.emit()
 
     def task_finished_message(self, milliseconds: int) -> None:
-        self._iface.messageBar().popWidget()
+        if self._message_bar_item:
+            self._iface.messageBar().popWidget(self._message_bar_item)
         self._iface.messageBar().pushMessage(
             "LoS Added",
             f"LoS Processing Finished. Lasted {milliseconds / 1000} seconds.",
