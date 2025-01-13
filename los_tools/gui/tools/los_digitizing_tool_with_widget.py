@@ -60,7 +60,9 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         self._los_layer = los_layer
 
         self._snap_point: QgsPointXY = None
-        self._selected_point: QgsPointXY = None
+        self._start_point: QgsPointXY = None
+        self._end_point: QgsPointXY = None
+        self._direction_point: QgsPointXY = None
 
     def activate(self) -> None:
 
@@ -110,6 +112,9 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
             self._widget = None
 
     def clean(self) -> None:
+        self._start_point = None
+        self._end_point = None
+        self._direction_point = None
         self._snap_indicator.setVisible(False)
         self._los_rubber_band.reset()
 
