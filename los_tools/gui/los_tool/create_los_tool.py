@@ -32,24 +32,26 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         if self._widget:
             self._widget.setAddLoSEnabled(False)
 
-    def canvasReleaseEvent(self, e: QgsMapMouseEvent) -> None:
-        if e.button() == Qt.RightButton and self._start_point is None and self._los_rubber_band.size() == 0:
+    def canvasReleaseEvent(self, event: QgsMapMouseEvent) -> None:
+        if event.button() == Qt.RightButton and self._start_point is None and self._los_rubber_band.size() == 0:
             self.deactivate()
-        if e.button() == Qt.RightButton:
+        if event.button() == Qt.RightButton:
             self.clean()
-        elif e.button() == Qt.LeftButton:
+        elif event.button() == Qt.LeftButton:
             if self._start_point is None:
                 if self._snap_point:
                     self._start_point = self._snap_point
                 else:
-                    self._start_point = e.mapPoint()
+                    self._start_point = event.mapPoint()
             else:
                 if self._snap_point:
-                    self.draw_los(self._snap_point)
+                    self._end_point = self._snap_point
                 else:
-                    self.draw_los(e.mapPoint())
+                    self._end_point = event.mapPoint()
+                self.draw_los()
                 self.addLoSStatusChanged.emit(True)
                 self._start_point = None
+                self._end_point = None
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
         super().canvasMoveEvent(event)
