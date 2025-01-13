@@ -1,5 +1,35 @@
 # Changelog
 
+## version 1.2.1
+
+- fix bad use of numpy to avoid exception
+
+## version 1.2.0
+
+- new tool to extract horizon lines at specific distance
+
+- minor fixes to gui tools (based on tests written for them)
+
+## version 1.1.2
+
+- fix issue with interactive tools not opening properly after closing
+
+## version 1.1.1
+
+- simplify inner working of GUI tools
+
+- fix `Set Camera` GUI tool
+
+## version 1.1 
+
+- update some internals including test
+
+- style python using black and isort
+
+- avoid some warnings in QGIS 3.38
+
+- remove older version of `No Target LoS Tool`
+
 ## version 1.0
 
 - addition of all the interactive tools - see websize menu **Interactive tools**
