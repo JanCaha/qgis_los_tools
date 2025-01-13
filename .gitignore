@@ -9,3 +9,4 @@ __pycache__
 /tests/_data/*.gpkg-shm
 /tests/_data/*.aux.xml
 /website/docs
+/build
