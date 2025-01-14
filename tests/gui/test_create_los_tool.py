@@ -37,7 +37,7 @@ def test_local_los(
     assert map_tool._los_rubber_band.size() == 0
 
     # move mouse - start creating LoS
-    map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event=QEvent.Type.MouseMove))
+    map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event_type=QEvent.Type.MouseMove))
 
     assert map_tool._start_point is not None
     assert map_tool._direction_point is not None
@@ -93,7 +93,7 @@ def test_global_los(
     map_tool._widget._los_type.setCurrentIndex(1)
 
     # move mouse - start creating LoS
-    map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event=QEvent.Type.MouseMove))
+    map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event_type=QEvent.Type.MouseMove))
 
     assert map_tool._start_point is not None
     assert map_tool._direction_point is not None
@@ -154,7 +154,7 @@ def test_right_click_when_creating(
     assert map_tool._los_rubber_band.size() == 0
 
     # move mouse - start creating LoS
-    map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event=QEvent.Type.MouseMove))
+    map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event_type=QEvent.Type.MouseMove))
 
     assert map_tool._start_point is not None
     assert map_tool._direction_point is not None
@@ -206,7 +206,7 @@ def test_global_los_add_to_plugin_layer(
     map_tool._widget._los_type.setCurrentIndex(1)
 
     # move mouse - start creating LoS
-    map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event=QEvent.Type.MouseMove))
+    map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, left_point, event_type=QEvent.Type.MouseMove))
 
     assert map_tool._start_point is not None
     assert map_tool._direction_point is not None
