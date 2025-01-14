@@ -35,10 +35,10 @@ def test_point_capture_map_tool_with_snap(
     qtbot: QtBot,
 ):
 
-    setup_project_with_snapping(qgis_canvas, layer_polygons, tolerance=20)
+    setup_project_with_snapping(qgis_canvas, layer_polygons)
 
     assert qgis_canvas.snappingUtils().config().enabled()
-    assert qgis_canvas.snappingUtils().config().tolerance() == 20
+    assert qgis_canvas.snappingUtils().config().tolerance() == 10
 
     map_tool = PointCaptureMapTool(qgis_canvas)
 
