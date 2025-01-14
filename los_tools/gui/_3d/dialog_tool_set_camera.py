@@ -113,7 +113,7 @@ class SetCameraDialog(DialogCameraSetting):
         )
 
         self.layout_item_3d.setCameraPose(camera_pose)
-        self.layout_item_3d.refresh()
+        self.layout_item_3d.redraw()
 
         msg = (
             f"Layout item `{self.layout_item_3d.displayName()}` in layout `{self.layout.name()}` "
