@@ -41,19 +41,22 @@ def result_filename(filename: str) -> str:
 def create_mouse_event(
     qgis_canvas: QgsMapCanvas,
     point_in_canvas_crs: QgsPointXY,
-    event: QEvent.Type = QEvent.Type.MouseButtonRelease,
+    event_type: QEvent.Type = QEvent.Type.MouseButtonRelease,
     mouse_button: Qt.MouseButton = Qt.MouseButton.LeftButton,
     key_modifier: Qt.KeyboardModifier = Qt.KeyboardModifier.NoModifier,
 ):
     mouse_event = QgsMapMouseEvent(
         qgis_canvas,
-        event,
+        event_type,
         QPoint(0, 0),
         mouse_button,
         mouse_button,
         key_modifier,
     )
     mouse_event.setMapPoint(point_in_canvas_crs)
+    mp = mouse_event.mapPoint()
+
+    assert mp == point_in_canvas_crs
 
     return mouse_event
 
@@ -78,23 +81,45 @@ def export_layout(path: Path, layout: QgsLayout, page: int = 0) -> None:
     exporter.exportToImage(path.as_posix(), image_settings)
 
 
-def setup_project_with_snapping(qgis_canvas: QgsMapCanvas, layer: QgsVectorLayer) -> None:
+def setup_project_without_snapping(qgis_canvas: QgsMapCanvas, layer: QgsVectorLayer) -> None:
     # setup project
     project = QgsProject.instance()
     project.addMapLayer(layer)
+    project.setCrs(layer.crs())
 
     # properly set up canvas
     qgis_canvas.setLayers([layer])
     qgis_canvas.setCurrentLayer(layer)
     qgis_canvas.zoomToFeatureExtent(layer.extent())
+    qgis_canvas.setDestinationCrs(layer.crs())
+
+    assert qgis_canvas.snappingUtils().config().enabled() is False
+
+
+def setup_project_with_snapping(
+    qgis_canvas: QgsMapCanvas,
+    layer: QgsVectorLayer,
+    tolerance: float = 10,
+    tolerance_units: Qgis.MapToolUnit = Qgis.MapToolUnit.Pixels,
+) -> None:
+
+    setup_project_without_snapping(qgis_canvas, layer)
 
     # set snapping
     config = qgis_canvas.snappingUtils().config()
+
     config.setEnabled(True)
     config.setMode(Qgis.SnappingMode.AllLayers)
     config.setType(Qgis.SnappingType.Vertex)
-    config.setUnits(Qgis.MapToolUnit.Pixels)
-    config.setTolerance(10)
+
+    config.setTolerance(tolerance)
+    config.setUnits(tolerance_units)
+
     config.addLayers([layer])
+
+    project = QgsProject.instance()
     project.setSnappingConfig(config)
+
     qgis_canvas.snappingUtils().setConfig(config)
+
+    assert qgis_canvas.snappingUtils().config().enabled()
