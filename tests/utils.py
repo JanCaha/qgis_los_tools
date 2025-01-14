@@ -129,3 +129,4 @@ def setup_project_with_snapping(
     qgis_canvas.snappingUtils().setConfig(config)
 
     assert qgis_canvas.snappingUtils().config().enabled()
+    assert qgis_canvas.snappingUtils().config().tolerance() == tolerance

@@ -37,9 +37,6 @@ def test_point_capture_map_tool_with_snap(
 
     setup_project_with_snapping(qgis_canvas, layer_polygons)
 
-    assert qgis_canvas.snappingUtils().config().enabled()
-    assert qgis_canvas.snappingUtils().config().tolerance() == 10
-
     map_tool = PointCaptureMapTool(qgis_canvas)
 
     point = QgsPointXY(-336433.464, -1189082.192)
