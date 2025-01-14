@@ -28,21 +28,20 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
         if event.button() == Qt.MouseButton.RightButton:
             self.deactivate()
         else:
-            point = self.toMapCoordinates(event.pos())
-            self.canvasClicked.emit(point, event.button())
+            self.canvasClicked.emit(self._current_point, event.button())
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
-        result = self.canvas().snappingUtils().snapToMap(event.mapPoint())
-        self._snap_indicator = QgsSnapIndicator(self.canvas())
+        match = self.canvas().snappingUtils().snapToMap(event.originalMapPoint())
 
-        if result.isValid() and result.type() == QgsPointLocator.Vertex:
-            self._current_point = result.point()
+        if match.isValid() and match.type() == QgsPointLocator.Vertex:
+            self._snap_indicator.setMatch(match)
+            self._snap_indicator.setVisible(True)
+            self._current_point = match.point()
             self._snapped = True
-            self._snap_layer_name = result.layer().name()
-            self._snap_indicator.setMatch(result)
-
+            self._snap_layer_name = match.layer().name()
         else:
-            self._current_point = event.mapPoint()
+            self._snap_indicator.setVisible(False)
+            self._current_point = event.originalMapPoint()
             self._snapped = False
             self._snap_layer_name = ""
 
