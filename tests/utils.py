@@ -93,6 +93,12 @@ def setup_project_without_snapping(qgis_canvas: QgsMapCanvas, layer: QgsVectorLa
     qgis_canvas.zoomToFeatureExtent(layer.extent())
     qgis_canvas.setDestinationCrs(layer.crs())
 
+    config = qgis_canvas.snappingUtils().config()
+    config.setEnabled(False)
+    qgis_canvas.snappingUtils().setConfig(config)
+
+    project.setSnappingConfig(config)
+
     assert qgis_canvas.snappingUtils().config().enabled() is False
 
 
