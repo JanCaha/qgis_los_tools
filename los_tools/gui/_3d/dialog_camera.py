@@ -68,9 +68,11 @@ class DialogCameraSetting(QDialog):
         self.raster_names.setReadOnly(True)
 
     def sync_to_project(self):
-        self.rasters_crs = self._list_of_rasters.crs()
 
-        self.raster_names.setText(self._list_of_rasters.raster_to_use())
+        if len(self._list_of_rasters) > 0:
+            self.rasters_crs = self._list_of_rasters.crs()
+
+            self.raster_names.setText(self._list_of_rasters.raster_to_use())
 
     def update_point(self, point: QgsPointXY, point_type: PointType):
         point = self.map_tool.get_point()
