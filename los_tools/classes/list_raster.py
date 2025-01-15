@@ -38,6 +38,9 @@ class ListOfRasters:
 
             self.order_by_pixel_size()
 
+    def __len__(self):
+        return len(self._dict_rasters)
+
     def __repr__(self):
         return f"ListOfRasters: [{", ".join([x.name() for x in self.rasters])}]"
 
