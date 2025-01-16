@@ -125,8 +125,8 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
                 angle = self._start_point.azimuth(self.end_point())
 
                 angles = self.los_angles(
-                    angle - self._widget.angle_difference,
-                    angle + self._widget.angle_difference,
+                    angle - (self._widget.angle_width / 2),
+                    angle + (self._widget.angle_width / 2),
                     self._widget.angle_step,
                 )
 
@@ -159,8 +159,8 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
             angle = self._start_point.azimuth(self.end_point())
 
             angles = self.los_angles(
-                angle - self._widget.angle_difference,
-                angle + self._widget.angle_difference,
+                angle - (self._widget.angle_width / 2),
+                angle + (self._widget.angle_width / 2),
                 self._widget.angle_step,
             )
 

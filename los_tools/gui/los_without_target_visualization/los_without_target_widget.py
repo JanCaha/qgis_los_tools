@@ -54,15 +54,18 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         self._max_angle.valueChanged.connect(self.valuesChanged.emit)
         self._max_angle.valueChanged.connect(self.save_settings)
 
-        self._angle_difference = QgsDoubleSpinBox(self)
-        self._angle_difference.setMinimum(0.000)
-        self._angle_difference.setMaximum(180.000)
-        self._angle_difference.setValue(10.000)
-        self._angle_difference.setClearValue(10.000)
-        self._angle_difference.setDecimals(3)
-        self._angle_difference.setSuffix("°")
-        self._angle_difference.valueChanged.connect(self.valuesChanged.emit)
-        self._angle_difference.valueChanged.connect(self.save_settings)
+        self._angle_width = QgsDoubleSpinBox(self)
+        self._angle_width.setMinimum(0.000)
+        self._angle_width.setMaximum(180.000)
+        self._angle_width.setValue(10.000)
+        self._angle_width.setClearValue(10.000)
+        self._angle_width.setDecimals(3)
+        self._angle_width.setSuffix("°")
+        self._angle_width.valueChanged.connect(self.valuesChanged.emit)
+        self._angle_width.valueChanged.connect(self.save_settings)
+        self._angle_width.valueChanged.connect(self.change_angle_width_label)
+
+        self._angle_width_label = QLabel("")
 
         page_1 = QWidget(self)
         page_1_layout = QFormLayout()
@@ -75,7 +78,8 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         page_2_layout = QFormLayout()
         page_2.setLayout(page_2_layout)
 
-        page_2_layout.addRow("Angle Difference", self._angle_difference)
+        page_2_layout.addRow("Angle Width", self._angle_width)
+        page_2_layout.addWidget(self._angle_width_label)
 
         self._tabs = QTabWidget(self)
         self._tabs.addTab(page_1, "Definition by Azimuth")
@@ -128,6 +132,8 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
 
         self._unit = QgsUnitTypes.DistanceUnit.DistanceMeters
 
+        self.change_angle_width_label()
+
     def _on_minimum_changed(self) -> None:
         if self._max_angle.value() < self._min_angle.value():
             self._max_angle.setValue(self._min_angle.value())
@@ -137,8 +143,8 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
             self._min_angle.setValue(self._max_angle.value())
 
     def _angle_step_changed(self) -> None:
-        if self._angle_step.value() > self._angle_difference.value() * 2:
-            self._angle_step.setValue(self._angle_difference.value() * 2)
+        if self._angle_step.value() > self._angle_width.value() * 2:
+            self._angle_step.setValue(self._angle_width.value() * 2)
 
     @property
     def los_type_definition(self) -> LoSNoTargetDefinitionType:
@@ -167,8 +173,8 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         self._unit = unit
 
     @property
-    def angle_difference(self) -> float:
-        return self._angle_difference.value()
+    def angle_width(self) -> float:
+        return self._angle_width.value()
 
     @property
     def show_distance_limits(self) -> bool:
@@ -204,7 +210,7 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
             section=QgsSettings.Section.Plugins,
         )
         settings.setValue(
-            f"{settings_class}/AngleDifference", self._angle_difference.value(), section=QgsSettings.Section.Plugins
+            f"{settings_class}/AngleWidth", self._angle_width.value(), section=QgsSettings.Section.Plugins
         )
         settings.setValue(
             f"{settings_class}/LoSType", self.los_type_definition.value, section=QgsSettings.Section.Plugins
@@ -264,11 +270,19 @@ class LoSNoTargetInputWidget(LoSDigitizingToolWidget):
         with QSignalBlocker(self._distances):
             self._distances.set_units(unit)
 
-        with QSignalBlocker(self._angle_difference):
-            self._angle_difference.setValue(
-                settings.value(f"{settings_class}/AngleDifference", 10, type=float, section=QgsSettings.Section.Plugins)
+        with QSignalBlocker(self._angle_width):
+            self._angle_width.setValue(
+                settings.value(f"{settings_class}/AngleWidth", 10, type=float, section=QgsSettings.Section.Plugins)
             )
 
         with QSignalBlocker(self._tabs):
             tab_index = settings.value(f"{settings_class}/LoSType", 0, type=int, section=QgsSettings.Section.Plugins)
             self._tabs.setCurrentIndex(tab_index)
+
+        self.change_angle_width_label()
+
+    def change_angle_width_label(self) -> None:
+        self._angle_width_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self._angle_width_label.setText(
+            f"Angle width {round(self._angle_width.value() / 2, 2)}° to each side " "\n" "of the main direction."
+        )
