@@ -1,14 +1,18 @@
 import typing
 
 from qgis.core import (
+    QgsColorRamp,
     QgsFeature,
     QgsFeatureRequest,
     QgsField,
     QgsFields,
+    QgsGraduatedSymbolRenderer,
     QgsLineString,
+    QgsMapLayer,
     QgsPoint,
     QgsProcessing,
     QgsProcessingAlgorithm,
+    QgsProcessingContext,
     QgsProcessingException,
     QgsProcessingFeedback,
     QgsProcessingParameterBoolean,
@@ -17,6 +21,8 @@ from qgis.core import (
     QgsProcessingParameterMatrix,
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
+    QgsStyle,
+    QgsSymbol,
     QgsVectorLayer,
     QgsWkbTypes,
 )
@@ -46,8 +52,9 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMatrix(
                 self.DISTANCES,
                 "Distance limits for horizon lines",
-                numberRows=1,
+                numberRows=2,
                 headers=["Distance"],
+                defaultValue=[500, 1000],
             )
         )
 
@@ -101,17 +108,17 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
 
         return super().checkParameterValues(parameters, context)
 
-    def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
+    def processAlgorithm(self, parameters, context: QgsProcessingContext, feedback: QgsProcessingFeedback):
         los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
 
         if los_layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
 
-        distances_matrix = self.parameterAsMatrix(parameters, self.DISTANCES, context)
+        self.distances_matrix = self.parameterAsMatrix(parameters, self.DISTANCES, context)
 
         distances: typing.List[float] = []
 
-        for distance in distances_matrix:
+        for distance in self.distances_matrix:
             try:
                 distances.append(float(distance))
             except ValueError:
@@ -131,7 +138,7 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
         observer_x_field_index = fields.indexFromName(FieldNames.OBSERVER_X)
         observer_y_field_index = fields.indexFromName(FieldNames.OBSERVER_Y)
 
-        sink, dest_id = self.parameterAsSink(
+        sink, self.dest_id = self.parameterAsSink(
             parameters,
             self.OUTPUT_LAYER,
             context,
@@ -212,7 +219,7 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
 
                     sink.addFeature(f)
 
-        return {self.OUTPUT_LAYER: dest_id}
+        return {self.OUTPUT_LAYER: self.dest_id}
 
     def name(self):
         return "extracthorizonlinesbydistace"
@@ -230,9 +237,26 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
         return ExtractHorizonLinesByDistanceAlgorithm()
 
     def helpUrl(self):
-        # TODO FIXME
-        return "https://jancaha.github.io/qgis_los_tools/tools/Horizons/tool_extract_horizon_lines/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/Horizons/tool_extract_horizon_lines_by_distances/"
 
-    # def shortHelpString(self):
-    #     # TODO FIXME
-    #     return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
+
+    def postProcessAlgorithm(self, context: QgsProcessingContext, feedback: QgsProcessingFeedback):
+        output_layer: QgsMapLayer = QgsProcessingUtils.mapLayerFromString(self.dest_id, context)
+
+        ramp: QgsColorRamp = QgsStyle.defaultStyle().colorRamp("Viridis")
+        ramp.invert()
+
+        renderer = QgsGraduatedSymbolRenderer.createRenderer(
+            output_layer,
+            FieldNames.HORIZON_DISTANCE,
+            len(self.distances_matrix),
+            QgsGraduatedSymbolRenderer.Mode.EqualInterval,
+            QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry),
+            ramp,
+        )
+
+        output_layer.setRenderer(renderer)
+
+        return {self.OUTPUT_LAYER: self.dest_id}
