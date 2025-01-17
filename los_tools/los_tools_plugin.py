@@ -182,14 +182,14 @@ class LoSToolsPlugin:
 
             self.toolbar.addSeparator()
 
-            self.add_action(
-                icon_path=get_icon_path("camera.svg"),
-                text="Create 3D View with Camera Setup",
-                callback=self.open_dialog_create_3d_view,
-                add_to_toolbar=False,
-                add_to_specific_toolbar=self.toolbar,
-                checkable=False,
-            )
+            # self.add_action(
+            #     icon_path=get_icon_path("camera.svg"),
+            #     text="Create 3D View with Camera Setup",
+            #     callback=self.open_dialog_create_3d_view,
+            #     add_to_toolbar=False,
+            #     add_to_specific_toolbar=self.toolbar,
+            #     checkable=False,
+            # )
 
             self.add_action(
                 icon_path=get_icon_path("camera_layout_item.svg"),
