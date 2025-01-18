@@ -43,9 +43,11 @@ def test_point_capture_map_tool_with_snap(
 
     map_tool.canvasMoveEvent(create_mouse_event(qgis_canvas, point, event_type=QEvent.Type.MouseMove))
 
+    assert map_tool.get_point() == QgsPointXY(-336430.54888639913406223, -1189081.19254285283386707)
+
     with qtbot.waitSignal(map_tool.canvasClicked, timeout=None, raising=True):
         map_tool.canvasReleaseEvent(create_mouse_event(qgis_canvas, point))
 
-    assert map_tool.get_point() == QgsPointXY(-336430.54888639913406223, -1189081.19254285283386707)
     assert map_tool.is_point_snapped()
     assert map_tool.snap_layer() == layer_polygons.name()
+    assert map_tool.get_point() == QgsPointXY(-336430.54888639913406223, -1189081.19254285283386707)
