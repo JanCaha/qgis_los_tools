@@ -78,7 +78,7 @@ def test_notarget_los_tool_direction_defition(
     map_tool.clean()
     map_tool._widget._tabs.setCurrentIndex(1)
     map_tool._widget._angle_step.setValue(1)
-    map_tool._widget._angle_difference.setValue(20)
+    map_tool._widget._angle_width.setValue(20)
 
     map_tool.activate()
 
@@ -114,7 +114,7 @@ def test_notarget_los_tool_direction_defition(
     # set widget
     map_tool.clean()
     map_tool._widget._tabs.setCurrentIndex(1)
-    map_tool._widget._angle_difference.setValue(90)
+    map_tool._widget._angle_width.setValue(90)
 
     point = QgsPointXY(-336408.92, -1189142.77)
 
@@ -141,7 +141,7 @@ def test_notarget_los_tool_direction_defition(
     map_tool.clean()
     map_tool._widget._tabs.setCurrentIndex(1)
     map_tool._widget._angle_step.setValue(2)
-    map_tool._widget._angle_difference.setValue(90)
+    map_tool._widget._angle_width.setValue(90)
 
     point = QgsPointXY(-336408.92, -1189142.77)
 
@@ -182,7 +182,7 @@ def test_notarget_los_tool_direction_defition_with_limits(
     map_tool.clean()
     map_tool._widget._tabs.setCurrentIndex(1)
     map_tool._widget._angle_step.setValue(1)
-    map_tool._widget._angle_difference.setValue(20)
+    map_tool._widget._angle_width.setValue(20)
     map_tool._widget._show_distances.setChecked(True)
     map_tool._widget._distances.set_distances([1, 5, 10, 50])
 
@@ -236,7 +236,7 @@ def test_notarget_los_tool_add_los_to_layer(
     map_tool.clean()
     map_tool._widget._tabs.setCurrentIndex(1)
     map_tool._widget._angle_step.setValue(1)
-    map_tool._widget._angle_difference.setValue(20)
+    map_tool._widget._angle_width.setValue(20)
     map_tool._widget._show_distances.setChecked(False)
 
     map_tool.activate()
