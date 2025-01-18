@@ -108,7 +108,7 @@ def test_notarget_los_tool_direction_defition(
     assert map_tool._end_point
     assert map_tool._direction_point is None
 
-    assert map_tool._los_rubber_band.size() == 41
+    assert map_tool._los_rubber_band.size() == 21
     assert map_tool._distance_limits_rubber_band.size() == 0
 
     # set widget
@@ -134,7 +134,7 @@ def test_notarget_los_tool_direction_defition(
     assert map_tool._end_point
     assert map_tool._direction_point is None
 
-    assert map_tool._los_rubber_band.size() == 181
+    assert map_tool._los_rubber_band.size() == 91
     assert map_tool._distance_limits_rubber_band.size() == 0
 
     # set widget
@@ -161,7 +161,7 @@ def test_notarget_los_tool_direction_defition(
     assert map_tool._end_point
     assert map_tool._direction_point is None
 
-    assert map_tool._los_rubber_band.size() == 91
+    assert map_tool._los_rubber_band.size() == 46
     assert map_tool._distance_limits_rubber_band.size() == 0
 
 
@@ -214,7 +214,7 @@ def test_notarget_los_tool_direction_defition_with_limits(
     assert map_tool._end_point
     assert map_tool._direction_point is None
 
-    assert map_tool._los_rubber_band.size() == 41
+    assert map_tool._los_rubber_band.size() == 21
     assert map_tool._distance_limits_rubber_band.size() == 4
 
 
@@ -267,7 +267,7 @@ def test_notarget_los_tool_add_los_to_layer(
     assert map_tool._end_point
     assert map_tool._direction_point is None
 
-    assert map_tool._los_rubber_band.size() == 41
+    assert map_tool._los_rubber_band.size() == 21
     assert map_tool._distance_limits_rubber_band.size() == 0
 
     assert los_layer.featureCount() == 0
@@ -281,4 +281,4 @@ def test_notarget_los_tool_add_los_to_layer(
     assert map_tool._end_point is None
     assert map_tool._direction_point is None
 
-    assert los_layer.featureCount() == 41
+    assert los_layer.featureCount() == 21
