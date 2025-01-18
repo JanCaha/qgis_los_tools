@@ -7,11 +7,16 @@ from qgis.core import (
     QgsRasterLayer,
     QgsVectorLayer,
 )
-from qgis.gui import QgsMapCanvas
+from qgis.gui import QgisInterface, QgsMapCanvas
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
 from los_tools.constants.fields import Fields
+
+
+@pytest.fixture(scope="function", autouse=True)
+def _qgis_new_project(qgis_iface: QgisInterface):
+    qgis_iface.newProject()
 
 
 @pytest.fixture
