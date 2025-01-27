@@ -31,6 +31,7 @@ from los_tools.gui.dialogs.dialog_raster_validations import RasterValidations
 from los_tools.gui.los_tool.create_los_tool import CreateLoSMapTool
 from los_tools.gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
 from los_tools.gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
+from los_tools.gui.raster_xml_file_loaders import RastersXMLDropHandler, RastersXMLItemProvider
 from los_tools.processing.los_tools_provider import LoSToolsProvider
 from los_tools.utils import get_icon_path
 
@@ -65,6 +66,11 @@ class LoSToolsPlugin:
             self._create_los_tool: CreateLoSMapTool = None
             self._optimize_point_location_tool: OptimizePointsLocationTool = None
 
+            self._raster_xml_item_provider = RastersXMLItemProvider(self)
+            self._raster_xml_drop_handler = RastersXMLDropHandler(self)
+            QgsApplication.dataItemProviderRegistry().addProvider(self._raster_xml_item_provider)
+            self.iface.registerCustomDropHandler(self._raster_xml_drop_handler)
+
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
 
@@ -76,6 +82,9 @@ class LoSToolsPlugin:
             del self.toolbar
 
             self._layer_LoS = None
+
+            QgsApplication.dataItemProviderRegistry().removeProvider(self._raster_xml_item_provider)
+            self.iface.unregisterCustomDropHandler(self._raster_xml_drop_handler)
 
     def initProcessing(self):
         QgsApplication.processingRegistry().addProvider(self.provider)
