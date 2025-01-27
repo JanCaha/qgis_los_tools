@@ -25,9 +25,10 @@ from los_tools.constants.fields import Fields
 from los_tools.constants.plugin import PluginConstants
 from los_tools.gui._3d.dialog_create_3d_view import Create3DView
 from los_tools.gui._3d.dialog_tool_set_camera import SetCameraDialog
-from los_tools.gui.dialogs.dialog_los_settings import LoSSettings
+from los_tools.gui.dialogs.dialog_los_settings import SamplingSettingsDistanceDialog
 from los_tools.gui.dialogs.dialog_object_parameters import ObjectParameters
 from los_tools.gui.dialogs.dialog_raster_validations import RasterValidations
+from los_tools.gui.dialogs.dialog_select_sampling_distance_layer import SelectSamplingDistanceLayerDialog
 from los_tools.gui.los_tool.create_los_tool import CreateLoSMapTool
 from los_tools.gui.los_without_target_visualization.los_without_target import LosNoTargetMapTool
 from los_tools.gui.optimize_point_location_tool.optimize_points_location_tool import OptimizePointsLocationTool
@@ -99,7 +100,7 @@ class LoSToolsPlugin:
             self.toolbar: QToolBar = self.iface.addToolBar(PluginConstants.plugin_toolbar_name)
             self.toolbar.setObjectName(PluginConstants.plugin_toolbar_name)
 
-            self.los_settings_dialog = LoSSettings(self.iface.mainWindow())
+            self.los_settings_dialog = SamplingSettingsDistanceDialog(self.iface.mainWindow())
             self.los_settings_dialog.samplingDistanceMatrixUpdated.connect(self.store_sampling_distance_matrix)
             self.los_settings_dialog.fill_distances()
 
@@ -150,6 +151,16 @@ class LoSToolsPlugin:
                 add_to_toolbar=False,
                 add_to_specific_toolbar=self.toolbar,
                 checkable=True,
+            )
+
+            self.toolbar.addSeparator()
+
+            self.add_action(
+                icon_path=get_icon_path("sampling_distance_matrix.svg"),
+                text="Load Sampling Distance Matrix from Layer",
+                callback=self.load_sampling_distance_matrix_from_layer,
+                add_to_toolbar=False,
+                add_to_specific_toolbar=self.toolbar,
             )
 
             self.toolbar.addSeparator()
@@ -418,3 +429,9 @@ class LoSToolsPlugin:
         if self._create_no_target_los_tool:
             self._create_no_target_los_tool.set_list_of_rasters(self._list_of_rasters_for_los)
             self._create_no_target_los_tool.reactivate()
+
+    def load_sampling_distance_matrix_from_layer(self):
+        dialog = SelectSamplingDistanceLayerDialog(self.iface.mainWindow())
+        result = dialog.exec()
+        if result == dialog.Accepted:
+            self._sampling_distance_matrix = SamplingDistanceMatrix(dialog.layer())
