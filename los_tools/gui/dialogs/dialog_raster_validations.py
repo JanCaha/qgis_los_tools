@@ -1,10 +1,12 @@
+import pathlib
 from typing import List
 
-from qgis.core import QgsPointXY, QgsProject, QgsRasterLayer, QgsUnitTypes
+from qgis.core import QgsPointXY, QgsProject, QgsRasterLayer, QgsSettings, QgsUnitTypes
 from qgis.gui import QgisInterface
-from qgis.PyQt.QtCore import Qt, pyqtSignal
+from qgis.PyQt.QtCore import QFileInfo, Qt, pyqtSignal
 from qgis.PyQt.QtWidgets import (
     QDialog,
+    QFileDialog,
     QFormLayout,
     QGroupBox,
     QHeaderView,
@@ -17,6 +19,7 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from los_tools.classes.list_raster import ListOfRasters
+from los_tools.constants.plugin import PluginConstants
 from los_tools.gui.tools.point_capture_map_tool import PointCaptureMapTool
 
 
@@ -93,6 +96,12 @@ class RasterValidations(QDialog):
 
         layout.addRow(group_box)
 
+        self.save_to_file = QPushButton()
+        self.save_to_file.setText("Save to file")
+        self.save_to_file.clicked.connect(self.on_save_to_file)
+
+        layout.addRow("Save to file...", self.save_to_file)
+
     def _setup_layers(self) -> None:
         self._rasters_view.clear()
 
@@ -137,6 +146,9 @@ class RasterValidations(QDialog):
         self._rasters_view.blockSignals(True)
 
         rasters = self.list_of_rasters.rasters
+
+        if self._rasters_view.topLevelItemCount() == 0:
+            self._setup_layers()
 
         for raster in rasters:
             for item in self._rasters_view.findItems(raster.name(), Qt.MatchFlag.MatchExactly):
@@ -242,3 +254,19 @@ class RasterValidations(QDialog):
             self.text.setText("Selection is valid and can be used in LoS creation tools.")
 
         self.select_point.setEnabled(not self.listOfRasters.is_empty())
+
+    def on_save_to_file(self) -> None:
+        settings = QgsSettings()
+        settings_key = f"{PluginConstants.settings_group}/DirLastRastersXML"
+
+        filename, _ = QFileDialog.getSaveFileName(
+            self, "Save File", settings.value(settings_key, ""), PluginConstants.rasters_xml_filter
+        )
+
+        if filename:
+            path = pathlib.Path(filename)
+            if path.suffix.lower() != PluginConstants.rasters_xml_extension:
+                filename = path.with_suffix(PluginConstants.rasters_xml_extension).as_posix()
+
+            settings.setValue(settings_key, QFileInfo(filename).path())
+            self.listOfRasters.save_to_file(filename)
