@@ -1,4 +1,6 @@
 import math
+import pathlib
+import typing
 from typing import Dict, List, Optional, Tuple
 
 from qgis.core import (
@@ -15,7 +17,10 @@ from qgis.core import (
     QgsRectangle,
     qgsFloatNear,
 )
+from qgis.PyQt.QtCore import QFile, QIODevice
+from qgis.PyQt.QtXml import QDomDocument
 
+from los_tools.constants.plugin import PluginConstants
 from los_tools.processing.tools.util_functions import bilinear_interpolated_value
 
 
@@ -227,3 +232,86 @@ class ListOfRasters:
                 points3d.append(QgsPoint(point.x(), point.y(), z))
 
         return QgsLineString(points3d)
+
+    def save_to_file(self, file_path: str) -> typing.Tuple[bool, str]:
+        """Saves configuration to XML file. Result is a tuple with success status and message."""
+
+        path = pathlib.Path(file_path)
+        if path.suffix.lower() != PluginConstants.rasters_xml_extension:
+            file_path = path.with_suffix(PluginConstants.rasters_xml_extension).as_posix()
+
+        doc = QDomDocument()
+
+        root = doc.createElement("ListOfRasters")
+
+        doc.appendChild(root)
+
+        for raster in self.rasters:
+            raster_element = doc.createElement("raster")
+            raster_element.setAttribute("dataProvider", raster.dataProvider().name())
+            raster_element.setAttribute("name", raster.name())
+            raster_element.setAttribute("path", raster.source())
+            raster_element.setAttribute("crs", raster.crs().authid())
+            raster_element.setAttribute("cellsWidth", raster.width())
+            raster_element.setAttribute("cellsHeight", raster.height())
+            raster_element.setAttribute("extentWidth", raster.extent().width())
+            raster_element.setAttribute("extentHeight", raster.extent().height())
+
+            root.appendChild(raster_element)
+        doc.toString()
+        file = QFile(file_path)
+        if file.open(QIODevice.OpenModeFlag.WriteOnly | QIODevice.OpenModeFlag.Text):
+            bytes_written = file.write(doc.toByteArray())
+            if bytes_written == -1:
+                file.close()
+                return False, f"Could not write to file `{file_path}`."
+            file.close()
+
+        return True, f"Configuration saved to `{file_path}`."
+
+    def read_from_file(self, file_path: str) -> typing.Tuple[bool, str]:
+
+        self._dict_rasters = {}
+
+        file = QFile(file_path)
+        if not file.open(QIODevice.OpenModeFlag.ReadOnly | QIODevice.OpenModeFlag.Text):
+            return False, f"Could not open file `{file_path}`."
+
+        doc = QDomDocument()
+        if not doc.setContent(file):
+            file.close()
+            return False, f"Could not read content of file `{file_path}`."
+        file.close()
+
+        root = doc.documentElement()
+        if root.tagName() != "ListOfRasters":
+            return False, f"File `{file_path}` is not a valid {PluginConstants.rasters_xml_name} file."
+
+        items = root.elementsByTagName("raster")
+
+        load_messages = []
+        for i in range(items.length()):
+            item = items.item(i).toElement()
+
+            raster_path = item.attribute("path")
+            if not pathlib.Path(raster_path).exists():
+                continue
+
+            raster = QgsRasterLayer(raster_path, item.attribute("name"), item.attribute("dataProvider"))
+            if not raster.isValid():
+                continue
+
+            if not (
+                raster.crs().authid() == item.attribute("crs")
+                and raster.width() == int(item.attribute("cellsWidth"))
+                and raster.height() == int(item.attribute("cellsHeight"))
+                and raster.extent().width() == float(item.attribute("extentWidth"))
+                and raster.extent().height() == float(item.attribute("extentHeight"))
+            ):
+                load_messages.append(f"Raster `{raster.name()}` does not fit with definition in the file.")
+
+            self._dict_rasters[raster.id()] = raster
+
+        self.order_by_pixel_size()
+
+        return True, ",".join(load_messages)
