@@ -36,7 +36,7 @@ from los_tools.gui.custom_classes import Distance, DistanceWidget
 from los_tools.utils import _column_type_class
 
 
-class LoSSettings(QDialog):
+class SamplingSettingsDistanceDialog(QDialog):
 
     samplingDistanceMatrixUpdated = pyqtSignal(SamplingDistanceMatrix)
 
@@ -280,11 +280,12 @@ class LoSSettings(QDialog):
         fields.append(QgsField(size_field_name, _column_type_class().Double))
 
         layer = QgsMemoryProviderUtils.createMemoryLayer(
-            PluginConstants.sampling_distanace_layer_name,
+            PluginConstants.sampling_distance_layer_name,
             fields=fields,
             geometryType=Qgis.WkbType.NoGeometry,
         )
-        layer.setCustomProperty(PluginConstants.sampling_distanace_layer_units_property, unit_name)
+        layer.setCustomProperty(PluginConstants.sampling_distance_layer, PluginConstants.sampling_distance_layer_value)
+        layer.setCustomProperty(PluginConstants.sampling_distance_layer_units_property, unit_name)
 
         angle = self.object_angle_size.value()
 

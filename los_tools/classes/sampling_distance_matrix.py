@@ -17,7 +17,7 @@ class SamplingDistanceMatrix:
         self.data = []
 
         if data:
-            unit_name = data.customProperty(PluginConstants.sampling_distanace_layer_units_property)
+            unit_name = data.customProperty(PluginConstants.sampling_distance_layer_units_property)
 
             if unit_name:
                 distance_field_name = FieldNames.TEMPLATE_DISTANCE.replace("?", unit_name)

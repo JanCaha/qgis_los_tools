@@ -8,8 +8,10 @@ class PluginConstants:
 
     settings_group = "LoSTools"
 
-    sampling_distanace_layer_name = "Sampling Table"
-    sampling_distanace_layer_units_property = "sampling_distance_units"
+    sampling_distance_layer_name = "Sampling Table"
+    sampling_distance_layer_units_property = "sampling_distance_units"
+    sampling_distance_layer = "sampling_distance_layer"
+    sampling_distance_layer_value = "True"
 
     rasters_xml_name = "Rasters XML"
     rasters_xml_extension = ".rastersxml"
