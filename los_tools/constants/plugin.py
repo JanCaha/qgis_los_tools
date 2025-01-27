@@ -10,3 +10,7 @@ class PluginConstants:
 
     sampling_distanace_layer_name = "Sampling Table"
     sampling_distanace_layer_units_property = "sampling_distance_units"
+
+    rasters_xml_name = "Rasters XML"
+    rasters_xml_extension = ".rastersxml"
+    rasters_xml_filter = f"{rasters_xml_name} Files (*{rasters_xml_extension})"
