@@ -21,30 +21,31 @@ from qgis.PyQt.QtWidgets import (
 
 
 class Distance:
+
     def __init__(
         self,
         distance: float = 0,
-        unit: QgsUnitTypes.DistanceUnit = QgsUnitTypes.DistanceUnit.DistanceMeters,
+        unit: Qgis.DistanceUnit = Qgis.DistanceUnit.Meters,
     ) -> None:
         self._distance: float = distance
-        self._unit: QgsUnitTypes.DistanceUnit = unit
+        self._unit: Qgis.DistanceUnit = unit
 
     def __str__(self) -> str:
-        return "{} {}".format(self._distance, QgsUnitTypes.toString(self._unit))
+        return f"{self._distance} {QgsUnitTypes.toString(self._unit)}"
 
     def __eq__(self, other) -> bool:
         return self._distance == other._distance and self._unit == other._unit
 
     def meters(self) -> float:
-        return self.inUnits(QgsUnitTypes.DistanceUnit.DistanceMeters)
+        return self.inUnits(Qgis.DistanceUnit.Meters)
 
     def distance(self) -> float:
         return self._distance
 
-    def unit(self) -> QgsUnitTypes.DistanceUnit:
+    def unit(self) -> Qgis.DistanceUnit:
         return self._unit
 
-    def inUnits(self, unit: QgsUnitTypes.DistanceUnit) -> float:
+    def inUnits(self, unit: Qgis.DistanceUnit) -> float:
         conversion = QgsUnitTypes.fromUnitToUnitFactor(self._unit, unit)
         return self._distance * conversion
 
@@ -74,24 +75,24 @@ class DistanceWidget(QWidget):
 
         self._units = QComboBox(self)
         self._units.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMeters),
-            QgsUnitTypes.DistanceUnit.DistanceMeters,
+            QgsUnitTypes.toString(Qgis.DistanceUnit.Meters),
+            Qgis.DistanceUnit.Meters,
         )
         self._units.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceKilometers),
-            QgsUnitTypes.DistanceUnit.DistanceKilometers,
+            QgsUnitTypes.toString(Qgis.DistanceUnit.Kilometers),
+            Qgis.DistanceUnit.Kilometers,
         )
         self._units.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceFeet),
-            QgsUnitTypes.DistanceUnit.DistanceFeet,
+            QgsUnitTypes.toString(Qgis.DistanceUnit.Feet),
+            Qgis.DistanceUnit.Feet,
         )
         self._units.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMiles),
-            QgsUnitTypes.DistanceUnit.DistanceMiles,
+            QgsUnitTypes.toString(Qgis.DistanceUnit.Miles),
+            Qgis.DistanceUnit.Miles,
         )
         self._units.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceYards),
-            QgsUnitTypes.DistanceUnit.DistanceYards,
+            QgsUnitTypes.toString(Qgis.DistanceUnit.Yards),
+            Qgis.DistanceUnit.Yards,
         )
         self._units.currentIndexChanged.connect(self._raiseValueChanged)
 
@@ -104,13 +105,13 @@ class DistanceWidget(QWidget):
     def setValue(
         self,
         value: float,
-        unit: QgsUnitTypes.DistanceUnit = QgsUnitTypes.DistanceUnit.DistanceMeters,
+        unit: Qgis.DistanceUnit = Qgis.DistanceUnit.Meters,
     ):
         self._units.setCurrentText(QgsUnitTypes.toString(unit))
         self._distance_value.setValue(value)
 
     def value(self) -> float:
-        return self.distance().inUnits(QgsUnitTypes.DistanceUnit.DistanceMeters)
+        return self.distance().inUnits(Qgis.DistanceUnit.Meters)
 
     def distance(self) -> Distance:
         return Distance(self._distance_value.value(), self._units.currentData(Qt.UserRole))
@@ -131,10 +132,10 @@ class DistanceWidget(QWidget):
         self._distance_value.setEnabled(value)
         self._units.setEnabled(value)
 
-    def unit(self) -> QgsUnitTypes.DistanceUnit:
+    def unit(self) -> Qgis.DistanceUnit:
         return self._units.currentData()
 
-    def set_units(self, unit: QgsUnitTypes.DistanceUnit) -> None:
+    def set_units(self, unit: Qgis.DistanceUnit) -> None:
         self._units.setCurrentText(QgsUnitTypes.toString(unit))
 
 
@@ -297,24 +298,24 @@ class DistancesWidget(QWidget):
 
         self._units = QComboBox(self)
         self._units.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMeters),
-            QgsUnitTypes.DistanceUnit.DistanceMeters,
+            QgsUnitTypes.toString(Qgis.DistanceUnit.Meters),
+            Qgis.DistanceUnit.Meters,
         )
         self._units.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceKilometers),
-            QgsUnitTypes.DistanceUnit.DistanceKilometers,
+            QgsUnitTypes.toString(Qgis.DistanceUnit.Kilometers),
+            Qgis.DistanceUnit.Kilometers,
         )
         self._units.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceFeet),
-            QgsUnitTypes.DistanceUnit.DistanceFeet,
+            QgsUnitTypes.toString(Qgis.DistanceUnit.Feet),
+            Qgis.DistanceUnit.Feet,
         )
         self._units.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceMiles),
-            QgsUnitTypes.DistanceUnit.DistanceMiles,
+            QgsUnitTypes.toString(Qgis.DistanceUnit.Miles),
+            Qgis.DistanceUnit.Miles,
         )
         self._units.addItem(
-            QgsUnitTypes.toString(QgsUnitTypes.DistanceUnit.DistanceYards),
-            QgsUnitTypes.DistanceUnit.DistanceYards,
+            QgsUnitTypes.toString(Qgis.DistanceUnit.Yards),
+            Qgis.DistanceUnit.Yards,
         )
         self._units.currentIndexChanged.connect(self.valueChanged.emit)
 
@@ -336,13 +337,13 @@ class DistancesWidget(QWidget):
         self.distances.sort()
         self._distance_values.setText(", ".join(str(d) for d in self.distances))
 
-    def units(self) -> QgsUnitTypes.DistanceUnit:
+    def units(self) -> Qgis.DistanceUnit:
         return self._units.currentData()
 
-    def set_units(self, unit: QgsUnitTypes.DistanceUnit):
+    def set_units(self, unit: Qgis.DistanceUnit):
         self._units.setCurrentText(QgsUnitTypes.toString(unit))
 
-    def distances_in_units(self, unit: QgsUnitTypes.DistanceUnit) -> List[float]:
+    def distances_in_units(self, unit: Qgis.DistanceUnit) -> List[float]:
         distances = []
         for d in self.distances:
             distances.append(Distance(d, self._units.currentData()).inUnits(unit))
