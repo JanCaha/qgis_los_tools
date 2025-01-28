@@ -41,19 +41,25 @@ class SelectSamplingDistanceLayerDialog(QDialog):
                     selectedLayers.append(layer)
 
         self.layer_cb = QComboBox(self)
-
-        for layer in selectedLayers:
-            self.layer_cb.addItem(layer.name(), layer)
+        self.layer_cb.currentIndexChanged.connect(self.on_layer_changed)
 
         self.buttons = QDialogButtonBox(self)
         self.buttons.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
+        self.buttons.button(QDialogButtonBox.Ok).setEnabled(False)
+
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
 
         layout.addRow("Select Layer", self.layer_cb)
         layout.addWidget(self.buttons)
 
+        for layer in selectedLayers:
+            self.layer_cb.addItem(layer.name(), layer)
+
     def layer(self) -> QgsVectorLayer:
         if self.layer_cb.currentIndex() == -1:
             return None
         return self.layer_cb.currentData(Qt.ItemDataRole.UserRole)
+
+    def on_layer_changed(self, index: int) -> None:
+        self.buttons.button(QDialogButtonBox.Ok).setEnabled(index != -1)
