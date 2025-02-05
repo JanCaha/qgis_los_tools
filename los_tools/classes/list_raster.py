@@ -247,10 +247,12 @@ class ListOfRasters:
         doc.appendChild(root)
 
         for raster in self.rasters:
+            relative_path = pathlib.Path(raster.source()).relative_to(pathlib.Path(file_path).parent)
+
             raster_element = doc.createElement("raster")
             raster_element.setAttribute("dataProvider", raster.dataProvider().name())
             raster_element.setAttribute("name", raster.name())
-            raster_element.setAttribute("path", raster.source())
+            raster_element.setAttribute("path", relative_path)
             raster_element.setAttribute("crs", raster.crs().authid())
             raster_element.setAttribute("cellsWidth", raster.width())
             raster_element.setAttribute("cellsHeight", raster.height())
@@ -258,7 +260,7 @@ class ListOfRasters:
             raster_element.setAttribute("extentHeight", raster.extent().height())
 
             root.appendChild(raster_element)
-        doc.toString()
+
         file = QFile(file_path)
         if file.open(QIODevice.OpenModeFlag.WriteOnly | QIODevice.OpenModeFlag.Text):
             bytes_written = file.write(doc.toByteArray())
@@ -297,7 +299,9 @@ class ListOfRasters:
             if not pathlib.Path(raster_path).exists():
                 continue
 
-            raster = QgsRasterLayer(raster_path, item.attribute("name"), item.attribute("dataProvider"))
+            raster_path = pathlib.Path(file_path).parent / raster_path
+
+            raster = QgsRasterLayer(raster_path.as_posix(), item.attribute("name"), item.attribute("dataProvider"))
             if not raster.isValid():
                 continue
 
