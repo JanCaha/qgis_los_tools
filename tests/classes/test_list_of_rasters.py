@@ -1,3 +1,5 @@
+import tempfile
+
 import pytest
 from qgis.core import (
     QgsCoordinateReferenceSystem,
@@ -9,6 +11,7 @@ from qgis.core import (
 )
 
 from los_tools.classes.list_raster import ListOfRasters
+from los_tools.constants.plugin import PluginConstants
 
 
 @pytest.fixture(autouse=True)
@@ -144,3 +147,22 @@ def test_raster_remove(
     list_rasters.remove_raster(raster_small.id())
 
     assert len(list_rasters.rasters) == 1
+
+
+def test_rasters_save_xml(
+    raster_small: QgsRasterLayer,
+    raster_large: QgsRasterLayer,
+):
+    list_rasters = ListOfRasters([raster_small, raster_large])
+
+    _, file = tempfile.mkstemp(suffix=PluginConstants.rasters_xml_extension)
+
+    list_rasters.save_to_file(file)
+
+    list_rasters_new = ListOfRasters([])
+
+    assert len(list_rasters_new.rasters) == 0
+
+    list_rasters_new.read_from_file(file)
+
+    assert len(list_rasters_new.rasters) == 2
