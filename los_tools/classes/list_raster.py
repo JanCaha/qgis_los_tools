@@ -247,12 +247,18 @@ class ListOfRasters:
         doc.appendChild(root)
 
         for raster in self.rasters:
-            relative_path = pathlib.Path(raster.source()).relative_to(pathlib.Path(file_path).parent)
+            try:
+                relative_path = pathlib.Path(raster.source()).relative_to(pathlib.Path(file_path).parent)
+                path_type = "relative"
+            except ValueError:
+                path_type = "absolute"
+                relative_path = raster.source()
 
             raster_element = doc.createElement("raster")
             raster_element.setAttribute("dataProvider", raster.dataProvider().name())
             raster_element.setAttribute("name", raster.name())
             raster_element.setAttribute("path", relative_path)
+            raster_element.setAttribute("pathType", path_type)
             raster_element.setAttribute("crs", raster.crs().authid())
             raster_element.setAttribute("cellsWidth", raster.width())
             raster_element.setAttribute("cellsHeight", raster.height())
@@ -296,10 +302,13 @@ class ListOfRasters:
             item = items.item(i).toElement()
 
             raster_path = item.attribute("path")
+            if item.attribute("pathType") == "relative":
+                raster_path = pathlib.Path(file_path).parent / raster_path
+            else:
+                raster_path = pathlib.Path(raster_path)
+
             if not pathlib.Path(raster_path).exists():
                 continue
-
-            raster_path = pathlib.Path(file_path).parent / raster_path
 
             raster = QgsRasterLayer(raster_path.as_posix(), item.attribute("name"), item.attribute("dataProvider"))
             if not raster.isValid():
