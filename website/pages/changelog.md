@@ -1,5 +1,15 @@
 # Changelog
 
+## version 2.0.0
+
+- rework GUI tools, they now work differently provide more informative messages when something is going on
+
+- `Sampling distance matrix` and `List of Rasters` needed to crate LoS with GUI tools are now stored in the plugin itself
+
+- interactive tools `Create LoS` and `Create LoS No Target Tool` now visualize and can also add LoS to the plugin layer
+
+- introduce **Rasters XML** (**.rastersxml**) file format to store raster list
+
 ## version 1.2.1
 
 - fix bad use of numpy to avoid exception
