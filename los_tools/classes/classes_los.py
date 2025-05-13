@@ -72,6 +72,7 @@ class LoS:
 
         target_distance = 0.0
         sampling_distance = 1.0
+        target_offset = 0.0
 
         if self.is_global:
             target_distance = calculate_distance(first_point_x, first_point_y, self.target_x, self.target_y)
