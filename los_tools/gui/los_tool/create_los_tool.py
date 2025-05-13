@@ -1,3 +1,5 @@
+import typing
+
 from qgis.core import QgsGeometry, QgsPoint, QgsPointXY, QgsTask, QgsVectorLayer, QgsVertexId
 from qgis.gui import QgisInterface, QgsMapMouseEvent
 from qgis.PyQt.QtCore import Qt
@@ -30,23 +32,23 @@ class CreateLoSMapTool(LoSDigitizingToolWithWidget):
         if self._widget:
             self._widget.setAddLoSEnabled(False)
 
-    def canvasReleaseEvent(self, event: QgsMapMouseEvent) -> None:
-        if event.button() == Qt.RightButton and self._start_point is None and self._los_rubber_band.size() == 0:
+    def canvasReleaseEvent(self, e: typing.Optional[QgsMapMouseEvent]) -> None:
+        if e.button() == Qt.MouseButton.RightButton and self._start_point is None and self._los_rubber_band.size() == 0:
             self.deactivate()
-        if event.button() == Qt.RightButton:
+        if e.button() == Qt.MouseButton.RightButton:
             self.clean()
-        elif event.button() == Qt.LeftButton:
+        elif e.button() == Qt.MouseButton.LeftButton:
             if self._start_point is None or (self._start_point and self._end_point):
                 self._end_point = None
                 if self._snap_point:
                     self._start_point = self._snap_point
                 else:
-                    self._start_point = event.mapPoint()
+                    self._start_point = e.mapPoint()
             else:
                 if self._snap_point:
                     self._end_point = self._snap_point
                 else:
-                    self._end_point = event.mapPoint()
+                    self._end_point = e.mapPoint()
                 self.draw_los()
                 self.addLoSStatusChanged.emit(True)
 

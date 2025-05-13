@@ -92,11 +92,11 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
         symbols = []
 
         symbol_invisible = QgsSymbol.defaultSymbol(Qgis.GeometryType.Point)
-        symbol_invisible.setColor(Qt.red)
+        symbol_invisible.setColor(Qt.GlobalColor.red)
         symbols.append(QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE))
 
         symbol_visible = QgsSymbol.defaultSymbol(Qgis.GeometryType.Point)
-        symbol_visible.setColor(Qt.green)
+        symbol_visible.setColor(Qt.GlobalColor.green)
         symbols.append(QgsRendererCategory(True, symbol_visible, TextLabels.VISIBLE))
 
         renderer = QgsCategorizedSymbolRenderer(FieldNames.VISIBLE, symbols)

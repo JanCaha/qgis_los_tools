@@ -43,7 +43,7 @@ class SamplingSettingsDistanceDialog(QDialog):
     def __init__(
         self,
         parent: Optional[QWidget] = None,
-        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Dialog,
+        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.WindowType.Dialog,
     ) -> None:
         super().__init__(parent, flags)
 
@@ -221,7 +221,7 @@ class SamplingSettingsDistanceDialog(QDialog):
 
         self.treeView.clear()
 
-        result_unit = self.data_unit.currentData(Qt.UserRole)
+        result_unit = self.data_unit.currentData(Qt.ItemDataRole.UserRole)
 
         if self._distances:
             item = QTreeWidgetItem()
@@ -243,7 +243,7 @@ class SamplingSettingsDistanceDialog(QDialog):
         for distance in self._distances:
             item = QTreeWidgetItem()
             item.setText(0, f"Over {distance}")
-            item.setData(0, Qt.UserRole, distance)
+            item.setData(0, Qt.ItemDataRole.UserRole, distance)
             size_units = self.calculate_size(self.object_angle_size.value(), distance)
             size = round(size_units.inUnits(result_unit), 3)
             item.setText(1, str(size))
@@ -268,7 +268,7 @@ class SamplingSettingsDistanceDialog(QDialog):
         return Distance(size, distance.unit())
 
     def create_data_layer(self) -> QgsVectorLayer:
-        unit = self.data_unit.currentData(Qt.UserRole)
+        unit = self.data_unit.currentData(Qt.ItemDataRole.UserRole)
         unit_name = QgsUnitTypes.toString(unit)
 
         distance_field_name = FieldNames.TEMPLATE_DISTANCE.replace("?", unit_name)

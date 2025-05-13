@@ -18,7 +18,7 @@ class ObjectParameters(QDialog):
     def __init__(
         self,
         parent: Optional[QWidget] = None,
-        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Dialog,
+        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.WindowType.Dialog,
     ) -> None:
         super().__init__(parent, flags)
 

@@ -1,4 +1,4 @@
-from typing import List
+import typing
 
 import numpy as np
 from qgis.core import Qgis, QgsGeometry, QgsPointXY, QgsTask, QgsVectorLayer
@@ -52,18 +52,18 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
                 self._distance_limits_rubber_band.reset()
                 self.draw()
 
-    def canvasReleaseEvent(self, event: QgsMapMouseEvent) -> None:
-        if event.button() == Qt.RightButton and self._los_rubber_band.size() == 0:
+    def canvasReleaseEvent(self, e: typing.Optional[QgsMapMouseEvent]) -> None:
+        if e.button() == Qt.MouseButton.RightButton and self._los_rubber_band.size() == 0:
             self.deactivate()
-        if event.button() == Qt.RightButton:
+        if e.button() == Qt.MouseButton.RightButton:
             self.clean()
             self.addLoSStatusChanged.emit(False)
-        if event.button() == Qt.LeftButton:
+        if e.button() == Qt.MouseButton.LeftButton:
             if self._widget.los_type_definition == LoSNoTargetDefinitionType.AZIMUTHS:
                 if self._snap_point:
                     self._start_point = self._snap_point
                 else:
-                    self._start_point = event.mapPoint()
+                    self._start_point = e.mapPoint()
                 self.draw()
                 self.addLoSStatusChanged.emit(True)
             else:
@@ -72,12 +72,12 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
                     if self._snap_point:
                         self._start_point = self._snap_point
                     else:
-                        self._start_point = event.mapPoint()
+                        self._start_point = e.mapPoint()
                 elif self._start_point and self._end_point is None:
                     if self._snap_point:
                         self._end_point = self._snap_point
                     else:
-                        self._end_point = event.mapPoint()
+                        self._end_point = e.mapPoint()
                     self.draw()
                     self.addLoSStatusChanged.emit(True)
 
@@ -141,7 +141,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
 
     def draw_limits(self) -> None:
 
-        angles: List[float] = []
+        angles: typing.List[float] = []
         point: QgsPointXY = None
 
         if self._widget.los_type_definition == LoSNoTargetDefinitionType.AZIMUTHS:
@@ -178,7 +178,7 @@ class LosNoTargetMapTool(LoSDigitizingToolWithWidget):
         self._distance_limits_rubber_band.show()
 
     @staticmethod
-    def los_angles(min_angle: float, max_angle: float, angle_step: float) -> List[float]:
+    def los_angles(min_angle: float, max_angle: float, angle_step: float) -> typing.List[float]:
         angles = np.arange(
             min_angle,
             max_angle + 0.000000001 * angle_step,

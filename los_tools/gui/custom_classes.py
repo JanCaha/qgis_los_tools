@@ -1,3 +1,4 @@
+import typing
 from functools import partial
 from typing import List, Optional, Union
 
@@ -114,7 +115,7 @@ class DistanceWidget(QWidget):
         return self.distance().inUnits(Qgis.DistanceUnit.Meters)
 
     def distance(self) -> Distance:
-        return Distance(self._distance_value.value(), self._units.currentData(Qt.UserRole))
+        return Distance(self._distance_value.value(), self._units.currentData(Qt.ItemDataRole.UserRole))
 
     def setMinimum(self, value: float) -> None:
         self._distance_value.setMinimum(value)
@@ -128,9 +129,9 @@ class DistanceWidget(QWidget):
     def setClearValue(self, customValue: float) -> None:
         self._distance_value.setClearValue(customValue)
 
-    def setEnabled(self, value: bool) -> None:
-        self._distance_value.setEnabled(value)
-        self._units.setEnabled(value)
+    def setEnabled(self, a0: bool) -> None:
+        self._distance_value.setEnabled(a0)
+        self._units.setEnabled(a0)
 
     def unit(self) -> Qgis.DistanceUnit:
         return self._units.currentData()
@@ -268,7 +269,7 @@ class DistancesWidget(QWidget):
     def __init__(
         self,
         parent: Optional[QWidget] = None,
-        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Widget,
+        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.WindowType.Widget,
     ) -> None:
         super().__init__(parent, flags)
 
@@ -281,10 +282,10 @@ class DistancesWidget(QWidget):
         self._units.setEnabled(a0)
         return super().setEnabled(a0)
 
-    def blockSignals(self, a0: bool) -> None:
-        self._distance_values.blockSignals(a0)
-        self._units.blockSignals(a0)
-        return super().blockSignals(a0)
+    def blockSignals(self, b: bool) -> bool:
+        self._distance_values.blockSignals(b)
+        self._units.blockSignals(b)
+        return super().blockSignals(b)
 
     def init_gui(self) -> None:
         layout = QHBoxLayout(self)
@@ -371,8 +372,9 @@ class DistanceSpinBoxDelegate(QStyledItemDelegate):
         else:
             super().setEditorData(editor, index)
 
-    def setModelData(self, editor: QWidget, model: QAbstractItemModel, index: QModelIndex):
+    def setModelData(self, editor: QWidget, model: typing.Optional[QAbstractItemModel], index: QModelIndex):
         if isinstance(editor, QDoubleSpinBox):
-            model.setData(index, editor.value(), Qt.ItemDataRole.EditRole)
+            if model:
+                model.setData(index, editor.value(), Qt.ItemDataRole.EditRole)
         else:
             super().setModelData(editor, model, index)

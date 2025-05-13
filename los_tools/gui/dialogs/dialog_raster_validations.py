@@ -126,7 +126,7 @@ class RasterValidations(QDialog):
 
             item = QTreeWidgetItem()
             item.setText(0, raster.name())
-            item.setData(0, Qt.UserRole, raster.id())
+            item.setData(0, Qt.ItemDataRole.UserRole, raster.id())
             item.setCheckState(0, Qt.CheckState.Unchecked)
 
             distance_unit = raster.crs().mapUnits()
@@ -152,7 +152,7 @@ class RasterValidations(QDialog):
 
         for raster in rasters:
             for item in self._rasters_view.findItems(raster.name(), Qt.MatchFlag.MatchExactly):
-                data = item.data(0, Qt.UserRole)
+                data = item.data(0, Qt.ItemDataRole.UserRole)
                 if data == raster.id():
                     item.setCheckState(0, Qt.CheckState.Checked)
                     break
@@ -218,7 +218,7 @@ class RasterValidations(QDialog):
         for i in range(self._rasters_view.topLevelItemCount()):
             item = self._rasters_view.topLevelItem(i)
             if item.checkState(0) == Qt.CheckState.Checked:
-                layer: QgsRasterLayer = QgsProject.instance().mapLayer(item.data(0, Qt.UserRole))
+                layer: QgsRasterLayer = QgsProject.instance().mapLayer(item.data(0, Qt.ItemDataRole.UserRole))
                 rasters_selected.append(layer)
 
         return rasters_selected

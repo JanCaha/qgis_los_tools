@@ -111,7 +111,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
             symbols = []
 
             symbol_horizon_global = QgsSymbol.defaultSymbol(Qgis.GeometryType.Point)
-            symbol_horizon_global.setColor(Qt.red)
+            symbol_horizon_global.setColor(Qt.GlobalColor.red)
 
             symbols.append(
                 QgsRendererCategory(
@@ -122,7 +122,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
             )
 
             symbol_horizon_local = QgsSymbol.defaultSymbol(Qgis.GeometryType.Point)
-            symbol_horizon_local.setColor(Qt.gray)
+            symbol_horizon_local.setColor(Qt.GlobalColor.gray)
 
             symbols.append(QgsRendererCategory(NamesConstants.HORIZON_LOCAL, symbol_horizon_local, TextLabels.LOCAL))
 

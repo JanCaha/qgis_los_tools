@@ -1,3 +1,5 @@
+import typing
+
 from qgis.core import Qgis, QgsPointLocator, QgsPointXY, QgsVectorLayer
 from qgis.gui import QgisInterface, QgsMapMouseEvent, QgsMapToolEdit, QgsMessageBarItem, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt, pyqtSignal
@@ -100,7 +102,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         self._widget.saveToLayerClicked.connect(self.add_los_to_layer)
 
         self._iface.addUserInputWidget(self._widget)
-        self._widget.setFocus(Qt.TabFocusReason)
+        self._widget.setFocus(Qt.FocusReason.TabFocusReason)
 
         self.addLoSStatusChanged.connect(self._widget.setAddLoSEnabled)
 
@@ -118,8 +120,8 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         self._snap_indicator.setVisible(False)
         self._los_rubber_band.reset()
 
-    def keyPressEvent(self, e: QKeyEvent) -> None:
-        if e.key() == Qt.Key_Escape or e.key() == Qt.Key_Backspace:
+    def keyPressEvent(self, e: typing.Optional[QKeyEvent]) -> None:
+        if e.key() == Qt.Key.Key_Escape or e.key() == Qt.Key.Key_Backspace:
             self.deactivate()
         return super().keyPressEvent(e)
 
@@ -191,8 +193,9 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
             duration=2,
         )
 
-    def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
-        self._set_snap_point(event)
+    def canvasMoveEvent(self, e: typing.Optional[QgsMapMouseEvent]) -> None:
+        if e:
+            self._set_snap_point(e)
 
     def reactivate(self):
         if self._widget:

@@ -12,7 +12,7 @@ class SelectSamplingDistanceLayerDialog(QDialog):
     def __init__(
         self,
         parent: typing.Optional[QWidget] = None,
-        flags: typing.Union[Qt.WindowFlags, Qt.WindowType] = Qt.Dialog,
+        flags: typing.Union[Qt.WindowFlags, Qt.WindowType] = Qt.WindowType.Dialog,
     ) -> None:
         super().__init__(parent, flags)
 

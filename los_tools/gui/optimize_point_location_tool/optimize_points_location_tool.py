@@ -1,3 +1,4 @@
+import typing
 from typing import Optional
 
 from qgis.core import (
@@ -61,7 +62,7 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
 
         self._widget = OptimizePointLocationInputWidget()
         self._iface.addUserInputWidget(self._widget)
-        self._widget.setFocus(Qt.TabFocusReason)
+        self._widget.setFocus(Qt.FocusReason.TabFocusReason)
 
         self._widget.valuesChanged.connect(self.set_values_from_widget)
         self.set_values_from_widget()
@@ -143,7 +144,7 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
         self.delete_widget()
         super(OptimizePointsLocationTool, self).deactivate()
 
-    def get_candidate_point(self, point: QgsPointXY = None) -> None:
+    def get_candidate_point(self, point: typing.Optional[QgsPointXY] = None) -> None:
         if point:
             self._candidate_point = OptimizePointLocationAlgorithm.optimized_point(
                 point,
@@ -156,7 +157,7 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
         else:
             self._candidate_point = None
 
-    def draw_rubber_bands(self, point: QgsPointXY = None) -> None:
+    def draw_rubber_bands(self, point: typing.Optional[QgsPointXY] = None) -> None:
         if point:
             circle = QgsCircle(QgsPoint(point.x(), point.y()), self._circle_radius)
             self.circle_rubber.setToGeometry(
@@ -200,7 +201,7 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
         else:
             return None
 
-    def canvasMoveEvent(self, e: QgsMapMouseEvent) -> None:
+    def canvasMoveEvent(self, e: typing.Optional[QgsMapMouseEvent]) -> None:
         match = self._snap(e.mapPoint())
         if match:
             self._point = match.point()
@@ -211,8 +212,8 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
             self.clean()
         return super().canvasMoveEvent(e)
 
-    def canvasReleaseEvent(self, e: QgsMapMouseEvent) -> None:
-        if e.button() == Qt.RightButton:
+    def canvasReleaseEvent(self, e: typing.Optional[QgsMapMouseEvent]) -> None:
+        if e.button() == Qt.MouseButton.RightButton:
             self.deactivate()
         if self._point and self._pointId and self._candidate_point:
             self.currentVectorLayer().beginEditCommand("Optimize Point Location")

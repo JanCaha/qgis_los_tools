@@ -1,3 +1,5 @@
+import typing
+
 from qgis.core import QgsPointLocator, QgsPointXY
 from qgis.gui import QgsMapCanvas, QgsMapMouseEvent, QgsMapToolEmitPoint, QgsSnapIndicator
 from qgis.PyQt.QtCore import Qt
@@ -12,7 +14,7 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
     def __init__(self, canvas: QgsMapCanvas):
         QgsMapToolEmitPoint.__init__(self, canvas)
 
-        self.setCursor(Qt.CrossCursor)
+        self.setCursor(Qt.CursorShape.CrossCursor)
 
         self._snap_indicator = QgsSnapIndicator(self.canvas())
 
@@ -21,17 +23,17 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
         self.canvas().unsetMapTool(self)
         QgsMapToolEmitPoint.deactivate(self)
 
-    def canvasPressEvent(self, event: QgsMapMouseEvent) -> None:
+    def canvasPressEvent(self, e: typing.Optional[QgsMapMouseEvent]) -> None:
         pass
 
-    def canvasReleaseEvent(self, event: QgsMapMouseEvent) -> None:
-        if event.button() == Qt.MouseButton.RightButton:
+    def canvasReleaseEvent(self, e: typing.Optional[QgsMapMouseEvent]) -> None:
+        if e.button() == Qt.MouseButton.RightButton:
             self.deactivate()
         else:
-            self.canvasClicked.emit(self._current_point, event.button())
+            self.canvasClicked.emit(self._current_point, e.button())
 
-    def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
-        match = self.canvas().snappingUtils().snapToMap(event.originalMapPoint())
+    def canvasMoveEvent(self, e: typing.Optional[QgsMapMouseEvent]) -> None:
+        match = self.canvas().snappingUtils().snapToMap(e.originalMapPoint())
 
         if match.isValid() and match.type() == QgsPointLocator.Vertex:
             self._snap_indicator.setMatch(match)
@@ -41,7 +43,7 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
             self._snap_layer_name = match.layer().name()
         else:
             self._snap_indicator.setVisible(False)
-            self._current_point = event.originalMapPoint()
+            self._current_point = e.originalMapPoint()
             self._snapped = False
             self._snap_layer_name = ""
 
