@@ -64,13 +64,14 @@ class LoS:
                 self.horizon.append((self.visible[i] is True) and (self.visible[i + 1] is False))
 
     def __parse_points(self, points: List[List[float]]) -> None:
-        max_angle_temp = -180
+        max_angle_temp = -180.0
 
         first_point_x = points[0][0]
         first_point_y = points[0][1]
         first_point_z = points[0][2] + self.observer_offset
 
-        sampling_distance: float = None
+        target_distance = 0.0
+        sampling_distance = 1.0
 
         if self.is_global:
             target_distance = calculate_distance(first_point_x, first_point_y, self.target_x, self.target_y)
@@ -123,19 +124,17 @@ class LoS:
             self.previous_max_angle.append(max_angle_temp)
 
             if i != 0:
-                if max_angle_temp < self.points[i - 1][self.VERTICAL_ANGLE]:
-                    if self.is_global:
-                        if i != self.target_index:
-                            max_angle_temp = self.points[i - 1][self.VERTICAL_ANGLE]
+                if max_angle_temp < self._angle_vertical(distance, point_z - first_point_z):
+                    if self.is_global and i == self.target_index:
+                        pass
                     else:
-                        max_angle_temp = self.points[i - 1][self.VERTICAL_ANGLE]
+                        max_angle_temp = self._angle_vertical(distance, point_z - first_point_z)
 
             # is visible is only valid if previous_max_angle is smaller then current angle
             if i == 0:
                 self.visible.append(True)
             else:
-                # [i] and [-1] actually points to the same point, no idea why I wrote this way
-                self.visible.append(self.previous_max_angle[i] < self.points[i - 1][self.VERTICAL_ANGLE])
+                self.visible.append(self.previous_max_angle[i] < self.points[i][self.VERTICAL_ANGLE])
 
     def __str__(self):
         string = ""
