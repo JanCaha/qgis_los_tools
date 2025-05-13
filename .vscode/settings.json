@@ -20,4 +20,8 @@
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
     },
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportAttributeAccessIssue": "none",
+        "reportOptionalMemberAccess": "none"
+    }
 }
