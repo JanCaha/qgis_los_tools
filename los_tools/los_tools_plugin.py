@@ -13,7 +13,6 @@ from qgis.core import (
     QgsProject,
     QgsRasterLayer,
     QgsVectorLayer,
-    QgsWkbTypes,
 )
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtGui import QIcon
@@ -345,7 +344,7 @@ class LoSToolsPlugin:
             return QgsMemoryProviderUtils.createMemoryLayer(
                 "Manually Created LoS",
                 Fields.los_plugin_layer_fields,
-                QgsWkbTypes.LineString25D,
+                Qgis.WkbType.LineString25D,
                 selected_crs,
             )
 
