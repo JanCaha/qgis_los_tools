@@ -1,4 +1,5 @@
 from qgis.core import (
+    Qgis,
     QgsCategorizedSymbolRenderer,
     QgsFeature,
     QgsFeatureIterator,
@@ -18,7 +19,6 @@ from qgis.core import (
     QgsRendererCategory,
     QgsSymbol,
     QgsVectorLayer,
-    QgsWkbTypes,
 )
 from qgis.PyQt.QtCore import Qt
 
@@ -80,11 +80,11 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
 
         symbols = []
 
-        symbol_invisible = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
+        symbol_invisible = QgsSymbol.defaultSymbol(Qgis.GeometryType.Line)
         symbol_invisible.setColor(Qt.red)
         symbols.append(QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE))
 
-        symbol_visible = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
+        symbol_visible = QgsSymbol.defaultSymbol(Qgis.GeometryType.Line)
         symbol_visible.setColor(Qt.green)
         symbols.append(QgsRendererCategory(True, symbol_visible, TextLabels.VISIBLE))
 
@@ -117,7 +117,7 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.MultiLineString25D,
+            Qgis.WkbType.MultiLineString25D,
             los_layer.sourceCrs(),
         )
 

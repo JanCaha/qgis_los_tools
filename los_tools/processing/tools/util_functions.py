@@ -17,7 +17,6 @@ from qgis.core import (
     QgsVectorLayer,
     QgsVertexId,
     QgsVertexIterator,
-    QgsWkbTypes,
 )
 
 from los_tools.constants.field_names import FieldNames
@@ -109,12 +108,12 @@ def wkt_to_array_points(wkt: str) -> List[List[float]]:
 
 def line_geometry_to_coords(geom: QgsGeometry) -> List[List[float]]:
     if geom.wkbType() not in [
-        QgsWkbTypes.Type.LineString,
-        QgsWkbTypes.Type.LineString25D,
-        QgsWkbTypes.Type.LineStringZ,
-        QgsWkbTypes.Type.MultiLineString,
-        QgsWkbTypes.Type.MultiLineString25D,
-        QgsWkbTypes.Type.MultiLineStringZ,
+        Qgis.WkbType.LineString,
+        Qgis.WkbType.LineString25D,
+        Qgis.WkbType.LineStringZ,
+        Qgis.WkbType.MultiLineString,
+        Qgis.WkbType.MultiLineString25D,
+        Qgis.WkbType.MultiLineStringZ,
     ]:
         raise TypeError("Geometry has to be LineString or MultiLineString optionally with Z coordinate.")
 
@@ -144,7 +143,7 @@ def segmentize_los_line(line: QgsGeometry, segment_length: float) -> QgsLineStri
     if not isinstance(line, QgsGeometry):
         raise TypeError("`line` should be `QgsGeometry`.")
 
-    if line.type() != QgsWkbTypes.GeometryType.LineGeometry:
+    if line.type() != Qgis.GeometryType.Line:
         raise TypeError("Can only properly segmentize Lines.")
 
     if 3 < line.constGet().vertexCount():

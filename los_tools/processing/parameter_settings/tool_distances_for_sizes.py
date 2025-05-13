@@ -1,5 +1,6 @@
 import math
 
+from pytest_qgis import Qgis
 from qgis.core import (
     QgsFeature,
     QgsField,
@@ -12,7 +13,6 @@ from qgis.core import (
     QgsProcessingParameterMatrix,
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.constants.field_names import FieldNames
@@ -68,7 +68,7 @@ class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField(FieldNames.DISTANCE, COLUMN_TYPE.Double))
         fields.append(QgsField(FieldNames.SIZE, COLUMN_TYPE.Double))
 
-        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields, QgsWkbTypes.NoGeometry)
+        sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields, Qgis.WkbType.NoGeometry)
 
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_TABLE))

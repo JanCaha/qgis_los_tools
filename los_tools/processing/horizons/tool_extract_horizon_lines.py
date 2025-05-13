@@ -1,4 +1,5 @@
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsFeatureRequest,
     QgsField,
@@ -15,7 +16,6 @@ from qgis.core import (
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
     QgsVectorLayer,
-    QgsWkbTypes,
 )
 
 from los_tools.classes.classes_los import LoSWithoutTarget
@@ -112,7 +112,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.LineStringZM,
+            Qgis.WkbType.LineStringZM,
             los_layer.sourceCrs(),
         )
 

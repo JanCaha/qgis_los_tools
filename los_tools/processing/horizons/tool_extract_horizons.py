@@ -1,6 +1,7 @@
 from typing import Union
 
 from qgis.core import (
+    Qgis,
     QgsCategorizedSymbolRenderer,
     QgsFeature,
     QgsFeatureSink,
@@ -18,7 +19,6 @@ from qgis.core import (
     QgsProcessingUtils,
     QgsRendererCategory,
     QgsSymbol,
-    QgsWkbTypes,
 )
 from qgis.PyQt.QtCore import Qt
 
@@ -110,7 +110,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
             symbols = []
 
-            symbol_horizon_global = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
+            symbol_horizon_global = QgsSymbol.defaultSymbol(Qgis.GeometryType.Point)
             symbol_horizon_global.setColor(Qt.red)
 
             symbols.append(
@@ -121,7 +121,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
                 )
             )
 
-            symbol_horizon_local = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
+            symbol_horizon_local = QgsSymbol.defaultSymbol(Qgis.GeometryType.Point)
             symbol_horizon_local.setColor(Qt.gray)
 
             symbols.append(QgsRendererCategory(NamesConstants.HORIZON_LOCAL, symbol_horizon_local, TextLabels.LOCAL))
@@ -161,7 +161,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.Point25D,
+            Qgis.WkbType.Point25D,
             los_layer.sourceCrs(),
         )
 

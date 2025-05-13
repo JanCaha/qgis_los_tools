@@ -139,7 +139,7 @@ class ExtractPointsLoSAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            Qgis.WkbType.Point25D
+            Qgis.WkbType.Point25D,
             los_layer.sourceCrs(),
         )
 

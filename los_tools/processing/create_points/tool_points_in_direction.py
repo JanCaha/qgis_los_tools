@@ -1,5 +1,6 @@
 import numpy as np
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -14,7 +15,6 @@ from qgis.core import (
     QgsProcessingParameterField,
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.constants.field_names import FieldNames
@@ -133,7 +133,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.Point,
+            Qgis.WkbType.Point,
             input_layer.sourceCrs(),
         )
 

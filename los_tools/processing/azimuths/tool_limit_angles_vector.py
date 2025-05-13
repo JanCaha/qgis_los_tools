@@ -1,4 +1,5 @@
 from qgis.core import (
+    Qgis,
     QgsCoordinateTransform,
     QgsFeature,
     QgsFeatureRequest,
@@ -13,7 +14,6 @@ from qgis.core import (
     QgsProcessingParameterField,
     QgsProcessingUtils,
     QgsProject,
-    QgsWkbTypes,
 )
 
 from los_tools.constants.field_names import FieldNames
@@ -106,7 +106,7 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_TABLE,
             context,
             fields,
-            QgsWkbTypes.NoGeometry,
+            Qgis.WkbType.NoGeometry,
             los_layer.sourceCrs(),
         )
 

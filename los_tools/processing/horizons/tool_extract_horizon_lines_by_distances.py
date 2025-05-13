@@ -1,6 +1,7 @@
 import typing
 
 from qgis.core import (
+    Qgis,
     QgsColorRamp,
     QgsFeature,
     QgsFeatureRequest,
@@ -24,7 +25,6 @@ from qgis.core import (
     QgsStyle,
     QgsSymbol,
     QgsVectorLayer,
-    QgsWkbTypes,
 )
 
 from los_tools.classes.classes_los import LoSWithoutTarget
@@ -143,7 +143,7 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.LineStringZM,
+            Qgis.WkbType.LineStringZM,
             los_layer.sourceCrs(),
         )
 
@@ -253,7 +253,7 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
             FieldNames.HORIZON_DISTANCE,
             len(self.distances_matrix),
             QgsGraduatedSymbolRenderer.Mode.EqualInterval,
-            QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry),
+            QgsSymbol.defaultSymbol(Qgis.GeometryType.Line),
             ramp,
         )
 

@@ -1,4 +1,5 @@
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -9,7 +10,6 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.constants.field_names import FieldNames
@@ -86,7 +86,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_TABLE,
             context,
             fields,
-            QgsWkbTypes.NoGeometry,
+            Qgis.WkbType.NoGeometry,
             point_layer.sourceCrs(),
         )
 

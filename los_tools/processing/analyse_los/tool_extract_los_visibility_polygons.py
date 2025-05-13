@@ -1,5 +1,6 @@
 from qgis.analysis import QgsGeometrySnapper, QgsInternalGeometrySnapper
 from qgis.core import (
+    Qgis,
     QgsCategorizedSymbolRenderer,
     QgsFeature,
     QgsFeatureIterator,
@@ -21,7 +22,6 @@ from qgis.core import (
     QgsRendererCategory,
     QgsSymbol,
     QgsVectorLayer,
-    QgsWkbTypes,
 )
 from qgis.PyQt.QtCore import Qt
 
@@ -83,13 +83,13 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
 
         symbols = []
 
-        symbol_invisible = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol_invisible = QgsSymbol.defaultSymbol(Qgis.GeometryType.Polygon)
         symbol_invisible.setColor(Qt.red)
 
         symbol_invisible.symbolLayer(0).setStrokeStyle(Qt.PenStyle(Qt.NoPen))
         symbols.append(QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE))
 
-        symbol_visible = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol_visible = QgsSymbol.defaultSymbol(Qgis.GeometryType.Polygon)
         symbol_visible.setColor(Qt.green)
         symbol_visible.symbolLayer(0).setStrokeStyle(Qt.PenStyle(Qt.NoPen))
         symbols.append(QgsRendererCategory(True, symbol_visible, TextLabels.VISIBLE))
@@ -123,7 +123,7 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.MultiPolygon,
+            Qgis.WkbType.MultiPolygon,
             los_layer.sourceCrs(),
         )
 

@@ -13,7 +13,6 @@ from qgis.core import (
     QgsProcessingParameterMultipleLayers,
     QgsProcessingParameterVectorLayer,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.classes.list_raster import ListOfRasters
@@ -183,7 +182,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.LineString25D,
+            Qgis.WkbType.LineString25D,
             observers_layer.sourceCrs(),
         )
 

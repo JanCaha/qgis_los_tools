@@ -1,4 +1,5 @@
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsFeatureSink,
     QgsField,
@@ -11,7 +12,6 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
@@ -110,7 +110,7 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             fields,
-            QgsWkbTypes.NoGeometry,
+            Qgis.WkbType.NoGeometry,
             input_los_layer.sourceCrs(),
         )
 

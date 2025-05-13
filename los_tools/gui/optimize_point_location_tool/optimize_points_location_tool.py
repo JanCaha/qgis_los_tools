@@ -31,12 +31,12 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
 
         self.snap_marker = QgsSnapIndicator(self._canvas)
 
-        self.circle_rubber = QgsRubberBand(self._canvas, Qgis.GeometryType.PolygonGeometry)
+        self.circle_rubber = QgsRubberBand(self._canvas, Qgis.GeometryType.Polygon)
         self.circle_rubber.setColor(QColor.fromRgb(255, 64, 64))
         self.circle_rubber.setWidth(2)
         self.circle_rubber.setOpacity(0.3)
 
-        self.point_rubber = QgsRubberBand(self._canvas, Qgis.GeometryType.PointGeometry)
+        self.point_rubber = QgsRubberBand(self._canvas, Qgis.GeometryType.Point)
         self.point_rubber.setColor(QColor.fromRgb(64, 64, 255))
         self.point_rubber.setWidth(2)
         self.point_rubber.setOpacity(0.75)
@@ -88,21 +88,21 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
         if self.currentVectorLayer() is None:
             self.messageEmitted.emit(
                 "Tool only works with vector layers. Current layer is not vector layer.",
-                Qgis.Critical,
+                Qgis.MessageLevel.Critical,
             )
             self._canvas.unsetMapTool(self)
             return
         if self.currentVectorLayer().crs().isGeographic():
             self.messageEmitted.emit(
                 "Tool only works for layers with projected CRS. Current layer has geographic crs.",
-                Qgis.Critical,
+                Qgis.MessageLevel.Critical,
             )
             self._canvas.unsetMapTool(self)
             return
         if self.currentVectorLayer().dataProvider().capabilities() & QgsVectorDataProvider.ChangeFeatures:
             self.messageEmitted.emit(
                 "Tool only works for layers where features can be edited. Current layer features cannot be edited.",
-                Qgis.Critical,
+                Qgis.MessageLevel.Critical,
             )
             self._canvas.unsetMapTool(self)
             return
@@ -117,12 +117,12 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
                 "Tool only works for point layers. Current layer is {}.".format(
                     QgsWkbTypes.geometryDisplayString(self.currentVectorLayer().geometryType())
                 ),
-                Qgis.Critical,
+                Qgis.MessageLevel.Critical,
             )
             self._canvas.unsetMapTool(self)
             return
         if not self.currentVectorLayer().isEditable():
-            self.messageEmitted.emit("Layer must be in editing mode.", Qgis.Critical)
+            self.messageEmitted.emit("Layer must be in editing mode.", Qgis.MessageLevel.Critical)
             self._canvas.unsetMapTool(self)
             return
         self._distance_unit = self.currentVectorLayer().crs().mapUnits()
@@ -178,7 +178,7 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
 
         config = QgsSnappingConfig(oldConfig)
         config.setEnabled(True)
-        config.setMode(QgsSnappingConfig.AdvancedConfiguration)
+        config.setMode(Qgis.SnappingMode.AdvancedConfiguration)
         config.setIntersectionSnapping(False)
         config.clearIndividualLayerSettings()
 
