@@ -114,6 +114,7 @@ class LoS:
                     self._angle_vertical(distance, point_z + target_offset - first_point_z),
                 ]
 
+            # points
             else:
                 self.points[i] = [
                     point_x,
