@@ -1,7 +1,7 @@
 import math
 
-from pytest_qgis import Qgis
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsField,
     QgsFields,
