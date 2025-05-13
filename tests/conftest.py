@@ -76,6 +76,8 @@ def table_angle_distance_size() -> QgsVectorLayer:
 
     table_dp = table.dataProvider()
 
+    assert table_dp is not None
+
     fields = table.fields()
 
     field_index_angle = fields.indexFromName(FieldNames.SIZE_ANGLE)
@@ -238,6 +240,7 @@ def mock_add_message_to_messagebar(qgis_iface: QgisInterface) -> typing.Callable
 @pytest.fixture(autouse=True, scope="function")
 def _clear_message_bar_messages(qgis_iface: QgisInterface):
     mb = qgis_iface.messageBar()
+    assert mb is not None
     mb.messages[Qgis.MessageLevel.Info] = []
     mb.messages[Qgis.MessageLevel.Warning] = []
     mb.messages[Qgis.MessageLevel.Critical] = []
