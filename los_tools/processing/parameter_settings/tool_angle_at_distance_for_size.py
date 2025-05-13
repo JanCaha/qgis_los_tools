@@ -52,9 +52,8 @@ class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
         angle = math.degrees(math.atan(size / distance))
 
         feedback.pushInfo(
-            "Angle to detect object of size {0} meters at distance {1} meters is {2} degrees (rounded to 3 decimal places).".format(
-                size, distance, round(angle, 3)
-            )
+            f"Angle to detect object of size {size} meters at distance {distance} "
+            f"meters is {round(angle, 3)} degrees (rounded to 3 decimal places)."
         )
 
         return {self.OUTPUT_ANGLE: angle}

@@ -114,9 +114,8 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
             Qgis.WkbType.PointZM,
         ]:
             self.messageEmitted.emit(
-                "Tool only works for point layers. Current layer is {}.".format(
-                    QgsWkbTypes.geometryDisplayString(self.currentVectorLayer().geometryType())
-                ),
+                "Tool only works for point layers. Current layer is "
+                f"{QgsWkbTypes.geometryDisplayString(self.currentVectorLayer().geometryType())}.",
                 Qgis.MessageLevel.Critical,
             )
             self._canvas.unsetMapTool(self)

@@ -225,7 +225,7 @@ class SamplingSettingsDistanceDialog(QDialog):
 
         if self._distances:
             item = QTreeWidgetItem()
-            item.setText(0, "Below {}".format(self._distances[0]))
+            item.setText(0, f"Below {self._distances[0]}")
             item.setText(
                 1,
                 str(round(self.default_sampling_size.distance().inUnits(result_unit), 3)),

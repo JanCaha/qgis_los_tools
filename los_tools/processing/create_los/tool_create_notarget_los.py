@@ -203,9 +203,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
         for observer_feature in observers_iterator:
             request = QgsFeatureRequest()
-            request.setFilterExpression(
-                "{} = {}".format(target_definition_id_field, observer_feature.attribute(observers_id))
-            )
+            request.setFilterExpression(f"{target_definition_id_field} = {observer_feature.attribute(observers_id)}")
 
             targets_iterators = targets_layer.getFeatures(request)
 

@@ -74,8 +74,8 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
         if FieldNames.LOS_TYPE not in field_names:
             msg = (
-                "Fields specific for LoS not found in current layer ({0}). "
-                "Cannot extract horizon lines from this layer.".format(FieldNames.LOS_TYPE)
+                f"Fields specific for LoS not found in current layer ({FieldNames.LOS_TYPE}). "
+                "Cannot extract horizon lines from this layer."
             )
 
             return False, msg
@@ -83,8 +83,9 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         los_type = get_los_type(los_layer, field_names)
 
         if los_type != NamesConstants.LOS_NO_TARGET:
-            msg = "LoS must be of type `{0}` to extract horizon lines but type `{1}` found.".format(
-                NamesConstants.LOS_NO_TARGET, los_type
+            msg = (
+                f"LoS must be of type `{NamesConstants.LOS_NO_TARGET}` "
+                f"to extract horizon lines but type `{los_type}` found."
             )
 
             return False, msg
@@ -127,7 +128,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
         for id_value in id_values:
             request = QgsFeatureRequest()
-            request.setFilterExpression("{} = '{}'".format(FieldNames.ID_OBSERVER, id_value))
+            request.setFilterExpression(f"{FieldNames.ID_OBSERVER} = '{id_value}'")
             order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
             request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
 

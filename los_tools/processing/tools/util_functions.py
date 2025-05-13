@@ -45,9 +45,10 @@ def get_los_type(los_layer: QgsVectorLayer, field_names: List[str]) -> str:
     los_types = los_layer.uniqueValues(index)
 
     if len(los_types) != 1:
+        types_txt = ", ".join(los_types)
         msg = (
-            "More than one type of LoS present in layer. Cannot process such layer. "
-            "Existing LoS types are {0}.".format(", ".join(los_types))
+            f"More than one type of LoS present in layer. Cannot process such layer. "
+            f"Existing LoS types are {types_txt}."
         )
 
         QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)
@@ -62,9 +63,10 @@ def get_horizon_lines_type(horizon_lines_layer: QgsVectorLayer) -> str:
     horizon_lines_types = horizon_lines_layer.uniqueValues(index)
 
     if len(horizon_lines_types) != 1:
+        types_txt = ", ".join(horizon_lines_types)
         msg = (
             "More than one type of horizon lines present in layer. Cannot process such layer. "
-            "Existing LoS types are {0}.".format(", ".join(horizon_lines_types))
+            f"Existing LoS types are {types_txt}."
         )
 
         QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)
@@ -81,8 +83,9 @@ def check_existence_los_fields(field_names: List[str]) -> None:
         or FieldNames.ID_TARGET in field_names
     ):
         msg = (
-            "Fields specific for LoS not found in current layer ({0}, {1}, {2}). "
-            "Cannot analyse the layer as LoS.".format(FieldNames.LOS_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET)
+            f"Fields specific for LoS not found in current layer "
+            f"({FieldNames.LOS_TYPE}, {FieldNames.ID_OBSERVER}, {FieldNames.ID_TARGET}). "
+            f"Cannot analyse the layer as LoS."
         )
 
         QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)

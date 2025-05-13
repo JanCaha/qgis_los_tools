@@ -77,8 +77,9 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         raster_band_count = raster.bandCount()
 
         if raster_band_count != 1:
-            msg = "`Location optimization raster` can only have one band." " Currently there are `{0}` bands.".format(
-                raster_band_count
+            msg = (
+                "`Location optimization raster` can only have one band."
+                f" Currently there are `{raster_band_count}` bands."
             )
 
             return False, msg
@@ -86,12 +87,12 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
         input_layer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
 
         if input_layer.sourceCrs().isGeographic():
-            msg = "`Input point layer` crs must be projected. " "Right now it is `geographic`."
+            msg = "`Input point layer` crs must be projected. Right now it is `geographic`."
 
             return False, msg
 
         if not raster_crs == input_layer.sourceCrs():
-            msg = "`Input point layer` and `Location optimization raster` crs must be equal. " "Right now they are not."
+            msg = "`Input point layer` and `Location optimization raster` crs must be equal. Right now they are not."
 
             return False, msg
 
@@ -109,7 +110,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
 
         if mask_raster is not None:
             if mask_raster.bandCount() != 1:
-                msg = "`Mask raster` can only have one band. Currently there are `{0}` bands.".format(raster_band_count)
+                msg = "`Mask raster` can only have one band. Currently there are `{raster_band_count}` bands."
 
                 return False, msg
 

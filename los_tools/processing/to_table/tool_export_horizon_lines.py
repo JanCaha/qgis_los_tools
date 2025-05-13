@@ -44,8 +44,8 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
         if FieldNames.HORIZON_TYPE not in field_names:
             msg = (
-                "Fields specific for horizon lines not found in current layer ({0}). "
-                "Cannot to_table the layer as horizon lines.".format(FieldNames.HORIZON_TYPE)
+                f"Fields specific for horizon lines not found in current layer ({FieldNames.HORIZON_TYPE}). "
+                "Cannot to_table the layer as horizon lines."
             )
 
             QgsMessageLog.logMessage(msg, "los_tools", Qgis.MessageLevel.Critical)

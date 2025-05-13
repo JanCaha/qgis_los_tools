@@ -66,10 +66,9 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
             and FieldNames.ID_TARGET in field_names
         ):
             msg = (
-                "Fields specific for LoS not found in current layer ({0}, {1}, {2}). "
-                "Cannot analyse the layer as LoS.".format(
-                    FieldNames.LOS_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET
-                )
+                "Fields specific for LoS not found in current layer "
+                f"({FieldNames.LOS_TYPE}, {FieldNames.ID_OBSERVER}, {FieldNames.ID_TARGET}). "
+                "Cannot analyse the layer as LoS."
             )
 
             return False, msg

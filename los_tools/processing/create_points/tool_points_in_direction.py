@@ -97,7 +97,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
         if main_direction_layer.featureCount() != 1:
             msg = (
                 "`Main direction point layer` should only containt one feature. "
-                "Currently is has `{}` features.".format(main_direction_layer.featureCount())
+                f"Currently is has `{main_direction_layer.featureCount()}` features."
             )
 
             return False, msg
