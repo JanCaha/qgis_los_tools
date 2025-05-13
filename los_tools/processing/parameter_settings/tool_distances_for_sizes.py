@@ -25,7 +25,7 @@ class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
     MAXIMALDISTANCE = "MaximalDistance"
     OUTPUT_TABLE = "OutputTable"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.ANGLE,

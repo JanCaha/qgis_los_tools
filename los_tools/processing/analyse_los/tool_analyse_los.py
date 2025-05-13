@@ -31,7 +31,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
     OUTPUT_LAYER = "OutputLayer"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )

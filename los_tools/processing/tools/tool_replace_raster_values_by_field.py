@@ -19,7 +19,7 @@ class ReplaceRasterValuesByFieldValuesAlgorithm(QgsProcessingAlgorithm):
     OUTPUT_RASTER = "OutputRaster"
     VALUE_FIELD = "ValueField"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterRasterLayer(self.RASTER_LAYER, "Raster Layer", [QgsProcessing.TypeRaster])
         )

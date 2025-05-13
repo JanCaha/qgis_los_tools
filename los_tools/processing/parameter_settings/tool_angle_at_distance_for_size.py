@@ -16,7 +16,7 @@ class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
     DISTANCE = "Distance"
     OUTPUT_ANGLE = "OutputAngle"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         param = QgsProcessingParameterNumber(
             self.SIZE,
             "Size of the object (in meters)",

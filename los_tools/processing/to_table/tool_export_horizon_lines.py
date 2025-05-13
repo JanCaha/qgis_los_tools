@@ -24,7 +24,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
     INPUT_HORIZON_LINES_LAYER = "HorizonLinesLayer"
     OUTPUT = "OutputFile"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_HORIZON_LINES_LAYER,

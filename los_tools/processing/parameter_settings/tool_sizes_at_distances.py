@@ -26,7 +26,7 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
     DEFAULT_SAMPLING_DISTANCE = "DefaultSamplingDistance"
     OUTPUT_TABLE = "OutputTable"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.ANGLE,

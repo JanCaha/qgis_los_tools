@@ -32,7 +32,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
     DISTANCE = "Distance"
     MASK_RASTER = "MaskRaster"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterRasterLayer(
                 self.INPUT_RASTER,

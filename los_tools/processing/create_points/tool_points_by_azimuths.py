@@ -33,7 +33,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
     DISTANCE = "Distance"
     OVER_NORTH = "OverNorth"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint])
         )

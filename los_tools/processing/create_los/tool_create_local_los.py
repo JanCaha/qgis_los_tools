@@ -33,7 +33,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
     LINE_DENSITY = "LineDensity"
     DEM_RASTERS = "DemRasters"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers", QgsProcessing.TypeRaster)
         )

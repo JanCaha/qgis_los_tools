@@ -23,7 +23,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
     OBJECT_LAYER_FIELD_ID = "ObjectLayerID"
     OUTPUT_TABLE = "OutputTable"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.POINT_LAYER, "Point layer", [QgsProcessing.TypeVectorPoint])
         )

@@ -34,7 +34,7 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
     horizons_types = [NamesConstants.HORIZON_MAX_LOCAL, NamesConstants.HORIZON_GLOBAL]
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
