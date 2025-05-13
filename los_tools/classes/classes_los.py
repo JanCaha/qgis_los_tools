@@ -88,9 +88,11 @@ class LoS:
                 point_z = self._curvature_corrections(point_z, distance, self.refraction_coefficient)
                 target_offset = self._curvature_corrections(self.target_offset, distance, self.refraction_coefficient)
 
+            # first point
             if i == 0:
                 self.points[i] = [point_x, point_y, 0, first_point_z, -90]
 
+            # target point global los
             elif self.is_global and math.fabs(target_distance - distance) < sampling_distance / 2:
                 self.points[i] = [
                     point_x,
@@ -102,6 +104,7 @@ class LoS:
 
                 self.target_index = i
 
+            # target point local los
             elif not self.is_global and not self.is_without_target and i == len(points) - 1:
                 self.points[i] = [
                     point_x,
