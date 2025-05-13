@@ -22,10 +22,12 @@ def get_plugin_version() -> str:
     return config["general"]["version"]
 
 
-def get_doc_file(file_path: str):
+def get_doc_file(file_path: str) -> dict[str, str]:
+    """Get the help file for a given file path."""
+
     path = Path(file_path)
 
-    file = "{path.stem}.help"
+    file = f"{path.stem}.help"
 
     help_file = path.parent.parent / "doc" / file
 
@@ -35,7 +37,7 @@ def get_doc_file(file_path: str):
 
         return descriptions
 
-    return ""
+    return {}
 
 
 def _column_type_class():
