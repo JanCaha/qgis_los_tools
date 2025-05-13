@@ -37,7 +37,7 @@ def create_small_raster(newRasterfn, rasterOrigin, pixelWidth, pixelHeight, arra
 
 @pytest.fixture
 def small_raster_example() -> QgsRasterLayer:
-    small_raster_file = "/vsimem/small.tif"
+    small_raster_file = "/tmp/small.tif"
     array = np.array([[1, 2], [3, 4]])
 
     create_small_raster(small_raster_file, (0, 2), 1, -1, array)
