@@ -1,4 +1,5 @@
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -9,7 +10,6 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.constants.field_names import FieldNames
@@ -23,7 +23,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
     OBJECT_LAYER_FIELD_ID = "ObjectLayerID"
     OUTPUT_TABLE = "OutputTable"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.POINT_LAYER, "Point layer", [QgsProcessing.TypeVectorPoint])
         )
@@ -86,7 +86,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_TABLE,
             context,
             fields,
-            QgsWkbTypes.NoGeometry,
+            Qgis.WkbType.NoGeometry,
             point_layer.sourceCrs(),
         )
 

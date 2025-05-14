@@ -1,14 +1,19 @@
 import typing
 
 from qgis.core import (
+    Qgis,
+    QgsColorRamp,
     QgsFeature,
     QgsFeatureRequest,
     QgsField,
     QgsFields,
+    QgsGraduatedSymbolRenderer,
     QgsLineString,
+    QgsMapLayer,
     QgsPoint,
     QgsProcessing,
     QgsProcessingAlgorithm,
+    QgsProcessingContext,
     QgsProcessingException,
     QgsProcessingFeedback,
     QgsProcessingParameterBoolean,
@@ -17,8 +22,9 @@ from qgis.core import (
     QgsProcessingParameterMatrix,
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
+    QgsStyle,
+    QgsSymbol,
     QgsVectorLayer,
-    QgsWkbTypes,
 )
 
 from los_tools.classes.classes_los import LoSWithoutTarget
@@ -37,7 +43,7 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
 
     horizons_types = [NamesConstants.HORIZON_MAX_LOCAL, NamesConstants.HORIZON_GLOBAL]
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
@@ -46,8 +52,9 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMatrix(
                 self.DISTANCES,
                 "Distance limits for horizon lines",
-                numberRows=1,
+                numberRows=2,
                 headers=["Distance"],
+                defaultValue=[500, 1000],
             )
         )
 
@@ -77,8 +84,8 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
 
         if FieldNames.LOS_TYPE not in field_names:
             msg = (
-                "Fields specific for LoS not found in current layer ({0}). "
-                "Cannot extract horizon lines from this layer.".format(FieldNames.LOS_TYPE)
+                f"Fields specific for LoS not found in current layer ({FieldNames.LOS_TYPE}). "
+                "Cannot extract horizon lines from this layer."
             )
 
             return False, msg
@@ -86,8 +93,9 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
         los_type = get_los_type(los_layer, field_names)
 
         if los_type != NamesConstants.LOS_NO_TARGET:
-            msg = "LoS must be of type `{0}` to extract horizon lines but type `{1}` found.".format(
-                NamesConstants.LOS_NO_TARGET, los_type
+            msg = (
+                f"LoS must be of type `{NamesConstants.LOS_NO_TARGET}` "
+                f"to extract horizon lines but type `{los_type}` found."
             )
 
             return False, msg
@@ -101,17 +109,17 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
 
         return super().checkParameterValues(parameters, context)
 
-    def processAlgorithm(self, parameters, context, feedback: QgsProcessingFeedback):
+    def processAlgorithm(self, parameters, context: QgsProcessingContext, feedback: QgsProcessingFeedback):
         los_layer: QgsVectorLayer = self.parameterAsVectorLayer(parameters, self.LOS_LAYER, context)
 
         if los_layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.LOS_LAYER))
 
-        distances_matrix = self.parameterAsMatrix(parameters, self.DISTANCES, context)
+        self.distances_matrix = self.parameterAsMatrix(parameters, self.DISTANCES, context)
 
         distances: typing.List[float] = []
 
-        for distance in distances_matrix:
+        for distance in self.distances_matrix:
             try:
                 distances.append(float(distance))
             except ValueError:
@@ -131,12 +139,12 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
         observer_x_field_index = fields.indexFromName(FieldNames.OBSERVER_X)
         observer_y_field_index = fields.indexFromName(FieldNames.OBSERVER_Y)
 
-        sink, dest_id = self.parameterAsSink(
+        sink, self.dest_id = self.parameterAsSink(
             parameters,
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.LineStringZM,
+            Qgis.WkbType.LineStringZM,
             los_layer.sourceCrs(),
         )
 
@@ -151,7 +159,7 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
 
         for id_value in id_values:
             request = QgsFeatureRequest()
-            request.setFilterExpression("{} = '{}'".format(FieldNames.ID_OBSERVER, id_value))
+            request.setFilterExpression(f"{FieldNames.ID_OBSERVER} = '{id_value}'")
             order_by_clause = QgsFeatureRequest.OrderByClause(FieldNames.AZIMUTH, ascending=True)
             request.setOrderBy(QgsFeatureRequest.OrderBy([order_by_clause]))
 
@@ -212,7 +220,7 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
 
                     sink.addFeature(f)
 
-        return {self.OUTPUT_LAYER: dest_id}
+        return {self.OUTPUT_LAYER: self.dest_id}
 
     def name(self):
         return "extracthorizonlinesbydistace"
@@ -230,9 +238,26 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
         return ExtractHorizonLinesByDistanceAlgorithm()
 
     def helpUrl(self):
-        # TODO FIXME
-        return "https://jancaha.github.io/qgis_los_tools/tools/Horizons/tool_extract_horizon_lines/"
+        return "https://jancaha.github.io/qgis_los_tools/tools/Horizons/tool_extract_horizon_lines_by_distances/"
 
-    # def shortHelpString(self):
-    #     # TODO FIXME
-    #     return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
+    def shortHelpString(self):
+        return QgsProcessingUtils.formatHelpMapAsHtml(get_doc_file(__file__), self)
+
+    def postProcessAlgorithm(self, context: QgsProcessingContext, feedback: QgsProcessingFeedback):
+        output_layer: QgsMapLayer = QgsProcessingUtils.mapLayerFromString(self.dest_id, context)
+
+        ramp: QgsColorRamp = QgsStyle.defaultStyle().colorRamp("Viridis")
+        ramp.invert()
+
+        renderer = QgsGraduatedSymbolRenderer.createRenderer(
+            output_layer,
+            FieldNames.HORIZON_DISTANCE,
+            len(self.distances_matrix),
+            QgsGraduatedSymbolRenderer.Mode.EqualInterval,
+            QgsSymbol.defaultSymbol(Qgis.GeometryType.Line),
+            ramp,
+        )
+
+        output_layer.setRenderer(renderer)
+
+        return {self.OUTPUT_LAYER: self.dest_id}

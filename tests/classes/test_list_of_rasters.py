@@ -1,7 +1,28 @@
+import tempfile
+
 import pytest
-from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRasterDataProvider, QgsRasterLayer, QgsVectorLayer
+from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsPoint,
+    QgsProject,
+    QgsRasterDataProvider,
+    QgsRasterLayer,
+    QgsVectorLayer,
+)
 
 from los_tools.classes.list_raster import ListOfRasters
+from los_tools.constants.plugin import PluginConstants
+
+
+@pytest.fixture(autouse=True)
+def _qgs_project(
+    raster_small: QgsRasterLayer,
+    raster_large: QgsRasterLayer,
+    raster_wrong_crs: QgsRasterLayer,
+    raster_multi_band: QgsRasterLayer,
+    los_local: QgsVectorLayer,
+):
+    QgsProject.instance().addMapLayers([raster_small, raster_large, raster_wrong_crs, los_local, raster_multi_band])
 
 
 def test_create_object(
@@ -113,3 +134,35 @@ def test_validate_ordering(
 
     assert status is False
     assert "Raster cell sizes must be unique to form complete ordering" in msg
+
+
+def test_raster_remove(
+    raster_small: QgsRasterLayer,
+    raster_large: QgsRasterLayer,
+):
+    list_rasters = ListOfRasters([raster_small, raster_large])
+
+    assert len(list_rasters.rasters) == 2
+
+    list_rasters.remove_raster(raster_small.id())
+
+    assert len(list_rasters.rasters) == 1
+
+
+def test_rasters_save_xml(
+    raster_small: QgsRasterLayer,
+    raster_large: QgsRasterLayer,
+):
+    list_rasters = ListOfRasters([raster_small, raster_large])
+
+    _, file = tempfile.mkstemp(suffix=PluginConstants.rasters_xml_extension)
+
+    list_rasters.save_to_file(file)
+
+    list_rasters_new = ListOfRasters([])
+
+    assert len(list_rasters_new.rasters) == 0
+
+    list_rasters_new.read_from_file(file)
+
+    assert len(list_rasters_new.rasters) == 2

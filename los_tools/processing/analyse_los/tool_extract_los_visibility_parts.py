@@ -1,4 +1,5 @@
 from qgis.core import (
+    Qgis,
     QgsCategorizedSymbolRenderer,
     QgsFeature,
     QgsFeatureIterator,
@@ -18,7 +19,6 @@ from qgis.core import (
     QgsRendererCategory,
     QgsSymbol,
     QgsVectorLayer,
-    QgsWkbTypes,
 )
 from qgis.PyQt.QtCore import Qt
 
@@ -36,7 +36,7 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
     CURVATURE_CORRECTIONS = "CurvatureCorrections"
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
@@ -67,8 +67,8 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
 
         if FieldNames.LOS_TYPE not in field_names:
             msg = (
-                "Fields specific for LoS not found in current layer ({0}). "
-                "Cannot extract horizons from this layer.".format(FieldNames.LOS_TYPE)
+                f"Fields specific for LoS not found in current layer ({FieldNames.LOS_TYPE}). "
+                "Cannot extract horizons from this layer."
             )
 
             return False, msg
@@ -80,12 +80,12 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
 
         symbols = []
 
-        symbol_invisible = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
-        symbol_invisible.setColor(Qt.red)
+        symbol_invisible = QgsSymbol.defaultSymbol(Qgis.GeometryType.Line)
+        symbol_invisible.setColor(Qt.GlobalColor.red)
         symbols.append(QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE))
 
-        symbol_visible = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
-        symbol_visible.setColor(Qt.green)
+        symbol_visible = QgsSymbol.defaultSymbol(Qgis.GeometryType.Line)
+        symbol_visible.setColor(Qt.GlobalColor.green)
         symbols.append(QgsRendererCategory(True, symbol_visible, TextLabels.VISIBLE))
 
         renderer = QgsCategorizedSymbolRenderer(FieldNames.VISIBLE, symbols)
@@ -117,7 +117,7 @@ class ExtractLoSVisibilityPartsAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.MultiLineString25D,
+            Qgis.WkbType.MultiLineString25D,
             los_layer.sourceCrs(),
         )
 

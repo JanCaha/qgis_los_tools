@@ -19,11 +19,11 @@ QGIS plugin with focus on other aspects of visibility and its analyses is [Visib
 
 The citation for the plugin should be:
 
-```
+```text
 Jan Caha (2023). LoS Tools. QGIS Plugin version 1.0. https://jancaha.github.io/qgis_los_tools/
 ```
 
-```
+```tex
 @Manual{,
   title = {LoS Tools}. QGIS Plugin version 1.0,
   author = {Jan Caha},

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg height="24" width="24" version="1.1" id="svg30" xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <g id="g7143"
+      style="fill:#000000;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill-opacity:1">
+      <path d="M 11.356728,18.286626 5.4751718,12.428181" />
+      <path d="M 19.518761,10.171683 13.637205,4.3132384" />
+      <path d="M 16.829521,12.843113 10.947965,6.9846681" />
+      <path
+         style="fill:#000000;stroke:#b2b2b2;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill-opacity:1"
+         d="M 2.7375777,21.236586 22.265726,1.6314005" />
+   </g>
+   <g
+      style="fill:#2a7fff;stroke:#333;stroke-width:0.8;stroke-linejoin:round;stroke-miterlimit:.4;stroke-opacity:.972549;stroke-dasharray:none">
+      <circle cx="21.095802" cy="2.9461203" r="2.5" />
+      <circle cx="2.8887188" cy="21.09376" r="2.5" />
+   </g>
+</svg>

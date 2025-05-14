@@ -1,5 +1,6 @@
 import numpy as np
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -14,7 +15,6 @@ from qgis.core import (
     QgsProcessingParameterField,
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.constants.field_names import FieldNames
@@ -31,7 +31,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
     ID_FIELD = "IdField"
     DISTANCE = "Distance"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint])
         )
@@ -97,7 +97,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
         if main_direction_layer.featureCount() != 1:
             msg = (
                 "`Main direction point layer` should only containt one feature. "
-                "Currently is has `{}` features.".format(main_direction_layer.featureCount())
+                f"Currently is has `{main_direction_layer.featureCount()}` features."
             )
 
             return False, msg
@@ -133,7 +133,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.Point,
+            Qgis.WkbType.Point,
             input_layer.sourceCrs(),
         )
 

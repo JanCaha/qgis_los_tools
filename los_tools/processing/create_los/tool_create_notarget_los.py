@@ -13,7 +13,6 @@ from qgis.core import (
     QgsProcessingParameterMultipleLayers,
     QgsProcessingParameterVectorLayer,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.classes.list_raster import ListOfRasters
@@ -37,7 +36,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
     DEM_RASTERS = "DemRasters"
     LINE_SETTINGS_TABLE = "LineSettingsTable"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers", QgsProcessing.TypeRaster)
         )
@@ -183,7 +182,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.LineString25D,
+            Qgis.WkbType.LineString25D,
             observers_layer.sourceCrs(),
         )
 
@@ -204,9 +203,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
         for observer_feature in observers_iterator:
             request = QgsFeatureRequest()
-            request.setFilterExpression(
-                "{} = {}".format(target_definition_id_field, observer_feature.attribute(observers_id))
-            )
+            request.setFilterExpression(f"{target_definition_id_field} = {observer_feature.attribute(observers_id)}")
 
             targets_iterators = targets_layer.getFeatures(request)
 

@@ -2,21 +2,36 @@ import typing
 from pathlib import Path
 
 import pytest
+from pytest import MonkeyPatch
 from pytest_qgis.utils import clean_qgis_layer
-from qgis.core import Qgis, QgsFeature, QgsRasterLayer, QgsVectorLayer
+from qgis.core import Qgis, QgsFeature, QgsGeometry, QgsPoint, QgsRasterLayer, QgsVectorLayer
 from qgis.gui import QgisInterface
 
 from los_tools.constants.field_names import FieldNames
+from los_tools.constants.fields import Fields
+from los_tools.constants.names_constants import NamesConstants
 from tests.utils import data_file_path
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _monkeypatch_iface(qgis_iface, monkeypatch):
+def _monkeypatch_iface(qgis_iface: QgisInterface, monkeypatch: MonkeyPatch) -> None:
     def add_user_input_widget(widget):
         pass
 
     qgis_iface.addUserInputWidget = None
     monkeypatch.setattr(qgis_iface, "addUserInputWidget", add_user_input_widget)
+
+    def push_widget(widget):
+        pass
+
+    qgis_iface.messageBar().pushWidget = None
+    monkeypatch.setattr(qgis_iface.messageBar(), "pushWidget", push_widget)
+
+    def pop_widget():
+        pass
+
+    qgis_iface.messageBar().popWidget = None
+    monkeypatch.setattr(qgis_iface.messageBar(), "popWidget", pop_widget)
 
 
 def _raster_layer(path: Path) -> QgsRasterLayer:
@@ -62,6 +77,8 @@ def table_angle_distance_size() -> QgsVectorLayer:
     )
 
     table_dp = table.dataProvider()
+
+    assert table_dp is not None
 
     fields = table.fields()
 
@@ -225,6 +242,7 @@ def mock_add_message_to_messagebar(qgis_iface: QgisInterface) -> typing.Callable
 @pytest.fixture(autouse=True, scope="function")
 def _clear_message_bar_messages(qgis_iface: QgisInterface):
     mb = qgis_iface.messageBar()
+    assert mb is not None
     mb.messages[Qgis.MessageLevel.Info] = []
     mb.messages[Qgis.MessageLevel.Warning] = []
     mb.messages[Qgis.MessageLevel.Critical] = []
@@ -234,3 +252,65 @@ def _clear_message_bar_messages(qgis_iface: QgisInterface):
 @pytest.fixture(autouse=True, scope="function")
 def _clean_project(qgis_iface: QgisInterface) -> None:
     qgis_iface.newProject()
+
+
+@pytest.fixture
+def los_geometry() -> QgsGeometry:
+    geom = QgsGeometry.fromPolyline(
+        [
+            QgsPoint(0, 0, 0.001),
+            QgsPoint(0, 1, 0.8),
+            QgsPoint(0, 2, 1.9),
+            QgsPoint(0, 3, 3),
+            QgsPoint(0, 4, 1),
+            QgsPoint(0, 5, 1),
+            QgsPoint(0, 6, 8),
+            QgsPoint(0, 7, 2),
+            QgsPoint(0, 8, 4),
+            QgsPoint(0, 9, 15),
+            QgsPoint(0, 10, 10),
+        ]
+    )
+
+    return geom
+
+
+@pytest.fixture
+def local_los_feature(los_geometry: QgsGeometry) -> QgsFeature:
+    feature = QgsFeature(Fields.los_local_fields)
+    feature.setGeometry(los_geometry)
+    feature.setAttribute(Fields.los_local_fields.indexFromName(FieldNames.LOS_TYPE), NamesConstants.LOS_LOCAL)
+    feature.setAttribute(Fields.los_local_fields.indexFromName(FieldNames.ID_OBSERVER), 1)
+    feature.setAttribute(Fields.los_local_fields.indexFromName(FieldNames.ID_TARGET), 1)
+    feature.setAttribute(Fields.los_local_fields.indexFromName(FieldNames.OBSERVER_OFFSET), 1)
+    feature.setAttribute(Fields.los_local_fields.indexFromName(FieldNames.TARGET_OFFSET), 0)
+    return feature
+
+
+@pytest.fixture
+def global_los_feature(los_geometry: QgsGeometry) -> QgsFeature:
+    feature = QgsFeature(Fields.los_global_fields)
+    feature.setGeometry(los_geometry)
+    feature.setAttribute(Fields.los_global_fields.indexFromName(FieldNames.LOS_TYPE), NamesConstants.LOS_GLOBAL)
+    feature.setAttribute(Fields.los_global_fields.indexFromName(FieldNames.ID_OBSERVER), 1)
+    feature.setAttribute(Fields.los_global_fields.indexFromName(FieldNames.ID_TARGET), 1)
+    feature.setAttribute(Fields.los_global_fields.indexFromName(FieldNames.OBSERVER_OFFSET), 1)
+    feature.setAttribute(Fields.los_global_fields.indexFromName(FieldNames.TARGET_OFFSET), 0)
+    feature.setAttribute(Fields.los_global_fields.indexFromName(FieldNames.TARGET_X), 0)
+    feature.setAttribute(Fields.los_global_fields.indexFromName(FieldNames.TARGET_Y), 6)
+    return feature
+
+
+@pytest.fixture
+def notarget_los_feature(los_geometry: QgsGeometry) -> QgsFeature:
+    feature = QgsFeature(Fields.los_notarget_fields)
+    feature.setGeometry(los_geometry)
+    feature.setAttribute(Fields.los_notarget_fields.indexFromName(FieldNames.LOS_TYPE), NamesConstants.LOS_NO_TARGET)
+    feature.setAttribute(Fields.los_notarget_fields.indexFromName(FieldNames.ID_OBSERVER), 1)
+    feature.setAttribute(Fields.los_notarget_fields.indexFromName(FieldNames.ID_TARGET), 1)
+    feature.setAttribute(Fields.los_notarget_fields.indexFromName(FieldNames.OBSERVER_OFFSET), 1)
+    feature.setAttribute(Fields.los_notarget_fields.indexFromName(FieldNames.AZIMUTH), 0)
+    feature.setAttribute(Fields.los_notarget_fields.indexFromName(FieldNames.OBSERVER_X), 0)
+    feature.setAttribute(Fields.los_notarget_fields.indexFromName(FieldNames.OBSERVER_Y), 0)
+    feature.setAttribute(Fields.los_notarget_fields.indexFromName(FieldNames.ANGLE_STEP), 1)
+    return feature

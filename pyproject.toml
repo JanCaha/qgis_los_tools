@@ -1,26 +1,20 @@
-[flake8]
-exclude = [
-    ".git", 
-    "__pycache__", 
-    "tests/*"
-]
+[tool.flake8]
+exclude = [".git", "__pycache__", "tests/*"]
 max-line-length = 120
-ignore="W293,W504"
+ignore = "W293,W504"
 
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests"
-]
+testpaths = ["tests"]
 addopts = [
     "--cov=los_tools",
     "--cov-report=term-missing:skip-covered",
     "-rP",
     "-vv",
-    "-s"
+    "-s",
 ]
-qgis_canvas_width=2000
-qgis_canvas_height=2000
+qgis_canvas_width = 2000
+qgis_canvas_height = 2000
 
 [tool.black]
 line-length = 120
@@ -42,7 +36,7 @@ disable = [
     "missing-class-docstring",
     "invalid-name",
     "too-many-arguments",
-    "attribute-defined-outside-init"
+    "attribute-defined-outside-init",
 ]
 
 [tool.mypy]

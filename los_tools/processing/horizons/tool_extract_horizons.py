@@ -1,6 +1,7 @@
 from typing import Union
 
 from qgis.core import (
+    Qgis,
     QgsCategorizedSymbolRenderer,
     QgsFeature,
     QgsFeatureSink,
@@ -18,7 +19,6 @@ from qgis.core import (
     QgsProcessingUtils,
     QgsRendererCategory,
     QgsSymbol,
-    QgsWkbTypes,
 )
 from qgis.PyQt.QtCore import Qt
 
@@ -48,7 +48,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
     dest_id: str
     horizon_type: str
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
@@ -89,8 +89,8 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
         if FieldNames.LOS_TYPE not in field_names:
             msg = (
-                "Fields specific for LoS not found in current layer ({0}). "
-                "Cannot extract horizons from this layer.".format(FieldNames.LOS_TYPE)
+                f"Fields specific for LoS not found in current layer ({FieldNames.LOS_TYPE}). "
+                "Cannot extract horizons from this layer."
             )
 
             return False, msg
@@ -110,8 +110,8 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
 
             symbols = []
 
-            symbol_horizon_global = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
-            symbol_horizon_global.setColor(Qt.red)
+            symbol_horizon_global = QgsSymbol.defaultSymbol(Qgis.GeometryType.Point)
+            symbol_horizon_global.setColor(Qt.GlobalColor.red)
 
             symbols.append(
                 QgsRendererCategory(
@@ -121,8 +121,8 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
                 )
             )
 
-            symbol_horizon_local = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
-            symbol_horizon_local.setColor(Qt.gray)
+            symbol_horizon_local = QgsSymbol.defaultSymbol(Qgis.GeometryType.Point)
+            symbol_horizon_local.setColor(Qt.GlobalColor.gray)
 
             symbols.append(QgsRendererCategory(NamesConstants.HORIZON_LOCAL, symbol_horizon_local, TextLabels.LOCAL))
 
@@ -161,7 +161,7 @@ class ExtractHorizonsAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.Point25D,
+            Qgis.WkbType.Point25D,
             los_layer.sourceCrs(),
         )
 

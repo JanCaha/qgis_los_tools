@@ -1,12 +1,4 @@
-from qgis.core import (
-    QgsFeature,
-    QgsGeometry,
-    QgsLineString,
-    QgsPoint,
-    QgsProcessingException,
-    QgsProcessingUtils,
-    QgsWkbTypes,
-)
+from qgis.core import Qgis, QgsFeature, QgsGeometry, QgsLineString, QgsPoint, QgsProcessingException, QgsProcessingUtils
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.constants.field_names import FieldNames
@@ -46,7 +38,7 @@ class CreateGlobalLosAlgorithm(CreateLocalLosAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.LineString25D,
+            Qgis.WkbType.LineString25D,
             observers_layer.sourceCrs(),
         )
 

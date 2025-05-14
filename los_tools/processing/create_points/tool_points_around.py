@@ -1,5 +1,6 @@
 import numpy as np
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -14,7 +15,6 @@ from qgis.core import (
     QgsProcessingParameterField,
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.constants.field_names import FieldNames
@@ -31,7 +31,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
     ID_FIELD = "IdField"
     DISTANCE = "Distance"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint])
         )
@@ -124,7 +124,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.Point,
+            Qgis.WkbType.Point,
             input_layer.sourceCrs(),
         )
 

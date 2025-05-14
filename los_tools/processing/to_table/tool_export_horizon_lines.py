@@ -14,7 +14,6 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.constants.field_names import FieldNames
@@ -25,7 +24,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
     INPUT_HORIZON_LINES_LAYER = "HorizonLinesLayer"
     OUTPUT = "OutputFile"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_HORIZON_LINES_LAYER,
@@ -45,8 +44,8 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
 
         if FieldNames.HORIZON_TYPE not in field_names:
             msg = (
-                "Fields specific for horizon lines not found in current layer ({0}). "
-                "Cannot to_table the layer as horizon lines.".format(FieldNames.HORIZON_TYPE)
+                f"Fields specific for horizon lines not found in current layer ({FieldNames.HORIZON_TYPE}). "
+                "Cannot to_table the layer as horizon lines."
             )
 
             QgsMessageLog.logMessage(msg, "los_tools", Qgis.MessageLevel.Critical)
@@ -77,7 +76,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             fields,
-            QgsWkbTypes.NoGeometry,
+            Qgis.WkbType.NoGeometry,
             input_horizon_lines_layer.sourceCrs(),
         )
 

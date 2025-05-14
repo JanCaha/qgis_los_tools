@@ -35,7 +35,7 @@ class OptimizePointLocationInputWidget(QWidget):
         return super().show()
 
     def set_units(self, unit: QgsUnitTypes) -> None:
-        self._distance.setSuffix(" {}".format(QgsUnitTypes.toString(unit)))
+        self._distance.setSuffix(f" {QgsUnitTypes.toString(unit)}")
 
     @property
     def raster_layer(self) -> QgsRasterLayer:

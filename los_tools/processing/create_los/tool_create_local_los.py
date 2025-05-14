@@ -1,4 +1,5 @@
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsGeometry,
     QgsPoint,
@@ -11,7 +12,6 @@ from qgis.core import (
     QgsProcessingParameterField,
     QgsProcessingParameterMultipleLayers,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.classes.list_raster import ListOfRasters
@@ -33,7 +33,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
     LINE_DENSITY = "LineDensity"
     DEM_RASTERS = "DemRasters"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers", QgsProcessing.TypeRaster)
         )
@@ -174,7 +174,7 @@ class CreateLocalLosAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.LineString25D,
+            Qgis.WkbType.LineString25D,
             observers_layer.sourceCrs(),
         )
 

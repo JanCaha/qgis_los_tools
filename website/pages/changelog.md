@@ -1,5 +1,45 @@
 # Changelog
 
+## version 2.0.0
+
+- rework GUI tools, they now work differently provide more informative messages when something is going on
+
+- `Sampling distance matrix` and `List of Rasters` needed to crate LoS with GUI tools are now stored in the plugin itself
+
+- interactive tools `Create LoS` and `Create LoS No Target Tool` now visualize and can also add LoS to the plugin layer
+
+- introduce **Rasters XML** (**.rastersxml**) file format to store raster list
+
+## version 1.2.1
+
+- fix bad use of numpy to avoid exception
+
+## version 1.2.0
+
+- new tool to extract horizon lines at specific distance
+
+- minor fixes to gui tools (based on tests written for them)
+
+## version 1.1.2
+
+- fix issue with interactive tools not opening properly after closing
+
+## version 1.1.1
+
+- simplify inner working of GUI tools
+
+- fix `Set Camera` GUI tool
+
+## version 1.1 
+
+- update some internals including test
+
+- style python using black and isort
+
+- avoid some warnings in QGIS 3.38
+
+- remove older version of `No Target LoS Tool`
+
 ## version 1.0
 
 - addition of all the interactive tools - see websize menu **Interactive tools**

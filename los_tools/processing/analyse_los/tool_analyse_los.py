@@ -31,7 +31,7 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
     OUTPUT_LAYER = "OutputLayer"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
@@ -66,10 +66,9 @@ class AnalyseLosAlgorithm(QgsProcessingAlgorithm):
             and FieldNames.ID_TARGET in field_names
         ):
             msg = (
-                "Fields specific for LoS not found in current layer ({0}, {1}, {2}). "
-                "Cannot analyse the layer as LoS.".format(
-                    FieldNames.LOS_TYPE, FieldNames.ID_OBSERVER, FieldNames.ID_TARGET
-                )
+                "Fields specific for LoS not found in current layer "
+                f"({FieldNames.LOS_TYPE}, {FieldNames.ID_OBSERVER}, {FieldNames.ID_TARGET}). "
+                "Cannot analyse the layer as LoS."
             )
 
             return False, msg

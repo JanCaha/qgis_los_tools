@@ -1,5 +1,6 @@
 from qgis.analysis import QgsGeometrySnapper, QgsInternalGeometrySnapper
 from qgis.core import (
+    Qgis,
     QgsCategorizedSymbolRenderer,
     QgsFeature,
     QgsFeatureIterator,
@@ -21,7 +22,6 @@ from qgis.core import (
     QgsRendererCategory,
     QgsSymbol,
     QgsVectorLayer,
-    QgsWkbTypes,
 )
 from qgis.PyQt.QtCore import Qt
 
@@ -39,7 +39,7 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
     CURVATURE_CORRECTIONS = "CurvatureCorrections"
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
@@ -70,8 +70,8 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
 
         if FieldNames.LOS_TYPE not in field_names:
             msg = (
-                "Fields specific for LoS not found in current layer ({0}). "
-                "Cannot extract horizons from this layer.".format(FieldNames.LOS_TYPE)
+                f"Fields specific for LoS not found in current layer ({FieldNames.LOS_TYPE}). "
+                "Cannot extract horizons from this layer."
             )
 
             return False, msg
@@ -83,15 +83,15 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
 
         symbols = []
 
-        symbol_invisible = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
-        symbol_invisible.setColor(Qt.red)
+        symbol_invisible = QgsSymbol.defaultSymbol(Qgis.GeometryType.Polygon)
+        symbol_invisible.setColor(Qt.GlobalColor.red)
 
-        symbol_invisible.symbolLayer(0).setStrokeStyle(Qt.PenStyle(Qt.NoPen))
+        symbol_invisible.symbolLayer(0).setStrokeStyle(Qt.PenStyle.NoPen)
         symbols.append(QgsRendererCategory(False, symbol_invisible, TextLabels.INVISIBLE))
 
-        symbol_visible = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
-        symbol_visible.setColor(Qt.green)
-        symbol_visible.symbolLayer(0).setStrokeStyle(Qt.PenStyle(Qt.NoPen))
+        symbol_visible = QgsSymbol.defaultSymbol(Qgis.GeometryType.Polygon)
+        symbol_visible.setColor(Qt.GlobalColor.green)
+        symbol_visible.symbolLayer(0).setStrokeStyle(Qt.PenStyle.NoPen)
         symbols.append(QgsRendererCategory(True, symbol_visible, TextLabels.VISIBLE))
 
         renderer = QgsCategorizedSymbolRenderer(FieldNames.VISIBLE, symbols)
@@ -123,7 +123,7 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_LAYER,
             context,
             fields,
-            QgsWkbTypes.MultiPolygon,
+            Qgis.WkbType.MultiPolygon,
             los_layer.sourceCrs(),
         )
 

@@ -1,4 +1,5 @@
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsFeatureSink,
     QgsField,
@@ -11,7 +12,6 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
-    QgsWkbTypes,
 )
 
 from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
@@ -27,7 +27,7 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
     CURVATURE_CORRECTIONS = "CurvatureCorrections"
     REFRACTION_COEFFICIENT = "RefractionCoefficient"
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, configuration=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(self.INPUT_LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
         )
@@ -58,8 +58,8 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
 
         if FieldNames.LOS_TYPE not in field_names:
             msg = (
-                "Fields specific for LoS not found in current layer ({0}). "
-                "Cannot to_table the layer as horizon lines.".format(FieldNames.LOS_TYPE)
+                f"Fields specific for LoS not found in current layer ({FieldNames.LOS_TYPE}). "
+                "Cannot to_table the layer as horizon lines."
             )
 
             return False, msg
@@ -110,7 +110,7 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             fields,
-            QgsWkbTypes.NoGeometry,
+            Qgis.WkbType.NoGeometry,
             input_los_layer.sourceCrs(),
         )
 

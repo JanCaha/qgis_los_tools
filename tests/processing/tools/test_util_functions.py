@@ -1,10 +1,9 @@
 import math
-import unittest
 
 import numpy as np
 import pytest
 from osgeo import gdal, osr
-from qgis.core import QgsGeometry, QgsLineString, QgsPoint, QgsPointXY, QgsRasterLayer, QgsVectorLayer
+from qgis.core import QgsGeometry, QgsLineString, QgsPoint, QgsPointXY, QgsRasterLayer
 
 from los_tools.processing.tools.util_functions import (
     bilinear_interpolated_value,
@@ -38,7 +37,7 @@ def create_small_raster(newRasterfn, rasterOrigin, pixelWidth, pixelHeight, arra
 
 @pytest.fixture
 def small_raster_example() -> QgsRasterLayer:
-    small_raster_file = "/vsimem/small.tif"
+    small_raster_file = "/tmp/small.tif"
     array = np.array([[1, 2], [3, 4]])
 
     create_small_raster(small_raster_file, (0, 2), 1, -1, array)
@@ -48,8 +47,12 @@ def small_raster_example() -> QgsRasterLayer:
     return small_raster
 
 
+@pytest.mark.skipif(int(gdal.VersionInfo()) < 3100000, reason="GDAL version is too low")
 def test_bilinear_interpolated_value_small_raster(small_raster_example: QgsRasterLayer):
     small_raster_dp = small_raster_example.dataProvider()
+
+    assert small_raster_dp
+    assert small_raster_dp.isValid()
 
     bilinear_value = bilinear_interpolated_value(small_raster_dp, QgsPointXY(1, 1))
     assert bilinear_value == pytest.approx(2.5)
