@@ -50,23 +50,35 @@
                                 <ul class="dropdown-menu">
                                     
 <li>
-    <a href="interactive%20tools/tool_los_without_target/" class="dropdown-item">Visualize LoS No Target Tool</a>
+    <a href="interactive%20tools/dialog_create_3d_view_with_camera_setup/" class="dropdown-item">Create 3D View with Camera Setup</a>
 </li>
                                     
 <li>
-    <a href="interactive%20tools/tool_los_without_target_sampling_settings/" class="dropdown-item">LoS without Target Sampling Settings</a>
+    <a href="interactive%20tools/dialog_los_without_target_sampling_settings/" class="dropdown-item">LoS without Target Sampling Settings</a>
+</li>
+                                    
+<li>
+    <a href="interactive%20tools/dialog_object_visibility_parameters/" class="dropdown-item">Object Visibility Parameters</a>
+</li>
+                                    
+<li>
+    <a href="interactive%20tools/dialog_raster_validations/" class="dropdown-item">Rasters Validation and Sampling</a>
+</li>
+                                    
+<li>
+    <a href="interactive%20tools/dialog_set_camera_to_layout_3d_map/" class="dropdown-item">Set Camera to Layout 3D Map</a>
+</li>
+                                    
+<li>
+    <a href="interactive%20tools/tool_create_los/" class="dropdown-item">Create LoS</a>
+</li>
+                                    
+<li>
+    <a href="interactive%20tools/tool_los_without_target/" class="dropdown-item">Create LoS No Target Tool</a>
 </li>
                                     
 <li>
     <a href="interactive%20tools/tool_optimize_point_location/" class="dropdown-item">Optimize Point Location Tool</a>
-</li>
-                                    
-<li>
-    <a href="interactive%20tools/tool_raster_validations/" class="dropdown-item">Rasters Validation and Sampling</a>
-</li>
-                                    
-<li>
-    <a href="interactive%20tools/tool_set_camera/" class="dropdown-item">Set Camera</a>
 </li>
                                 </ul>
                             </li>
@@ -281,10 +293,13 @@
 <p>A local horizon is any horizon on the LoS that is not global. There may be multiple local horizons on an LoS. Among these local horizons, the highest local horizon can be useful for some analyses. The maximal local horizon is the highest horizon that is not global.</p>
 <h3 id="dem-use-in-the-plugin">DEM Use in the Plugin</h3>
 <p>Most tools in the plugin allow you to use more than one DEM raster. The rasters are ordered from the smallest cell size to the largest. The cell size of each raster must be unique to form a complete ordering of rasters. Elevation is always obtained from the raster with the smallest cell size that has a valid elevation value (no data is not considered a valid value). This allows the utilization of DEMs with large cells in addition to DEMs with smaller cells. For example, a DEM with a cell size of 1 meter can be used within a city for areas close to observers, and SRTM data (30 meter cell size) can be used in areas around the city, far from the observer.</p>
+<p>In LoS creation processing tools (<a href="tools/LoS%20Creation/tool_create_global_los/">Create Global LoS</a>, <a href="tools/LoS%20Creation/tool_create_local_los/">Create Local LoS</a>, <a href="tools/LoS%20Creation/tool_create_notarget_los/">Create No Target LoS</a>), the DEMs are specified as one parameter, and during processing, the rasters are ordered and used as described above. In interactive tools (<a href="interactive%20tools/tool_create_los/">Create LoS Tools</a>, <a href="interactive%20tools/tool_los_without_target/">Create LoS No Target Tool</a>), the rasters are obtained from the plugin itself (where the list is stored) and can be modified using <a href="interactive%20tools/dialog_raster_validations/">Rasters Validation and Sampling</a>. The default value for this raster list, prior to user modification, is the visible rasters in the QGIS project.</p>
+<p>The plugin allows saving the raster list (setup in the plugin) to a file and also loading it back. It uses simple XML format named <strong>Rasters XML</strong>. This file can saved from <a href="interactive%20tools/dialog_raster_validations/">Rasters Validation and Sampling</a> and reflects setting showed in that window. The created file will have <strong>.rastersxml</strong> extension. This file can be loaded back from <strong>QGIS</strong> <strong>Browser</strong> panel. Loading the file will add the rasters to the current project and also set them in the plugin (in the <a href="interactive%20tools/dialog_raster_validations/">Rasters Validation and Sampling</a> windows etc.). Only rasters that exist and have the same settings (CRS, extent size, cell size) as when they were saved can be loaded back.</p>
 <h3 id="los-sampling-strategy">LoS Sampling Strategy</h3>
-<p>For tools <a href="tools/LoS%20Creation/tool_create_global_los/">Create Global LoS</a>, <a href="tools/LoS%20Creation/tool_create_local_los/">Create Local LoS</a>, and <a href="tools/LoS%20Creation/tool_create_notarget_los/">Create No Target LoS</a>, the LoS is determined by <strong>sampling distance</strong>, which specifies how often a point is placed on the LoS, and optionally by <strong>maximal LoS length</strong>.</p>
-<p>The tool <a href="./tools/LoS%20Creation/tool_create_notarget_los_v2.md">Create No Target LoS V2</a> parametrizes LoS by a so-called <strong>Sampling distance - distance table</strong>. This approach is significantly more flexible, as it allows the sampling distance to change based on the distance from the observer. The table is the output of the tools <a href="tools/Calculate%20Parameters%20Settings/tool_distances_for_sizes/">Calculate Object Distances</a> and <a href="tools/Calculate%20Parameters%20Settings/tool_sizes_at_distances/">Calculate Object Sizes</a>. Each row specifies the distance from which a specific sampling size should be used. For example, a row with column values of <strong>Distance (meters)</strong> 1000 and <strong>Size of object (meters)</strong> 1.754 specifies that a sampling distance of 1.754 meters should be used on the LoS when the length exceeds 1000 meters. The maximal length of the LoS is given by the maximal value of <strong>Distance (meters)</strong>.</p>
-<p>There can be two special rows in the table with values of <strong>Distance (meters)</strong> 0 and -1. A row with a value of 0 specifies the sampling distance for distances smaller than the smallest provided distance (default value is 1). A row with a value of -1 means that there is no maximal LoS length and that the limit is provided by the raster data extent.</p>
+<p>For the tools <a href="tools/LoS%20Creation/tool_create_global_los/">Create Global LoS</a> and <a href="tools/LoS%20Creation/tool_create_local_los/">Create Local LoS</a>, the LoS is determined by the <strong>sampling distance</strong>, which specifies how often a point is placed on the LoS.</p>
+<p>The tool <a href="tools/LoS%20Creation/tool_create_notarget_los/">Create No Target LoS</a> parametrizes LoS using a <strong>sampling distance - distance table</strong>. This approach is significantly more flexible, as it allows the sampling distance to change based on the distance from the observer. The table is the output of the tool <a href="interactive%20tools/dialog_los_without_target_sampling_settings/">LoS without Target Sampling Settings</a>. Each row specifies the distance from which a specific sampling size should be used.</p>
+<p>For example, a row with column values of <strong>Distance (meters)</strong> 1000 and <strong>Size of object (meters)</strong> 1.754 specifies that a sampling distance of 1.754 meters should be used on the LoS when the length exceeds 1000 meters. The maximal length of the LoS is given by the maximal value of <strong>Distance (meters)</strong>. There can be two special rows in the table with values of <strong>Distance (meters)</strong> 0 and -1. A row with a value of 0 specifies the sampling distance for distances smaller than the smallest provided distance (default value is 1). A row with a value of -1 means that there is no maximal LoS length and that the limit is provided by the raster data extent.</p>
+<p>For the <a href="interactive%20tools/tool_los_without_target/">Create LoS No Target Tool</a>, the <strong>sampling distance - distance table</strong> is obtained from the plugin itself and can be modified using <a href="interactive%20tools/dialog_los_without_target_sampling_settings/">LoS without Target Sampling Settings</a>.</p>
 <h2 id="citation">Citation</h2>
 <p>The citation for the plugin should be:</p>
 <pre><code>Jan Caha (2023). LoS Tools. QGIS Plugin version 1.0. https://jancaha.github.io/qgis_los_tools/
@@ -380,5 +395,5 @@
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2024-11-14 15:17:04.718601+00:00
+Build Date UTC : 2025-05-14 12:11:58.973016+00:00
 -->
