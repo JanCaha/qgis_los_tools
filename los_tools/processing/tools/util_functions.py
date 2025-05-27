@@ -182,16 +182,21 @@ def get_diagonal_size(raster: QgsRasterDataProvider) -> float:
 
 
 # taken from plugin rasterinterpolation https://plugins.qgis.org/plugins/rasterinterpolation/
-def bilinear_interpolated_value(raster: QgsRasterDataProvider, point: Union[QgsPoint, QgsPointXY]) -> Optional[float]:
+def bilinear_interpolated_value(
+    raster_dp: Optional[QgsRasterDataProvider], point: Union[QgsPoint, QgsPointXY]
+) -> Optional[float]:
     # see the implementation of raster data provider, identify method
     # https://github.com/qgis/Quantum-GIS/blob/master/src/core/raster/qgsrasterdataprovider.cpp#L268
+    if raster_dp is None:
+        return None
+
     x = point.x()
     y = point.y()
 
-    extent = raster.extent()
+    extent = raster_dp.extent()
 
-    xres = extent.width() / raster.xSize()
-    yres = extent.height() / raster.ySize()
+    xres = extent.width() / raster_dp.xSize()
+    yres = extent.height() / raster_dp.ySize()
 
     col = round((x - extent.xMinimum()) / xres)
     row = round((extent.yMaximum() - y) / yres)
@@ -203,7 +208,7 @@ def bilinear_interpolated_value(raster: QgsRasterDataProvider, point: Union[QgsP
 
     pixelExtent = QgsRectangle(xMin, yMin, xMax, yMax)
 
-    myBlock = raster.block(1, pixelExtent, 2, 2)
+    myBlock = raster_dp.block(1, pixelExtent, 2, 2)
 
     # http://en.wikipedia.org/wiki/Bilinear_interpolation#Algorithm
     v12 = myBlock.value(0, 0)
@@ -211,7 +216,7 @@ def bilinear_interpolated_value(raster: QgsRasterDataProvider, point: Union[QgsP
     v11 = myBlock.value(1, 0)
     v21 = myBlock.value(1, 1)
 
-    if raster.sourceNoDataValue(1) in (v12, v22, v11, v21):
+    if raster_dp.sourceNoDataValue(1) in (v12, v22, v11, v21):
         return None
 
     x1 = xMin + xres / 2
@@ -223,7 +228,7 @@ def bilinear_interpolated_value(raster: QgsRasterDataProvider, point: Union[QgsP
         v11 * (x2 - x) * (y2 - y) + v21 * (x - x1) * (y2 - y) + v12 * (x2 - x) * (y - y1) + v22 * (x - x1) * (y - y1)
     ) / ((x2 - x1) * (y2 - y1))
 
-    if value is not None and value == raster.sourceNoDataValue(1):
+    if value is not None and value == raster_dp.sourceNoDataValue(1):
         return None
 
     return value
