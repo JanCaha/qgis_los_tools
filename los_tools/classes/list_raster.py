@@ -1,7 +1,6 @@
 import math
 import pathlib
 import typing
-from typing import Dict, List, Optional, Tuple
 
 from qgis.core import (
     QgsCoordinateReferenceSystem,
@@ -26,9 +25,9 @@ from los_tools.processing.tools.util_functions import bilinear_interpolated_valu
 
 class ListOfRasters:
 
-    def __init__(self, rasters: List[QgsMapLayer]):
+    def __init__(self, rasters: typing.List[QgsMapLayer]):
 
-        self._dict_rasters: Dict[str, QgsRasterLayer] = {}
+        self._dict_rasters: typing.Dict[str, QgsRasterLayer] = {}
 
         if rasters:
             first_crs = rasters[0].crs()
@@ -53,11 +52,11 @@ class ListOfRasters:
         return ", ".join([x.name() for x in self.rasters])
 
     @property
-    def rasters(self) -> List[QgsRasterLayer]:
-        return list(self._dict_rasters.values())
+    def rasters(self) -> typing.List[QgsRasterLayer]:
+        return [x for x in self._dict_rasters.values() if isinstance(x, QgsRasterLayer)]
 
     @property
-    def raster_ids(self) -> List[str]:
+    def raster_ids(self) -> typing.List[str]:
         return list(self._dict_rasters.keys())
 
     def remove_raster(self, raster_id: str) -> None:
@@ -65,7 +64,7 @@ class ListOfRasters:
             self._dict_rasters.pop(raster_id)
 
     @staticmethod
-    def validate_bands(rasters: List[QgsMapLayer]) -> Tuple[bool, str]:
+    def validate_bands(rasters: typing.Sequence[QgsRasterLayer | QgsMapLayer]) -> typing.Tuple[bool, str]:
         for raster in rasters:
             dem_band_count = raster.bandCount()
 
@@ -77,7 +76,10 @@ class ListOfRasters:
         return True, ""
 
     @staticmethod
-    def validate_crs(rasters: List[QgsMapLayer], crs: QgsCoordinateReferenceSystem = None) -> Tuple[bool, str]:
+    def validate_crs(
+        rasters: typing.Sequence[QgsRasterLayer | QgsMapLayer],
+        crs: typing.Optional[QgsCoordinateReferenceSystem] = None,
+    ) -> typing.Tuple[bool, str]:
         if crs is None:
             crs = rasters[0].crs()
 
@@ -97,8 +99,8 @@ class ListOfRasters:
         return True, ""
 
     @staticmethod
-    def validate_ordering(rasters: List[QgsMapLayer]) -> Tuple[bool, str]:
-        values: List[float] = []
+    def validate_ordering(rasters: typing.Sequence[QgsRasterLayer | QgsMapLayer]) -> typing.Tuple[bool, str]:
+        values: typing.List[float] = []
 
         for raster in rasters:
             values.append(raster.extent().width() / raster.width())
@@ -115,7 +117,7 @@ class ListOfRasters:
         return True, ""
 
     @staticmethod
-    def validate_square_cell_size(rasters: List[QgsMapLayer]) -> Tuple[bool, str]:
+    def validate_square_cell_size(rasters: typing.Sequence[QgsRasterLayer | QgsMapLayer]) -> typing.Tuple[bool, str]:
         for raster in rasters:
             xres = raster.extent().width() / raster.width()
             yres = raster.extent().height() / raster.height()
@@ -130,7 +132,7 @@ class ListOfRasters:
         return True, ""
 
     @staticmethod
-    def validate(rasters: List[QgsMapLayer]) -> bool:
+    def validate(rasters: typing.List[QgsMapLayer]) -> bool:
         if not rasters:
             return False
 
@@ -177,11 +179,11 @@ class ListOfRasters:
             self._dict_rasters[x[0]] = x[2]
 
     @property
-    def rasters_dp(self) -> List[QgsRasterDataProvider]:
-        return [x.dataProvider() for x in self.rasters]
+    def rasters_dp(self) -> typing.List[typing.Optional[QgsRasterDataProvider]]:
+        return [x.dataProvider() for x in self.rasters if x is not None]
 
     def maximal_diagonal_size(self) -> float:
-        extent: Optional[QgsRectangle] = None
+        extent: typing.Optional[QgsRectangle] = None
 
         for raster in self.rasters:
             if extent is None:
@@ -192,7 +194,7 @@ class ListOfRasters:
 
         return math.sqrt(math.pow(extent.width(), 2) + math.pow(extent.height(), 2))
 
-    def extract_interpolated_value(self, point: QgsPoint) -> Optional[float]:
+    def extract_interpolated_value(self, point: QgsPoint) -> typing.Optional[float]:
         for raster_dp in self.rasters_dp:
             value = bilinear_interpolated_value(raster_dp, point)
 
@@ -211,18 +213,22 @@ class ListOfRasters:
         transformed_point = geom.asPoint()
         return QgsPoint(transformed_point.x(), transformed_point.y())
 
-    def extract_interpolated_value_at_point(self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem) -> float:
+    def extract_interpolated_value_at_point(
+        self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem
+    ) -> typing.Optional[float]:
         return self.extract_interpolated_value(self._convert_point_to_crs_of_raster(point, crs))
 
-    def sampling_from_raster_at_point(self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem) -> str:
-        point = self._convert_point_to_crs_of_raster(point, crs)
+    def sampling_from_raster_at_point(
+        self, input_point: QgsPointXY, crs: QgsCoordinateReferenceSystem
+    ) -> typing.Optional[str]:
+        point = self._convert_point_to_crs_of_raster(input_point, crs)
         for i, raster_dp in enumerate(self.rasters_dp):
             value = bilinear_interpolated_value(raster_dp, point)
             if value is not None:
                 return self.rasters[i].name()
         return None
 
-    def add_z_values(self, points: List[QgsPoint]) -> QgsLineString:
+    def add_z_values(self, points: typing.List[QgsPoint]) -> QgsLineString:
         points3d = []
 
         for point in points:
@@ -248,8 +254,9 @@ class ListOfRasters:
 
         for raster in self.rasters:
             try:
-                relative_path = pathlib.Path(raster.source()).relative_to(pathlib.Path(file_path).parent)
+                relative_path_raster = pathlib.Path(raster.source()).relative_to(pathlib.Path(file_path).parent)
                 path_type = "relative"
+                relative_path = str(relative_path_raster)
             except ValueError:
                 path_type = "absolute"
                 relative_path = raster.source()
