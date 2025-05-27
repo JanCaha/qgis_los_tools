@@ -1,4 +1,4 @@
-from typing import List
+import typing
 
 import numpy as np
 from qgis.core import QgsFeature, QgsGeometry, QgsLineString, QgsPoint, QgsVectorLayer
@@ -13,11 +13,11 @@ class SamplingDistanceMatrix:
     INDEX_SAMPLING_DISTANCE = 0
     INDEX_DISTANCE = 1
 
-    def __init__(self, data: QgsVectorLayer = None):
+    def __init__(self, layer: typing.Optional[QgsVectorLayer] = None):
         self.data = []
 
-        if data:
-            unit_name = data.customProperty(PluginConstants.sampling_distance_layer_units_property)
+        if layer is not None:
+            unit_name = layer.customProperty(PluginConstants.sampling_distance_layer_units_property)
 
             if unit_name:
                 distance_field_name = FieldNames.TEMPLATE_DISTANCE.replace("?", unit_name)
@@ -28,7 +28,7 @@ class SamplingDistanceMatrix:
 
             feature: QgsFeature
 
-            for feature in data.getFeatures():
+            for feature in layer.getFeatures():
                 self.data.append(
                     [
                         feature.attribute(size_field_name),
@@ -70,7 +70,7 @@ class SamplingDistanceMatrix:
 
             self.sort_data()
 
-    def get_row(self, index: int) -> List[float]:
+    def get_row(self, index: int) -> typing.List[float]:
         return self.data[index]
 
     def get_row_distance(self, index: int):
@@ -117,7 +117,7 @@ class SamplingDistanceMatrix:
     def next_distance(self, current_distance: float) -> float:
         value_to_add = 0.0
 
-        row: List[float]
+        row: typing.List[float]
 
         for row in self.data:
             if row[self.INDEX_DISTANCE] < current_distance + row[self.INDEX_SAMPLING_DISTANCE]:
