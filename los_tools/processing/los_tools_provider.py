@@ -34,7 +34,7 @@ from los_tools.utils import get_icon_path, get_plugin_version
 
 class LoSToolsProvider(QgsProcessingProvider):
     def __init__(self):
-        super().__init__()
+        super(LoSToolsProvider, self).__init__()
 
     def versionInfo(self):
         return get_plugin_version()
@@ -46,7 +46,8 @@ class LoSToolsProvider(QgsProcessingProvider):
             Setting(
                 PluginConstants.provider_name_short,
                 Settings.name_sample_z,
-                "Use sampler in the Python code? If unchecked (set to `False`) the Z value is not extracted in tools that create LoS.",
+                "Use sampler in the Python code? If unchecked (set to `False`) "
+                "the Z value is not extracted in tools that create LoS.",
                 True,
             )
         )
