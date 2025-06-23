@@ -157,7 +157,7 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
                     refraction_coefficient=ref_coeff,
                 )
 
-            for i in range(0, len(los.points)):
+            for i, _ in enumerate(los.points):
                 feature = QgsFeature(fields)
 
                 if los_type == NamesConstants.LOS_LOCAL:
@@ -166,8 +166,8 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
                             los_id,
                             observer_id,
                             observer_offset,
-                            los.points[i][LoSLocal.DISTANCE],
-                            los.points[i][LoSLocal.Z],
+                            los.points[i].distance,
+                            los.points[i].z,
                             los.visible[i],
                             los.horizon[i],
                             target_id,
@@ -183,8 +183,8 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
                             los_id,
                             observer_id,
                             observer_offset,
-                            los.points[i][LoSGlobal.DISTANCE],
-                            los.points[i][LoSGlobal.Z],
+                            los.points[i].distance,
+                            los.points[i].z,
                             los.visible[i],
                             los.horizon[i],
                             target_id,
@@ -202,8 +202,8 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
                             los_id,
                             observer_id,
                             observer_offset,
-                            los.points[i][2],
-                            los.points[i][3],
+                            los.points[i].distance,
+                            los.points[i].z,
                             los.visible[i],
                             los.horizon[i],
                         ]
