@@ -1,6 +1,6 @@
 import math
 import pathlib
-import typing
+from typing import Dict, List, Sequence, Tuple
 
 from qgis.core import (
     QgsCoordinateReferenceSystem,
@@ -24,10 +24,11 @@ from los_tools.processing.tools.util_functions import bilinear_interpolated_valu
 
 
 class ListOfRasters:
+    """Class to manage a list of raster layers with validation and utility methods."""
 
-    def __init__(self, rasters: typing.List[QgsMapLayer]):
+    def __init__(self, rasters: List[QgsMapLayer]):
 
-        self._dict_rasters: typing.Dict[str, QgsRasterLayer] = {}
+        self._dict_rasters: Dict[str, QgsRasterLayer] = {}
 
         if rasters:
             first_crs = rasters[0].crs()
@@ -46,17 +47,18 @@ class ListOfRasters:
         return len(self._dict_rasters)
 
     def __repr__(self):
-        return f"ListOfRasters: [{", ".join([x.name() for x in self.rasters])}]"
+        rasters = ", ".join([x.name() for x in self.rasters])
+        return f"ListOfRasters: [{rasters}]"
 
     def raster_to_use(self) -> str:
         return ", ".join([x.name() for x in self.rasters])
 
     @property
-    def rasters(self) -> typing.List[QgsRasterLayer]:
+    def rasters(self) -> List[QgsRasterLayer]:
         return [x for x in self._dict_rasters.values() if isinstance(x, QgsRasterLayer)]
 
     @property
-    def raster_ids(self) -> typing.List[str]:
+    def raster_ids(self) -> List[str]:
         return list(self._dict_rasters.keys())
 
     def remove_raster(self, raster_id: str) -> None:
@@ -64,7 +66,8 @@ class ListOfRasters:
             self._dict_rasters.pop(raster_id)
 
     @staticmethod
-    def validate_bands(rasters: typing.Sequence[QgsRasterLayer | QgsMapLayer]) -> typing.Tuple[bool, str]:
+    def validate_bands(rasters: Sequence[QgsRasterLayer | QgsMapLayer]) -> Tuple[bool, str]:
+        """Validates that layers have only one band."""
         for raster in rasters:
             dem_band_count = raster.bandCount()
 
@@ -77,9 +80,10 @@ class ListOfRasters:
 
     @staticmethod
     def validate_crs(
-        rasters: typing.Sequence[QgsRasterLayer | QgsMapLayer],
-        crs: typing.Optional[QgsCoordinateReferenceSystem] = None,
-    ) -> typing.Tuple[bool, str]:
+        rasters: Sequence[QgsRasterLayer | QgsMapLayer],
+        crs: QgsCoordinateReferenceSystem | None = None,
+    ) -> Tuple[bool, str]:
+        """Validates that layers have the same CRS and that it matches the provided CRS template."""
         if crs is None:
             crs = rasters[0].crs()
 
@@ -99,8 +103,9 @@ class ListOfRasters:
         return True, ""
 
     @staticmethod
-    def validate_ordering(rasters: typing.Sequence[QgsRasterLayer | QgsMapLayer]) -> typing.Tuple[bool, str]:
-        values: typing.List[float] = []
+    def validate_ordering(rasters: Sequence[QgsRasterLayer | QgsMapLayer]) -> Tuple[bool, str]:
+        """Validates that all layers are ordered by pixel size (cell size)."""
+        values: List[float] = []
 
         for raster in rasters:
             values.append(raster.extent().width() / raster.width())
@@ -117,7 +122,8 @@ class ListOfRasters:
         return True, ""
 
     @staticmethod
-    def validate_square_cell_size(rasters: typing.Sequence[QgsRasterLayer | QgsMapLayer]) -> typing.Tuple[bool, str]:
+    def validate_square_cell_size(rasters: Sequence[QgsRasterLayer | QgsMapLayer]) -> Tuple[bool, str]:
+        """Validates that all layers have square cells (equal x and y resolution)."""
         for raster in rasters:
             xres = raster.extent().width() / raster.width()
             yres = raster.extent().height() / raster.height()
@@ -132,7 +138,8 @@ class ListOfRasters:
         return True, ""
 
     @staticmethod
-    def validate(rasters: typing.List[QgsMapLayer]) -> bool:
+    def validate(rasters: List[QgsMapLayer]) -> bool:
+        """Validates the list of layers for CRS, bands, ordering, and square cell size."""
         if not rasters:
             return False
 
@@ -144,9 +151,11 @@ class ListOfRasters:
         )
 
     def crs(self) -> QgsCoordinateReferenceSystem:
+        """Returns the CRS of the first raster in the list. This main CRS used for this class."""
         return self.rasters[0].crs()
 
     def is_valid(self) -> bool:
+        """Checks if the list of rasters is valid."""
         return (
             self.validate_crs(self.rasters)[0]
             and self.validate_bands(self.rasters)[0]
@@ -155,17 +164,20 @@ class ListOfRasters:
         )
 
     def is_empty(self) -> bool:
+        """Checks if the list of rasters is empty."""
         if self.rasters:
             return False
         return True
 
     def extent_polygon(self) -> QgsGeometry:
+        """Returns the union of all rasters' extents as a QgsGeometry."""
         geoms = []
         for raster in self.rasters:
             geoms.append(QgsGeometry.fromRect(raster.extent()))
         return QgsGeometry.unaryUnion(geoms)
 
     def order_by_pixel_size(self) -> None:
+        """Orders rasters by pixel size (cell size) in ascending order."""
         tuples = []
 
         for raster in self.rasters:
@@ -179,11 +191,11 @@ class ListOfRasters:
             self._dict_rasters[x[0]] = x[2]
 
     @property
-    def rasters_dp(self) -> typing.List[typing.Optional[QgsRasterDataProvider]]:
+    def rasters_dp(self) -> List[QgsRasterDataProvider | None]:
         return [x.dataProvider() for x in self.rasters if x is not None]
 
     def maximal_diagonal_size(self) -> float:
-        extent: typing.Optional[QgsRectangle] = None
+        extent: QgsRectangle | None = None
 
         for raster in self.rasters:
             if extent is None:
@@ -194,7 +206,8 @@ class ListOfRasters:
 
         return math.sqrt(math.pow(extent.width(), 2) + math.pow(extent.height(), 2))
 
-    def extract_interpolated_value(self, point: QgsPoint) -> typing.Optional[float]:
+    def extract_interpolated_value(self, point: QgsPoint) -> float | None:
+        """Extracts interpolated value at the given point from the rasters."""
         for raster_dp in self.rasters_dp:
             value = bilinear_interpolated_value(raster_dp, point)
 
@@ -204,6 +217,7 @@ class ListOfRasters:
         return None
 
     def _convert_point_to_crs_of_raster(self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem) -> QgsPoint:
+        """Converts point to the CRS of the first raster in the list"""
         if crs.toWkt() == self.rasters[0].crs().toWkt():
             return QgsPoint(point.x(), point.y())
 
@@ -213,14 +227,12 @@ class ListOfRasters:
         transformed_point = geom.asPoint()
         return QgsPoint(transformed_point.x(), transformed_point.y())
 
-    def extract_interpolated_value_at_point(
-        self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem
-    ) -> typing.Optional[float]:
+    def extract_interpolated_value_at_point(self, point: QgsPointXY, crs: QgsCoordinateReferenceSystem) -> float | None:
+        """Extracts interpolated value at the given point from the rasters."""
         return self.extract_interpolated_value(self._convert_point_to_crs_of_raster(point, crs))
 
-    def sampling_from_raster_at_point(
-        self, input_point: QgsPointXY, crs: QgsCoordinateReferenceSystem
-    ) -> typing.Optional[str]:
+    def sampling_from_raster_at_point(self, input_point: QgsPointXY, crs: QgsCoordinateReferenceSystem) -> str | None:
+        """Returns the name of the raster layer that contains value at the given point."""
         point = self._convert_point_to_crs_of_raster(input_point, crs)
         for i, raster_dp in enumerate(self.rasters_dp):
             value = bilinear_interpolated_value(raster_dp, point)
@@ -228,7 +240,8 @@ class ListOfRasters:
                 return self.rasters[i].name()
         return None
 
-    def add_z_values(self, points: typing.List[QgsPoint]) -> QgsLineString:
+    def add_z_values(self, points: List[QgsPoint]) -> QgsLineString:
+        """Adds z values to points based on the raster data. Returns a QgsLineString with 3D points."""
         points3d = []
 
         for point in points:
@@ -239,7 +252,7 @@ class ListOfRasters:
 
         return QgsLineString(points3d)
 
-    def save_to_file(self, file_path: str) -> typing.Tuple[bool, str]:
+    def save_to_file(self, file_path: str) -> Tuple[bool, str]:
         """Saves configuration to XML file. Result is a tuple with success status and message."""
 
         path = pathlib.Path(file_path)
@@ -284,7 +297,8 @@ class ListOfRasters:
 
         return True, f"Configuration saved to `{file_path}`."
 
-    def read_from_file(self, file_path: str) -> typing.Tuple[bool, str]:
+    def read_from_file(self, file_path: str) -> Tuple[bool, str]:
+        """Read configuration from XML file. Result is a tuple with success status and message."""
 
         self._dict_rasters = {}
 
