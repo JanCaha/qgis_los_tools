@@ -11,9 +11,10 @@ from qgis.core import (
     QgsProcessingParameterField,
     QgsProcessingUtils,
 )
+from qgis.PyQt.QtCore import QMetaType
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.utils import COLUMN_TYPE, get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
@@ -77,9 +78,9 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
         object_field_id = self.parameterAsString(parameters, self.OBJECT_LAYER_FIELD_ID, context)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.ID_POINT, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.ID_OBJECT, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.AZIMUTH, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.ID_POINT, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.ID_OBJECT, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.AZIMUTH, QMetaType.Type.Double))
 
         sink, dest_id = self.parameterAsSink(
             parameters,

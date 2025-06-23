@@ -15,9 +15,10 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingUtils,
 )
+from qgis.PyQt.QtCore import QMetaType
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.utils import COLUMN_TYPE, COLUMN_TYPE_STRING, get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
@@ -64,11 +65,11 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         feature_count = input_horizon_lines_layer.featureCount()
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.ID_OBSERVER, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.HORIZON_TYPE, COLUMN_TYPE_STRING))
-        fields.append(QgsField(FieldNames.ANGLE, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.VIEWING_ANGLE, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.CSV_HORIZON_DISTANCE, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.ID_OBSERVER, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.HORIZON_TYPE, QMetaType.Type.QString))
+        fields.append(QgsField(FieldNames.ANGLE, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.VIEWING_ANGLE, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.CSV_HORIZON_DISTANCE, QMetaType.Type.Double))
 
         sink: QgsFeatureSink
         sink, path_sink = self.parameterAsSink(

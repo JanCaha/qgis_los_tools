@@ -12,7 +12,7 @@ from qgis.core import (
     QgsUnitTypes,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import Qt, pyqtSignal
+from qgis.PyQt.QtCore import QMetaType, Qt, pyqtSignal
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -33,7 +33,6 @@ from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.plugin import PluginConstants
 from los_tools.gui.custom_classes import Distance, DistanceWidget
-from los_tools.utils import _column_type_class
 
 
 class SamplingSettingsDistanceDialog(QDialog):
@@ -275,9 +274,9 @@ class SamplingSettingsDistanceDialog(QDialog):
         size_field_name = FieldNames.TEMPLATE_SIZE.replace("?", unit_name)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.SIZE_ANGLE, _column_type_class().Double))
-        fields.append(QgsField(distance_field_name, _column_type_class().Double))
-        fields.append(QgsField(size_field_name, _column_type_class().Double))
+        fields.append(QgsField(FieldNames.SIZE_ANGLE, QMetaType.Type.Double))
+        fields.append(QgsField(distance_field_name, QMetaType.Type.Double))
+        fields.append(QgsField(size_field_name, QMetaType.Type.Double))
 
         layer = QgsMemoryProviderUtils.createMemoryLayer(
             PluginConstants.sampling_distance_layer_name,

@@ -1,21 +1,21 @@
 from qgis.core import QgsField, QgsFields
+from qgis.PyQt.QtCore import QMetaType
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.utils import COLUMN_TYPE, COLUMN_TYPE_STRING
 
 
 class Fields:
 
-    _field_azimuth = QgsField(FieldNames.AZIMUTH, COLUMN_TYPE.Double)
-    _field_angle_step = QgsField(FieldNames.ANGLE_STEP, COLUMN_TYPE.Double)
-    _field_observer_x = QgsField(FieldNames.OBSERVER_X, COLUMN_TYPE.Double)
-    _field_observer_y = QgsField(FieldNames.OBSERVER_Y, COLUMN_TYPE.Double)
+    _field_azimuth = QgsField(FieldNames.AZIMUTH, QMetaType.Type.Double)
+    _field_angle_step = QgsField(FieldNames.ANGLE_STEP, QMetaType.Type.Double)
+    _field_observer_x = QgsField(FieldNames.OBSERVER_X, QMetaType.Type.Double)
+    _field_observer_y = QgsField(FieldNames.OBSERVER_Y, QMetaType.Type.Double)
 
     _base_fields = QgsFields()
-    _base_fields.append(QgsField(FieldNames.LOS_TYPE, COLUMN_TYPE_STRING))
-    _base_fields.append(QgsField(FieldNames.ID_OBSERVER, COLUMN_TYPE.Int))
-    _base_fields.append(QgsField(FieldNames.ID_TARGET, COLUMN_TYPE.Int))
-    _base_fields.append(QgsField(FieldNames.OBSERVER_OFFSET, COLUMN_TYPE.Double))
+    _base_fields.append(QgsField(FieldNames.LOS_TYPE, QMetaType.Type.QString))
+    _base_fields.append(QgsField(FieldNames.ID_OBSERVER, QMetaType.Type.Int))
+    _base_fields.append(QgsField(FieldNames.ID_TARGET, QMetaType.Type.Int))
+    _base_fields.append(QgsField(FieldNames.OBSERVER_OFFSET, QMetaType.Type.Double))
 
     los_notarget_fields = QgsFields(_base_fields)
     los_notarget_fields.append(_field_azimuth)
@@ -25,11 +25,11 @@ class Fields:
 
     los_local_fields = QgsFields(_base_fields)
 
-    los_local_fields.append(QgsField(FieldNames.TARGET_OFFSET, COLUMN_TYPE.Double))
+    los_local_fields.append(QgsField(FieldNames.TARGET_OFFSET, QMetaType.Type.Double))
 
     los_global_fields = QgsFields(los_local_fields)
-    los_global_fields.append(QgsField(FieldNames.TARGET_X, COLUMN_TYPE.Double))
-    los_global_fields.append(QgsField(FieldNames.TARGET_Y, COLUMN_TYPE.Double))
+    los_global_fields.append(QgsField(FieldNames.TARGET_X, QMetaType.Type.Double))
+    los_global_fields.append(QgsField(FieldNames.TARGET_Y, QMetaType.Type.Double))
 
     los_plugin_layer_fields = QgsFields(los_global_fields)
     los_plugin_layer_fields.append(_field_azimuth)

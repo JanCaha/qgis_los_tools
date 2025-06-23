@@ -17,10 +17,11 @@ from qgis.core import (
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
 )
+from qgis.PyQt.QtCore import QMetaType
 
 from los_tools.constants.field_names import FieldNames
 from los_tools.processing.tools.util_functions import get_max_decimal_numbers, round_all_values
-from los_tools.utils import COLUMN_TYPE, get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
@@ -135,10 +136,10 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
         round_digits = get_max_decimal_numbers([angle_min, angle_max, angle_step])
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.ID_ORIGINAL_POINT, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.ID_POINT, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.AZIMUTH, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.ANGLE_STEP_POINTS, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.ID_ORIGINAL_POINT, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.ID_POINT, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.AZIMUTH, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.ANGLE_STEP_POINTS, QMetaType.Type.Double))
 
         sink, dest_id = self.parameterAsSink(
             parameters,

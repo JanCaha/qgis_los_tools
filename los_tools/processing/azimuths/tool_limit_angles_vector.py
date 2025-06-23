@@ -15,11 +15,12 @@ from qgis.core import (
     QgsProcessingUtils,
     QgsProject,
 )
+from qgis.PyQt.QtCore import QMetaType
 
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.processing.tools.util_functions import get_los_type
-from los_tools.utils import COLUMN_TYPE, get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
@@ -97,10 +98,10 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
             coord_transform = None
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.ID_OBSERVER, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.ID_OBJECT, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.AZIMUTH_MIN, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.AZIMUTH_MAX, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.ID_OBSERVER, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.ID_OBJECT, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.AZIMUTH_MIN, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.AZIMUTH_MAX, QMetaType.Type.Double))
 
         sink, dest_id = self.parameterAsSink(
             parameters,

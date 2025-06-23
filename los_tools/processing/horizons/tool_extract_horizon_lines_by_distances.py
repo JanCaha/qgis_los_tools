@@ -26,12 +26,13 @@ from qgis.core import (
     QgsSymbol,
     QgsVectorLayer,
 )
+from qgis.PyQt.QtCore import QMetaType
 
 from los_tools.classes.classes_los import LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.processing.tools.util_functions import get_los_type
-from los_tools.utils import COLUMN_TYPE, COLUMN_TYPE_STRING, get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
@@ -129,10 +130,10 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
         ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.HORIZON_DISTANCE, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.ID_OBSERVER, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.OBSERVER_X, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.OBSERVER_Y, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.HORIZON_DISTANCE, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.ID_OBSERVER, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.OBSERVER_X, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.OBSERVER_Y, QMetaType.Type.Double))
 
         horizon_distance_field_index = fields.indexFromName(FieldNames.HORIZON_DISTANCE)
         id_observer_field_index = fields.indexFromName(FieldNames.ID_OBSERVER)

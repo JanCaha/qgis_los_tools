@@ -14,9 +14,10 @@ from qgis.core import (
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
 )
+from qgis.PyQt.QtCore import QMetaType
 
 from los_tools.constants.field_names import FieldNames
-from los_tools.utils import COLUMN_TYPE, get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
@@ -95,9 +96,9 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
         default_sampling_size = self.parameterAsDouble(parameters, self.DEFAULT_SAMPLING_DISTANCE, context)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.SIZE_ANGLE, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.DISTANCE, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.SIZE, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.SIZE_ANGLE, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.DISTANCE, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.SIZE, QMetaType.Type.Double))
 
         sink, dest_id = self.parameterAsSink(parameters, self.OUTPUT_TABLE, context, fields, Qgis.WkbType.NoGeometry)
 

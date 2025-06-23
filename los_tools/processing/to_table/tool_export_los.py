@@ -13,12 +13,13 @@ from qgis.core import (
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
 )
+from qgis.PyQt.QtCore import QMetaType
 
 from los_tools.classes.classes_los import LoSGlobal, LoSLocal, LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.processing.tools.util_functions import get_los_type
-from los_tools.utils import COLUMN_TYPE, COLUMN_TYPE_STRING, get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class ExportLoSAlgorithm(QgsProcessingAlgorithm):
@@ -82,24 +83,24 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
 
         fields = QgsFields()
 
-        fields.append(QgsField(FieldNames.ID_LOS, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.ID_OBSERVER, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.OBSERVER_OFFSET, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.CSV_OBSERVER_DISTANCE, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.CSV_ELEVATION, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.CSV_VISIBLE, COLUMN_TYPE.Bool))
-        fields.append(QgsField(FieldNames.CSV_HORIZON, COLUMN_TYPE.Bool))
+        fields.append(QgsField(FieldNames.ID_LOS, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.ID_OBSERVER, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.OBSERVER_OFFSET, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.CSV_OBSERVER_DISTANCE, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.CSV_ELEVATION, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.CSV_VISIBLE, QMetaType.Type.Bool))
+        fields.append(QgsField(FieldNames.CSV_HORIZON, QMetaType.Type.Bool))
 
         if los_type == NamesConstants.LOS_LOCAL:
-            fields.append(QgsField(FieldNames.ID_TARGET, COLUMN_TYPE.Int))
-            fields.append(QgsField(FieldNames.TARGET_OFFSET, COLUMN_TYPE.Double))
+            fields.append(QgsField(FieldNames.ID_TARGET, QMetaType.Type.Int))
+            fields.append(QgsField(FieldNames.TARGET_OFFSET, QMetaType.Type.Double))
 
         elif los_type == NamesConstants.LOS_GLOBAL:
-            fields.append(QgsField(FieldNames.ID_TARGET, COLUMN_TYPE.Int))
-            fields.append(QgsField(FieldNames.TARGET_OFFSET, COLUMN_TYPE.Double))
-            fields.append(QgsField(FieldNames.TARGET_X, COLUMN_TYPE.Double))
-            fields.append(QgsField(FieldNames.TARGET_Y, COLUMN_TYPE.Double))
-            fields.append(QgsField(FieldNames.CSV_TARGET, COLUMN_TYPE.Bool))
+            fields.append(QgsField(FieldNames.ID_TARGET, QMetaType.Type.Int))
+            fields.append(QgsField(FieldNames.TARGET_OFFSET, QMetaType.Type.Double))
+            fields.append(QgsField(FieldNames.TARGET_X, QMetaType.Type.Double))
+            fields.append(QgsField(FieldNames.TARGET_Y, QMetaType.Type.Double))
+            fields.append(QgsField(FieldNames.CSV_TARGET, QMetaType.Type.Bool))
 
         # elif los_type == NamesConstants.LOS_NO_TARGET:
         #     pass

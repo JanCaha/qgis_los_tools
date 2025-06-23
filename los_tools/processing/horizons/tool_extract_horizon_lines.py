@@ -17,12 +17,13 @@ from qgis.core import (
     QgsProcessingUtils,
     QgsVectorLayer,
 )
+from qgis.PyQt.QtCore import QMetaType
 
 from los_tools.classes.classes_los import LoSWithoutTarget
 from los_tools.constants.field_names import FieldNames
 from los_tools.constants.names_constants import NamesConstants
 from los_tools.processing.tools.util_functions import get_los_type
-from los_tools.utils import COLUMN_TYPE, COLUMN_TYPE_STRING, get_doc_file
+from los_tools.utils import get_doc_file
 
 
 class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
@@ -103,10 +104,10 @@ class ExtractHorizonLinesAlgorithm(QgsProcessingAlgorithm):
         ref_coeff = self.parameterAsDouble(parameters, self.REFRACTION_COEFFICIENT, context)
 
         fields = QgsFields()
-        fields.append(QgsField(FieldNames.HORIZON_TYPE, COLUMN_TYPE_STRING))
-        fields.append(QgsField(FieldNames.ID_OBSERVER, COLUMN_TYPE.Int))
-        fields.append(QgsField(FieldNames.OBSERVER_X, COLUMN_TYPE.Double))
-        fields.append(QgsField(FieldNames.OBSERVER_Y, COLUMN_TYPE.Double))
+        fields.append(QgsField(FieldNames.HORIZON_TYPE, QMetaType.Type.QString))
+        fields.append(QgsField(FieldNames.ID_OBSERVER, QMetaType.Type.Int))
+        fields.append(QgsField(FieldNames.OBSERVER_X, QMetaType.Type.Double))
+        fields.append(QgsField(FieldNames.OBSERVER_Y, QMetaType.Type.Double))
 
         sink, dest_id = self.parameterAsSink(
             parameters,
