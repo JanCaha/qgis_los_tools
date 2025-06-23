@@ -20,7 +20,7 @@ class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
         param = QgsProcessingParameterNumber(
             self.SIZE,
             "Size of the object (in meters)",
-            QgsProcessingParameterNumber.Double,
+            QgsProcessingParameterNumber.Type.Double,
             defaultValue=1,
             minValue=0.001,
             optional=False,
@@ -33,7 +33,7 @@ class ObjectDetectionAngleAlgorithm(QgsProcessingAlgorithm):
         param = QgsProcessingParameterNumber(
             self.DISTANCE,
             "Distance of the object from observer (in meters)",
-            QgsProcessingParameterNumber.Double,
+            QgsProcessingParameterNumber.Type.Double,
             defaultValue=1000,
             minValue=0.001,
             optional=False,

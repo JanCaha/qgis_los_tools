@@ -26,7 +26,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.POINT_LAYER, "Point layer", [QgsProcessing.TypeVectorPoint])
+            QgsProcessingParameterFeatureSource(self.POINT_LAYER, "Point layer", [QgsProcessing.SourceType.TypeVectorPoint])
         )
 
         self.addParameter(
@@ -34,7 +34,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
                 self.POINT_LAYER_FIELD_ID,
                 "Point layer ID field",
                 parentLayerParameterName=self.POINT_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=False,
             )
         )
@@ -43,7 +43,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.OBJECT_LAYER,
                 "Object layer",
-                [QgsProcessing.TypeVectorLine, QgsProcessing.TypeVectorPolygon],
+                [QgsProcessing.SourceType.TypeVectorLine, QgsProcessing.SourceType.TypeVectorPolygon],
             )
         )
 
@@ -52,7 +52,7 @@ class AzimuthPointPolygonAlgorithm(QgsProcessingAlgorithm):
                 self.OBJECT_LAYER_FIELD_ID,
                 "Object layer ID field",
                 parentLayerParameterName=self.OBJECT_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=False,
             )
         )

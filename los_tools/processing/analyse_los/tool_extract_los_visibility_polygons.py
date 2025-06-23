@@ -41,7 +41,7 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.SourceType.TypeVectorLine])
         )
 
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_LAYER, "Output LoS parts layer"))
@@ -58,7 +58,7 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.REFRACTION_COEFFICIENT,
                 "Refraction coefficient value",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.13,
             )
         )
@@ -134,7 +134,7 @@ class ExtractLoSVisibilityPolygonsAlgorithm(QgsProcessingAlgorithm):
 
         los_iterator: QgsFeatureIterator = los_layer.getFeatures()
 
-        geometry_snapper = QgsInternalGeometrySnapper(0.000001, QgsGeometrySnapper.EndPointToEndPoint)
+        geometry_snapper = QgsInternalGeometrySnapper(0.000001, QgsGeometrySnapper.SnapMode.EndPointToEndPoint)
 
         for feature_number, los_feature in enumerate(los_iterator):
             if feedback.isCanceled():

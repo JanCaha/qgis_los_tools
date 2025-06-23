@@ -58,7 +58,7 @@ class RasterValidations(QDialog):
         self._rasters_view.setColumnCount(2)
         self._rasters_view.setHeaderLabels(["Rasters", "Cell size (x - y)"])
         self._rasters_view.setMaximumHeight(150)
-        self._rasters_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self._rasters_view.header().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         layout.addRow(self._rasters_view)
 
         self.text = QTextBrowser(self)
@@ -138,7 +138,7 @@ class RasterValidations(QDialog):
                 " - "
                 f"{round(raster.extent().height() / raster.height(), 3)} {distance_unit}",
             )
-            item.setData(1, Qt.UserRole, raster.extent().width() / raster.width())
+            item.setData(1, Qt.ItemDataRole.UserRole, raster.extent().width() / raster.width())
 
             self._rasters_view.addTopLevelItem(item)
 

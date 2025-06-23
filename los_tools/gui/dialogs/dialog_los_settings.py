@@ -106,7 +106,7 @@ class SamplingSettingsDistanceDialog(QDialog):
         self.default_sampling_size.valueChanged.connect(self.fill_distances)
 
         self.maximal_los_length = DistanceWidget()
-        self.maximal_los_length.setValue(100, QgsUnitTypes.DistanceKilometers)
+        self.maximal_los_length.setValue(100, QgsUnitTypes.DistanceUnit.DistanceKilometers)
         self.maximal_los_length.valueChanged.connect(self.fill_distances)
         self.maximal_los_length.setDisabled(True)
 
@@ -118,7 +118,7 @@ class SamplingSettingsDistanceDialog(QDialog):
         layout_group_box_los.addRow("Maximal LoS Length", self.maximal_los_length)
 
         self.distance = DistanceWidget()
-        self.distance.setValue(1, QgsUnitTypes.DistanceKilometers)
+        self.distance.setValue(1, QgsUnitTypes.DistanceUnit.DistanceKilometers)
 
         lineLayout = QHBoxLayout()
 

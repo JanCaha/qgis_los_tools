@@ -31,7 +31,7 @@ class ObjectDistancesAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGLE,
                 "Angle size of object (in degrees)",
-                QgsProcessingParameterNumber.Double,
+                QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.1,
                 minValue=0.0,
                 maxValue=100.0,

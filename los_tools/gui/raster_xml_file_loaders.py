@@ -1,7 +1,7 @@
 import pathlib
 import typing
 
-from PyQt5.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsDataItem, QgsDataItemProvider, QgsDataProvider, QgsMimeDataUtils, QgsProject
 from qgis.gui import QgsCustomDropHandler
 from qgis.PyQt.QtCore import QDir
@@ -28,13 +28,13 @@ def load_raster_xml(path: str, plugin) -> bool:
 
     if len(list_of_rasters) > 0:
         message_box_load = QMessageBox()
-        message_box_load.setIcon(QMessageBox.Question)
+        message_box_load.setIcon(QMessageBox.Icon.Question)
         message_box_load.setWindowTitle("Load Rasters from file?")
         message_box_load.setText(f"Would you like to load {len(list_of_rasters)} the rasters from the file `{path}`?")
-        message_box_load.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
-        message_box_load.setDefaultButton(QMessageBox.No)
-        res = message_box_load.exec_()
-        if res == QMessageBox.Yes:
+        message_box_load.setStandardButtons(QMessageBox.StandardButton.No | QMessageBox.StandardButton.Yes)
+        message_box_load.setDefaultButton(QMessageBox.StandardButton.No)
+        res = message_box_load.exec()
+        if res == QMessageBox.StandardButton.Yes:
             project = QgsProject.instance()
             rasters = list_of_rasters.rasters
             for raster in reversed(rasters):
@@ -85,7 +85,7 @@ class RastersXMLItemProvider(QgsDataItemProvider):
         return PluginConstants.rasters_xml_name
 
     def capabilities(self):  # pylint: disable=missing-docstring
-        return QgsDataProvider.File
+        return QgsDataProvider.DataCapability.File
 
     def createDataItem(self, path: str, parentItem):  # pylint: disable=missing-docstring
 
@@ -101,8 +101,8 @@ class RastersXMLItem(QgsDataItem):
 
     def __init__(self, parent, name, path, plugin):
         self.plugin = plugin
-        super().__init__(QgsDataItem.Custom, parent, name, path)
-        self.setState(QgsDataItem.Populated)  # no children
+        super().__init__(QgsDataItem.Type.Custom, parent, name, path)
+        self.setState(QgsDataItem.State.Populated)  # no children
         self.setToolTip(QDir.toNativeSeparators(path))
 
     def hasDragEnabled(self):  # pylint: disable=missing-docstring

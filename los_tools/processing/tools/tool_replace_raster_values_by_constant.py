@@ -21,11 +21,11 @@ class ReplaceRasterValuesByConstantValueAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterRasterLayer(self.RASTER_LAYER, "Raster Layer", [QgsProcessing.TypeRaster])
+            QgsProcessingParameterRasterLayer(self.RASTER_LAYER, "Raster Layer", [QgsProcessing.SourceType.TypeRaster])
         )
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.VECTOR_LAYER, "Vector Layer", [QgsProcessing.TypeVectorPolygon])
+            QgsProcessingParameterFeatureSource(self.VECTOR_LAYER, "Vector Layer", [QgsProcessing.SourceType.TypeVectorPolygon])
         )
 
         self.addParameter(QgsProcessingParameterNumber(self.RASTER_VALUE, "Replacement value", defaultValue=1))

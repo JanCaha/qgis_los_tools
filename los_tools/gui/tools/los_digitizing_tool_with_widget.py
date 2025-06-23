@@ -83,7 +83,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
         if not ListOfRasters.validate(self._raster_list.rasters):
             self.messageEmitted.emit(
                 "Tool needs valid setup in `Raster Validations` dialog.",
-                Qgis.Critical,
+                Qgis.MessageLevel.Critical,
             )
             self.deactivate()
             return
@@ -128,7 +128,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
     def _set_snap_point(self, event: QgsMapMouseEvent) -> None:
         result = self.canvas().snappingUtils().snapToMap(event.mapPoint())
 
-        if result.isValid() and result.type() == QgsPointLocator.Vertex:
+        if result.isValid() and result.type() == QgsPointLocator.Type.Vertex:
             self._snap_point = result.point()
             self._snap_indicator.setMatch(result)
         else:
@@ -139,7 +139,7 @@ class LoSDigitizingToolWithWidget(QgsMapToolEdit):
             self._iface.messageBar().pushMessage(
                 "Can't Drawn LoS",
                 "LoS can be drawn only for projected CRS. Canvas is currently in geographic CRS.",
-                Qgis.Critical,
+                Qgis.MessageLevel.Critical,
                 duration=5,
             )
             return False

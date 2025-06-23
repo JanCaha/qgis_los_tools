@@ -100,7 +100,7 @@ class OptimizePointsLocationTool(QgsMapToolEdit):
             )
             self._canvas.unsetMapTool(self)
             return
-        if self.currentVectorLayer().dataProvider().capabilities() & QgsVectorDataProvider.ChangeFeatures:
+        if self.currentVectorLayer().dataProvider().capabilities() & QgsVectorDataProvider.Capability.ChangeFeatures:
             self.messageEmitted.emit(
                 "Tool only works for layers where features can be edited. Current layer features cannot be edited.",
                 Qgis.MessageLevel.Critical,

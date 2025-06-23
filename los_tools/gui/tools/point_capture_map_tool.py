@@ -35,7 +35,7 @@ class PointCaptureMapTool(QgsMapToolEmitPoint):
     def canvasMoveEvent(self, e: typing.Optional[QgsMapMouseEvent]) -> None:
         match = self.canvas().snappingUtils().snapToMap(e.originalMapPoint())
 
-        if match.isValid() and match.type() == QgsPointLocator.Vertex:
+        if match.isValid() and match.type() == QgsPointLocator.Type.Vertex:
             self._snap_indicator.setMatch(match)
             self._snap_indicator.setVisible(True)
             self._current_point = match.point()

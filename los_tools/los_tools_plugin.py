@@ -129,7 +129,7 @@ class LoSToolsPlugin:
             toolButton.setIcon(QIcon(get_icon_path("los_layer_menu.svg")))
             menu = QMenu()
             toolButton.setMenu(menu)
-            toolButton.setPopupMode(QToolButton.MenuButtonPopup)
+            toolButton.setPopupMode(QToolButton.ToolButtonPopupMode.MenuButtonPopup)
             menu.addAction(self.add_los_layer_action)
             menu.addAction(self.empty_los_layer_action)
             self.toolbar.addWidget(toolButton)

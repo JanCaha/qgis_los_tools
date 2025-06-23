@@ -36,7 +36,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint])
+            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.SourceType.TypeVectorPoint])
         )
 
         self.addParameter(
@@ -44,7 +44,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
                 self.ID_FIELD,
                 "ID field to assign to output",
                 parentLayerParameterName=self.INPUT_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=True,
             )
         )
@@ -53,7 +53,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGLE_START,
                 "Azimuth start",
-                QgsProcessingParameterNumber.Double,
+                QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.0,
                 minValue=0.0,
                 maxValue=360.0,
@@ -65,7 +65,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGLE_END,
                 "Azimuth end",
-                QgsProcessingParameterNumber.Double,
+                QgsProcessingParameterNumber.Type.Double,
                 defaultValue=360.0,
                 minValue=0.0,
                 maxValue=360.0,
@@ -86,7 +86,7 @@ class CreatePointsInAzimuthsAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGLE_STEP,
                 "Angle step",
-                QgsProcessingParameterNumber.Double,
+                QgsProcessingParameterNumber.Type.Double,
                 defaultValue=1.0,
                 minValue=0.001,
                 maxValue=180.0,

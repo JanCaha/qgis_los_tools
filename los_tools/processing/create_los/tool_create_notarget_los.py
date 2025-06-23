@@ -38,7 +38,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers", QgsProcessing.TypeRaster)
+            QgsProcessingParameterMultipleLayers(self.DEM_RASTERS, "Raster DEM Layers", QgsProcessing.SourceType.TypeRaster)
         )
 
         self.addParameter(
@@ -53,7 +53,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.OBSERVER_POINTS_LAYER,
                 "Observers point layer",
-                [QgsProcessing.TypeVectorPoint],
+                [QgsProcessing.SourceType.TypeVectorPoint],
             )
         )
 
@@ -62,7 +62,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                 self.OBSERVER_ID_FIELD,
                 "Observer ID field",
                 parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=False,
             )
         )
@@ -72,7 +72,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                 self.OBSERVER_OFFSET_FIELD,
                 "Observer offset field",
                 parentLayerParameterName=self.OBSERVER_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=False,
             )
         )
@@ -81,7 +81,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.TARGET_POINTS_LAYER,
                 "Targets point layer",
-                [QgsProcessing.TypeVectorPoint],
+                [QgsProcessing.SourceType.TypeVectorPoint],
             )
         )
 
@@ -90,7 +90,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                 self.TARGET_ID_FIELD,
                 "Target ID field",
                 parentLayerParameterName=self.TARGET_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=False,
             )
         )
@@ -100,7 +100,7 @@ class CreateNoTargetLosAlgorithm(QgsProcessingAlgorithm):
                 self.TARGET_DEFINITION_ID_FIELD,
                 "Target and Observer agreement ID field",
                 parentLayerParameterName=self.TARGET_POINTS_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=False,
             )
         )

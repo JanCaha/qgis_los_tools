@@ -34,7 +34,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint])
+            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.SourceType.TypeVectorPoint])
         )
 
         self.addParameter(
@@ -42,7 +42,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
                 self.ID_FIELD,
                 "ID field to assign to output",
                 parentLayerParameterName=self.INPUT_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=True,
             )
         )
@@ -51,7 +51,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGLE_START,
                 "Minimal angle",
-                QgsProcessingParameterNumber.Double,
+                QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.0,
                 minValue=0.0,
                 maxValue=360.0,
@@ -63,7 +63,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGLE_END,
                 "Maximal angle",
-                QgsProcessingParameterNumber.Double,
+                QgsProcessingParameterNumber.Type.Double,
                 defaultValue=359.999,
                 minValue=0.0,
                 maxValue=360.0,
@@ -75,7 +75,7 @@ class CreatePointsAroundAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGLE_STEP,
                 "Angle step",
-                QgsProcessingParameterNumber.Double,
+                QgsProcessingParameterNumber.Type.Double,
                 defaultValue=1.0,
                 minValue=0.001,
                 maxValue=360.0,

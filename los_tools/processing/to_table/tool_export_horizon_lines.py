@@ -30,7 +30,7 @@ class ExportHorizonLinesAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT_HORIZON_LINES_LAYER,
                 "Horizon Lines Layer",
-                [QgsProcessing.TypeVectorLine],
+                [QgsProcessing.SourceType.TypeVectorLine],
             )
         )
 

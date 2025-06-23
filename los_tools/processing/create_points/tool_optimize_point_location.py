@@ -37,7 +37,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.INPUT_RASTER,
                 "Location optimization raster",
-                [QgsProcessing.TypeRaster],
+                [QgsProcessing.SourceType.TypeRaster],
             )
         )
 
@@ -45,7 +45,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
                 "Input point layer (points to optimize)",
-                [QgsProcessing.TypeVectorPoint],
+                [QgsProcessing.SourceType.TypeVectorPoint],
             )
         )
 
@@ -64,7 +64,7 @@ class OptimizePointLocationAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.MASK_RASTER,
                 "Mask raster",
-                [QgsProcessing.TypeRaster],
+                [QgsProcessing.SourceType.TypeRaster],
                 optional=True,
             )
         )

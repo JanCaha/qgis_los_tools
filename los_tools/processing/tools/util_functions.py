@@ -51,7 +51,7 @@ def get_los_type(los_layer: QgsVectorLayer, field_names: List[str]) -> str:
             f"Existing LoS types are {types_txt}."
         )
 
-        QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)
+        QgsMessageLog.logMessage(msg, "los_tools", Qgis.MessageLevel.Critical)
 
         raise QgsProcessingException(msg)
 
@@ -69,7 +69,7 @@ def get_horizon_lines_type(horizon_lines_layer: QgsVectorLayer) -> str:
             f"Existing LoS types are {types_txt}."
         )
 
-        QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)
+        QgsMessageLog.logMessage(msg, "los_tools", Qgis.MessageLevel.Critical)
 
         raise QgsProcessingException(msg)
 
@@ -88,7 +88,7 @@ def check_existence_los_fields(field_names: List[str]) -> None:
             f"Cannot analyse the layer as LoS."
         )
 
-        QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)
+        QgsMessageLog.logMessage(msg, "los_tools", Qgis.MessageLevel.Critical)
 
         raise QgsProcessingException(msg)
 

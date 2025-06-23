@@ -30,7 +30,7 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.INPUT_LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
+            QgsProcessingParameterFeatureSource(self.INPUT_LOS_LAYER, "LoS layer", [QgsProcessing.SourceType.TypeVectorLine])
         )
 
         self.addParameter(
@@ -45,7 +45,7 @@ class ExportLoSAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.REFRACTION_COEFFICIENT,
                 "Refraction coefficient value",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.13,
             )
         )

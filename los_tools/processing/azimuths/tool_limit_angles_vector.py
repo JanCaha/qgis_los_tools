@@ -31,14 +31,14 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.SourceType.TypeVectorLine])
         )
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.OBJECT_LAYER,
                 "Object layer",
-                [QgsProcessing.TypeVectorLine, QgsProcessing.TypeVectorPolygon],
+                [QgsProcessing.SourceType.TypeVectorLine, QgsProcessing.SourceType.TypeVectorPolygon],
             )
         )
 
@@ -47,7 +47,7 @@ class LimitAnglesAlgorithm(QgsProcessingAlgorithm):
                 self.OBJECT_LAYER_FIELD_ID,
                 "Objects layer ID field",
                 parentLayerParameterName=self.OBJECT_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=False,
             )
         )

@@ -46,7 +46,7 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.TypeVectorLine])
+            QgsProcessingParameterFeatureSource(self.LOS_LAYER, "LoS layer", [QgsProcessing.SourceType.TypeVectorLine])
         )
 
         self.addParameter(
@@ -73,7 +73,7 @@ class ExtractHorizonLinesByDistanceAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.REFRACTION_COEFFICIENT,
                 "Refraction coefficient value",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.13,
             )
         )

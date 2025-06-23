@@ -21,11 +21,11 @@ class ReplaceRasterValuesByFieldValuesAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterRasterLayer(self.RASTER_LAYER, "Raster Layer", [QgsProcessing.TypeRaster])
+            QgsProcessingParameterRasterLayer(self.RASTER_LAYER, "Raster Layer", [QgsProcessing.SourceType.TypeRaster])
         )
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.VECTOR_LAYER, "Vector Layer", [QgsProcessing.TypeVectorPolygon])
+            QgsProcessingParameterFeatureSource(self.VECTOR_LAYER, "Vector Layer", [QgsProcessing.SourceType.TypeVectorPolygon])
         )
 
         self.addParameter(
@@ -33,7 +33,7 @@ class ReplaceRasterValuesByFieldValuesAlgorithm(QgsProcessingAlgorithm):
                 self.VALUE_FIELD,
                 "Field specifying the replacement values",
                 parentLayerParameterName=self.VECTOR_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=False,
             )
         )

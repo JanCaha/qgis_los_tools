@@ -34,7 +34,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, configuration=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.TypeVectorPoint])
+            QgsProcessingParameterFeatureSource(self.INPUT_LAYER, "Input point layer", [QgsProcessing.SourceType.TypeVectorPoint])
         )
 
         self.addParameter(
@@ -42,7 +42,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
                 self.ID_FIELD,
                 "ID field to assign to output",
                 parentLayerParameterName=self.INPUT_LAYER,
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 optional=True,
             )
         )
@@ -51,7 +51,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.DIRECTION_LAYER,
                 "Main direction point layer",
-                [QgsProcessing.TypeVectorPoint],
+                [QgsProcessing.SourceType.TypeVectorPoint],
             )
         )
 
@@ -59,7 +59,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGLE_OFFSET,
                 "Angle offset from the main direction",
-                QgsProcessingParameterNumber.Double,
+                QgsProcessingParameterNumber.Type.Double,
                 defaultValue=20.0,
                 minValue=0.0,
                 maxValue=180.0,
@@ -71,7 +71,7 @@ class CreatePointsInDirectionAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGLE_STEP,
                 "Angle step",
-                QgsProcessingParameterNumber.Double,
+                QgsProcessingParameterNumber.Type.Double,
                 defaultValue=1.0,
                 minValue=0.001,
                 maxValue=180.0,

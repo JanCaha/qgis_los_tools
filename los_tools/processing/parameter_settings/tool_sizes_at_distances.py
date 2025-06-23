@@ -32,7 +32,7 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGLE,
                 "Angle size of object (in degrees)",
-                QgsProcessingParameterNumber.Double,
+                QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.1,
                 minValue=0.0,
                 maxValue=100.0,
@@ -54,7 +54,7 @@ class ObjectSizesAlgorithm(QgsProcessingAlgorithm):
             self.DEFAULT_SAMPLING_DISTANCE,
             "Default sampling size (in meters)",
             defaultValue=1,
-            type=QgsProcessingParameterNumber.Double,
+            type=QgsProcessingParameterNumber.Type.Double,
         )
         param.setMetadata({"widget_wrapper": {"decimals": 3}})
 
