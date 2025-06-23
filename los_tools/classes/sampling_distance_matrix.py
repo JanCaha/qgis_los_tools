@@ -1,4 +1,4 @@
-import typing
+from typing import List, Optional
 
 import numpy as np
 from qgis.core import QgsFeature, QgsGeometry, QgsLineString, QgsPoint, QgsVectorLayer
@@ -8,13 +8,15 @@ from los_tools.constants.plugin import PluginConstants
 
 
 class SamplingDistanceMatrix:
+    """Class to hold the sampling distance matrix data. Size of object in first column, distance in second."""
+
     NUMBER_OF_COLUMNS = 2
 
     INDEX_SAMPLING_DISTANCE = 0
     INDEX_DISTANCE = 1
 
-    def __init__(self, layer: typing.Optional[QgsVectorLayer] = None):
-        self.data = []
+    def __init__(self, layer: Optional[QgsVectorLayer] = None):
+        self.data: List[List[float]] = []
 
         if layer is not None:
             unit_name = layer.customProperty(PluginConstants.sampling_distance_layer_units_property)
@@ -50,6 +52,7 @@ class SamplingDistanceMatrix:
         return len(self.data)
 
     def sort_data(self):
+        """Sort the data by distance."""
         self.data = sorted(self.data, key=lambda d: d[self.INDEX_DISTANCE])
 
     def replace_minus_one_with_value(self, value: float) -> None:
@@ -70,17 +73,20 @@ class SamplingDistanceMatrix:
 
             self.sort_data()
 
-    def get_row(self, index: int) -> typing.List[float]:
+    def get_row(self, index: int) -> List[float]:
         return self.data[index]
 
-    def get_row_distance(self, index: int):
+    def get_row_distance(self, index: int) -> float:
+        """Get the distance for the specified row."""
         return self.get_row(index)[self.INDEX_DISTANCE]
 
-    def get_row_sampling_distance(self, index: int):
+    def get_row_sampling_distance(self, index: int) -> float:
+        """Get the sampling distance for the specified row."""
         return self.get_row(index)[self.INDEX_SAMPLING_DISTANCE]
 
     @staticmethod
     def validate_table(data: QgsVectorLayer):
+        """Validate the sampling distance - distance table (layer)."""
         field_names = data.fields().names()
 
         if FieldNames.SIZE_ANGLE not in field_names:
@@ -115,9 +121,10 @@ class SamplingDistanceMatrix:
         return self.data[-1][self.INDEX_DISTANCE]
 
     def next_distance(self, current_distance: float) -> float:
+        """Get the next distance based on the current distance."""
         value_to_add = 0.0
 
-        row: typing.List[float]
+        row: List[float]
 
         for row in self.data:
             if row[self.INDEX_DISTANCE] < current_distance + row[self.INDEX_SAMPLING_DISTANCE]:
@@ -126,7 +133,7 @@ class SamplingDistanceMatrix:
         return current_distance + value_to_add
 
     def build_line(self, origin_point: QgsPoint, direction_point: QgsPoint) -> QgsLineString:
-
+        """Build a line based on the sampling distance matrix in given direction. Sampling and length is based on data."""
         lines = []
 
         for i in range(len(self)):
@@ -159,6 +166,7 @@ class SamplingDistanceMatrix:
         return result_line
 
     def densified_line(self, start_point: QgsPoint, end_point: QgsPoint, sampling_row_index: int) -> QgsLineString:
+        """Densifies the line between two points based on the sampling distance."""
         line = QgsGeometry.fromPolyline([start_point, end_point])
 
         line = line.densifyByDistance(distance=np.nextafter(self.get_row_sampling_distance(sampling_row_index), np.inf))

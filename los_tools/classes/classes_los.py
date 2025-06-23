@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import math
-import typing
 from typing import List, Optional, Union
 
 from qgis.core import QgsFeature, QgsGeometry, QgsPoint
@@ -517,7 +516,7 @@ class LoSWithoutTarget(LoS):
     def from_another(
         cls,
         other: LoSWithoutTarget,
-        distance_limit: typing.Optional[float] = None,
+        distance_limit: Optional[float] = None,
     ) -> LoSWithoutTarget:
         obj = LoSWithoutTarget.__new__(LoSWithoutTarget)
         obj.observer_offset = other.observer_offset
