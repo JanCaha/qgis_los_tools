@@ -6,7 +6,7 @@
 name=LoS Tools
 qgisMinimumVersion=3.40
 description=This plugin creates and analyzes lines-of-sight (LoS) and also provides supporting tools.
-version=2.0.0
+version=2.1.0
 author=Jan Caha
 email=jan.caha@outlook.com
 
@@ -20,7 +20,10 @@ repository=https://github.com/JanCaha/qgis_los_tools
 
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
-changelog=2.0.0
+changelog=2.1.0
+    - fix typing that cause issues
+    - update LoS class, to be better for handling
+    <p>2.0.0
     - rework GUI tools, they now work differently provide more informative messages when something is going on
     - "Sampling distance matrix" and "List of Rasters" needed to crate LoS with GUI tools are now stored in the plugin itself
     - interactive tools "Create LoS" and "Create LoS No Target Tool" now visualize and can also add LoS to the plugin layer
