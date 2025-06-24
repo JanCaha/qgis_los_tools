@@ -33,7 +33,7 @@ def load_raster_xml(path: str, plugin) -> bool:
         message_box_load.setText(f"Would you like to load {len(list_of_rasters)} the rasters from the file `{path}`?")
         message_box_load.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
         message_box_load.setDefaultButton(QMessageBox.No)
-        res = message_box_load.exec_()
+        res = message_box_load.exec()
         if res == QMessageBox.Yes:
             project = QgsProject.instance()
             rasters = list_of_rasters.rasters
