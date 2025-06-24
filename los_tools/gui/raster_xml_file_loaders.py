@@ -1,10 +1,10 @@
 import pathlib
 import typing
 
-from PyQt5.QtGui import QIcon
 from qgis.core import QgsDataItem, QgsDataItemProvider, QgsDataProvider, QgsMimeDataUtils, QgsProject
 from qgis.gui import QgsCustomDropHandler
 from qgis.PyQt.QtCore import QDir
+from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 
 from los_tools.classes.list_raster import ListOfRasters

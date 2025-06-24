@@ -138,7 +138,7 @@ class RasterValidations(QDialog):
                 " - "
                 f"{round(raster.extent().height() / raster.height(), 3)} {distance_unit}",
             )
-            item.setData(1, Qt.UserRole, raster.extent().width() / raster.width())
+            item.setData(1, Qt.ItemDataRole.UserRole, raster.extent().width() / raster.width())
 
             self._rasters_view.addTopLevelItem(item)
 

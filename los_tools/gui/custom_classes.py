@@ -57,7 +57,7 @@ class DistanceWidget(QWidget):
     def __init__(
         self,
         parent: Optional[QWidget] = None,
-        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.Widget,
+        flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.WindowType.Widget,
     ) -> None:
         super().__init__(parent, flags)
 
@@ -239,7 +239,7 @@ class DistancesDialog(QDialog):
     def add_distance(self, distance: float = 0):
         item = NumericTreeItem([str(distance)])
         item.setData(0, Qt.ItemDataRole.EditRole, float(distance))
-        item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable | Qt.ItemIsSelectable)
+        item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsEditable | Qt.ItemFlag.ItemIsSelectable)
         self._distances_tree_widget.addTopLevelItem(item)
 
         self._distances_tree_widget.sortItems(
