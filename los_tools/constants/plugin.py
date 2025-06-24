@@ -16,3 +16,4 @@ class PluginConstants:
     rasters_xml_name = "Rasters XML"
     rasters_xml_extension = ".rastersxml"
     rasters_xml_filter = f"{rasters_xml_name} Files (*{rasters_xml_extension})"
+    rasters_xml_providerkey = "rasters_xml"

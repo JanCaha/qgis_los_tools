@@ -11,8 +11,6 @@ from los_tools.classes.list_raster import ListOfRasters
 from los_tools.constants.plugin import PluginConstants
 from los_tools.utils import get_icon_path
 
-RASTERS_XML_PROVIDERKEY = "rasters_xml"
-
 
 def is_path_rasters_xml_json(path: typing.Union[str, pathlib.Path]) -> bool:
     """Check if a path is a RastersXML file"""
@@ -59,17 +57,21 @@ class RastersXMLDropHandler(QgsCustomDropHandler):
         super().__init__()
         self.plugin = plugin
 
-    def handleFileDrop(self, file):  # pylint: disable=missing-docstring
-        if not is_path_rasters_xml_json(file):
-            return False
-        return True
+    def handleFileDrop(self, file: str | None):  # pylint: disable=missing-docstring
+        if file:
+            if not is_path_rasters_xml_json(file):
+                return False
+            return True
+        return False
 
     def handleCustomUriDrop(self, uri: QgsMimeDataUtils.Uri) -> None:
-        load_raster_xml(uri.uri, self.plugin)
+        if uri.uri:
+            load_raster_xml(uri.uri, self.plugin)
+
         return super().handleCustomUriDrop(uri)
 
     def customUriProviderKey(self) -> str:
-        return RASTERS_XML_PROVIDERKEY
+        return PluginConstants.rasters_xml_providerkey
 
 
 class RastersXMLItemProvider(QgsDataItemProvider):
@@ -87,10 +89,12 @@ class RastersXMLItemProvider(QgsDataItemProvider):
     def capabilities(self):  # pylint: disable=missing-docstring
         return QgsDataProvider.File
 
-    def createDataItem(self, path: str, parentItem):  # pylint: disable=missing-docstring
+    def createDataItem(self, path: str | None, parentItem):  # pylint: disable=missing-docstring
 
-        if is_path_rasters_xml_json(path):
-            return RastersXMLItem(parentItem, pathlib.Path(path).name, path, self.plugin)
+        if path:
+            if is_path_rasters_xml_json(path):
+                return RastersXMLItem(parentItem, pathlib.Path(path).name, path, self.plugin)
+
         return None
 
 
@@ -115,7 +119,7 @@ class RastersXMLItem(QgsDataItem):
     def mimeUri(self):  # pylint: disable=missing-docstring
         u = QgsMimeDataUtils.Uri()
         u.layerType = "custom"
-        u.providerKey = RASTERS_XML_PROVIDERKEY
+        u.providerKey = PluginConstants.rasters_xml_providerkey
         u.name = self.name()
         u.uri = self.path()
         return u
