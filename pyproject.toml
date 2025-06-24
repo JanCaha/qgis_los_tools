@@ -45,3 +45,6 @@ ignore_missing_imports = true
 show_column_numbers = true
 no_pretty = true
 no_strict_optional = true
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov", "mock", "deepdiff"]

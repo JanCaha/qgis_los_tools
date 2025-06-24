@@ -1,9 +1,0 @@
-# For tests execution:
-deepdiff
-mock
-flake8
-pep257
-pylint
-pycodestyle
-pytest
-pytest-cov
