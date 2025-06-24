@@ -149,7 +149,7 @@ def test_raster_remove(
     assert len(list_rasters.rasters) == 1
 
 
-def test_rasters_save_xml(
+def test_rasters_save_load_xml(
     raster_small: QgsRasterLayer,
     raster_large: QgsRasterLayer,
 ):
