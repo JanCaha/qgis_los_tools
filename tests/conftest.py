@@ -2,6 +2,7 @@ import typing
 from pathlib import Path
 
 import pytest
+import qgis.utils
 from pytest import MonkeyPatch
 from pytest_qgis.utils import clean_qgis_layer
 from qgis.core import Qgis, QgsFeature, QgsGeometry, QgsPoint, QgsRasterLayer, QgsVectorLayer
@@ -11,6 +12,16 @@ from los_tools.constants.field_names import FieldNames
 from los_tools.constants.fields import Fields
 from los_tools.constants.names_constants import NamesConstants
 from tests.utils import data_file_path
+
+
+@pytest.fixture(
+    autouse=True,
+    scope="function",
+)
+def _add_plugin_path_to_qgis_plugin_paths(monkeypatch):
+    qgis.utils.plugin_paths.append(Path(__file__).parent.parent.as_posix())
+    qgis.utils.updateAvailablePlugins()
+    assert "los_tools" in qgis.utils.available_plugins
 
 
 @pytest.fixture(autouse=True, scope="function")
@@ -32,6 +43,18 @@ def _monkeypatch_iface(qgis_iface: QgisInterface, monkeypatch: MonkeyPatch) -> N
 
     qgis_iface.messageBar().popWidget = None
     monkeypatch.setattr(qgis_iface.messageBar(), "popWidget", pop_widget)
+
+    # Define a mock for projectRead signal
+    class ProjectRead:
+        def connect(self, func):
+            pass
+
+    qgis_iface.projectRead = None
+    monkeypatch.setattr(qgis_iface, "projectRead", ProjectRead())
+
+    # Define a mock for registerCustomDropHandler function
+    qgis_iface.registerCustomDropHandler = None
+    monkeypatch.setattr(qgis_iface, "registerCustomDropHandler", lambda x: None)
 
 
 def _raster_layer(path: Path) -> QgsRasterLayer:
@@ -283,7 +306,7 @@ def local_los_feature(los_geometry: QgsGeometry) -> QgsFeature:
     feature.setAttribute(Fields.los_local_fields.indexFromName(FieldNames.ID_OBSERVER), 1)
     feature.setAttribute(Fields.los_local_fields.indexFromName(FieldNames.ID_TARGET), 1)
     feature.setAttribute(Fields.los_local_fields.indexFromName(FieldNames.OBSERVER_OFFSET), 1)
-    feature.setAttribute(Fields.los_local_fields.indexFromName(FieldNames.TARGET_OFFSET), 0)
+    feature.setAttribute(Fields.los_local_fields.indexFromName(FieldNames.TARGET_OFFSET), 99)
     return feature
 
 
