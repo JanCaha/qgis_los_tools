@@ -23,5 +23,6 @@
     "python.analysis.diagnosticSeverityOverrides": {
         "reportAttributeAccessIssue": "none",
         "reportOptionalMemberAccess": "none"
-    }
+    },
+    "debugpy.debugJustMyCode": false
 }
