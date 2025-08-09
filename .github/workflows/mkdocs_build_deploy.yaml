@@ -1,12 +1,18 @@
 name: Build Documentation and Deploy to GitHub Pages
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+  
+
 on:
   release:
     types: [published, edited]
   push:
     tags:
       - 'v*'
-    
+  workflow_dispatch:
+
 jobs:
 
   build-deploy:
