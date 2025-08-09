@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -u
-set -e
+set -euo pipefail
 
 echo "Prepare plugin"
 
