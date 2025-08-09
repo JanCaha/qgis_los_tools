@@ -48,12 +48,12 @@ For the [Create LoS No Target Tool](./interactive%20tools/tool_los_without_targe
 The citation for the plugin should be:
 
 ```
-Jan Caha (2025). LoS Tools. QGIS Plugin version 2.0. https://jancaha.github.io/qgis_los_tools/
+Jan Caha (2025). LoS Tools. QGIS Plugin version 2.1.0. https://jancaha.github.io/qgis_los_tools/
 ```
 
 ```
 @Manual{,
-  title = {LoS Tools}. QGIS Plugin version 2.0,
+  title = {LoS Tools}. QGIS Plugin version 2.1.0,
   author = {Jan Caha},
   year = {2025},
   url = {https://jancaha.github.io/qgis_los_tools/}
