@@ -279,6 +279,8 @@ class LoSToolsPlugin:
         self.raster_validations = RasterValidations(iface=self.iface)
         project = QgsProject.instance()
         project.layersRemoved.connect(self.update_list_of_rasters)
+        self.raster_validations.selectedRastersChanged.connect(self.store_list_of_rasters)
+        self.raster_validations.selectedRastersChanged.connect(self.list_of_rasters_for_los_updated)
 
     def update_list_of_rasters(self, removed_rasters_ids: typing.List[str]):
         selected_raster_ids = []
@@ -407,8 +409,6 @@ class LoSToolsPlugin:
     def open_dialog_raster_selection(self):
         if self._list_of_rasters_for_los:
             self.raster_validations.setup_used_rasters(self._list_of_rasters_for_los)
-        self.raster_validations.selectedRastersChanged.connect(self.store_list_of_rasters)
-        self.raster_validations.selectedRastersChanged.connect(self.list_of_rasters_for_los_updated)
         self.raster_validations.exec()
 
     # store variables in plugin
