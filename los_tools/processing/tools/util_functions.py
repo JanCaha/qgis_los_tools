@@ -76,23 +76,6 @@ def get_horizon_lines_type(horizon_lines_layer: QgsVectorLayer) -> str:
     return list(horizon_lines_types)[0]
 
 
-def check_existence_los_fields(field_names: List[str]) -> None:
-    if not (
-        FieldNames.LOS_TYPE in field_names
-        or FieldNames.ID_OBSERVER in field_names
-        or FieldNames.ID_TARGET in field_names
-    ):
-        msg = (
-            f"Fields specific for LoS not found in current layer "
-            f"({FieldNames.LOS_TYPE}, {FieldNames.ID_OBSERVER}, {FieldNames.ID_TARGET}). "
-            f"Cannot analyse the layer as LoS."
-        )
-
-        QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)
-
-        raise QgsProcessingException(msg)
-
-
 def wkt_to_array_points(wkt: str) -> List[List[float]]:
     reg = re.compile(r"(LineString\s?Z |LINESTRING |MULTILINESTRING |MultiLineString\s?Z )", re.IGNORECASE)
 
