@@ -66,7 +66,7 @@ def get_horizon_lines_type(horizon_lines_layer: QgsVectorLayer) -> str:
         types_txt = ", ".join(horizon_lines_types)
         msg = (
             "More than one type of horizon lines present in layer. Cannot process such layer. "
-            f"Existing LoS types are {types_txt}."
+            f"Existing horizon lines types are {types_txt}."
         )
 
         QgsMessageLog.logMessage(msg, "los_tools", Qgis.Critical)

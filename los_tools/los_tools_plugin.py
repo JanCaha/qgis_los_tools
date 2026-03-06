@@ -368,7 +368,7 @@ class LoSToolsPlugin:
         else:
             self.iface.messageBar().pushMessage(
                 "LoS Layer",
-                "Could not at plugin LoS layer to the project.",
+                "Could not add plugin LoS layer to the project.",
                 Qgis.MessageLevel.Info,
                 duration=2,
             )
