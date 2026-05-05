@@ -7,9 +7,9 @@ concurrency:
 on:
   push:
     paths:
-    - "los_tools/**"
-    - ".github/workflows/test_plugin.yaml"
-    - "tests/**"
+      - "los_tools/**"
+      - ".github/workflows/test_plugin.yaml"
+      - "tests/**"
 
 jobs:
 
@@ -18,68 +18,33 @@ jobs:
     runs-on: ubuntu-24.04
 
     strategy:
+      fail-fast: false
       matrix:
-        qgis_source: [ubuntu, ubuntugis-nightly]
+        qgis-version: [ "3.22", "3.28", "3.34", "3.40", "3.44" ]
 
     steps:
 
       - id: skip_check
         uses: fkirc/skip-duplicate-actions@v5
         with:
-          concurrent_skipping: 'same_content_newer'
-          skip_after_successful_duplicate: 'true'
+          concurrent_skipping: "same_content_newer"
+          skip_after_successful_duplicate: "true"
 
-      - name: Install
+      - name: Setup conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          use-mamba: true
+          channels: conda-forge,defaults
+
+      - name: Create environment and install QGIS
         run: |
-          sudo apt-get install python3-pytest python3-pytest-cov python3-pytestqt
+          conda create -n qgis_env --no-default-packages --yes
+          conda install -n qgis_env qgis=${{ matrix.qgis-version }} pytest pytest-qt pytest-cov --yes
+          conda run -n qgis_env pip install --no-cache-dir pytest-qgis
 
-      - name: Prepare QGIS
-        run: |
-          sudo gpg -k && \
-          KEYRING=/usr/share/keyrings/qgis-archive-keyring.gpg && \
-          wget -O $KEYRING https://download.qgis.org/downloads/qgis-archive-keyring.gpg && \
-          sudo touch /etc/apt/sources.list.d/qgis.sources && \
-          echo 'Types: deb deb-src' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
-          echo 'URIs: https://qgis.org/${{ matrix.qgis_source }}' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
-          echo 'Suites: '$(lsb_release -c -s) | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
-          echo 'Architectures: '$(dpkg --print-architecture) | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
-          echo 'Components: main' | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
-          echo 'Signed-By: '$KEYRING | sudo tee -a /etc/apt/sources.list.d/qgis.sources && \
-          KEYRING=/usr/share/keyrings/ubuntugis-archive-keyring.gpg && \
-          sudo gpg --no-default-keyring --keyring $KEYRING --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 6B827C12C2D425E227EDCA75089EBE08314DF160 && \
-          sudo touch /etc/apt/sources.list.d/ubuntugis-unstable.sources && \
-          echo 'Types: deb deb-src' | sudo tee -a /etc/apt/sources.list.d/ubuntugis-unstable.sources && \
-          echo 'URIs:https://ppa.launchpadcontent.net/ubuntugis/ubuntugis-unstable/ubuntu' | sudo tee -a /etc/apt/sources.list.d/ubuntugis-unstable.sources && \
-          echo 'Suites: '$(lsb_release -c -s)| sudo tee -a /etc/apt/sources.list.d/ubuntugis-unstable.sources && \
-          echo 'Architectures: '$(dpkg --print-architecture) | sudo tee -a /etc/apt/sources.list.d/ubuntugis-unstable.sources && \
-          echo 'Components: main' | sudo tee -a /etc/apt/sources.list.d/ubuntugis-unstable.sources && \
-          echo 'Signed-By: '$KEYRING | sudo tee -a /etc/apt/sources.list.d/ubuntugis-unstable.sources
-
-      - name: Install
-        run: | 
-          sudo apt-get update && \
-          sudo apt-get -y -q install --no-install-recommends wget software-properties-common build-essential ca-certificates python3-pip dialog apt-utils && \
-          sudo apt -y -q install qgis qgis-dev
-
-      - name: QGIS Version
-        run: qgis --version
-            
-      - name: Install Python packages
-        run: pip install pytest-qgis --break-system-packages
-      
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Add Python Path
-        run: | 
-           echo "PYTHONPATH=$PYTHONPATH:/usr/share/qgis/python/plugins:/usr/share/qgis/python:$PWD" >> $GITHUB_ENV
-           echo "DEBIAN_FRONTEND=noninteractive" >> $GITHUB_ENV
-           echo "QT_QPA_PLATFORM=offscreen" >> $GITHUB_ENV
-           echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
-
-      - name: Print Python Path
-        run: echo $PYTHONPATH
+        uses: actions/checkout@v6
 
       - name: Run Tests
         run: |
-          pytest tests --cov=los_tools --cov-report=term-missing:skip-covered -rP -s
+          conda run -n qgis_env pytest tests --cov=los_tools --cov-report=term-missing:skip-covered -rP -s
