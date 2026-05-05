@@ -44,8 +44,8 @@ class SelectSamplingDistanceLayerDialog(QDialog):
         self.layer_cb.currentIndexChanged.connect(self.on_layer_changed)
 
         self.buttons = QDialogButtonBox(self)
-        self.buttons.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
-        self.buttons.button(QDialogButtonBox.Ok).setEnabled(False)
+        self.buttons.setStandardButtons(QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Ok)
+        self.buttons.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
 
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
@@ -62,4 +62,4 @@ class SelectSamplingDistanceLayerDialog(QDialog):
         return self.layer_cb.currentData(Qt.ItemDataRole.UserRole)
 
     def on_layer_changed(self, index: int) -> None:
-        self.buttons.button(QDialogButtonBox.Ok).setEnabled(index != -1)
+        self.buttons.button(QDialogButtonBox.StandardButton.Ok).setEnabled(index != -1)

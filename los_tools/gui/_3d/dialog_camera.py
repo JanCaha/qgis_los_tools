@@ -53,8 +53,8 @@ class DialogCameraSetting(QDialog):
         self.target_coordinate = QLineEdit()
         self.target_coordinate.setEnabled(False)
 
-        self.button_box = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Ok, self)
-        self.button_box.button(QDialogButtonBox.Ok).setEnabled(False)
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Ok, self)
+        self.button_box.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
 
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
@@ -108,4 +108,4 @@ class DialogCameraSetting(QDialog):
         if self.point_target.isEmpty():
             return
 
-        self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
+        self.button_box.button(QDialogButtonBox.StandardButton.Ok).setEnabled(True)
