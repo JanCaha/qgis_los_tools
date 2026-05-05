@@ -53,7 +53,9 @@ class DialogCameraSetting(QDialog):
         self.target_coordinate = QLineEdit()
         self.target_coordinate.setEnabled(False)
 
-        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Ok, self)
+        self.button_box = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Ok, self
+        )
         self.button_box.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
 
         self.button_box.accepted.connect(self.accept)
