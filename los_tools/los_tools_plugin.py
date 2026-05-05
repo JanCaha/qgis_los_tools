@@ -16,7 +16,7 @@ from qgis.core import (
 )
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QMenu, QToolBar, QToolButton
+from qgis.PyQt.QtWidgets import QAction, QDialog, QMenu, QToolBar, QToolButton
 
 from los_tools.classes.list_raster import ListOfRasters
 from los_tools.classes.sampling_distance_matrix import SamplingDistanceMatrix
@@ -129,7 +129,7 @@ class LoSToolsPlugin:
             toolButton.setIcon(QIcon(get_icon_path("los_layer_menu.svg")))
             menu = QMenu()
             toolButton.setMenu(menu)
-            toolButton.setPopupMode(QToolButton.MenuButtonPopup)
+            toolButton.setPopupMode(QToolButton.ToolButtonPopupMode.MenuButtonPopup)
             menu.addAction(self.add_los_layer_action)
             menu.addAction(self.empty_los_layer_action)
             self.toolbar.addWidget(toolButton)
@@ -432,5 +432,5 @@ class LoSToolsPlugin:
     def load_sampling_distance_matrix_from_layer(self):
         dialog = SelectSamplingDistanceLayerDialog(self.iface.mainWindow())
         result = dialog.exec()
-        if result == dialog.Accepted:
+        if result == QDialog.DialogCode.Accepted:
             self._sampling_distance_matrix = SamplingDistanceMatrix(dialog.layer())

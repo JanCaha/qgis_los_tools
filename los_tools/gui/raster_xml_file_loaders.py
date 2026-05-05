@@ -26,13 +26,13 @@ def load_raster_xml(path: str, plugin) -> bool:
 
     if len(list_of_rasters) > 0:
         message_box_load = QMessageBox()
-        message_box_load.setIcon(QMessageBox.Question)
+        message_box_load.setIcon(QMessageBox.Icon.Question)
         message_box_load.setWindowTitle("Load Rasters from file?")
         message_box_load.setText(f"Would you like to load {len(list_of_rasters)} the rasters from the file `{path}`?")
-        message_box_load.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
-        message_box_load.setDefaultButton(QMessageBox.No)
+        message_box_load.setStandardButtons(QMessageBox.StandardButton.No | QMessageBox.StandardButton.Yes)
+        message_box_load.setDefaultButton(QMessageBox.StandardButton.No)
         res = message_box_load.exec()
-        if res == QMessageBox.Yes:
+        if res == QMessageBox.StandardButton.Yes:
             project = QgsProject.instance()
             rasters = list_of_rasters.rasters
             for raster in reversed(rasters):
